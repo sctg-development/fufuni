@@ -1,0 +1,3 @@
+[submodule "apps/merchant"]
+	path = apps/merchant
+	url = git@github.com:aeltorio/merchant.git

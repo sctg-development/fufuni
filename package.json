@@ -1,0 +1,21 @@
+{
+  "name": "fufuni",
+  "private": true,
+  "packageManager": "npm@11.6.2",
+  "workspaces": [
+    "apps/merchant",
+    "apps/merchant/admin",
+    "apps/merchant/example",
+    "apps/client",  
+    "apps/cloudflare-worker"
+  ],
+  "devDependencies": {
+    "turbo": "^2.8.13"
+  },
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "dev:env": "turbo run dev:env --parallel",
+    "build": "turbo run build",
+    "start": "npm run dev"
+  }
+}

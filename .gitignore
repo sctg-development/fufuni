@@ -1,0 +1,13 @@
+# Node modules
+node_modules/
+
+# Turbo cache
+.turbo/
+
+# npm logs
+npm-debug.log*
+
+# dotenv environment files
+.env
+
+.dev.vars
