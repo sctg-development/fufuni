@@ -34,7 +34,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { LinkUniversal } from "./link-universal";
 import { I18nIcon, LanguageSwitch } from "./language-switch";
 
-import { LoginLogoutButton, LoginLogoutLink } from "@/authentication";
+import { LoginLogoutButton, LoginLogoutLink, AuthenticationGuardWithPermission } from "@/authentication";
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import {
@@ -86,16 +86,33 @@ export const Navbar = () => {
         <div className="hidden lg:flex gap-4 justify-start ml-2">
           {siteConfig().navItems.map((item) => (
             <NavbarItem key={item.href}>
-              <LinkUniversal
-                className={clsx(
-                  linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium",
-                )}
-                color="foreground"
-                href={item.href}
-              >
-                {item.label}
-              </LinkUniversal>
+              {item.permissions && item.permissions.length > 0 ? (
+                <AuthenticationGuardWithPermission
+                  permission={item.permissions[0]}
+                >
+                  <LinkUniversal
+                    className={clsx(
+                      linkStyles({ color: "foreground" }),
+                      "data-[active=true]:text-primary data-[active=true]:font-medium",
+                    )}
+                    color="foreground"
+                    href={item.href}
+                  >
+                    {item.label}
+                  </LinkUniversal>
+                </AuthenticationGuardWithPermission>
+              ) : (
+                <LinkUniversal
+                  className={clsx(
+                    linkStyles({ color: "foreground" }),
+                    "data-[active=true]:text-primary data-[active=true]:font-medium",
+                  )}
+                  color="foreground"
+                  href={item.href}
+                >
+                  {item.label}
+                </LinkUniversal>
+              )}
             </NavbarItem>
           ))}
         </div>
@@ -169,19 +186,39 @@ export const Navbar = () => {
         <div className="mx-4 mt-2 flex flex-col gap-2">
           {siteConfig().navMenuItems.map((item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>
-              <LinkUniversal
-                color={
-                  index === 2
-                    ? "primary"
-                    : index === siteConfig().navMenuItems.length - 1
-                      ? "danger"
-                      : "foreground"
-                }
-                href={item.href}
-                size="lg"
-              >
-                {item.label}
-              </LinkUniversal>
+              {item.permissions && item.permissions.length > 0 ? (
+                <AuthenticationGuardWithPermission
+                  permission={item.permissions[0]}
+                >
+                  <LinkUniversal
+                    color={
+                      index === 2
+                        ? "primary"
+                        : index === siteConfig().navMenuItems.length - 1
+                          ? "danger"
+                          : "foreground"
+                    }
+                    href={item.href}
+                    size="lg"
+                  >
+                    {item.label}
+                  </LinkUniversal>
+                </AuthenticationGuardWithPermission>
+              ) : (
+                <LinkUniversal
+                  color={
+                    index === 2
+                      ? "primary"
+                      : index === siteConfig().navMenuItems.length - 1
+                        ? "danger"
+                        : "foreground"
+                  }
+                  href={item.href}
+                  size="lg"
+                >
+                  {item.label}
+                </LinkUniversal>
+              )}
             </NavbarMenuItem>
           ))}
           <NavbarMenuItem key="login-logout">
