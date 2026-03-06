@@ -148,7 +148,7 @@
   "openapi-docs": "Openapi with Swagger-ui",
   "template_login_prompt": "Click the button below to try the demo.",
   "template_welcome_back": "Welcome {{name}}, explore the example pages below or log out to start over.",
-  "template_clone_instructions": "Clone this repo, edit .env and run yarn install && yarn dev:env to get started.",
+  "template_clone_instructions": "Clone this repo, edit .env and run npm install && npm run dev:env to get started.",
   "template_login_required": "(login required to access)",
 
   "admin-inventory-title": "Inventory",

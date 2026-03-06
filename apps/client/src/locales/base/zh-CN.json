@@ -107,7 +107,7 @@
   "duration-day": "{{count}} 天",
   "template_login_prompt": "点击下面的按钮以试用演示。",
   "template_welcome_back": "欢迎 {{name}}，请浏览下面的示例页面或注销以重新开始。",
-  "template_clone_instructions": "克隆此仓库，编辑 .env 并运行 yarn install && yarn dev:env 开始。",
+  "template_clone_instructions": "克隆此仓库，编辑 .env 并运行 npm install && npm run dev:env 开始。",
   "template_login_required": "(需要登录才能访问)",
   "actions": "行动",
   "admin-customers-col-email": "电子邮件",
