@@ -374,7 +374,7 @@ export const useSecuredApi = () => {
         (import.meta as any).env?.API_BASE_URL
           ? (import.meta as any).env.API_BASE_URL
           : "";
-      const result = await postJson(`${apiBase}/__auth0/token`, {});
+      const result = await postJson(`${apiBase}/v1/__auth0/token`, {});
 
       return result as Auth0ManagementTokenApiResponse;
     };
@@ -729,7 +729,7 @@ export const useSecuredApi = () => {
  * 1. Wait for Auth0 to finish loading and ensure the user is authenticated.
  * 2. Check the user's current permissions (from the JWT) against the target list.
  * 3. If any are missing, check `sessionStorage` for a persistent "attempted" flag.
- * 4. If not attempted, call the worker's `/api/__auth0/autopermissions` endpoint.
+ * 4. If not attempted, call the worker's `/v1/__auth0/autopermissions` endpoint.
  * 5. On success, force a token refresh (`cacheMode: "off"`) and reload the page.
  * 6. The `sessionStorage` flag is cleaned up ONLY once the user is confirmed to have all permissions.
  */
@@ -788,7 +788,7 @@ export const AutoPermissionProvisioner: FC<{ children: ReactNode }> = ({
       sessionStorage.setItem(storageKey, "true");
       try {
         const apiBase = (import.meta as any).env.API_BASE_URL || "";
-        const result = await postJson(`${apiBase}/__auth0/autopermissions`, {});
+        const result = await postJson(`${apiBase}/v1/__auth0/autopermissions`, {});
 
         if (result.success) {
           // 6. Token Refresh: Bypass local cache to get the new JWT from Auth0 servers.

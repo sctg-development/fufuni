@@ -28,6 +28,27 @@ export const siteConfig = () => ({
       label: i18next.t("about"),
       href: "/about",
     },
+    // admin pages - visible to all for now. guards can be handled on the page itself
+    {
+      label: i18next.t("admin-products-title"),
+      href: "/admin/products",
+    },
+    {
+      label: i18next.t("admin-customers-title"),
+      href: "/admin/customers",
+    },
+    {
+      label: i18next.t("admin-inventory-title"),
+      href: "/admin/inventory",
+    },
+    {
+      label: i18next.t("admin-orders-title"),
+      href: "/admin/orders",
+    },
+    {
+      label: i18next.t("admin-webhooks-title"),
+      href: "/admin/webhooks",
+    },
   ],
   navMenuItems: [
     {
@@ -49,6 +70,26 @@ export const siteConfig = () => ({
     {
       label: i18next.t("about"),
       href: "/about",
+    },
+    {
+      label: i18next.t("admin-products-title"),
+      href: "/admin/products",
+    },
+    {
+      label: i18next.t("admin-customers-title"),
+      href: "/admin/customers",
+    },
+    {
+      label: i18next.t("admin-inventory-title"),
+      href: "/admin/inventory",
+    },
+    {
+      label: i18next.t("admin-orders-title"),
+      href: "/admin/orders",
+    },
+    {
+      label: i18next.t("admin-webhooks-title"),
+      href: "/admin/webhooks",
     },
   ],
   links: {

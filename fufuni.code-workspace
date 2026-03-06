@@ -1,0 +1,81 @@
+{
+  "folders": [
+    {
+      "name": "Root",
+      "path": "./"
+    },
+    {
+      "name": "Client App",
+      "path": "./apps/client"
+    },
+    {
+      "name": "Merchant",
+      "path": "./apps/merchant"
+    },
+    {
+      "name": "Merchant Admin",
+      "path": "./apps/merchant/admin"
+    },
+    {
+      "name": "Merchant example",
+      "path": "./apps/merchant/example"
+    },
+    {
+      "name": "Cloudflare Worker",
+      "path": "./apps/cloudflare-worker"
+    },
+    {
+      "name": "Sensitive datas",
+      "path": "./_sensitive_datas"
+    },
+    {
+      "name": "GitHub Actions",
+      "path": "./.github"
+    }
+  ],
+  "settings": {
+
+    "i18n-ally-next.keystyle": "flat",
+    "i18n-ally-next.sourceLanguage": "en-US",
+    "i18n-ally-next.localesPaths": [
+      "apps/client/src/locales/base"
+    ],
+    "i18n-ally-next.enabledFrameworks": ["react-i18next"],
+    "git.openRepositoryInParentFolders": "always",
+    "terminal.integrated.defaultProfile.linux": "bash",
+    "terminal.integrated.defaultProfile.osx": "zsh",
+    "terminal.integrated.profiles.linux": {
+      "bash": {
+        "path": "bash",
+        "args": [
+          "-c",
+          "echo WORKSPACE_ROOT=${workspaceFolder};if [ -f ${workspaceFolder}/.env ]; then set -a && source ${workspaceFolder}/.env && export WORKSPACE_ROOT=${workspaceFolder}/ && set +a && echo '.env loaded successfully from ${workspaceFolder}/.env'; else echo '.env file not found'; fi && exec bash -i"
+        ]
+      }
+    },
+    "terminal.integrated.profiles.osx": {
+      "zsh": {
+        "path": "zsh",
+        "args": [
+          "-c",
+          "echo WORKSPACE_ROOT=${workspaceFolder}; if [ -f ${workspaceFolder}/.env ]; then set -a && source ${workspaceFolder}/.env && export WORKSPACE_ROOT=${workspaceFolder}/ && set +a && echo '.env loaded successfully from ${workspaceFolder}/.env'; else echo '.env file not found'; fi && exec zsh -i"
+        ]
+      }
+    },
+    "npm.packageManager": "yarn",
+    "turbo.useLocalTurbo": true,
+    "eslint.workingDirectories": [
+      "apps/client",
+      "apps/cloudflare-worker"
+    ],
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-vscode.vscode-typescript-next",
+      "bradlc.vscode-tailwindcss",
+      "esbenp.prettier-vscode",
+      "ms-vscode.vscode-json",
+      "bierner.markdown-mermaid"
+    ]
+  }
+}

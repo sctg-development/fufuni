@@ -29,6 +29,11 @@ import PricingPage from "@/pages/pricing";
 import BlogPage from "@/pages/blog";
 import AboutPage from "@/pages/about";
 import UsersAndPermissionsPage from "@/pages/admin/users-and-permissions";
+import ProductsPage from "@/pages/admin/products";
+import CustomersPage from "@/pages/admin/customers";
+import InventoryPage from "@/pages/admin/inventory";
+import OrdersPage from "@/pages/admin/orders";
+import WebhooksPage from "@/pages/admin/webhooks";
 import { SwaggerPage } from "@/pages/swagger";
 
 function App() {
@@ -64,6 +69,26 @@ function App() {
         <Route
           element={<AuthenticationGuard component={UsersAndPermissionsPage} />}
           path="/admin/users"
+        />
+        <Route
+          element={<AuthenticationGuard component={ProductsPage} />}
+          path="/admin/products"
+        />
+        <Route
+          element={<AuthenticationGuard component={CustomersPage} />}
+          path="/admin/customers"
+        />
+        <Route
+          element={<AuthenticationGuard component={InventoryPage} />}
+          path="/admin/inventory"
+        />
+        <Route
+          element={<AuthenticationGuard component={OrdersPage} />}
+          path="/admin/orders"
+        />
+        <Route
+          element={<AuthenticationGuard component={WebhooksPage} />}
+          path="/admin/webhooks"
         />
         <Route
           element={<AuthenticationGuard component={SwaggerPage} />}

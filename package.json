@@ -6,7 +6,7 @@
     "apps/merchant",
     "apps/merchant/admin",
     "apps/merchant/example",
-    "apps/client",  
+    "apps/client",
     "apps/cloudflare-worker"
   ],
   "devDependencies": {
@@ -17,5 +17,11 @@
     "dev:env": "turbo run dev:env --parallel",
     "build": "turbo run build",
     "start": "npm run dev"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.90.21",
+    "@tanstack/react-table": "^8.21.3",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.577.0"
   }
 }
