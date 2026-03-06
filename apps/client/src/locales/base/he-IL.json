@@ -221,5 +221,11 @@
   "products-error": "טעינת המוצרים נכשלה",
   "remove": "לְהַסִיר",
   "shop-products-title": "מוצרים",
-  "total": "סַך הַכֹּל"
+  "total": "סַך הַכֹּל",
+  "checkout-failed": "התשלום נכשל. \nאנא נסה שוב.",
+  "checkout-invalid-email": "נא להזין כתובת אימייל חוקית.",
+  "email-label": "כתובת אימייל",
+  "manage-store": "לנהל את החנות",
+  "processing": "מעבד...",
+  "shipping-note": "משלוח ומיסים מחושבים בקופה."
 }

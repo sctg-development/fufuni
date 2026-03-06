@@ -218,8 +218,14 @@
   "cart-clear": "Vider le panier",
   "cart-empty": "Votre panier est vide.",
   "checkout": "Passer la commande",
+  "email-label": "Adresse e-mail",
+  "checkout-invalid-email": "Veuillez saisir une adresse e-mail valide.",
+  "checkout-failed": "Échec du paiement. Veuillez réessayer.",
+  "shipping-note": "Livraison et taxes calculées lors du paiement.",
   "products-error": "Échec du chargement des produits",
   "remove": "Retirer",
   "shop-products-title": "Produits",
-  "total": "Total"
+  "total": "Total",
+  "manage-store": "Gérer le magasin",
+  "processing": "Traitement..."
 }

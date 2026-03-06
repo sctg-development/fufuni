@@ -110,6 +110,11 @@
   "total": "Total",
   "cart-clear": "Clear cart",
   "checkout": "Checkout",
+  "email-label": "Email address",
+  "checkout-invalid-email": "Please enter a valid email address.",
+  "checkout-failed": "Checkout failed. Please try again.",
+  "shipping-note": "Shipping and taxes calculated at checkout.",
+  "processing": "Processing...",
   "status": "Status",
   "all": "All",
   "actions": "Actions",
@@ -220,5 +225,6 @@
   "admin-webhooks-confirm-delete": "Delete this webhook? This cannot be undone.",
   "admin-webhooks-deleting": "Deleting...",
   "delete": "Delete",
-  "done": "Done"
+  "done": "Done",
+  "manage-store": "Manage the store"
 }

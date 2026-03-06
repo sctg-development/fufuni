@@ -73,10 +73,14 @@ export const LoginButton: FC<{ text?: string }> = ({ text }) => {
  * Only shows when the user is not authenticated.
  * @param props - Component props
  * @param [props.text] - Custom text for the link. Defaults to localized "log-in" text.
+ * @param [props.i18nKey] - Optional i18n key to use instead of the default 'log-in'.
+ * @param [props.size] - Size of the Heroui link (sm, md, lg).
  * @returns Login link or null if user is already authenticated
  */
 export const LoginLink: FC<{
   text?: string;
+  /** i18n key for label; defaults to 'log-in' */
+  i18nKey?: string;
   color?:
     | "primary"
     | "foreground"
@@ -84,26 +88,28 @@ export const LoginLink: FC<{
     | "success"
     | "warning"
     | "danger";
-}> = ({ text, color }) => {
+  /** heroui size; defaults to 'lg' */
+  size?: "sm" | "md" | "lg";
+}> = ({ text, i18nKey, color, size = "lg" }) => {
   const { isAuthenticated, login } = useAuth();
   const { t } = useTranslation();
 
   if (!text) {
-    text = t("log-in");
+    text = t(i18nKey || "log-in");
   }
 
+  if (isAuthenticated) return null;
+
   return (
-    !isAuthenticated && (
-      <Link
-        color={color}
-        size="lg"
-        onPress={() => {
-          login();
-        }}
-      >
-        {text}
-      </Link>
-    )
+    <Link
+      color={color}
+      size={size}
+      onPress={() => {
+        login();
+      }}
+    >
+      {text}
+    </Link>
   );
 };
 
@@ -168,7 +174,7 @@ export const LogoutButton: FC<LogoutButtonProps> = ({
 
 interface LogoutLinkProps extends LogoutButtonProps {
   /**
-   * Button color
+   * Link color
    */
   color?:
     | "primary"
@@ -177,49 +183,60 @@ interface LogoutLinkProps extends LogoutButtonProps {
     | "success"
     | "warning"
     | "danger";
-}
+  /** heroui size; defaults to 'lg' */
+  size?: "sm" | "md" | "lg";
+  /** optional i18n key for logout text (default 'log-out-someone') */
+  i18nKey?: string;
+} // note: kept for backwards compatibility; use logoutI18nKey in LoginLogoutLink
+
 
 /**
  * Renders a logout link for authentication.
  * By default, only shows when the user is authenticated.
  * @param props - Component props
  * @param [props.text] - Custom text for the link. Defaults to localized "log-out-someone" text filled with user name or ID
+ * @param [props.i18nKey] - Optional i18n key to use instead of the default 'log-out-someone'.
+ * @param [props.size] - Size of the Heroui link (sm, md, lg).
  * @returns Logout link or null based on authentication status
  */
-export const LogoutLink: FC<LogoutLinkProps> = ({
+export const LogoutLink: FC<LogoutLinkProps & { i18nKey?: string }> = ({
   showButtonIfNotAuthenticated = false,
   text,
+  i18nKey,
   color,
+  size = "lg",
 }) => {
   const { isAuthenticated, logout, user } = useAuth();
   const { t } = useTranslation();
 
   if (!text) {
-    text = t("log-out-someone", {
+    text = t(i18nKey || "log-out-someone", {
       name: getNameWithFallback(user),
     });
   }
 
-  return isAuthenticated || showButtonIfNotAuthenticated ? (
-    <>
-      <Link
-        color={color}
-        size="lg"
-        onPress={() => {
-          logout({
-            logoutParams: {
-              returnTo: new URL(
-                import.meta.env.BASE_URL || "/",
-                window.location.origin,
-              ).toString(),
-            },
-          });
-        }}
-      >
-        {text}
-      </Link>
-    </>
-  ) : null;
+  if (!(isAuthenticated || showButtonIfNotAuthenticated)) {
+    return null;
+  }
+
+  return (
+    <Link
+      color={color}
+      size={size}
+      onPress={() => {
+        logout({
+          logoutParams: {
+            returnTo: new URL(
+              import.meta.env.BASE_URL || "/",
+              window.location.origin,
+            ).toString(),
+          },
+        });
+      }}
+    >
+      {text}
+    </Link>
+  );
 };
 
 /**
@@ -250,10 +267,26 @@ export const LoginLogoutButton: FC<LogoutButtonProps> = ({
  * Provides a convenient way to toggle between auth actions in a single component.
  * @returns Either the LoginLink or LogoutLink component
  */
-export const LoginLogoutLink: FC<LogoutLinkProps> = ({
+export const LoginLogoutLink: FC<{
+  showButtonIfNotAuthenticated?: boolean;
+  text?: string;
+  loginI18nKey?: string;
+  logoutI18nKey?: string;
+  color?:
+    | "primary"
+    | "foreground"
+    | "secondary"
+    | "success"
+    | "warning"
+    | "danger";
+  size?: "sm" | "md" | "lg";
+}> = ({
   showButtonIfNotAuthenticated = false,
   text,
+  loginI18nKey,
+  logoutI18nKey,
   color,
+  size,
 }) => {
   const { isAuthenticated } = useAuth();
 
@@ -262,11 +295,19 @@ export const LoginLogoutLink: FC<LogoutLinkProps> = ({
       color={color}
       showButtonIfNotAuthenticated={showButtonIfNotAuthenticated}
       text={text}
+      i18nKey={logoutI18nKey}
+      size={size}
     />
   ) : (
-    <LoginLink />
+    <LoginLink
+      color={color}
+      text={text}
+      i18nKey={loginI18nKey}
+      size={size}
+    />
   );
 };
+
 
 /**
  * Higher-order component that protects routes requiring authentication.

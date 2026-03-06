@@ -221,5 +221,11 @@
   "products-error": "فشل في تحميل المنتجات",
   "remove": "يزيل",
   "shop-products-title": "منتجات",
-  "total": "المجموع"
+  "total": "المجموع",
+  "checkout-failed": "فشل الخروج. \nيرجى المحاولة مرة أخرى.",
+  "checkout-invalid-email": "يرجى إدخال عنوان بريد إلكتروني صالح.",
+  "email-label": "عنوان البريد الإلكتروني",
+  "manage-store": "إدارة المتجر",
+  "processing": "يعالج...",
+  "shipping-note": "الشحن والضرائب تحسب عند الخروج."
 }

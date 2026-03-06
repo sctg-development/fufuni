@@ -36,7 +36,7 @@ import { useState } from "react";
 import { LinkUniversal } from "./link-universal";
 import { I18nIcon, LanguageSwitch } from "./language-switch";
 
-import { LoginLogoutButton, LoginLogoutLink, AuthenticationGuardWithPermission } from "@/authentication";
+import { AuthenticationGuardWithPermission } from "@/authentication";
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import {
@@ -183,7 +183,6 @@ export const Navbar = () => {
             availableLanguages={availableLanguages}
             icon={I18nIcon}
           />
-          <LoginLogoutButton />
         </NavbarItem>
         <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
         <NavbarItem className="hidden md:flex">
@@ -253,8 +252,7 @@ export const Navbar = () => {
             </NavbarMenuItem>
           ))}
           <NavbarMenuItem key="login-logout">
-            <LoginLogoutLink color="primary" />
-          </NavbarMenuItem>
+            </NavbarMenuItem>
         </div>
       </NavbarMenu>
     </HeroUINavbar>

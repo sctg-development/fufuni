@@ -221,5 +221,11 @@
   "products-error": "No se pudieron cargar los productos",
   "remove": "Eliminar",
   "shop-products-title": "Productos",
-  "total": "Total"
+  "total": "Total",
+  "checkout-failed": "El pago falló. \nPor favor inténtalo de nuevo.",
+  "checkout-invalid-email": "Por favor, introduce una dirección de correo electrónico válida.",
+  "email-label": "Dirección de correo electrónico",
+  "manage-store": "Administrar la tienda",
+  "processing": "Tratamiento...",
+  "shipping-note": "Envío e impuestos calculados al finalizar la compra."
 }

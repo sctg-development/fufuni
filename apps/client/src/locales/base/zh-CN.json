@@ -221,5 +221,11 @@
   "products-error": "无法加载产品",
   "remove": "消除",
   "shop-products-title": "产品",
-  "total": "全部的"
+  "total": "全部的",
+  "checkout-failed": "结帐失败。\n请再试一次。",
+  "checkout-invalid-email": "请输入有效的电子邮件地址。",
+  "email-label": "电子邮件",
+  "manage-store": "管理商店",
+  "processing": "加工...",
+  "shipping-note": "运费和税费在结账时计算。"
 }

@@ -80,5 +80,49 @@ export async function searchProducts(query: string): Promise<StoreProduct[]> {
   return (resp.items || []).filter((p) => p.variants && p.variants.length > 0);
 }
 
-// TODO: export cart helpers (createCart/addItems/checkout) if needed in the
-// frontend later.
+// helper functions for cart creation and checkout, mirroring the example API client
+
+export interface CartResponse {
+  id: string;
+  // other fields may be present but we only care about id for now
+}
+
+export interface AddItemsResponse {
+  success: boolean;
+}
+
+export interface CheckoutResponse {
+  checkout_url: string;
+}
+
+export async function createCart(email: string): Promise<CartResponse> {
+  return request<CartResponse>(`/v1/carts`, {
+    method: 'POST',
+    body: JSON.stringify({ customer_email: email }),
+  });
+}
+
+export async function addItemsToCart(
+  cartId: string,
+  items: Array<{ sku: string; qty: number }>,
+): Promise<AddItemsResponse> {
+  return request<AddItemsResponse>(`/v1/carts/${cartId}/items`, {
+    method: 'POST',
+    body: JSON.stringify({ items }),
+  });
+}
+
+export async function checkoutCart(
+  cartId: string,
+  successUrl: string,
+  cancelUrl: string,
+): Promise<CheckoutResponse> {
+  return request<CheckoutResponse>(`/v1/carts/${cartId}/checkout`, {
+    method: 'POST',
+    body: JSON.stringify({
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+    }),
+  });
+}
+

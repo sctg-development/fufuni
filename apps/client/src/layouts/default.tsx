@@ -27,6 +27,7 @@ import { JWTPayload, jwtVerify } from "jose";
 import { getLocalJwkSet } from "@/authentication/utils/jwks";
 import { Navbar } from "@/components/navbar";
 import { UserTechnicalInfoModal } from "@/modals/user-technical-info";
+import { LoginLogoutLink } from "@/authentication";
 
 export default function DefaultLayout({
   children,
@@ -87,14 +88,14 @@ export default function DefaultLayout({
   return (
       <div className="relative flex flex-col h-screen">
         <Navbar />
-        <main className="container mx-auto max-w-7xl px-6 flex-grow pt-16">
+        <main className="container mx-auto max-w-7xl px-6 grow pt-16">
           {children}
         </main>
         <footer className="w-full flex items-center justify-center py-3">
         <Link
           isExternal
           className="flex items-center gap-1 text-current"
-          href="https://github.com/sctg-development/vite-react-heroui-auth0-template"
+          href="https://github.com/sctg-development/fufuni"
           title={t("vite-react-heroui-auth0-template")}
         >
           <span className="text-default-600">
@@ -103,13 +104,16 @@ export default function DefaultLayout({
           <p className="text-primary">SCTG React template</p>
         </Link>
         &nbsp;
-        {isAuthenticated ? (
-          <span onClick={() => setIsModalOpen(true)}>
-            {t("user")}: &nbsp;{user?.name}
+        <div className="flex items-center gap-2 text-primary">
+          {isAuthenticated && (
+            <span onClick={() => setIsModalOpen(true)} className="cursor-pointer">
+              {t("user")}: &nbsp;{user?.name}
+            </span>
+          )}
+          <span className="text-default-600">
+            <LoginLogoutLink color="foreground" size="md" loginI18nKey="manage-store"/>
           </span>
-        ) : (
-          <></>
-        )}
+        </div>
       </footer>
       {user ? (
         <UserTechnicalInfoModal
