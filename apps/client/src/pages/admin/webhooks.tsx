@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Loader2,
@@ -13,9 +13,10 @@ import {
   RotateCw,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Button } from "@heroui/button";
 import { useSecuredApi } from "@/authentication";
 import DefaultLayout from "@/layouts/default";
-import { Modal } from "@heroui/modal";
+import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
 import clsx from "clsx";
 
 const WEBHOOK_EVENTS = [
@@ -61,6 +62,18 @@ export default function WebhooksPage() {
   const [newSecret, setNewSecret] = useState<string | null>(null);
   const [copiedSecret, setCopiedSecret] = useState(false);
 
+  // bumping this counter causes the query key to change, forcing a fresh network
+  // request (provider caching is keyed by URL so we also append a cache-busting
+  // query parameter when we call `getJson`).
+  const [refreshIndex, setRefreshIndex] = useState(0);
+
+  // debug: track when the create modal state changes
+  /* eslint-disable no-console */
+  useEffect(() => {
+    console.log("[WebhooksPage] createModal =>", createModal);
+  }, [createModal]);
+  /* eslint-enable no-console */
+
   const [newUrl, setNewUrl] = useState("");
   const [newEvents, setNewEvents] = useState<string[]>(["order.created"]);
 
@@ -68,8 +81,8 @@ export default function WebhooksPage() {
     (import.meta as any).env?.API_BASE_URL ? (import.meta as any).env.API_BASE_URL : "";
 
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: ["webhooks"],
-    queryFn: () => getJson(`${apiBase}/v1/webhooks`),
+    queryKey: ["webhooks", refreshIndex],
+    queryFn: () => getJson(`${apiBase}/v1/webhooks?cb=${Date.now()}`),
   });
 
   const webhooks: Webhook[] = data?.items || [];
@@ -84,7 +97,9 @@ export default function WebhooksPage() {
     mutationFn: (data: { url: string; events: string[] }) =>
       postJson(`${apiBase}/v1/webhooks`, data),
     onSuccess: (result: any) => {
-      queryClient.invalidateQueries({ queryKey: ["webhooks"] });
+      // bump the counter rather than relying solely on invalidateQueries so that
+      // the url used by getJson is unique and bypasses the provider cache.
+      setRefreshIndex((i) => i + 1);
       setCreateModal(false);
       setNewUrl("");
       setNewEvents(["order.created"]);
@@ -146,21 +161,22 @@ export default function WebhooksPage() {
           </h1>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => queryClient.invalidateQueries({ queryKey: ["webhooks"] })}
+              onClick={() => setRefreshIndex((i) => i + 1)}
               disabled={isFetching}
-              className="p-2 rounded hover:bg-[var(--bg-hover)] transition-colors disabled:opacity-50"
+              className="p-2 rounded hover:bg-(--bg-hover) transition-colors disabled:opacity-50"
               style={{ color: "var(--text-muted)" }}
             >
               <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
             </button>
-            <button
-              onClick={() => setCreateModal(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-sm rounded font-semibold transition-colors"
-              style={{ background: "var(--accent)", color: "var(--text-inverse)" }}
+            <Button
+              color="primary"
+              size="sm"
+              onPress={() => setCreateModal(true)}
+              className="inline-flex items-center gap-1.5"
             >
               <Plus size={16} />
               {t("admin-webhooks-btn-add")}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -199,7 +215,7 @@ export default function WebhooksPage() {
                   <tr
                     key={webhook.id}
                     onClick={() => setSelectedWebhook(webhook.id)}
-                    className="cursor-pointer transition-colors hover:bg-[var(--bg-hover)]"
+                    className="cursor-pointer transition-colors hover:bg-(--bg-hover)"
                   >
                     <td className="px-4 py-4 font-mono text-sm break-all">{webhook.url}</td>
                     <td className="px-4 py-4 text-xs" style={{ color: "var(--text-muted)" }}>
@@ -225,127 +241,124 @@ export default function WebhooksPage() {
         </div>
 
         {/* Create Modal */}
-        <Modal isOpen={createModal} onClose={() => setCreateModal(false)} title={t("admin-webhooks-modal-title")} size="md">
-          <form onSubmit={handleCreate} className="space-y-4">
-            <div>
-              <label
-                className="block text-xs font-medium uppercase tracking-wide mb-2"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                {t("admin-webhooks-field-endpoint")}
-              </label>
-              <input
-                type="url"
-                value={newUrl}
-                onChange={(e) => setNewUrl(e.target.value)}
-                placeholder="https://your-server.com/webhook"
-                required
-                className="w-full px-3 py-2 text-sm font-mono rounded-lg focus:outline-none focus:ring-2"
-                style={{
-                  background: "var(--bg-card)",
-                  border: "1px solid var(--border)",
-                  color: "var(--text)",
-                }}
-              />
-            </div>
-
-            <div>
-              <label
-                className="block text-xs font-medium uppercase tracking-wide mb-2"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                {t("admin-webhooks-field-events")}
-              </label>
-              <div
-                className="space-y-2 max-h-48 overflow-y-auto p-3 rounded-lg"
-                style={{ border: "1px solid var(--border)" }}
-              >
-                {WEBHOOK_EVENTS.map((event) => (
+        <Modal isOpen={createModal} onClose={() => setCreateModal(false)} size="md">
+          <ModalContent>
+            <ModalHeader>{t("admin-webhooks-modal-title")}</ModalHeader>
+            <ModalBody>
+              <form onSubmit={handleCreate} className="space-y-4">
+                <div>
                   <label
-                    key={event.value}
-                    className="flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors hover:bg-[var(--bg-hover)]"
+                    className="block text-xs font-medium uppercase tracking-wide mb-2"
+                    style={{ color: "var(--text-secondary)" }}
                   >
-                    <input
-                      type="checkbox"
-                      checked={newEvents.includes(event.value)}
-                      onChange={() => toggleEvent(event.value)}
-                      className="mt-0.5"
-                    />
-                    <div>
-                      <p className="text-sm font-mono">{event.label}</p>
-                      <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                        {event.description}
-                      </p>
-                    </div>
+                    {t("admin-webhooks-field-endpoint")}
                   </label>
-                ))}
-              </div>
-            </div>
+                  <input
+                    type="url"
+                    value={newUrl}
+                    onChange={(e) => setNewUrl(e.target.value)}
+                    placeholder="https://your-server.com/webhook"
+                    required
+                    className="w-full px-3 py-2 text-sm font-mono rounded-lg focus:outline-none focus:ring-2"
+                    style={{
+                      background: "var(--bg-card)",
+                      border: "1px solid var(--border)",
+                      color: "var(--text)",
+                    }}
+                  />
+                </div>
 
-            <div
-              className="flex gap-2 justify-end pt-4 border-t"
-              style={{ borderColor: "var(--border)" }}
-            >
-              <button
-                type="button"
-                onClick={() => setCreateModal(false)}
-                className="px-4 py-2 text-sm font-medium"
-                style={{ color: "var(--text-muted)" }}
-              >
-                {t("cancel")}
-              </button>
-              <button
-                type="submit"
-                disabled={createMutation.isPending || newEvents.length === 0}
-                className="px-4 py-2 text-sm font-semibold rounded-lg disabled:opacity-50"
-                style={{ background: "var(--accent)", color: "white" }}
-              >
-                {createMutation.isPending ? t("admin-webhooks-creating") : t("admin-webhooks-btn-create")}
-              </button>
-            </div>
-          </form>
+                <div>
+                  <label
+                    className="block text-xs font-medium uppercase tracking-wide mb-2"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    {t("admin-webhooks-field-events")}
+                  </label>
+                  <div
+                    className="space-y-2 max-h-48 overflow-y-auto p-3 rounded-lg"
+                    style={{ border: "1px solid var(--border)" }}
+                  >
+                    {WEBHOOK_EVENTS.map((event) => (
+                      <label
+                        key={event.value}
+                        className="flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors hover:bg-(--bg-hover)"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={newEvents.includes(event.value)}
+                          onChange={() => toggleEvent(event.value)}
+                          className="mt-0.5"
+                        />
+                        <div>
+                          <p className="text-sm font-mono">{event.label}</p>
+                          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                            {event.description}
+                          </p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button onPress={() => setCreateModal(false)}>{t("cancel")}</Button>
+                  <Button
+                    type="submit"
+                    color="primary"
+                    disabled={createMutation.isPending || newEvents.length === 0}
+                  >
+                    {createMutation.isPending ? t("admin-webhooks-creating") : t("admin-webhooks-btn-create")}
+                  </Button>
+                </div>
+              </form>
+            </ModalBody>
+          </ModalContent>
         </Modal>
 
         {/* Secret Display Modal */}
-        <Modal isOpen={!!newSecret} onClose={() => setNewSecret(null)} title={t("admin-webhooks-secret-title")} size="sm">
-          <div className="space-y-4">
-            <div className="p-3 rounded-lg" style={{ border: "1px solid var(--border)" }}>
-              <p className="text-xs font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-                {t("admin-webhooks-secret-savehint")}
-              </p>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 font-mono text-xs break-all">{newSecret}</code>
-                <button
-                  onClick={() => copySecret(newSecret!)}
-                  className="p-2 rounded-lg hover:bg-[var(--bg-hover)] flex-shrink-0"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  {copiedSecret ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
-                </button>
+        <Modal isOpen={!!newSecret} onClose={() => setNewSecret(null)} size="sm">
+          <ModalContent>
+            <ModalHeader>{t("admin-webhooks-secret-title")}</ModalHeader>
+            <ModalBody>
+              <div className="space-y-4">
+                <div className="p-3 rounded-lg" style={{ border: "1px solid var(--border)" }}>
+                  <p className="text-xs font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
+                    {t("admin-webhooks-secret-savehint")}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 font-mono text-xs break-all">{newSecret}</code>
+                    <button
+                      onClick={() => copySecret(newSecret!)}
+                      className="p-2 rounded-lg hover:bg-(--bg-hover) shrink-0"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {copiedSecret ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                    </button>
+                  </div>
+                </div>
+                <p className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
+                  {t("admin-webhooks-secret-note")}
+                </p>
+                <Button onPress={() => setNewSecret(null)} className="w-full" color="primary">
+                  {t("done")}
+                </Button>
               </div>
-            </div>
-            <p className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
-              {t("admin-webhooks-secret-note")}
-            </p>
-            <button
-              onClick={() => setNewSecret(null)}
-              className="w-full px-4 py-2 text-sm font-semibold rounded-lg"
-              style={{ background: "var(--accent)", color: "white" }}
-            >
-              {t("done")}
-            </button>
-          </div>
+            </ModalBody>
+          </ModalContent>
         </Modal>
 
         {/* Detail modal */}
         <Modal
           isOpen={!!selectedWebhook}
           onClose={() => setSelectedWebhook(null)}
-          title={t("admin-webhooks-detail-title")}
           size="lg"
         >
-          {webhookDetail && (
-            <div className="space-y-5">
+          <ModalContent>
+            <ModalHeader>{t("admin-webhooks-detail-title")}</ModalHeader>
+            <ModalBody>
+              {webhookDetail && (
+                <div className="space-y-5">
               {/* URL & Status */}
               <div className="p-3 rounded-lg" style={{ border: "1px solid var(--border)" }}>
                 <h4
@@ -493,6 +506,8 @@ export default function WebhooksPage() {
               </div>
             </div>
           )}
+          </ModalBody>
+          </ModalContent>
         </Modal>
       </div>
     </DefaultLayout>

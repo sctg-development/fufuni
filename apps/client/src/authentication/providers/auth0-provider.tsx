@@ -242,6 +242,30 @@ export const useAuth0Provider = (): AuthProvider => {
     [getAccessToken],
   );
 
+  const patchJson = useCallback(
+    async (url: string, data: any): Promise<any> => {
+      try {
+        const accessToken = await getAccessToken();
+
+        const apiResponse = await fetch(url, {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+
+        return await apiResponse.json();
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error("Error patching JSON:", error);
+        throw error;
+      }
+    },
+    [getAccessToken],
+  );
+
   // Memoize the returned API surface so consumers receive stable function identities
   return useMemo(
     () => ({
@@ -254,6 +278,7 @@ export const useAuth0Provider = (): AuthProvider => {
       hasPermission,
       getJson,
       postJson,
+      patchJson,
       putJson,
       deleteJson,
     }),

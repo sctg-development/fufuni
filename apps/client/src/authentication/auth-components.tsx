@@ -361,7 +361,7 @@ export const AuthenticationGuardWithPermission: FC<{
  * ```
  */
 export const useSecuredApi = () => {
-  const { getJson, postJson, deleteJson, hasPermission, putJson } = useAuth();
+  const { getJson, postJson, deleteJson, hasPermission, putJson, patchJson } = useAuth();
 
   /**
    * Obtient un token Auth0 Management API via le worker (avec cache KV).
@@ -696,6 +696,7 @@ export const useSecuredApi = () => {
   return {
     getJson,
     postJson,
+    patchJson,
     deleteJson,
     hasPermission,
     putJson,

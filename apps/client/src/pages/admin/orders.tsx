@@ -23,7 +23,7 @@ import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { useSecuredApi } from "@/authentication";
 import DefaultLayout from "@/layouts/default";
-import { Modal } from "@heroui/modal";
+import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
 
 // --- typings -------------------------------------------------------------
 interface Order {
@@ -52,7 +52,7 @@ const ORDER_STATUSES = [
 
 export default function OrdersPage() {
   const { t } = useTranslation();
-  const { getJson, putJson, postJson } = useSecuredApi();
+  const { getJson, patchJson, postJson } = useSecuredApi();
   const queryClient = useQueryClient();
 
   const apiBase =
@@ -63,27 +63,34 @@ export default function OrdersPage() {
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
+  // trigger new fetch by bumping this counter; used in query key and url cache-bust
+  const [refreshIndex, setRefreshIndex] = useState(0);
+
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: ["orders", statusFilter],
+    queryKey: ["orders", statusFilter, refreshIndex],
     queryFn: () =>
-      getJson(`${apiBase}/v1/orders?limit=100${statusFilter ? `&status=${statusFilter}` : ""}`),
+      getJson(`${apiBase}/v1/orders?limit=100${statusFilter ? `&status=${statusFilter}` : ""}&cb=${Date.now()}`),
   });
 
   const orders: Order[] = data?.items || [];
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
-      putJson(`${apiBase}/v1/orders/${id}`, data),
+      patchJson(`${apiBase}/v1/orders/${id}`, data),
     onSuccess: (updated: Order) => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      console.log("order status updated", updated);
+      setRefreshIndex((i) => i + 1);
       setSelectedOrder(updated);
+    },
+    onError: (err) => {
+      console.error("failed to update order", err);
     },
   });
 
   const refundMutation = useMutation({
     mutationFn: (id: string) => postJson(`${apiBase}/v1/orders/${id}/refund`, {}),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      setRefreshIndex((i) => i + 1);
       setSelectedOrder(null);
     },
   });
@@ -154,7 +161,7 @@ export default function OrdersPage() {
             {t("admin-orders-title")}
           </h1>
           <button
-            onClick={() => queryClient.invalidateQueries({ queryKey: ["orders"] })}
+            onClick={() => setRefreshIndex((i) => i + 1)}
             disabled={isFetching}
             className="p-2 rounded hover:bg-[var(--bg-hover)] transition-colors disabled:opacity-50"
             style={{ color: "var(--text-muted)" }}
@@ -273,16 +280,18 @@ export default function OrdersPage() {
         <Modal
           isOpen={!!selectedOrder}
           onClose={() => setSelectedOrder(null)}
-          title={
-            selectedOrder
-              ? `${t("admin-orders-order-prefix")} ${selectedOrder.number ||
-                  selectedOrder.id.slice(0, 8)}`
-              : t("admin-orders-title")
-          }
           size="lg"
         >
-          {selectedOrder && (
-            <div className="space-y-5">
+          <ModalContent>
+            <ModalHeader>
+              {selectedOrder
+                ? `${t("admin-orders-order-prefix")} ${selectedOrder.number ||
+                    selectedOrder.id.slice(0, 8)}`
+                : t("admin-orders-title")}
+            </ModalHeader>
+            <ModalBody>
+              {selectedOrder && (
+                <div className="space-y-5">
               {/* Status Badge */}
               <span className="text-sm font-mono">{selectedOrder.status}</span>
 
@@ -449,9 +458,13 @@ export default function OrdersPage() {
                   <select
                     value={selectedOrder.status}
                     onChange={(e) => {
+                      const newStatus = e.target.value;
+                      console.log("select status", newStatus);
+                      // optimistically update
+                      setSelectedOrder((o) => (o ? { ...o, status: newStatus } : o));
                       updateMutation.mutate({
                         id: selectedOrder.id,
-                        data: { status: e.target.value },
+                        data: { status: newStatus },
                       });
                     }}
                     disabled={updateMutation.isPending}
@@ -536,7 +549,9 @@ export default function OrdersPage() {
                 )}
               </div>
             </div>
-          )}
+              )}
+            </ModalBody>
+          </ModalContent>
         </Modal>
       </div>
     </DefaultLayout>

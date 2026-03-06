@@ -22,7 +22,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useSecuredApi } from "@/authentication";
 import DefaultLayout from "@/layouts/default";
-import { Modal } from "@heroui/modal";
+import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
 import clsx from "clsx";
 
 // --- typings -------------------------------------------------------------
@@ -51,9 +51,11 @@ export default function InventoryPage() {
   const [adjustDelta, setAdjustDelta] = useState("");
   const [adjustReason, setAdjustReason] = useState<string>("restock");
 
-  const { data, isLoading, isFetching, refetch } = useQuery({
-    queryKey: ["inventory"],
-    queryFn: () => getJson(`${apiBase}/v1/inventory`),
+  const [refreshIndex, setRefreshIndex] = useState(0);
+
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ["inventory", refreshIndex],
+    queryFn: () => getJson(`${apiBase}/v1/inventory?cb=${Date.now()}`),
   });
 
   const inventory: InventoryItem[] = data?.items || [];
@@ -62,7 +64,7 @@ export default function InventoryPage() {
     mutationFn: ({ sku, delta, reason }: { sku: string; delta: number; reason: string }) =>
       postJson(`${apiBase}/v1/inventory/${sku}/adjust`, { delta, reason }),
     onSuccess: (updated: InventoryItem) => {
-      queryClient.invalidateQueries({ queryKey: ["inventory"] });
+      setRefreshIndex((i) => i + 1);
       setSelectedItem(updated);
       setAdjustDelta("");
     },
@@ -138,7 +140,7 @@ export default function InventoryPage() {
             {t("admin-inventory-title")}
           </h1>
           <button
-            onClick={() => refetch()}
+            onClick={() => setRefreshIndex((i) => i + 1)}
             disabled={isFetching}
             className="p-2 rounded hover:bg-[var(--bg-hover)] transition-colors disabled:opacity-50"
             style={{ color: "var(--text-muted)" }}
@@ -245,11 +247,13 @@ export default function InventoryPage() {
             setSelectedItem(null);
             setAdjustDelta("");
           }}
-          title={selectedItem?.sku || t("admin-inventory-title")}
           size="md"
         >
-          {selectedItem && (
-            <div className="space-y-5">
+          <ModalContent>
+            <ModalHeader>{selectedItem?.sku || t("admin-inventory-title")}</ModalHeader>
+            <ModalBody>
+              {selectedItem && (
+                <div className="space-y-5">
               {/* Product info */}
               <div
                 className="flex items-center gap-3 p-3 rounded-lg"
@@ -390,7 +394,9 @@ export default function InventoryPage() {
                 </button>
               </form>
             </div>
-          )}
+              )}
+            </ModalBody>
+          </ModalContent>
         </Modal>
       </div>
     </DefaultLayout>
