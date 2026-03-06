@@ -35,6 +35,7 @@ import InventoryPage from "@/pages/admin/inventory";
 import OrdersPage from "@/pages/admin/orders";
 import WebhooksPage from "@/pages/admin/webhooks";
 import { SwaggerPage } from "@/pages/swagger";
+import CartPage from "@/pages/cart";
 
 function App() {
   const { isLoading } = useAuth();
@@ -53,6 +54,7 @@ function App() {
     <Suspense fallback={<SiteLoading />}>
       <Routes>
         <Route element={<IndexPage />} path="/" />
+        <Route element={<CartPage />} path="/cart" />
         <Route
           element={<AuthenticationGuard component={ApiPage} />}
           path="/api"
@@ -95,7 +97,7 @@ function App() {
           path="/openapi"
         />
         <Route element={<PageNotFound />} path="*" />
-      </Routes>
+        </Routes>
     </Suspense>
   );
 }

@@ -16,9 +16,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
+
+let styleInjected = false;
 
 export const SiteLoading = () => {
   useEffect(() => {
+    if (styleInjected) return;
+
     const styleElement = document.createElement("style");
 
     styleElement.innerHTML = `
@@ -29,14 +34,13 @@ export const SiteLoading = () => {
       }
     `;
     document.head.appendChild(styleElement);
+    styleInjected = true;
 
-    return () => {
-      document.head.removeChild(styleElement);
-    };
+    // nothing to cleanup: we keep the style for the whole app
   }, []);
 
-  return (
-    <div className="absolute flex items-center justify-center h-screen w-screen dark:bg-black">
+  const content = (
+    <div className="fixed inset-0 z-50 flex items-center justify-center dark:bg-black">
       <div
         aria-label="Loading"
         aria-live="polite"
@@ -45,11 +49,13 @@ export const SiteLoading = () => {
           w-48 h-48
           rounded-full
           bg-[conic-gradient(red,orange,yellow,green,blue,indigo,violet,red)]
-          [mask-image:radial-gradient(circle_closest-side,transparent_75%,#000_75%,#000_100%)]
-          [animation:spinner-rotate_800ms_linear_infinite]
+          mask-[radial-gradient(circle_closest-side,transparent_75%,#000_75%,#000_100%)]
+          animate-[spinner-rotate_800ms_linear_infinite]
         "
         role="status"
       />
     </div>
   );
+
+  return typeof document !== "undefined" ? createPortal(content, document.body) : content;
 };

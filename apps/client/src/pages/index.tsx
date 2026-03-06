@@ -17,8 +17,6 @@
  */
 
 import { LinkUniversal } from "@/components/link-universal";
-import { Snippet } from "@heroui/snippet";
-import { Code } from "@heroui/code";
 import { button as buttonStyles } from "@heroui/theme";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -29,9 +27,45 @@ import { title, subtitle } from "@/components/primitives";
 import { GithubIcon } from "@/components/icons";
 import DefaultLayout from "@/layouts/default";
 
+import { useState } from "react";
+
+import { StoreProduct, searchProducts, getProducts } from "@/lib/store-api";
+import { ProductCard } from "@/components/product-card";
+import { useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+
+
 export default function IndexPage() {
   const { t } = useTranslation();
   const { isAuthenticated, user } = useAuth();
+
+  // check for search query in URL
+  const [searchParams] = useSearchParams();
+  const term = searchParams.get("q") || "";
+
+  const {
+    data: products,
+    isLoading: productsLoading,
+    isError: productsError,
+  } = useQuery<StoreProduct[], Error>({
+    queryKey: ["products", term],
+    queryFn: async () => {
+      if (term) {
+        return await searchProducts(term);
+      }
+      // no term => default product list
+      return await getProducts();
+    },
+  });
+
+  const safeProducts: StoreProduct[] = products || [];
+  const [selectedVariants, setSelectedVariants] =
+    useState<Record<string, string>>({});
+
+  const handleVariantChange = (productId: string, sku: string) => {
+    setSelectedVariants((prev) => ({ ...prev, [productId]: sku }));
+  };
+
 
   return (
     <DefaultLayout>
@@ -131,20 +165,31 @@ export default function IndexPage() {
           )}
         </div>
 
-        <div className="mt-8">
-          <Snippet hideCopyButton hideSymbol variant="bordered">
-            <span>
-              <Trans i18nKey="get-started-by-editing" />{" "}
-              <Code color="primary">pages/index.tsx</Code>
-            </span>
-          </Snippet>
-          <p className="text-xs mt-2">
-            <Trans i18nKey="template_clone_instructions">
-              Clone this repo, edit <code>.env</code> and run{" "}
-              <code>yarn install && yarn dev:env</code> to get started.
-            </Trans>
-          </p>
-        </div>
+      </section>
+
+      {/* products grid */}
+      <section className="max-w-6xl mx-auto px-6 py-12">
+        <h2 className="text-2xl font-semibold mb-6 text-center">
+          {t("shop-products-title")}
+        </h2>
+        {productsLoading ? (
+          <p className="text-center">{t("admin-products-loading")}</p>
+        ) : productsError ? (
+          <p className="text-center text-red-500">{t("products-error")}</p>
+        ) : safeProducts.length === 0 ? (
+          <p className="text-center">{t("admin-products-empty")}</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {safeProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                selectedSku={selectedVariants[product.id]}
+                onSelectVariant={handleVariantChange}
+              />
+            ))}
+          </div>
+        )}
       </section>
     </DefaultLayout>
   );

@@ -17,6 +17,8 @@
  */
 
 /* global process */
+import dotenv from "dotenv";
+import path from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -24,6 +26,14 @@ import tailwindcss from "@tailwindcss/vite";
 import { githubPagesSpa } from "@sctg/vite-plugin-github-pages-spa";
 
 import _package from "./package.json" with { type: "json" };
+
+const env = dotenv.config({
+  path: path.resolve(import.meta.dirname, '../../.env'),
+});
+// Construct an array containing all the *_PERMISSION values from the .env file
+const scopesArray = Object.entries(env.parsed || {})
+  .filter(([key]) => key.endsWith("_PERMISSION"))
+  .map(([_, value]) => value);
 
 /**
  * Package.json type definition for React project
@@ -84,7 +94,7 @@ export function extractPerVendorDependencies(
  * @see https://vitejs.dev/config/
  */
 console.warn(
-  `Launching Vite with\nAUTH0_DOMAIN: ${process.env.AUTH0_DOMAIN}\nAUTH0_CLIENT_ID: ${process.env.AUTH0_CLIENT_ID}\nAUTH0_AUDIENCE: ${process.env.AUTH0_AUDIENCE}\nAUTH0_SCOPE: ${process.env.AUTH0_SCOPE}\nAPI_BASE_URL: ${process.env.API_BASE_URL}\nAUTH0_ADMIN_PERMISSION: ${process.env.ADMIN_AUTH0_PERMISSION}\nAUTH0_AUTOMATIC_PERMISSIONS: ${process.env.AUTH0_AUTOMATIC_PERMISSIONS}`,
+  `Launching Vite with\nAUTH0_DOMAIN: ${process.env.AUTH0_DOMAIN}\nAUTH0_CLIENT_ID: ${process.env.AUTH0_CLIENT_ID}\nAUTH0_AUDIENCE: ${process.env.AUTH0_AUDIENCE}\nAUTH0_SCOPE: ${process.env.AUTH0_SCOPE}\nAPI_BASE_URL: ${process.env.API_BASE_URL}\nAUTH0_ADMIN_PERMISSION: ${process.env.ADMIN_AUTH0_PERMISSION}\nAUTH0_AUTOMATIC_PERMISSIONS: ${process.env.AUTH0_AUTOMATIC_PERMISSIONS}\nPERMISSIONS: ${JSON.stringify(scopesArray)}\nMERCHANT_PK: ${process.env.MERCHANT_PK}`,
 );
 export default defineConfig({
   base: process.env.VITE_BASE_PATH || "/",
@@ -122,12 +132,11 @@ export default defineConfig({
       process.env.AUTH0_CACHE_DURATION_S || "300",
     ),
     // Permissions
-    "import.meta.env.PERMISSIONS": JSON.stringify([process.env.READ_PERMISSION || "read:api",
-    process.env.WRITE_PERMISSION || "write:api",
-    process.env.ADMIN_AUTH0_PERMISSION || "auth0:admin:api"]),
+    "import.meta.env.PERMISSIONS": JSON.stringify(scopesArray),
     "import.meta.env.AUTH0_AUTOMATIC_PERMISSIONS": JSON.stringify(process.env.AUTH0_AUTOMATIC_PERMISSIONS?.split(",") || []),
     "import.meta.env.ADMIN_AUTH0_PERMISSION": JSON.stringify(process.env.ADMIN_AUTH0_PERMISSION || "auth0:admin:api"),
     "import.meta.env.ADMIN_STORE_PERMISSION": JSON.stringify(process.env.ADMIN_STORE_PERMISSION || "admin:store"),
+    "import.meta.env.MERCHANT_PK": JSON.stringify(process.env.MERCHANT_PK || "merchant_pk_placeholder"),
   },
   plugins: [react(), tsconfigPaths(), tailwindcss(), githubPagesSpa()],
   build: {

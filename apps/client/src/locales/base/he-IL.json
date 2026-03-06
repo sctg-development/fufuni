@@ -212,5 +212,15 @@
   "openapi-docs": "Openapi עם Swagger-ui",
   "save": "לְהַצִיל",
   "status": "סטָטוּס",
-  "success": "הַצלָחָה"
+  "success": "הַצלָחָה",
+  "add-to-cart": "הוסף לעגלה",
+  "cart": "סל קניות",
+  "cart-clear": "נקה עגלה",
+  "cart-empty": "העגלה שלך ריקה.",
+  "checkout": "קופה"
+}
+ "products-error": "טעינת המוצרים נכשלה",
+  "remove": "לְהַסִיר",
+  "shop-products-title": "מוצרים",
+  "total": "סַך הַכֹּל"
 }

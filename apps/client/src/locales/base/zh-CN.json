@@ -212,5 +212,14 @@
   "openapi-docs": "OpenAPI 与 Swagger-ui",
   "save": "节省",
   "status": "地位",
-  "success": "成功"
+  "success": "成功",
+  "add-to-cart": "添加到购物车",
+  "cart": "购物车",
+  "cart-clear": "清除购物车",
+  "cart-empty": "您的购物车是空的。",
+  "checkout": "查看",
+  "products-error": "无法加载产品",
+  "remove": "消除",
+  "shop-products-title": "产品",
+  "total": "全部的"
 }

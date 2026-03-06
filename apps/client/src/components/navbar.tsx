@@ -30,6 +30,8 @@ import {
 import { link as linkStyles } from "@heroui/theme";
 import { clsx } from "@heroui/shared-utils";
 import { Trans, useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 import { LinkUniversal } from "./link-universal";
 import { I18nIcon, LanguageSwitch } from "./language-switch";
@@ -45,12 +47,33 @@ import {
   SearchIcon,
 } from "@/components/icons";
 import { Logo } from "@/components/icons";
+import { useCart } from "@/hooks/useCart";
+import { ShoppingCart } from "lucide-react";
 import { availableLanguages } from "@/i18n";
 
 export const Navbar = () => {
   const { t } = useTranslation();
+  const { count: cartCount } = useCart();
+  const navigate = useNavigate();
+  const [searchValue, setSearchValue] = useState("");
+
+  const submitSearch = () => {
+    const q = searchValue.trim();
+    if (q) {
+      navigate(`/?q=${encodeURIComponent(q)}`);
+      setSearchValue("");
+    }
+  };
+
   const searchInput = (
     <Input
+      value={searchValue}
+      onChange={(e) => setSearchValue(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          submitSearch();
+        }
+      }}
       aria-label={t("search")}
       classNames={{
         inputWrapper: "bg-default-100",
@@ -122,7 +145,15 @@ export const Navbar = () => {
         className="hidden sm:flex basis-1/5 sm:basis-full"
         justify="end"
       >
-        <NavbarItem className="hidden sm:flex gap-2">
+        <NavbarItem className="hidden sm:flex gap-2 items-center">
+          <LinkUniversal href="/cart" className="relative">
+            <ShoppingCart size={20} />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-danger text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                {cartCount}
+              </span>
+            )}
+          </LinkUniversal>
           <LinkUniversal
             isExternal
             isInternet

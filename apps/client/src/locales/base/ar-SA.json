@@ -212,5 +212,14 @@
   "openapi-docs": "Openapi مع Swagger-ui",
   "save": "يحفظ",
   "status": "حالة",
-  "success": "نجاح"
+  "success": "نجاح",
+  "add-to-cart": "أضف إلى السلة",
+  "cart": "سلة التسوق",
+  "cart-clear": "عربة واضحة",
+  "cart-empty": "سلة التسوق الخاصة بك فارغة.",
+  "checkout": "الدفع",
+  "products-error": "فشل في تحميل المنتجات",
+  "remove": "يزيل",
+  "shop-products-title": "منتجات",
+  "total": "المجموع"
 }

@@ -27,14 +27,12 @@ export function SwaggerPage() {
   }, [isAuthenticated, getAccessTokenSilently]);
 
   // Re‑use the same logic that used to live inside the component
-  const source = import.meta.env.BASE_URL.endsWith("/")
-    ? import.meta.env.BASE_URL + "openapi.json"
-    : import.meta.env.BASE_URL + "/openapi.json";
+  const source = import.meta.env.API_BASE_URL.endsWith("/")
+    ? import.meta.env.API_BASE_URL + "openapi.json"
+    : import.meta.env.API_BASE_URL + "/openapi.json";
 
   const dataServers = [
-    (import.meta.env.API_BASE_URL as string).endsWith("/api")
-      ? (import.meta.env.API_BASE_URL as string).split("/api")[0]
-      : (import.meta.env.API_BASE_URL as string),
+    (import.meta.env.API_BASE_URL as string),
   ];
 
   const description = t("api-server");
