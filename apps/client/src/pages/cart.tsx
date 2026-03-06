@@ -29,7 +29,7 @@ export default function CartPage() {
       <div className="max-w-4xl mx-auto py-12">
         <h1 className="text-2xl font-semibold mb-6">{t("cart")}</h1>
         {items.length === 0 ? (
-          <p>{t("cart-empty", "Your cart is empty")}</p>
+          <p>{t("cart-empty")}</p>
         ) : (
           <div className="space-y-4">
             {items.map((item) => (
@@ -86,7 +86,7 @@ export default function CartPage() {
                 onClick={() => clear()}
                 className={buttonStyles({ color: "danger" })}
               >
-                {t("cart-clear", "Clear cart")}
+                {t("cart-clear")}
               </button>
               <LinkUniversal
                 className={buttonStyles({ color: "primary" })}

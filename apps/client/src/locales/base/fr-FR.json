@@ -217,9 +217,8 @@
   "cart": "Panier",
   "cart-clear": "Vider le panier",
   "cart-empty": "Votre panier est vide.",
-  "checkout": "Vérifier"
-}
- "products-error": "Échec du chargement des produits",
+  "checkout": "Vérifier",
+  "products-error": "Échec du chargement des produits",
   "remove": "Retirer",
   "shop-products-title": "Produits",
   "total": "Total"

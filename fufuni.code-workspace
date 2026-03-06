@@ -6,7 +6,7 @@
     },
     {
       "name": "Client App",
-      "path": "./apps/client"
+      "path": "./apps/client",
     },
     {
       "name": "Merchant",
@@ -34,13 +34,6 @@
     }
   ],
   "settings": {
-
-    "i18n-ally-next.keystyle": "flat",
-    "i18n-ally-next.sourceLanguage": "en-US",
-    "i18n-ally-next.localesPaths": [
-      "apps/client/src/locales/base"
-    ],
-    "i18n-ally-next.enabledFrameworks": ["react-i18next"],
     "git.openRepositoryInParentFolders": "always",
     "terminal.integrated.defaultProfile.linux": "bash",
     "terminal.integrated.defaultProfile.osx": "zsh",
@@ -63,11 +56,13 @@
       }
     },
     "npm.packageManager": "yarn",
-    "turbo.useLocalTurbo": true,
-    "eslint.workingDirectories": [
-      "apps/client",
-      "apps/cloudflare-worker"
+    "i18n-ally-next.keystyle": "flat",
+    "i18n-ally-next.localesPaths": [
+      "./src/locales/base"
     ],
+    "i18n-ally-next.sourceLanguage": "en-US",
+    "i18n-ally-next.displayLanguage": "fr-FR",
+    "i18n-ally-next.languageTagSystem": "bcp47"
   },
   "extensions": {
     "recommendations": [

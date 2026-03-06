@@ -217,9 +217,8 @@
   "cart": "סל קניות",
   "cart-clear": "נקה עגלה",
   "cart-empty": "העגלה שלך ריקה.",
-  "checkout": "קופה"
-}
- "products-error": "טעינת המוצרים נכשלה",
+  "checkout": "קופה",
+  "products-error": "טעינת המוצרים נכשלה",
   "remove": "לְהַסִיר",
   "shop-products-title": "מוצרים",
   "total": "סַך הַכֹּל"
