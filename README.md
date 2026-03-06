@@ -1,6 +1,6 @@
 ![](https://tokeisrv.sctg.eu.org/b1/github.com/sctg-development/fufuni?type=TypeScript,TSX,html&category=code)
 ![](https://tokeisrv.sctg.eu.org/b1/github.com/sctg-development/fufuni?type=TypeScript,TSX,html&category=comments)
-# Vite, OAuth & HeroUI Template
+# Merchant, Vite, OAuth & HeroUI Template
 
 Welcome to a fully‑functional starter you can fork and deploy in minutes 🔥
 
