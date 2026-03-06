@@ -35,7 +35,7 @@ export default function ApiPage() {
       if (isAuthenticated) {
         try {
           const response = await getJson(
-            `${import.meta.env.API_BASE_URL}/get/${user?.sub}`,
+            `${import.meta.env.API_BASE_URL}/v1/__auth0/get/${user?.sub}`,
           );
 
           setApiResponse(response);
@@ -57,7 +57,7 @@ export default function ApiPage() {
           </h1>
         </div>
         <Snippet className="max-w-11/12" symbol="" title="api-response">
-          <div className="max-w-2xs sm:max-w-sm md:max-w-md lg:max-w-5xl  whitespace-break-spaces  text-wrap break-words">
+          <div className="max-w-2xs sm:max-w-sm md:max-w-md lg:max-w-5xl  whitespace-break-spaces  text-wrap wrap-break-word">
             {JSON.stringify(apiResponse, null, 2)}
           </div>
         </Snippet>
