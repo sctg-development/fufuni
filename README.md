@@ -26,7 +26,8 @@ attractive landing page with a **Log in** button and direct links to a sample
 API and auto‑generated OpenAPI/Swagger docs — no auth required to view the
 interface.
 
-[<img width="1271" alt="demo" src="https://github.com/user-attachments/assets/f41f1fc3-ab50-40af-8ece-af4602812cc3" />](https://sctg-development.github.io/fufuni)
+<img width="1347" height="1603" alt="image" src="https://github.com/user-attachments/assets/276ba064-4483-40ac-acd7-fd19345200ba" />
+
 
 ## On Github Pages ?
 
