@@ -34,6 +34,11 @@ import CustomersPage from "@/pages/admin/customers";
 import InventoryPage from "@/pages/admin/inventory";
 import OrdersPage from "@/pages/admin/orders";
 import WebhooksPage from "@/pages/admin/webhooks";
+import RegionsPage from "@/pages/admin/regions";
+import CurrenciesPage from "@/pages/admin/currencies";
+import CountriesPage from "@/pages/admin/countries";
+import WarehousesPage from "@/pages/admin/warehouses";
+import ShippingRatesPage from "@/pages/admin/shipping-rates";
 import { SwaggerPage } from "@/pages/swagger";
 import CartPage from "@/pages/cart";
 
@@ -91,6 +96,26 @@ function App() {
         <Route
           element={<AuthenticationGuard component={WebhooksPage} />}
           path="/admin/webhooks"
+        />
+        <Route
+          element={<AuthenticationGuard component={RegionsPage} />}
+          path="/admin/regions"
+        />
+        <Route
+          element={<AuthenticationGuard component={CurrenciesPage} />}
+          path="/admin/currencies"
+        />
+        <Route
+          element={<AuthenticationGuard component={CountriesPage} />}
+          path="/admin/countries"
+        />
+        <Route
+          element={<AuthenticationGuard component={WarehousesPage} />}
+          path="/admin/warehouses"
+        />
+        <Route
+          element={<AuthenticationGuard component={ShippingRatesPage} />}
+          path="/admin/shipping-rates"
         />
         <Route
           element={<AuthenticationGuard component={SwaggerPage} />}

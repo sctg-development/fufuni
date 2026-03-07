@@ -14,23 +14,6 @@ export const siteConfig = () => ({
       href: "/",
       permissions: [], // No permissions required, visible to all
     },
-    // {
-    //   label: i18next.t("api"),
-    //   href: "/api",
-    // },
-    // {
-    //   label: i18next.t("pricing"),
-    //   href: "/pricing",
-    // },
-    // {
-    //   label: i18next.t("blog"),
-    //   href: "/blog",
-    // },
-    // {
-    //   label: i18next.t("about"),
-    //   href: "/about",
-    // },
-
     // admin pages - visible to all for now. guards can be handled on the page itself
     {
       label: i18next.t("admin-products-title"),
@@ -57,6 +40,31 @@ export const siteConfig = () => ({
       href: "/admin/webhooks",
       permissions: ["admin:store"], // Only visible to users with "admin:store" permission
     },
+    {
+      label: i18next.t("admin-regions-title"),
+      href: "/admin/regions",
+      permissions: ["admin:store"], // Only visible to users with "admin:store" permission
+    },
+    {
+      label: i18next.t("admin-currencies-title"),
+      href: "/admin/currencies",
+      permissions: ["admin:store"], // Only visible to users with "admin:store" permission
+    },
+    {
+      label: i18next.t("admin-countries-title"),
+      href: "/admin/countries",
+      permissions: ["admin:store"], // Only visible to users with "admin:store" permission
+    },
+    {
+      label: i18next.t("admin-warehouses-title"),
+      href: "/admin/warehouses",
+      permissions: ["admin:store"], // Only visible to users with "admin:store" permission
+    },
+    {
+      label: i18next.t("admin-shipping-rates-title"),
+      href: "/admin/shipping-rates",
+      permissions: ["admin:store"], // Only visible to users with "admin:store" permission
+    },
   ],
   navMenuItems: [
     {
@@ -64,27 +72,10 @@ export const siteConfig = () => ({
       href: "/",
       permissions: [], // No permissions required, visible to all
     },
-    // {
-    //   label: i18next.t("api"),
-    //   href: "/api",
-    // },
-    // {
-    //   label: i18next.t("pricing"),
-    //   href: "/pricing",
-    // },
-    // {
-    //   label: i18next.t("blog"),
-    //   href: "/blog",
-    // },
-    // {
-    //   label: i18next.t("about"),
-    //   href: "/about",
-    // },
     {
       label: i18next.t("admin-products-title"),
       href: "/admin/products",
       permissions: ["admin:store"], // Only visible to users with "admin:store" permission
-
     },
     {
       label: i18next.t("admin-customers-title"),
@@ -106,10 +97,34 @@ export const siteConfig = () => ({
       href: "/admin/webhooks",
       permissions: ["admin:store"], // Only visible to users with "admin:store" permission
     },
+    {
+      label: i18next.t("admin-regions-title"),
+      href: "/admin/regions",
+      permissions: ["admin:store"], // Only visible to users with "admin:store" permission
+    },
+    {
+      label: i18next.t("admin-currencies-title"),
+      href: "/admin/currencies",
+      permissions: ["admin:store"], // Only visible to users with "admin:store" permission
+    },
+    {
+      label: i18next.t("admin-countries-title"),
+      href: "/admin/countries",
+      permissions: ["admin:store"], // Only visible to users with "admin:store" permission
+    },
+    {
+      label: i18next.t("admin-warehouses-title"),
+      href: "/admin/warehouses",
+      permissions: ["admin:store"], // Only visible to users with "admin:store" permission
+    },
+    {
+      label: i18next.t("admin-shipping-rates-title"),
+      href: "/admin/shipping-rates",
+      permissions: ["admin:store"], // Only visible to users with "admin:store" permission
+    },
   ],
   links: {
-    github:
-      "https://github.com/sctg-development/fufuni",
+    github: "https://github.com/sctg-development/fufuni",
     twitter: "https://twitter.com/hero_ui",
     docs: "https://github.com/sctg-development/fufuni/blob/main/README.md",
     discord: "https://discord.gg/9b6yyZKmH4",

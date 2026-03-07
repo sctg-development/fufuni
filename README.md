@@ -227,6 +227,14 @@ For more detailed commands, see the [Turborepo Guide](./TURBOREPO-GUIDE.md).
       - [Testing with Cloudflare Workers](#testing-with-cloudflare-workers)
       - [Understanding Token Flow](#understanding-token-flow)
   - [Administration & User Management](#administration--user-management)
+  - [Multi-Region Integration](#multi-region-integration)
+    - [Overview](#overview)
+    - [Managing Regions](#managing-regions)
+    - [Managing Currencies](#managing-currencies)
+    - [Managing Countries](#managing-countries)
+    - [Managing Warehouses](#managing-warehouses)
+    - [Managing Shipping Rates](#managing-shipping-rates)
+    - [Region-Aware Checkout](#region-aware-checkout)
   - [Technical Information Modal](#technical-information-modal)
   - [Internationalization](#internationalization)
     - [Adding a New Language](#adding-a-new-language)
@@ -595,6 +603,189 @@ Accessible via `/admin/users`, the management page allows administrators to:
 
 > [!IMPORTANT]
 > To use these features, you must configure the Auth0 Management API credentials and set the `ADMIN_AUTH0_PERMISSION` in your environment variables.
+
+## Multi-Region Integration
+
+The merchant backend includes a comprehensive multi-region system that enables you to manage products, pricing, shipping, and warehousing across multiple geographic regions. This feature is essential for businesses operating in multiple countries or currency zones.
+
+### Overview
+
+The multi-region system consists of five interconnected management interfaces:
+
+1. **Regions** (`/admin/regions`) - Define geographic areas and their associated currencies
+2. **Currencies** (`/admin/currencies`) - Manage currency codes, symbols, and decimal precision
+3. **Countries** (`/admin/countries`) - Assign countries to regions and configure languages
+4. **Warehouses** (`/admin/warehouses`) - Set up warehouse locations with inventory tracking per region
+5. **Shipping Rates** (`/admin/shipping-rates`) - Configure region-specific shipping costs based on weight and delivery time
+
+These five entities work together to enable:
+- **Region-aware pricing**: Automatically convert product prices based on the customer's region
+- **Warehouse inventory management**: Track stock levels across multiple regional warehouses
+- **Smart shipping calculation**: Compute shipping costs based on origin warehouse, destination region, and weight
+- **Multi-language support**: Serve the checkout experience in customers' local languages
+
+### Managing Regions
+
+Regions are the top-level organizational unit. Each region:
+- Has a unique code (e.g., "EU", "NA", "APAC")
+- Is associated with a primary currency
+- Can contain multiple countries
+- Determines default pricing and shipping behavior
+
+**Access**: Navigate to **Admin Dashboard** → **Regions** (requires `admin:store` permission)
+
+**Operations**:
+- **Create Region**: Click "Add Region", enter a unique code, select a currency, and save
+- **Edit Region**: Click the edit icon (pencil) on any region to modify its code or currency
+- **Set as Default**: Mark a region as default to use it when the customer's region cannot be determined
+- **Delete Region**: Click the delete icon (trash) to remove a region (only if no countries are assigned)
+
+**Best Practices**:
+- Use ISO 3166-1 alpha-2 country codes as region identifiers when possible (EU, GB, US, etc.)
+- Always have at least one default region configured
+- Ensure the default region's currency is well-supported in your payment processor
+
+### Managing Currencies
+
+Currencies define the monetary units used in your regions. Each currency:
+- Has a 3-letter ISO code (e.g., "USD", "EUR", "GBP")
+- Displays with a custom symbol (e.g., "$", "€", "£")
+- Specifies decimal precision (typically 2 for most currencies, 0 for JPY)
+
+**Access**: Navigate to **Admin Dashboard** → **Currencies** (requires `admin:store` permission)
+
+**Operations**:
+- **Create Currency**: Click "Add Currency", enter the ISO code, configure the symbol and decimal places
+- **Edit Currency**: Modify symbol or decimal places for any currency
+- **Delete Currency**: Remove a currency (only if not assigned to any region)
+
+**Validation Rules**:
+- Currency code must be exactly 3 uppercase letters
+- Decimal places must be 0-8 (recommended: 0-2 for standard currencies)
+- Symbol can be any Unicode character (e.g., $, €, ¥, ₹, ₽)
+
+**Examples**:
+- USD: Symbol "$", Decimals: 2
+- EUR: Symbol "€", Decimals: 2
+- JPY: Symbol "¥", Decimals: 0
+- BTC: Symbol "₿", Decimals: 8 (for crypto payment support)
+
+### Managing Countries
+
+Countries map geographic locations to regions and languages. Each country:
+- Has a unique 2-letter ISO code (e.g., "US", "FR", "JP")
+- Belongs to exactly one region
+- Specifies available languages for localization
+- Determines shipping and pricing rules
+
+**Access**: Navigate to **Admin Dashboard** → **Countries** (requires `admin:store` permission)
+
+**Operations**:
+- **Create Country**: Click "Add Country", select a country code, assign a region, select supported languages
+- **Edit Country**: Modify a country's assigned region or language settings
+- **Delete Country**: Remove a country (this will reassign any assigned addresses to the region's default)
+
+**Language Selection**:
+- Each country can support multiple languages
+- The system respects language availability during checkout
+- Users see localization in their selected language if it's available for their country
+
+**Example Configuration**:
+- US (United States) → Region: "NA" (North America) → Languages: English
+- FR (France) → Region: "EU" (Europe) → Languages: French, English
+- IN (India) → Region: "APAC" → Languages: Hindi, English, Tamil
+
+### Managing Warehouses
+
+Warehouses represent physical inventory locations. Each warehouse:
+- Has a name, address, and contact information
+- Belongs to a specific region
+- Maintains inventory for products in that region
+- Has a priority rank for fulfillment routing
+
+**Access**: Navigate to **Admin Dashboard** → **Warehouses** (requires `admin:store` permission)
+
+**Operations**:
+- **Create Warehouse**: Click "Add Warehouse", fill in address details and assign to a region
+- **Edit Warehouse**: Update warehouse information or change its region priority
+- **Delete Warehouse**: Remove a warehouse (inventory will be reassigned to the region's default warehouse)
+
+**Address Fields**:
+- Name (required): Display name of the warehouse
+- Address Line 1 (required): Street address
+- Address Line 2 (optional): Apartment, suite, etc.
+- City (required): City name
+- State/Province (required): State or province code
+- Postal Code (required): ZIP code or postal code
+- Country (required): Country where the warehouse is located
+- Phone (optional): Contact phone number for the warehouse
+
+**Priority System**:
+- Lower numbers = higher priority for order fulfillment
+- Set priority 1 for your main warehouse, then 2, 3, etc. for secondary locations
+- The system routes shipments from the highest-priority warehouse with available inventory
+
+**Example**:
+```
+Warehouse 1: "Main EU Hub" (Germany) - Priority 1
+Warehouse 2: "UK Overflow" (United Kingdom) - Priority 2
+Warehouse 3: "EU Secondary" (Belgium) - Priority 3
+```
+
+### Managing Shipping Rates
+
+Shipping rates define the cost and delivery time for orders shipped from warehouses to regions. Each rate:
+- Links a warehouse to a destination region
+- Specifies weight-based pricing (e.g., different costs for 0-1kg, 1-5kg, 5-20kg)
+- Includes estimated delivery time in business days
+- Supports weight-based rate tiers
+
+**Access**: Navigate to **Admin Dashboard** → **Shipping Rates** (requires `admin:store` permission)
+
+**Operations**:
+- **Create Shipping Rate**: Click "Add Shipping Rate", select a warehouse and destination region, configure rates
+- **Edit Shipping Rate**: Modify cost, weight limits, or delivery days
+- **Delete Shipping Rate**: Remove a shipping route
+
+**Configuration Fields**:
+- **Warehouse**: Origin warehouse for shipments (dropdown)
+- **Region**: Destination region (dropdown)
+- **Cost** (in base currency): How much to charge for shipping
+- **Min Weight (g)**: Minimum package weight this rate applies to
+- **Max Weight (g)**: Maximum package weight this rate applies to (leave empty for no limit)
+- **Estimated Delivery Days**: How many business days before delivery (1-30 recommended)
+
+**Weight Tiering**:
+You can create multiple shipping rates for the same warehouse→region pair with different weight ranges. For example:
+
+```
+EU Warehouse → France Region:
+  - 0-500g: €5.99, 3 days
+  - 500g-2kg: €9.99, 3 days
+  - 2kg-10kg: €19.99, 5 days
+  - 10kg+: €0.99/kg, 7 days
+```
+
+The system automatically selects the appropriate rate based on the order's total weight.
+
+### Region-Aware Checkout
+
+The checkout process automatically adapts based on the customer's detected or selected region:
+
+**Checkout Flow**:
+1. **Region Detection**: The system determines the customer's region from their shipping address
+2. **Currency Conversion**: Product prices are automatically converted to the region's currency
+3. **Tax Calculation**: Tax rates are applied based on the destination region (when configured)
+4. **Shipping Calculation**: Available shipping options are filtered to those covering the destination
+5. **Warehouse Selection**: The system routes the order to the highest-priority warehouse with inventory
+
+**Example Checkout**:
+A customer in France:
+- Region: EU (detected from country_code: "FR")
+- Currency: EUR (region's primary currency)
+- Product priced at $100 USD → displays as €92 EUR (using conversion rate)
+- Shipping Options: Only rates from "EU Warehouse → France Region" are offered
+- Delivery: Estimated 3-5 business days (from shipping rate configuration)
 
 ## Technical Information Modal
 

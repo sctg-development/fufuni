@@ -63,6 +63,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # List of files and directories to include in the backup (relative to PROJECT_ROOT)
 FILES_TO_BACKUP=(
     ".env"                                           # Environment variables
+    ".github/prompts"                               # GitHub copilot prompts
     "cloudflare-worker/.wrangler"
     "cloudflare-worker/.vscode/launch.json"
     "cloudflare-worker/.vscode/settings.json"

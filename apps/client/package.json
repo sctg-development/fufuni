@@ -19,6 +19,7 @@
   "dependencies": {
     "@auth0/auth0-react": "^2.15.0",
     "@heroui/button": "^2.2.31",
+    "@heroui/card": "^2.2.27",
     "@heroui/chip": "^2.2.24",
     "@heroui/code": "^2.2.24",
     "@heroui/date-picker": "^2.3.32",

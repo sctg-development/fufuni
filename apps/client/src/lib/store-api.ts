@@ -126,3 +126,299 @@ export async function checkoutCart(
   });
 }
 
+// ============================================================
+// MULTI-REGION API HELPERS
+// ============================================================
+
+export interface Currency {
+  id: string;
+  code: string;
+  display_name: string;
+  symbol: string;
+  decimal_places: number;
+  status: 'active' | 'inactive';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Country {
+  id: string;
+  code: string;
+  display_name: string;
+  country_name: string;
+  language_code: string;
+  status: 'active' | 'inactive';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Warehouse {
+  id: string;
+  display_name: string;
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state?: string;
+  postal_code: string;
+  country_code: string;
+  priority: number;
+  status: 'active' | 'inactive';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ShippingRate {
+  id: string;
+  display_name: string;
+  description?: string;
+  max_weight_g?: number;
+  min_delivery_days?: number;
+  max_delivery_days?: number;
+  status: 'active' | 'inactive';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Region {
+  id: string;
+  display_name: string;
+  currency_id: string;
+  currency_code?: string;
+  is_default: boolean;
+  status: 'active' | 'inactive';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PaginationResponse<T> {
+  items: T[];
+  pagination: {
+    has_more: boolean;
+    next_cursor: string | null;
+  };
+}
+
+// Regions
+export async function getRegions(limit?: number, cursor?: string): Promise<PaginationResponse<Region>> {
+  const params = new URLSearchParams();
+  if (limit) params.append('limit', limit.toString());
+  if (cursor) params.append('cursor', cursor);
+  return request<PaginationResponse<Region>>(`/v1/regions?${params.toString()}`);
+}
+
+export async function getRegion(id: string): Promise<Region> {
+  return request<Region>(`/v1/regions/${id}`);
+}
+
+export async function createRegion(data: {
+  display_name: string;
+  currency_id: string;
+  is_default?: boolean;
+  country_ids?: string[];
+  warehouse_ids?: string[];
+  shipping_rate_ids?: string[];
+}): Promise<Region> {
+  return request<Region>(`/v1/regions`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateRegion(id: string, data: {
+  display_name?: string;
+  currency_id?: string;
+  is_default?: boolean;
+  status?: 'active' | 'inactive';
+}): Promise<Region> {
+  return request<Region>(`/v1/regions/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteRegion(id: string): Promise<{ deleted: boolean }> {
+  return request<{ deleted: boolean }>(`/v1/regions/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// Currencies
+export async function getCurrencies(limit?: number, cursor?: string): Promise<PaginationResponse<Currency>> {
+  const params = new URLSearchParams();
+  if (limit) params.append('limit', limit.toString());
+  if (cursor) params.append('cursor', cursor);
+  return request<PaginationResponse<Currency>>(`/v1/regions/currencies?${params.toString()}`);
+}
+
+export async function getCurrency(id: string): Promise<Currency> {
+  return request<Currency>(`/v1/regions/currencies/${id}`);
+}
+
+export async function createCurrency(data: {
+  code: string;
+  display_name: string;
+  symbol: string;
+  decimal_places?: number;
+}): Promise<Currency> {
+  return request<Currency>(`/v1/regions/currencies`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateCurrency(id: string, data: {
+  display_name?: string;
+  symbol?: string;
+  decimal_places?: number;
+  status?: 'active' | 'inactive';
+}): Promise<Currency> {
+  return request<Currency>(`/v1/regions/currencies/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteCurrency(id: string): Promise<{ deleted: boolean }> {
+  return request<{ deleted: boolean }>(`/v1/regions/currencies/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// Countries
+export async function getCountries(limit?: number, cursor?: string): Promise<PaginationResponse<Country>> {
+  const params = new URLSearchParams();
+  if (limit) params.append('limit', limit.toString());
+  if (cursor) params.append('cursor', cursor);
+  return request<PaginationResponse<Country>>(`/v1/regions/countries?${params.toString()}`);
+}
+
+export async function getCountry(id: string): Promise<Country> {
+  return request<Country>(`/v1/regions/countries/${id}`);
+}
+
+export async function createCountry(data: {
+  code: string;
+  display_name: string;
+  country_name: string;
+  language_code?: string;
+}): Promise<Country> {
+  return request<Country>(`/v1/regions/countries`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateCountry(id: string, data: {
+  display_name?: string;
+  country_name?: string;
+  language_code?: string;
+  status?: 'active' | 'inactive';
+}): Promise<Country> {
+  return request<Country>(`/v1/regions/countries/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteCountry(id: string): Promise<{ deleted: boolean }> {
+  return request<{ deleted: boolean }>(`/v1/regions/countries/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// Warehouses
+export async function getWarehouses(limit?: number, cursor?: string): Promise<PaginationResponse<Warehouse>> {
+  const params = new URLSearchParams();
+  if (limit) params.append('limit', limit.toString());
+  if (cursor) params.append('cursor', cursor);
+  return request<PaginationResponse<Warehouse>>(`/v1/regions/warehouses?${params.toString()}`);
+}
+
+export async function getWarehouse(id: string): Promise<Warehouse> {
+  return request<Warehouse>(`/v1/regions/warehouses/${id}`);
+}
+
+export async function createWarehouse(data: {
+  display_name: string;
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state?: string;
+  postal_code: string;
+  country_code: string;
+  priority?: number;
+}): Promise<Warehouse> {
+  return request<Warehouse>(`/v1/regions/warehouses`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateWarehouse(id: string, data: {
+  display_name?: string;
+  address_line1?: string;
+  address_line2?: string | null;
+  city?: string;
+  state?: string | null;
+  postal_code?: string;
+  country_code?: string;
+  priority?: number;
+  status?: 'active' | 'inactive';
+}): Promise<Warehouse> {
+  return request<Warehouse>(`/v1/regions/warehouses/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteWarehouse(id: string): Promise<{ deleted: boolean }> {
+  return request<{ deleted: boolean }>(`/v1/regions/warehouses/${id}`, {
+    method: 'DELETE',
+  });
+}
+
+// Shipping Rates
+export async function getShippingRates(limit?: number, cursor?: string): Promise<PaginationResponse<ShippingRate>> {
+  const params = new URLSearchParams();
+  if (limit) params.append('limit', limit.toString());
+  if (cursor) params.append('cursor', cursor);
+  return request<PaginationResponse<ShippingRate>>(`/v1/regions/shipping-rates?${params.toString()}`);
+}
+
+export async function getShippingRate(id: string): Promise<ShippingRate> {
+  return request<ShippingRate>(`/v1/regions/shipping-rates/${id}`);
+}
+
+export async function createShippingRate(data: {
+  display_name: string;
+  description?: string;
+  max_weight_g?: number;
+  min_delivery_days?: number;
+  max_delivery_days?: number;
+}): Promise<ShippingRate> {
+  return request<ShippingRate>(`/v1/regions/shipping-rates`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateShippingRate(id: string, data: {
+  display_name?: string;
+  description?: string | null;
+  max_weight_g?: number | null;
+  min_delivery_days?: number | null;
+  max_delivery_days?: number | null;
+  status?: 'active' | 'inactive';
+}): Promise<ShippingRate> {
+  return request<ShippingRate>(`/v1/regions/shipping-rates/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteShippingRate(id: string): Promise<{ deleted: boolean }> {
+  return request<{ deleted: boolean }>(`/v1/regions/shipping-rates/${id}`, {
+    method: 'DELETE',
+  });
+}
+
