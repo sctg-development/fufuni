@@ -1,14 +1,48 @@
-import { useState, useEffect, useMemo } from "react";
+/**
+ * MIT License
+ *
+ * Copyright (c) 2026 Ronan LE MEILLAT - SCTG Development
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+import React, { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useSecuredApi } from "@/authentication";
-import DefaultLayout from "@/layouts/default";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@heroui/table";
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@heroui/table";
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
+
+import DefaultLayout from "@/layouts/default";
+import { useSecuredApi } from "@/authentication";
 import { SearchIcon } from "@/components/icons";
 
 // --- Data types ----------------------------------------------------------
+/**
+ * A product variant with SKU, pricing and optional image.
+ */
 interface Variant {
   id: string;
   sku: string;
@@ -17,6 +51,9 @@ interface Variant {
   image_url?: string;
 }
 
+/**
+ * Represents a product with metadata and its variants.
+ */
 interface Product {
   id: string;
   title: string;
@@ -26,15 +63,23 @@ interface Product {
   created_at: string;
 }
 
+/**
+ * Options for filtering products by status, including an empty value for all.
+ */
 const STATUS_OPTIONS = ["", "active", "draft"];
 
 // -------------------------------------------------------------------------
+/**
+ * Administrative product management page: list, search, filter and
+ * create/edit basic product records.
+ */
 export default function ProductsPage() {
   const { t } = useTranslation();
   const { getJson, postJson, putJson } = useSecuredApi();
 
-  const apiBase =
-    (import.meta as any).env?.API_BASE_URL ? (import.meta as any).env.API_BASE_URL : "";
+  const apiBase = (import.meta as any).env?.API_BASE_URL
+    ? (import.meta as any).env.API_BASE_URL
+    : "";
 
   // list state
   const [products, setProducts] = useState<Product[]>([]);
@@ -50,12 +95,18 @@ export default function ProductsPage() {
   const [formStatus, setFormStatus] = useState<"active" | "draft">("active");
 
   // fetch products from backend
+  /**
+   * Load product list from the API, applying current status filter.
+   * Updates local `products` state and toggles loading indicator.
+   */
   const loadProducts = async () => {
     setLoading(true);
     try {
       let url = `${apiBase}/v1/products?limit=100`;
+
       if (statusFilter) url += `&status=${statusFilter}`;
       const resp = await getJson(url);
+
       setProducts(resp.items || []);
     } catch (err) {
       console.error("Failed to load products", err);
@@ -71,7 +122,9 @@ export default function ProductsPage() {
   // filtered list according to global search
   const displayed = useMemo(() => {
     const term = globalFilter.trim().toLowerCase();
+
     if (!term) return products;
+
     return products.filter(
       (p) =>
         p.title.toLowerCase().includes(term) ||
@@ -80,6 +133,9 @@ export default function ProductsPage() {
     );
   }, [products, globalFilter]);
 
+  /**
+   * Prepare and open the modal for creating a new product.
+   */
   const openCreate = () => {
     setEditingProduct(null);
     setFormTitle("");
@@ -88,6 +144,11 @@ export default function ProductsPage() {
     setCreateModal(true);
   };
 
+  /**
+   * Populate modal fields with existing product data and open for editing.
+   *
+   * @param p - product to edit
+   */
   const openEdit = (p: Product) => {
     setEditingProduct(p);
     setFormTitle(p.title);
@@ -96,6 +157,12 @@ export default function ProductsPage() {
     setCreateModal(true);
   };
 
+  /**
+   * Handle form submission for creating or updating a product. Performs the
+   * appropriate API call, closes the modal, and reloads the product list.
+   *
+   * @param e - form submission event
+   */
   const submitForm = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -126,11 +193,11 @@ export default function ProductsPage() {
           <h1 className="text-xl font-semibold">{t("admin-products-title")}</h1>
           <div className="flex items-center gap-2">
             <Input
+              placeholder={t("search") + "..."}
+              size="sm"
+              startContent={<SearchIcon className="text-default-400" />}
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
-              placeholder={t("search") + "..."}
-              startContent={<SearchIcon className="text-default-400" />}
-              size="sm"
             />
             <select
               className="w-32 border rounded px-2 py-1 text-sm"
@@ -144,10 +211,10 @@ export default function ProductsPage() {
               ))}
             </select>
             <Button
+              className="min-w-40 whitespace-nowrap"
               color="primary"
               size="md"
               onPress={openCreate}
-              className="min-w-40 whitespace-nowrap"
             >
               {t("admin-products-btn-add")}
             </Button>
@@ -166,7 +233,7 @@ export default function ProductsPage() {
               <TableColumn>{t("admin-products-col-status")}</TableColumn>
               <TableColumn>{t("actions")}</TableColumn>
             </TableHeader>
-            <TableBody emptyContent={t("admin-products-empty")}> 
+            <TableBody emptyContent={t("admin-products-empty")}>
               {displayed.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell>{p.title}</TableCell>
@@ -188,27 +255,35 @@ export default function ProductsPage() {
       {/* create/edit modal */}
       <Modal isOpen={createModal} onClose={() => setCreateModal(false)}>
         <ModalContent>
-          <ModalHeader>{editingProduct ? t("edit") : t("admin-products-modal-title")}</ModalHeader>
+          <ModalHeader>
+            {editingProduct ? t("edit") : t("admin-products-modal-title")}
+          </ModalHeader>
           <ModalBody>
-            <form onSubmit={submitForm} className="space-y-4">
+            <form className="space-y-4" onSubmit={submitForm}>
               <div>
-                <label className="block text-sm font-medium">{t("admin-products-modal-field-title")}</label>
+                <label className="block text-sm font-medium">
+                  {t("admin-products-modal-field-title")}
+                </label>
                 <Input
+                  required
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
-                  required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium">{t("admin-products-modal-field-description")}</label>
+                <label className="block text-sm font-medium">
+                  {t("admin-products-modal-field-description")}
+                </label>
                 <textarea
+                  className="w-full px-3 py-2 border rounded"
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
-                  className="w-full px-3 py-2 border rounded"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium">{t("status")}</label>
+                <label className="block text-sm font-medium">
+                  {t("status")}
+                </label>
                 <select
                   className="border rounded px-2 py-1 w-full"
                   value={formStatus}
@@ -219,8 +294,12 @@ export default function ProductsPage() {
                 </select>
               </div>
               <div className="flex justify-end gap-2">
-                <Button onPress={() => setCreateModal(false)}>{t("admin-products-btn-cancel")}</Button>
-                <Button type="submit" color="primary">{editingProduct ? t("save") : t("admin-products-btn-create")}</Button>
+                <Button onPress={() => setCreateModal(false)}>
+                  {t("admin-products-btn-cancel")}
+                </Button>
+                <Button color="primary" type="submit">
+                  {editingProduct ? t("save") : t("admin-products-btn-create")}
+                </Button>
               </div>
             </form>
           </ModalBody>

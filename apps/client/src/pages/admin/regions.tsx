@@ -1,41 +1,90 @@
+/**
+ * MIT License
+ *
+ * Copyright (c) 2026 Ronan LE MEILLAT - SCTG Development
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useSecuredApi } from "@/authentication";
-import DefaultLayout from "@/layouts/default";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@heroui/table";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
+import {
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@heroui/table";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from "@heroui/modal";
 import { Card, CardBody } from "@heroui/card";
 import { Tooltip } from "@heroui/tooltip";
-import { SearchIcon } from "@/components/icons";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
+import { SearchIcon } from "@/components/icons";
+import DefaultLayout from "@/layouts/default";
+import { useSecuredApi } from "@/authentication";
+
+/**
+ * A geographical or market region used by the platform.
+ */
 interface Region {
   id: string;
   display_name: string;
   currency_id: string;
   currency_code?: string;
   is_default: boolean;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   created_at: string;
   updated_at: string;
 }
 
+/**
+ * Currency metadata used when selecting a region's primary currency.
+ */
 interface Currency {
   id: string;
   code: string;
   display_name: string;
 }
 
+/**
+ * Possible status values for a region.
+ */
 const STATUS_OPTIONS = ["active", "inactive"];
 
 export default function RegionsPage() {
   const { t } = useTranslation();
   const { getJson, postJson, deleteJson, patchJson } = useSecuredApi();
-  
-  const apiBase = (import.meta as any).env?.API_BASE_URL ? (import.meta as any).env.API_BASE_URL : "";
+
+  const apiBase = (import.meta as any).env?.API_BASE_URL
+    ? (import.meta as any).env.API_BASE_URL
+    : "";
 
   // List state
   const [regions, setRegions] = useState<Region[]>([]);
@@ -49,13 +98,17 @@ export default function RegionsPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingRegion, setEditingRegion] = useState<Region | null>(null);
   const [formData, setFormData] = useState({
-    display_name: '',
-    currency_id: '',
+    display_name: "",
+    currency_id: "",
     is_default: false,
-    status: 'active' as 'active' | 'inactive',
+    status: "active" as "active" | "inactive",
   });
 
   // Load regions and currencies
+  /**
+   * Retrieve the list of regions and available currencies from the backend
+   * and update component state. Used on mount and after data-changing actions.
+   */
   const loadData = async () => {
     setLoading(true);
     try {
@@ -63,6 +116,7 @@ export default function RegionsPage() {
         getJson(`${apiBase}/v1/regions?limit=100`),
         getJson(`${apiBase}/v1/regions/currencies?limit=100`),
       ]);
+
       setRegions(regionsResp.items || []);
       setCurrencies(currenciesResp.items || []);
     } catch (err) {
@@ -79,31 +133,43 @@ export default function RegionsPage() {
   // Filtered regions
   const displayed = useMemo(() => {
     let filtered = regions;
+
     if (statusFilter) {
-      filtered = filtered.filter(r => r.status === statusFilter);
+      filtered = filtered.filter((r) => r.status === statusFilter);
     }
     const term = globalFilter.trim().toLowerCase();
+
     if (term) {
-      filtered = filtered.filter(r =>
-        r.display_name.toLowerCase().includes(term) ||
-        r.currency_code?.toLowerCase().includes(term)
+      filtered = filtered.filter(
+        (r) =>
+          r.display_name.toLowerCase().includes(term) ||
+          r.currency_code?.toLowerCase().includes(term),
       );
     }
+
     return filtered;
   }, [regions, statusFilter, globalFilter]);
 
+  /**
+   * Prepare and open the modal for creating a new region.
+   */
   const handleOpenCreate = () => {
     setIsEditMode(false);
     setEditingRegion(null);
     setFormData({
-      display_name: '',
-      currency_id: '',
+      display_name: "",
+      currency_id: "",
       is_default: false,
-      status: 'active',
+      status: "active",
     });
     onOpen();
   };
 
+  /**
+   * Populate the modal with an existing region's data and open for editing.
+   *
+   * @param region - region object to modify
+   */
   const handleOpenEdit = (region: Region) => {
     setIsEditMode(true);
     setEditingRegion(region);
@@ -116,18 +182,30 @@ export default function RegionsPage() {
     onOpen();
   };
 
+  /**
+   * Send the form data to the backend to create or update a region. Updates
+   * local state optimistically with the returned object, or reloads on
+   * failure, then closes the modal.
+   */
   const handleSave = async () => {
     try {
       if (isEditMode && editingRegion) {
-        const response = await patchJson(`${apiBase}/v1/regions/${editingRegion.id}`, formData);
+        const response = await patchJson(
+          `${apiBase}/v1/regions/${editingRegion.id}`,
+          formData,
+        );
+
         // Mettre à jour le state local avec les données retournées
         if (response) {
-          setRegions(regions.map(r => r.id === editingRegion.id ? response : r));
+          setRegions(
+            regions.map((r) => (r.id === editingRegion.id ? response : r)),
+          );
         } else {
           await loadData();
         }
       } else {
         const response = await postJson(`${apiBase}/v1/regions`, formData);
+
         // Ajouter la nouvelle région au tableau
         if (response) {
           setRegions([...regions, response]);
@@ -141,6 +219,11 @@ export default function RegionsPage() {
     }
   };
 
+  /**
+   * Remove a region after user confirmation and reload data.
+   *
+   * @param id - identifier of the region to delete
+   */
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this region?")) {
       try {
@@ -152,6 +235,11 @@ export default function RegionsPage() {
     }
   };
 
+  /**
+   * Mark the given region as the default, then refresh the list.
+   *
+   * @param id - region to promote as default
+   */
   const handleSetDefault = async (id: string) => {
     try {
       await postJson(`${apiBase}/v1/regions/${id}/default`, {});
@@ -165,13 +253,13 @@ export default function RegionsPage() {
     <DefaultLayout>
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">{t('admin-regions-title')}</h1>
+          <h1 className="text-3xl font-bold">{t("admin-regions-title")}</h1>
           <Button
             color="primary"
             endContent={<Plus className="w-4 h-4" />}
             onPress={handleOpenCreate}
           >
-            {t('admin-regions-add')}
+            {t("admin-regions-add")}
           </Button>
         </div>
 
@@ -180,15 +268,17 @@ export default function RegionsPage() {
             <Input
               isClearable
               className="w-full"
-              placeholder={t('admin-common-search', 'Search...')}
+              placeholder={t("admin-common-search", "Search...")}
               startContent={<SearchIcon className="w-4 h-4" />}
               value={globalFilter}
               onValueChange={setGlobalFilter}
             />
             <Select
-              label={t('admin-common-status', 'Status')}
+              label={t("admin-common-status", "Status")}
               selectedKeys={statusFilter ? [statusFilter] : []}
-              onSelectionChange={(key) => setStatusFilter(Array.from(key).join(''))}
+              onSelectionChange={(key) =>
+                setStatusFilter(Array.from(key).join(""))
+              }
             >
               <SelectItem key="">All</SelectItem>
               <SelectItem key="active">Active</SelectItem>
@@ -201,22 +291,36 @@ export default function RegionsPage() {
           <CardBody>
             <Table isStriped>
               <TableHeader>
-                <TableColumn key="display_name">{t('admin-common-name', 'Name')}</TableColumn>
-                <TableColumn key="currency">{t('admin-common-currency', 'Currency')}</TableColumn>
-                <TableColumn key="is_default">{t('admin-common-default', 'Default')}</TableColumn>
-                <TableColumn key="status">{t('admin-common-status', 'Status')}</TableColumn>
-                <TableColumn key="actions">{t('admin-common-actions', 'Actions')}</TableColumn>
+                <TableColumn key="display_name">
+                  {t("admin-common-name", "Name")}
+                </TableColumn>
+                <TableColumn key="currency">
+                  {t("admin-common-currency", "Currency")}
+                </TableColumn>
+                <TableColumn key="is_default">
+                  {t("admin-common-default", "Default")}
+                </TableColumn>
+                <TableColumn key="status">
+                  {t("admin-common-status", "Status")}
+                </TableColumn>
+                <TableColumn key="actions">
+                  {t("admin-common-actions", "Actions")}
+                </TableColumn>
               </TableHeader>
               <TableBody
-                items={displayed}
+                emptyContent={<div>{t("admin-common-empty", "No data")}</div>}
                 isLoading={loading}
-                loadingContent={<div>{t('admin-common-loading', 'Loading...')}</div>}
-                emptyContent={<div>{t('admin-common-empty', 'No data')}</div>}
+                items={displayed}
+                loadingContent={
+                  <div>{t("admin-common-loading", "Loading...")}</div>
+                }
               >
                 {(region) => (
                   <TableRow key={region.id}>
                     <TableCell>{region.display_name}</TableCell>
-                    <TableCell>{region.currency_code || region.currency_id}</TableCell>
+                    <TableCell>
+                      {region.currency_code || region.currency_id}
+                    </TableCell>
                     <TableCell>
                       {region.is_default ? (
                         <span className="text-green-600">✓ Default</span>
@@ -232,7 +336,13 @@ export default function RegionsPage() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <span className={region.status === 'active' ? 'text-green-600' : 'text-gray-600'}>
+                      <span
+                        className={
+                          region.status === "active"
+                            ? "text-green-600"
+                            : "text-gray-600"
+                        }
+                      >
                         {region.status}
                       </span>
                     </TableCell>
@@ -248,9 +358,9 @@ export default function RegionsPage() {
                         </Button>
                         <Button
                           isIconOnly
+                          color="danger"
                           size="sm"
                           variant="light"
-                          color="danger"
                           onPress={() => handleDelete(region.id)}
                         >
                           <Trash2 className="w-4 h-4" />
@@ -264,25 +374,44 @@ export default function RegionsPage() {
           </CardBody>
         </Card>
 
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
+        <Modal isOpen={isOpen} size="lg" onOpenChange={onOpenChange}>
           <ModalContent>
             <ModalHeader className="flex flex-col gap-1">
-              {isEditMode ? t('admin-regions-edit') : t('admin-regions-create')}
+              {isEditMode ? t("admin-regions-edit") : t("admin-regions-create")}
             </ModalHeader>
             <ModalBody>
-              <Tooltip content={t('admin-regions-code-help', 'Unique identifier for this region')}>
+              <Tooltip
+                content={t(
+                  "admin-regions-code-help",
+                  "Unique identifier for this region",
+                )}
+              >
                 <Input
-                  label={t('admin-common-name', 'Name')}
+                  label={t("admin-common-name", "Name")}
                   placeholder="Enter region name"
                   value={formData.display_name}
-                  onValueChange={(value) => setFormData({...formData, display_name: value})}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, display_name: value })
+                  }
                 />
               </Tooltip>
-              <Tooltip content={t('admin-regions-currency-help', 'Primary currency for products in this region')}>
+              <Tooltip
+                content={t(
+                  "admin-regions-currency-help",
+                  "Primary currency for products in this region",
+                )}
+              >
                 <Select
-                  label={t('admin-common-currency', 'Currency')}
-                  selectedKeys={formData.currency_id ? [formData.currency_id] : []}
-                  onSelectionChange={(key) => setFormData({...formData, currency_id: Array.from(key).join('')})}
+                  label={t("admin-common-currency", "Currency")}
+                  selectedKeys={
+                    formData.currency_id ? [formData.currency_id] : []
+                  }
+                  onSelectionChange={(key) =>
+                    setFormData({
+                      ...formData,
+                      currency_id: Array.from(key).join(""),
+                    })
+                  }
                 >
                   {currencies.map((curr) => (
                     <SelectItem key={curr.id} textValue={curr.code}>
@@ -291,11 +420,21 @@ export default function RegionsPage() {
                   ))}
                 </Select>
               </Tooltip>
-              <Tooltip content={t('admin-regions-default-help', 'Mark as default region for unrecognized customers')}>
+              <Tooltip
+                content={t(
+                  "admin-regions-default-help",
+                  "Mark as default region for unrecognized customers",
+                )}
+              >
                 <Select
-                  label={t('admin-common-status', 'Status')}
+                  label={t("admin-common-status", "Status")}
                   selectedKeys={[formData.status]}
-                  onSelectionChange={(key) => setFormData({...formData, status: Array.from(key).join('') as 'active' | 'inactive'})}
+                  onSelectionChange={(key) =>
+                    setFormData({
+                      ...formData,
+                      status: Array.from(key).join("") as "active" | "inactive",
+                    })
+                  }
                 >
                   {STATUS_OPTIONS.map((opt) => (
                     <SelectItem key={opt}>{opt}</SelectItem>
@@ -304,11 +443,19 @@ export default function RegionsPage() {
               </Tooltip>
             </ModalBody>
             <ModalFooter>
-              <Button color="default" variant="light" onPress={() => onOpenChange()}>
-                {t('admin-common-cancel', 'Cancel')}
+              <Button
+                color="default"
+                variant="light"
+                onPress={() => onOpenChange()}
+              >
+                {t("admin-common-cancel", "Cancel")}
               </Button>
-              <Button color="primary" onPress={handleSave} isDisabled={!formData.display_name || !formData.currency_id}>
-                {t('admin-common-save', 'Save')}
+              <Button
+                color="primary"
+                isDisabled={!formData.display_name || !formData.currency_id}
+                onPress={handleSave}
+              >
+                {t("admin-common-save", "Save")}
               </Button>
             </ModalFooter>
           </ModalContent>

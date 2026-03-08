@@ -10,12 +10,13 @@
     "apps/cloudflare-worker"
   ],
   "devDependencies": {
-    "turbo": "^2.8.13"
+    "turbo": "^2.8.14"
   },
   "scripts": {
     "dev": "turbo run dev --parallel",
     "dev:env": "turbo run dev:env --parallel",
     "build": "turbo run build",
+    "build:env": "turbo run build:env",
     "start": "npm run dev"
   },
   "dependencies": {

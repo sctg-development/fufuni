@@ -12,6 +12,10 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
+    },
+    "build:env": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
     }
   }
 }

@@ -15,7 +15,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Backup Yarn workspace files
-echo -e "${YELLOW}💾 Backing up Yarn workspace files...${NC}"
+echo -e "${YELLOW}💾 Backing up npm workspace files...${NC}"
 if [ -f "package.json" ]; then
     mv package.json package.json.bak
 fi
@@ -25,6 +25,7 @@ echo -e "${YELLOW}🧹 Cleaning node_modules...${NC}"
 rm -rf node_modules
 rm -rf apps/client/node_modules 
 rm -rf apps/cloudflare-worker/node_modules
+rm -rf apps/merchant/node_modules
 rm -rf .turbo
 rm -rf apps/client/.turbo
 rm -rf apps/client/dist
@@ -37,6 +38,11 @@ cd ../../
 
 echo -e "${YELLOW}📦 npm install in cloudflare-worker...${NC}"
 cd apps/cloudflare-worker
+npm install
+cd ../../
+
+echo -e "${YELLOW}📦 npm install in merchant...${NC}"
+cd apps/merchant
 npm install
 cd ../../
 
@@ -68,4 +74,4 @@ else
 fi
 
 echo -e "${GREEN}✅ Reproducible build finished${NC}"
-echo -e "${YELLOW}🚀 You can now run: yarn preview:client${NC}"
+echo -e "${YELLOW}🚀 You can now run: npm run preview:client${NC}"
