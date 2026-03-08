@@ -99,7 +99,7 @@ jobs:
         run: |
           source .env
           cd apps/client
-          npm run build:client -- --base="/${{ github.event.repository.name }}/"
+          npm run build:env -- --base="/${{ github.event.repository.name }}/"
         env:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}
