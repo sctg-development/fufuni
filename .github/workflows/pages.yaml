@@ -98,7 +98,8 @@ jobs:
         # You can change the base path to your repository name
         run: |
           source .env
-          npm run build:client:env -- --base="/${{ github.event.repository.name }}/"
+          cd apps/client
+          npm run build:client -- --base="/${{ github.event.repository.name }}/"
         env:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}

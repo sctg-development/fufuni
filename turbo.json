@@ -16,6 +16,9 @@
     "build:env": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
+    },
+    "preview:env": {
+      "cache": false
     }
   }
 }

@@ -18,6 +18,7 @@
     "build": "turbo run build",
     "build:env": "turbo run build:env",
     "build:client:env": "npm --workspace=apps/client run build:env",
+    "preview:env": "turbo run preview:env --parallel --filter=merchant --filter=client",
     "start": "npm run dev"
   },
   "dependencies": {
