@@ -189,7 +189,7 @@ export default function CustomersPage() {
             {customerDetail?.name || selectedCustomer?.email || t("customer")}
           </ModalHeader>
           <ModalBody>
-            {customerDetail ? (
+            {customerDetail && selectedCustomer ? (
               <div className="space-y-5">
                 {/* Contact / Stats / Addresses / Orders copied roughly from merchant */}
                 <div className="grid grid-cols-2 gap-5">
@@ -420,12 +420,12 @@ export default function CustomersPage() {
                   className="text-xs font-mono pt-4 border-t"
                   style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
                 >
-                  Customer since {new Date(selectedCustomer!.created_at).toLocaleString()}
-                  {selectedCustomer!.stats.last_order_at && (
+                  Customer since {new Date(selectedCustomer.created_at).toLocaleString()}
+                  {selectedCustomer.stats.last_order_at && (
                     <span>
                       {' '}
                       · Last order{' '}
-                      {new Date(selectedCustomer!.stats.last_order_at).toLocaleString()}
+                      {new Date(selectedCustomer.stats.last_order_at).toLocaleString()}
                     </span>
                   )}
                 </div>
