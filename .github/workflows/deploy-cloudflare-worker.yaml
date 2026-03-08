@@ -41,6 +41,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          submodules: "recursive"
+          depth: 1
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -63,6 +66,7 @@ jobs:
       - name: Create .env file
         run: |
           echo -n ${{ secrets.AUTH0_AUDIENCE }} | sed -n 's/http.:\/\/\(.*\)/DOMAIN_NAME=\1\n/p' > .env
+          echo "CRYPTOKEN=${{ secrets.CRYPTOKEN }}" >> .env
           echo "AUTHENTICATION_PROVIDER_TYPE=${{ secrets.AUTHENTICATION_PROVIDER_TYPE }}" >> .env
           echo "AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }}" >> .env
           echo "AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }}" >> .env
@@ -73,11 +77,15 @@ jobs:
           echo "AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }}" >> .env
           echo "API_BASE_URL=${{ secrets.API_BASE_URL }}" >> .env
           echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" >> .env
-          echo "READ_PERMISSION=${{ secrets.READ_PERMISSION }}" >> .env
-          echo "WRITE_PERMISSION=${{ secrets.WRITE_PERMISSION }}" >> .env
-          echo "ADMIN_PERMISSION=${{ secrets.ADMIN_PERMISSION }}" >> .env
           echo "ADMIN_AUTH0_PERMISSION=${{ secrets.ADMIN_AUTH0_PERMISSION }}" >> .env
+          echo "ADMIN_STORE_PERMISSION=${{ secrets.ADMIN_STORE_PERMISSION }}" >> .env
           echo "AUTH0_AUTOMATIC_PERMISSIONS=${{ secrets.AUTH0_AUTOMATIC_PERMISSIONS }}" >> .env
+          echo "MERCHANT_PK=${{ secrets.MERCHANT_PK }}" >> .env
+          echo "MERCHANT_SK=${{ secrets.MERCHANT_SK }}" >> .env
+          echo "BACKUP_GPG=${{ secrets.BACKUP_GPG }}" >> .env
+          echo "BACKUP_SSH=${{ secrets.BACKUP_SSH }}" >> .env
+          echo "AUTH0_TEST_TOKEN=${{ secrets.AUTH0_TEST_TOKEN }}" >> .env
+          echo "CLOUDFLARE_USE_PAGE_DEV_DOMAIN=${{ secrets.CLOUDFLARE_USE_PAGE_DEV_DOMAIN }}" >> .env
 
       - name: Replace "// vars.*" in wrangler.jsonc with a json string
         run: |
@@ -86,8 +94,19 @@ jobs:
           cp wrangler.jsonc wrangler.jsonc.bak
           set -a && source .env && set +a 
           cat .env
-          cat wrangler.jsonc.bak | sed 's|// "vars".*.|,"vars": { "AUTHENTICATION_PROVIDER_TYPE": "'"${AUTHENTICATION_PROVIDER_TYPE}"'", "AUTH0_DOMAIN": "'"${AUTH0_DOMAIN}"'", "AUTH0_CLIENT_ID": "'"${AUTH0_CLIENT_ID}"'","AUTH0_CLIENT_SECRET": "'"${AUTH0_CLIENT_SECRET}"'", "AUTH0_SCOPE": "'"${AUTH0_SCOPE}"'", "AUTH0_AUDIENCE": "'"${AUTH0_AUDIENCE}"'", "API_BASE_URL": "'"${API_BASE_URL}"'", "CORS_ORIGIN": "'"${CORS_ORIGIN}"'", "READ_PERMISSION": "'"${READ_PERMISSION}"'", "ADMIN_AUTH0_PERMISSION": "'"${ADMIN_AUTH0_PERMISSION}"'","AUTH0_MANAGEMENT_API_CLIENT_ID": "'"${AUTH0_MANAGEMENT_API_CLIENT_ID}"'", "AUTH0_MANAGEMENT_API_CLIENT_SECRET": "'"${AUTH0_MANAGEMENT_API_CLIENT_SECRET}"'", "AUTH0_AUTOMATIC_PERMISSIONS": "'"${AUTH0_AUTOMATIC_PERMISSIONS}"'" }|' > wrangler.jsonc.2
-          cat wrangler.jsonc.2 | sed 's|// "routes".*.|,"routes": [{ "pattern": "'"${DOMAIN_NAME}"'", "custom_domain": true }]|'  > wrangler.jsonc
+          cat wrangler.jsonc.bak | sed 's|// "vars".*.|,"vars": { "CRYPTOKEN": "'"${CRYPTOKEN}"'", "AUTHENTICATION_PROVIDER_TYPE": "'"${AUTHENTICATION_PROVIDER_TYPE}"'", "AUTH0_DOMAIN": "'"${AUTH0_DOMAIN}"'", "AUTH0_CLIENT_ID": "'"${AUTH0_CLIENT_ID}"'","AUTH0_CLIENT_SECRET": "'"${AUTH0_CLIENT_SECRET}"'", "AUTH0_SCOPE": "'"${AUTH0_SCOPE}"'", "AUTH0_AUDIENCE": "'"${AUTH0_AUDIENCE}"'", "API_BASE_URL": "'"${API_BASE_URL}"'", "CORS_ORIGIN": "'"${CORS_ORIGIN}"'", "ADMIN_AUTH0_PERMISSION": "'"${ADMIN_AUTH0_PERMISSION}"'", "ADMIN_STORE_PERMISSION": "'"${ADMIN_STORE_PERMISSION}"'", "AUTH0_MANAGEMENT_API_CLIENT_ID": "'"${AUTH0_MANAGEMENT_API_CLIENT_ID}"'", "AUTH0_MANAGEMENT_API_CLIENT_SECRET": "'"${AUTH0_MANAGEMENT_API_CLIENT_SECRET}"'", "AUTH0_AUTOMATIC_PERMISSIONS": "'"${AUTH0_AUTOMATIC_PERMISSIONS}"'", "MERCHANT_PK": "'"${MERCHANT_PK}"'", "MERCHANT_SK": "'"${MERCHANT_SK}"'", "BACKUP_GPG": "'"${BACKUP_GPG}"'", "BACKUP_SSH": "'"${BACKUP_SSH}"'", "AUTH0_TEST_TOKEN": "'"${AUTH0_TEST_TOKEN}"'", "CLOUDFLARE_USE_PAGE_DEV_DOMAIN": "'"${CLOUDFLARE_USE_PAGE_DEV_DOMAIN}"'" }|' > wrangler.jsonc.2
+          # inject a custom-domain route only when we're *not* configured to use the page.dev domain
+          # treat any non‑empty, non‑false/0 value as "use page.dev"
+          val="${CLOUDFLARE_USE_PAGE_DEV_DOMAIN,,}"  # lowercase for case‑insensitive comparison
+          echo "CLOUDFLARE_USE_PAGE_DEV_DOMAIN value: '$val'"
+          if [ -n "$val" ] && [ "$val" != "false" ] && [ "$val" != "0" ]; then
+            # using page.dev domain, leave routes comment intact
+            mv wrangler.jsonc.2 wrangler.jsonc
+          else
+            # not using page.dev, add custom-domain route
+            cat wrangler.jsonc.2 | sed 's|// "routes".*.|,"routes": [{ "pattern": "'"${DOMAIN_NAME}"'", "custom_domain": true }]|'  > wrangler.jsonc
+          fi
+          cat wrangler.jsonc
           cat wrangler.jsonc
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
@@ -96,6 +115,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: apps/cloudflare-worker
           vars: |
+            CRYPTOKEN
             AUTHENTICATION_PROVIDER_TYPE
             AUTH0_DOMAIN
             AUTH0_CLIENT_ID
@@ -107,11 +127,16 @@ jobs:
             AUTH0_AUDIENCE
             API_BASE_URL
             CORS_ORIGIN
-            READ_PERMISSION
-            WRITE_PERMISSION
-            ADMIN_PERMISSION
             ADMIN_AUTH0_PERMISSION
+            ADMIN_STORE_PERMISSION
+            MERCHANT_PK
+            MERCHANT_SK
+            BACKUP_GPG
+            BACKUP_SSH
+            AUTH0_TEST_TOKEN
+            CLOUDFLARE_USE_PAGE_DEV_DOMAIN
         env:
+          CRYPTOKEN: ${{ secrets.CRYPTOKEN }}
           AUTHENTICATION_PROVIDER_TYPE: ${{ secrets.AUTHENTICATION_PROVIDER_TYPE }}
           AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
           AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
@@ -123,9 +148,13 @@ jobs:
           AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
           CORS_ORIGIN: ${{ secrets.CORS_ORIGIN }}
-          READ_PERMISSION: ${{ secrets.READ_PERMISSION }}
-          WRITE_PERMISSION: ${{ secrets.WRITE_PERMISSION }}
-          ADMIN_PERMISSION: ${{ secrets.ADMIN_PERMISSION }}
           ADMIN_AUTH0_PERMISSION: ${{ secrets.ADMIN_AUTH0_PERMISSION }}
+          ADMIN_STORE_PERMISSION: ${{ secrets.ADMIN_STORE_PERMISSION }}
+          MERCHANT_PK: ${{ secrets.MERCHANT_PK }}
+          MERCHANT_SK: ${{ secrets.MERCHANT_SK }}
+          BACKUP_GPG: ${{ secrets.BACKUP_GPG }}
+          BACKUP_SSH: ${{ secrets.BACKUP_SSH }}
+          AUTH0_TEST_TOKEN: ${{ secrets.AUTH0_TEST_TOKEN }}
+          CLOUDFLARE_USE_PAGE_DEV_DOMAIN: ${{ secrets.CLOUDFLARE_USE_PAGE_DEV_DOMAIN }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}
