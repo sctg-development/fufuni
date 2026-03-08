@@ -86,15 +86,17 @@ jobs:
           echo "BACKUP_SSH=${{ secrets.BACKUP_SSH }}" >> .env
           echo "AUTH0_TEST_TOKEN=${{ secrets.AUTH0_TEST_TOKEN }}" >> .env
           echo "CLOUDFLARE_USE_PAGE_DEV_DOMAIN=${{ secrets.CLOUDFLARE_USE_PAGE_DEV_DOMAIN }}" >> .env
+          echo "KV_CACHE_ID=${{ secrets.KV_CACHE_ID }}" >> .env
 
       - name: Replace "// vars.*" in wrangler.jsonc with a json string
         run: |
-          cp .env apps/cloudflare-worker/.env
-          cd apps/cloudflare-worker
+          cp .env apps/merchant/.env
+          cd apps/merchant
           cp wrangler.jsonc wrangler.jsonc.bak
           set -a && source .env && set +a 
           cat .env
-          cat wrangler.jsonc.bak | sed 's|// "vars".*.|,"vars": { "CRYPTOKEN": "'"${CRYPTOKEN}"'", "AUTHENTICATION_PROVIDER_TYPE": "'"${AUTHENTICATION_PROVIDER_TYPE}"'", "AUTH0_DOMAIN": "'"${AUTH0_DOMAIN}"'", "AUTH0_CLIENT_ID": "'"${AUTH0_CLIENT_ID}"'","AUTH0_CLIENT_SECRET": "'"${AUTH0_CLIENT_SECRET}"'", "AUTH0_SCOPE": "'"${AUTH0_SCOPE}"'", "AUTH0_AUDIENCE": "'"${AUTH0_AUDIENCE}"'", "API_BASE_URL": "'"${API_BASE_URL}"'", "CORS_ORIGIN": "'"${CORS_ORIGIN}"'", "ADMIN_AUTH0_PERMISSION": "'"${ADMIN_AUTH0_PERMISSION}"'", "ADMIN_STORE_PERMISSION": "'"${ADMIN_STORE_PERMISSION}"'", "AUTH0_MANAGEMENT_API_CLIENT_ID": "'"${AUTH0_MANAGEMENT_API_CLIENT_ID}"'", "AUTH0_MANAGEMENT_API_CLIENT_SECRET": "'"${AUTH0_MANAGEMENT_API_CLIENT_SECRET}"'", "AUTH0_AUTOMATIC_PERMISSIONS": "'"${AUTH0_AUTOMATIC_PERMISSIONS}"'", "MERCHANT_PK": "'"${MERCHANT_PK}"'", "MERCHANT_SK": "'"${MERCHANT_SK}"'", "BACKUP_GPG": "'"${BACKUP_GPG}"'", "BACKUP_SSH": "'"${BACKUP_SSH}"'", "AUTH0_TEST_TOKEN": "'"${AUTH0_TEST_TOKEN}"'", "CLOUDFLARE_USE_PAGE_DEV_DOMAIN": "'"${CLOUDFLARE_USE_PAGE_DEV_DOMAIN}"'" }|' > wrangler.jsonc.2
+          cat wrangler.jsonc.bak | sed 's|// "vars".*.|,"vars": { "CRYPTOKEN": "'"${CRYPTOKEN}"'", "AUTHENTICATION_PROVIDER_TYPE": "'"${AUTHENTICATION_PROVIDER_TYPE}"'", "AUTH0_DOMAIN": "'"${AUTH0_DOMAIN}"'", "AUTH0_CLIENT_ID": "'"${AUTH0_CLIENT_ID}"'","AUTH0_CLIENT_SECRET": "'"${AUTH0_CLIENT_SECRET}"'", "AUTH0_SCOPE": "'"${AUTH0_SCOPE}"'", "AUTH0_AUDIENCE": "'"${AUTH0_AUDIENCE}"'", "API_BASE_URL": "'"${API_BASE_URL}"'", "CORS_ORIGIN": "'"${CORS_ORIGIN}"'", "ADMIN_AUTH0_PERMISSION": "'"${ADMIN_AUTH0_PERMISSION}"'", "ADMIN_STORE_PERMISSION": "'"${ADMIN_STORE_PERMISSION}"'", "AUTH0_MANAGEMENT_API_CLIENT_ID": "'"${AUTH0_MANAGEMENT_API_CLIENT_ID}"'", "AUTH0_MANAGEMENT_API_CLIENT_SECRET": "'"${AUTH0_MANAGEMENT_API_CLIENT_SECRET}"'", "AUTH0_AUTOMATIC_PERMISSIONS": "'"${AUTH0_AUTOMATIC_PERMISSIONS}"'", "MERCHANT_PK": "'"${MERCHANT_PK}"'", "MERCHANT_SK": "'"${MERCHANT_SK}"'", "BACKUP_GPG": "'"${BACKUP_GPG}"'", "BACKUP_SSH": "'"${BACKUP_SSH}"'", "AUTH0_TEST_TOKEN": "'"${AUTH0_TEST_TOKEN}"'", "CLOUDFLARE_USE_PAGE_DEV_DOMAIN": "'"${CLOUDFLARE_USE_PAGE_DEV_DOMAIN}"'", "KV_CACHE_ID": "'"${KV_CACHE_ID}"'" }|' \
+            | sed '/"binding": "KV_CACHE"/,/}/ s|"id": "[^"]*"|"id": "'"${KV_CACHE_ID}"'"|' > wrangler.jsonc.2
           # inject a custom-domain route only when we're *not* configured to use the page.dev domain
           # treat any non‑empty, non‑false/0 value as "use page.dev"
           val="${CLOUDFLARE_USE_PAGE_DEV_DOMAIN,,}"  # lowercase for case‑insensitive comparison
@@ -113,7 +115,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: apps/cloudflare-worker
+          workingDirectory: apps/merchant
           vars: |
             CRYPTOKEN
             AUTHENTICATION_PROVIDER_TYPE
@@ -135,6 +137,7 @@ jobs:
             BACKUP_SSH
             AUTH0_TEST_TOKEN
             CLOUDFLARE_USE_PAGE_DEV_DOMAIN
+            KV_CACHE_ID
         env:
           CRYPTOKEN: ${{ secrets.CRYPTOKEN }}
           AUTHENTICATION_PROVIDER_TYPE: ${{ secrets.AUTHENTICATION_PROVIDER_TYPE }}
@@ -156,5 +159,6 @@ jobs:
           BACKUP_SSH: ${{ secrets.BACKUP_SSH }}
           AUTH0_TEST_TOKEN: ${{ secrets.AUTH0_TEST_TOKEN }}
           CLOUDFLARE_USE_PAGE_DEV_DOMAIN: ${{ secrets.CLOUDFLARE_USE_PAGE_DEV_DOMAIN }}
+          KV_CACHE_ID: ${{ secrets.KV_CACHE_ID }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}
