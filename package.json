@@ -17,6 +17,7 @@
     "dev:env": "turbo run dev:env --parallel",
     "build": "turbo run build",
     "build:env": "turbo run build:env",
+    "build:client:env": "npm --workspace=apps/client run build:env",
     "start": "npm run dev"
   },
   "dependencies": {
