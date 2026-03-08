@@ -91,6 +91,7 @@ jobs:
       - name: Workaround Heroui in monorepo
         run: |
           source .env
+          npm i -g turbo
           ./build-reproductible-dev.sh 
       
       - name: Build project
