@@ -26,6 +26,7 @@ rm -rf node_modules
 rm -rf apps/client/node_modules 
 rm -rf apps/cloudflare-worker/node_modules
 rm -rf apps/merchant/node_modules
+rm -rf apps/merchant/admin/node_modules
 rm -rf .turbo
 rm -rf apps/client/.turbo
 rm -rf apps/client/dist
@@ -33,18 +34,39 @@ rm -rf apps/client/dist
 # npm install in each app
 echo -e "${YELLOW}📦 npm install in client...${NC}"
 cd apps/client
+# backup lock file
+if [ -f "package-lock.json" ]; then
+    mv package-lock.json package-lock.json.bak
+fi
 npm install
 cd ../../
 
 echo -e "${YELLOW}📦 npm install in cloudflare-worker...${NC}"
 cd apps/cloudflare-worker
+# backup lock file
+if [ -f "package-lock.json" ]; then
+    mv package-lock.json package-lock.json.bak
+fi
 npm install
 cd ../../
 
 echo -e "${YELLOW}📦 npm install in merchant...${NC}"
 cd apps/merchant
+# backup lock file
+if [ -f "package-lock.json" ]; then
+    mv package-lock.json package-lock.json.bak
+fi
 npm install
 cd ../../
+
+echo -e "${YELLOW}📦 npm install in merchant/admin...${NC}"
+cd apps/merchant/admin
+# backup lock file
+if [ -f "package-lock.json" ]; then
+    mv package-lock.json package-lock.json.bak
+fi
+npm install
+cd ../../..
 
 # Restore Lock files
 echo -e "${YELLOW}🔄 Restoring Lock files...${NC}"
