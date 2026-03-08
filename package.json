@@ -20,9 +20,5 @@
     "start": "npm run dev"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.90.21",
-    "@tanstack/react-table": "^8.21.3",
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.577.0"
   }
 }
