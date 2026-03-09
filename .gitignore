@@ -11,3 +11,5 @@ npm-debug.log*
 .env
 
 .dev.vars
+apps/client/package-lock.json.bak
+apps/cloudflare-worker/package-lock.json.bak
