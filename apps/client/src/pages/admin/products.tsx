@@ -35,7 +35,7 @@ import {
 } from "@heroui/table";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Card, CardBody } from "@heroui/card";
-import { Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon, X } from "lucide-react";
 
 import DefaultLayout from "@/layouts/default";
 import { useSecuredApi } from "@/authentication";
@@ -541,20 +541,28 @@ export default function ProductsPage() {
                 <label className="block text-sm font-medium">
                   {t("admin-products-field-image")}
                 </label>
-                <div className="flex gap-2">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={uploadingImage}
-                  />
-                </div>
-                {variantImage && (
-                  <div className="mt-2">
+                {variantImage ? (
+                  <div className="relative inline-block mt-2">
                     <img
                       src={variantImage}
                       alt="Preview"
                       className="w-20 h-20 object-cover rounded border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setVariantImage(null)}
+                      className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploadingImage}
                     />
                   </div>
                 )}
