@@ -10,6 +10,7 @@
     "apps/cloudflare-worker"
   ],
   "devDependencies": {
+    "fast-glob": "^3.3.3",
     "turbo": "^2.8.14"
   },
   "scripts": {
@@ -19,8 +20,7 @@
     "build:env": "bash -c 'turbo run build:env -- \"$@\"' --",
     "build:client:env": "bash -c 'npm --workspace=apps/client run build:env \"$@\"' --",
     "preview:env": "bash -c '(cd apps/merchant && npm run preview:env) & (cd apps/client && npm run preview:env -- \"$@\") && wait' --",
-    "start": "npm run dev"
-  },
-  "dependencies": {
+    "start": "npm run dev",
+    "export:llms": "tsx scripts/export-code-for-lllm.ts"
   }
 }
