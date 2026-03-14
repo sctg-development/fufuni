@@ -23,7 +23,7 @@
  */
 import React, { useState, useEffect, useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { RefreshCw, AlertTriangle, Package } from "lucide-react";
+import { RefreshCw, AlertTriangle, Package, Plus, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
@@ -46,6 +46,7 @@ import {
 } from "@heroui/modal";
 import { Card, CardBody } from "@heroui/card";
 import { Tooltip } from "@heroui/tooltip";
+import { Chip } from "@heroui/chip";
 import clsx from "clsx";
 
 import { SearchIcon } from "@/components/icons";
@@ -53,6 +54,24 @@ import DefaultLayout from "@/layouts/default";
 import { useSecuredApi } from "@/authentication";
 
 // --- typings -------------------------------------------------------------
+/**
+ * Complete warehouse definition.
+ */
+interface Warehouse {
+  id: string;
+  display_name: string;
+  address_line1?: string;
+  address_line2?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
+  country_code?: string;
+  priority: number;
+  status: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 /**
  * Inventory levels for a specific warehouse.
  */
@@ -94,6 +113,7 @@ export default function InventoryPage() {
 
   // List state
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [allWarehouses, setAllWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading] = useState(true);
   const [globalFilter, setGlobalFilter] = useState<string>("");
 
@@ -108,17 +128,20 @@ export default function InventoryPage() {
   /**
    * Retrieve the current inventory snapshot from the backend and update state.
    * Adds a cache‑busting query parameter to avoid stale results.
+   * Also loads the complete list of all warehouses. Uses JWT token from useSecuredApi.
    */
   const loadData = async () => {
     setLoading(true);
     try {
-      const response = await getJson(
-        `${apiBase}/v1/inventory?cb=${Date.now()}`,
-      );
+      const [inventoryResponse, warehousesResponse] = await Promise.all([
+        getJson(`${apiBase}/v1/inventory?cb=${Date.now()}`),
+        getJson(`${apiBase}/v1/regions/warehouses?limit=500`),
+      ]);
 
-      setInventory(response.items || []);
+      setInventory(inventoryResponse.items || []);
+      setAllWarehouses(warehousesResponse.items || []);
     } catch (err) {
-      console.error("Failed to load inventory", err);
+      console.error("Failed to load inventory or warehouses", err);
     } finally {
       setLoading(false);
     }
@@ -174,6 +197,65 @@ export default function InventoryPage() {
       setSelectedWarehouse("");
     },
   });
+
+  /**
+   * Initialize a product in a new warehouse with a default quantity of 1.
+   * Uses the adjust endpoint with delta=1 and reason='restock'.
+   */
+  const initializeWarehouseMutation = useMutation({
+    mutationFn: ({ sku, warehouseId }: { sku: string; warehouseId: string }) =>
+      postJson(
+        `${apiBase}/v1/inventory/${encodeURIComponent(sku)}/warehouse-adjust`,
+        {
+          warehouse_id: warehouseId,
+          delta: 1,
+          reason: "restock",
+        },
+      ),
+    onSuccess: (updated: InventoryItem) => {
+      setInventory(
+        inventory.map((item) => (item.sku === updated.sku ? updated : item)),
+      );
+      setSelectedItem(updated);
+    },
+  });
+
+  /**
+   * Remove a product from a warehouse (only when quantity is 0).
+   * Sends a DELETE request to remove the warehouse_inventory record.
+   */
+  const deleteWarehouseMutation = useMutation({
+    mutationFn: ({ sku, warehouseId }: { sku: string; warehouseId: string }) =>
+      postJson(
+        `${apiBase}/v1/inventory/${encodeURIComponent(sku)}/warehouse-delete`,
+        { warehouse_id: warehouseId },
+      ),
+    onSuccess: (updated: InventoryItem) => {
+      setInventory(
+        inventory.map((item) => (item.sku === updated.sku ? updated : item)),
+      );
+      setSelectedItem(updated);
+    },
+  });
+
+  /**
+   * Check if a warehouse already has this product in inventory.
+   *
+   * @param warehouseId - warehouse ID to check
+   * @returns true if product exists in warehouse
+   */
+  const hasProductInWarehouse = (warehouseId: string) =>
+    selectedItem?.warehouses?.some((w) => w.warehouse_id === warehouseId) ?? false;
+
+  /**
+   * Get the current quantity of a product in a specific warehouse.
+   *
+   * @param warehouseId - warehouse ID to check
+   * @returns quantity or 0
+   */
+  const getWarehouseQuantity = (warehouseId: string) =>
+    selectedItem?.warehouses?.find((w) => w.warehouse_id === warehouseId)
+      ?.quantity ?? 0;
 
   /**
    * Trigger the inventory adjustment mutation using current form values.
@@ -395,104 +477,201 @@ export default function InventoryPage() {
                     className="space-y-4 pt-4 border-t"
                     onSubmit={handleFormSubmit}
                   >
-                    {/* Warehouse selection */}
-                    {selectedItem.warehouses &&
-                    selectedItem.warehouses.length > 0 ? (
-                      <div className="space-y-3">
-                        <p className="text-sm font-medium">
-                          {t("admin-inventory-warehouses", "Warehouse Details")}
-                        </p>
-                        <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto">
-                          {selectedItem.warehouses.map((w) => (
-                            <label
-                              key={w.warehouse_id}
-                              className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer"
+                    {/* Warehouse distribution */}
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium">
+                        {t("admin-inventory-warehouses")}
+                      </p>
+                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                        {allWarehouses.map((warehouse) => {
+                          const exists = hasProductInWarehouse(warehouse.id);
+                          const qty = getWarehouseQuantity(warehouse.id);
+                          const isSelected = selectedWarehouse === warehouse.id;
+
+                          return (
+                            <div
+                              key={warehouse.id}
+                              className={clsx(
+                                "flex items-center justify-between gap-3 p-3 rounded-lg border transition-colors",
+                                isSelected ? "bg-blue-50 border-blue-300" : "hover:bg-gray-50",
+                              )}
                             >
-                              <input
-                                checked={selectedWarehouse === w.warehouse_id}
-                                className="w-4 h-4"
-                                name="warehouse"
-                                type="radio"
-                                value={w.warehouse_id}
-                                onChange={(e) =>
-                                  setSelectedWarehouse(e.target.value)
-                                }
-                              />
-                              <div className="flex-1">
-                                <p className="text-sm font-medium">
-                                  {w.warehouse_name}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  Qty: {w.quantity}
-                                </p>
+                              {/* Warehouse info + status */}
+                              <label className="flex items-center gap-3 flex-1 cursor-pointer">
+                                <input
+                                  checked={isSelected}
+                                  className="w-4 h-4"
+                                  name="warehouse"
+                                  type="radio"
+                                  value={warehouse.id}
+                                  onChange={(e) =>
+                                    setSelectedWarehouse(e.target.value)
+                                  }
+                                />
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium">
+                                    {warehouse.display_name}
+                                  </p>
+                                  {exists && (
+                                    <p className="text-xs text-gray-500">
+                                      Qty: {qty}
+                                    </p>
+                                  )}
+                                </div>
+
+                                {/* Status badge */}
+                                {!exists && (
+                                  <Chip
+                                    size="sm"
+                                    variant="flat"
+                                    color="default"
+                                  >
+                                    {t("admin-inventory-not-stocked")}
+                                  </Chip>
+                                )}
+                                {exists && qty === 0 && (
+                                  <Chip size="sm" variant="flat" color="danger">
+                                    {t("admin-inventory-badge-empty")}
+                                  </Chip>
+                                )}
+                                {exists && qty > 0 && qty <= 5 && (
+                                  <Chip size="sm" variant="flat" color="warning">
+                                    {t("admin-inventory-low")}
+                                  </Chip>
+                                )}
+                                {exists && qty > 5 && (
+                                  <Chip size="sm" variant="flat" color="success">
+                                    {t("admin-inventory-in-stock")}
+                                  </Chip>
+                                )}
+                              </label>
+
+                              {/* Quick actions */}
+                              <div className="flex items-center gap-1">
+                                {!exists && (
+                                  <Tooltip
+                                    content={t(
+                                      "admin-inventory-init-warehouse"
+                                    )}
+                                  >
+                                    <Button
+                                      isIconOnly
+                                      size="sm"
+                                      variant="light"
+                                      color="success"
+                                      isLoading={
+                                        initializeWarehouseMutation.isPending
+                                      }
+                                      onPress={() => {
+                                        if (selectedItem) {
+                                          initializeWarehouseMutation.mutate({
+                                            sku: selectedItem.sku,
+                                            warehouseId: warehouse.id,
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      <Plus size={16} />
+                                    </Button>
+                                  </Tooltip>
+                                )}
+
+                                {exists && qty === 0 && (
+                                  <Tooltip
+                                    content={t(
+                                      "admin-inventory-remove-warehouse"
+                                    )}
+                                  >
+                                    <Button
+                                      isIconOnly
+                                      size="sm"
+                                      variant="light"
+                                      color="danger"
+                                      isLoading={deleteWarehouseMutation.isPending}
+                                      onPress={() => {
+                                        if (selectedItem) {
+                                          deleteWarehouseMutation.mutate({
+                                            sku: selectedItem.sku,
+                                            warehouseId: warehouse.id,
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      <Trash2 size={16} />
+                                    </Button>
+                                  </Tooltip>
+                                )}
                               </div>
-                            </label>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Adjustment form for selected warehouse */}
+                    {selectedWarehouse && hasProductInWarehouse(selectedWarehouse) && (
+                      <div className="space-y-3 pt-3 border-t">
+                        <p className="text-xs font-medium text-gray-600">
+                          {t(
+                            "admin-inventory-adjust-section"
+                          )}
+                        </p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <Tooltip
+                            content={t(
+                              "admin-inventory-field-quantity",
+                              "Enter quantity to add or remove",
+                            )}
+                          >
+                            <Input
+                              required
+                              label={t("admin-inventory-field-quantity")}
+                              placeholder="e.g. 50 or -10"
+                              type="number"
+                              value={adjustDelta}
+                              onValueChange={setAdjustDelta}
+                            />
+                          </Tooltip>
+                          <Tooltip
+                            content={t(
+                              "admin-inventory-field-reason",
+                              "Reason for adjustment",
+                            )}
+                          >
+                            <Select
+                              label={t("admin-inventory-field-reason")}
+                              selectedKeys={[adjustReason]}
+                              onSelectionChange={(key) =>
+                                setAdjustReason(Array.from(key).join(""))
+                              }
+                            >
+                              {ADJUST_REASONS.map((r) => (
+                                <SelectItem key={r}>
+                                  {r.charAt(0).toUpperCase() + r.slice(1)}
+                                </SelectItem>
+                              ))}
+                            </Select>
+                          </Tooltip>
+                        </div>
+
+                        {/* Quick actions */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-600">
+                            {t("admin-inventory-quick-label")}
+                          </span>
+                          {[10, 25, 50, 100].map((n) => (
+                            <button
+                              key={n}
+                              className="px-2 py-1 text-xs font-mono rounded-lg border hover:bg-gray-100 transition-colors"
+                              type="button"
+                              onClick={() => setAdjustDelta(String(n))}
+                            >
+                              +{n}
+                            </button>
                           ))}
                         </div>
                       </div>
-                    ) : (
-                      <p className="text-sm text-gray-500">
-                        {t(
-                          "admin-inventory-no-warehouses",
-                          "No warehouse data available",
-                        )}
-                      </p>
                     )}
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <Tooltip
-                        content={t(
-                          "admin-inventory-field-quantity",
-                          "Enter quantity to add or remove",
-                        )}
-                      >
-                        <Input
-                          required
-                          label={t("admin-inventory-field-quantity")}
-                          placeholder="e.g. 50 or -10"
-                          type="number"
-                          value={adjustDelta}
-                          onValueChange={setAdjustDelta}
-                        />
-                      </Tooltip>
-                      <Tooltip
-                        content={t(
-                          "admin-inventory-field-reason",
-                          "Reason for adjustment",
-                        )}
-                      >
-                        <Select
-                          label={t("admin-inventory-field-reason")}
-                          selectedKeys={[adjustReason]}
-                          onSelectionChange={(key) =>
-                            setAdjustReason(Array.from(key).join(""))
-                          }
-                        >
-                          {ADJUST_REASONS.map((r) => (
-                            <SelectItem key={r}>
-                              {r.charAt(0).toUpperCase() + r.slice(1)}
-                            </SelectItem>
-                          ))}
-                        </Select>
-                      </Tooltip>
-                    </div>
-
-                    {/* Quick actions */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-600">
-                        {t("admin-inventory-quick-label")}
-                      </span>
-                      {[10, 25, 50, 100].map((n) => (
-                        <button
-                          key={n}
-                          className="px-2 py-1 text-xs font-mono rounded-lg border hover:bg-gray-100 transition-colors"
-                          type="button"
-                          onClick={() => setAdjustDelta(String(n))}
-                        >
-                          +{n}
-                        </button>
-                      ))}
-                    </div>
                   </form>
                 </div>
               )}
@@ -508,7 +687,10 @@ export default function InventoryPage() {
               <Button
                 color="primary"
                 isDisabled={
-                  adjustMutation.isPending || !adjustDelta || !selectedWarehouse
+                  adjustMutation.isPending ||
+                  !adjustDelta ||
+                  !selectedWarehouse ||
+                  !hasProductInWarehouse(selectedWarehouse)
                 }
                 onPress={handleAdjust}
               >
