@@ -16,9 +16,9 @@
     "dev": "turbo run dev --parallel",
     "dev:env": "turbo run dev:env --parallel",
     "build": "turbo run build",
-    "build:env": "turbo run build:env",
-    "build:client:env": "npm --workspace=apps/client run build:env",
-    "preview:env": "turbo run preview:env --parallel --filter=merchant --filter=client",
+    "build:env": "bash -c 'turbo run build:env -- \"$@\"' --",
+    "build:client:env": "bash -c 'npm --workspace=apps/client run build:env \"$@\"' --",
+    "preview:env": "bash -c '(cd apps/merchant && npm run preview:env) & (cd apps/client && npm run preview:env -- \"$@\") && wait' --",
     "start": "npm run dev"
   },
   "dependencies": {

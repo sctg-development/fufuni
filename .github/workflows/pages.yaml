@@ -22,7 +22,6 @@ on:
       - main
     paths:
       - apps/client/**
-      - yarn.lock
       - .github/workflows/pages.yaml
 
   #   release:
@@ -88,17 +87,16 @@ jobs:
           echo "AUTH0_TEST_TOKEN=${{ secrets.AUTH0_TEST_TOKEN }}" >> .env
           echo "CLOUDFLARE_USE_PAGE_DEV_DOMAIN=${{ secrets.CLOUDFLARE_USE_PAGE_DEV_DOMAIN }}" >> .env
           echo "VITE_BASE_PATH=${{ github.event.repository.name }}" >> .env
-      - name: Workaround Heroui in monorepo
-        run: |
-          source .env
-          npm i -g turbo
-          ./build-reproductible-dev.sh 
+      # - name: Workaround Heroui in monorepo
+      #   run: |
+      #     source .env
+      #     npm i -g turbo
+      #     ./build-reproductible-dev.sh 
       
       - name: Build project
         # You can change the base path to your repository name
         run: |
           source .env
-          cd apps/client
           npm run build:env -- --base="/${{ github.event.repository.name }}/"
         env:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
