@@ -20,24 +20,77 @@ import fg from "fast-glob";
 import fs from "node:fs/promises";
 import path from "node:path";
 
+function languageForExtension(ext: string) {
+    switch (ext) {
+        case ".ts":
+        case ".tsx":
+            return "typescript";
+        case ".js":
+        case ".jsx":
+            return "javascript";
+        case ".json":
+            return "json";
+        default:
+            return "";
+    }
+}
+
 async function main() {
-    const outFile = process.argv[2] || "export.txt";
+    const outFile = process.argv[2] || "export.md";
     const root = process.cwd();
 
-    const patterns = ["apps/client/src/**/*.{ts,tsx,js,jsx}", "apps/merchant/src/**/*.{ts,tsx,js,jsx}"];
+    const patterns = [
+        "apps/client/src/**/*.{ts,tsx,js,jsx,json}",
+        "apps/merchant/src/**/*.{ts,tsx,js,jsx,json}",
+    ];
     const ignore = ["**/node_modules/**", "**/dist/**", "**/.next/**", "**/*.d.ts"];
 
     const files = await fg(patterns, { cwd: root, absolute: true, onlyFiles: true, ignore });
-    let combined = "";
+
+    const codeFiles: Array<{ rel: string; content: string; ext: string }> = [];
+    const configFiles: Array<{ rel: string; content: string }> = [];
 
     for (const abs of files) {
         const rel = path.relative(root, abs);
+        const ext = path.extname(rel).toLowerCase();
         const content = await fs.readFile(abs, "utf8");
-        combined += `/**\n *\n * FILE: ${rel}\n *\n */\n\n`;
-        combined += content + "\n\n";
+
+        if (ext === ".json") {
+            configFiles.push({ rel, content });
+        } else {
+            codeFiles.push({ rel, content, ext });
+        }
     }
 
-    await fs.writeFile(outFile, combined, "utf8");
+    codeFiles.sort((a, b) => a.rel.localeCompare(b.rel));
+    configFiles.sort((a, b) => a.rel.localeCompare(b.rel));
+
+    let md = "# Fufuni code details\n\n";
+
+    if (codeFiles.length > 0) {
+        md += "## Code\n\n";
+        for (const file of codeFiles) {
+            const lang = languageForExtension(file.ext) || "";
+            md += `### File: ${file.rel}\n`;
+            md += "```" + lang + "\n";
+            md += file.content;
+            if (!file.content.endsWith("\n")) md += "\n";
+            md += "```\n\n";
+        }
+    }
+
+    if (configFiles.length > 0) {
+        md += "## Configuration\n\n";
+        for (const file of configFiles) {
+            md += `### File: ${file.rel}\n`;
+            md += "```json\n";
+            md += file.content;
+            if (!file.content.endsWith("\n")) md += "\n";
+            md += "```\n\n";
+        }
+    }
+
+    await fs.writeFile(outFile, md, "utf8");
     console.log(`Exported ${files.length} files to ${outFile}`);
 }
 
