@@ -33,7 +33,9 @@ import {
   TableRow,
   TableCell,
 } from "@heroui/table";
-import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
+import { Card, CardBody } from "@heroui/card";
+import { Image as ImageIcon } from "lucide-react";
 
 import DefaultLayout from "@/layouts/default";
 import { useSecuredApi } from "@/authentication";
@@ -94,6 +96,16 @@ export default function ProductsPage() {
   const [formDescription, setFormDescription] = useState("");
   const [formStatus, setFormStatus] = useState<"active" | "draft">("active");
 
+  // variants modal state
+  const [variantModal, setVariantModal] = useState(false);
+  const [editingVariant, setEditingVariant] = useState<Variant | null>(null);
+  const [variantSku, setVariantSku] = useState("");
+  const [variantTitle, setVariantTitle] = useState("");
+  const [variantPrice, setVariantPrice] = useState("");
+  const [variantImage, setVariantImage] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [submittingVariant, setSubmittingVariant] = useState(false);
+
   // fetch products from backend
   /**
    * Load product list from the API, applying current status filter.
@@ -149,11 +161,21 @@ export default function ProductsPage() {
    *
    * @param p - product to edit
    */
-  const openEdit = (p: Product) => {
-    setEditingProduct(p);
+  const openEdit = async (p: Product) => {
+    setEditingProduct(null);
     setFormTitle(p.title);
     setFormDescription(p.description);
     setFormStatus(p.status);
+
+    // Load full product details for variant management
+    try {
+      const full = await getJson(`${apiBase}/v1/products/${p.id}`);
+      setEditingProduct(full);
+    } catch (err) {
+      console.error("Error loading product", err);
+      setEditingProduct(p);
+    }
+
     setCreateModal(true);
   };
 
@@ -182,6 +204,128 @@ export default function ProductsPage() {
       loadProducts();
     } catch (err) {
       console.error("Error saving product", err);
+    }
+  };
+
+  /**
+   * Reset variant form fields and close the variant modal.
+   */
+  const resetVariantForm = () => {
+    setEditingVariant(null);
+    setVariantSku("");
+    setVariantTitle("");
+    setVariantPrice("");
+    setVariantImage(null);
+  };
+
+  /**
+   * Open variant creation form with empty fields.
+   */
+  const openCreateVariant = () => {
+    resetVariantForm();
+    setVariantModal(true);
+  };
+
+  /**
+   * Populate variant form with existing data and open for editing.
+   *
+   * @param v - variant to edit
+   */
+  const openEditVariant = (v: Variant) => {
+    setEditingVariant(v);
+    setVariantSku(v.sku);
+    setVariantTitle(v.title);
+    setVariantPrice(String(v.price_cents));
+    setVariantImage(v.image_url || null);
+    setVariantModal(true);
+  };
+
+  /**
+   * Handle image upload: POST file to /v1/images endpoint.
+   *
+   * @param e - file input change event
+   */
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(`${apiBase}/v1/images`, {
+        method: "POST",
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("auth_token") || ""}`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Upload failed");
+      const result = await response.json();
+      setVariantImage(result.url || result.key);
+    } catch (err) {
+      console.error("Image upload error", err);
+      alert(t("admin-products-image-upload-error"));
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  /**
+   * Submit variant form: create or update variant.
+   *
+   * @param e - form submission event
+   */
+  const submitVariant = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProduct) return;
+
+    setSubmittingVariant(true);
+    try {
+      const price = parseInt(variantPrice, 10);
+      if (isNaN(price)) {
+        alert("Invalid price");
+        setSubmittingVariant(false);
+        return;
+      }
+
+      if (editingVariant) {
+        // Update variant
+        await putJson(
+          `${apiBase}/v1/products/${editingProduct.id}/variants/${editingVariant.id}`,
+          {
+            sku: variantSku,
+            title: variantTitle,
+            price_cents: price,
+            image_url: variantImage || undefined,
+          }
+        );
+      } else {
+        // Create variant
+        await postJson(`${apiBase}/v1/products/${editingProduct.id}/variants`, {
+          sku: variantSku,
+          title: variantTitle,
+          price_cents: price,
+          image_url: variantImage || undefined,
+        });
+      }
+
+      setVariantModal(false);
+      resetVariantForm();
+
+      // Reload product to show new/updated variant
+      const updated = await getJson(`${apiBase}/v1/products/${editingProduct.id}`);
+      setEditingProduct(updated);
+      setProducts((prev) =>
+        prev.map((p) => (p.id === editingProduct.id ? updated : p))
+      );
+    } catch (err) {
+      console.error("Error saving variant", err);
+      alert(t("admin-products-variant-save-error"));
+    } finally {
+      setSubmittingVariant(false);
     }
   };
 
@@ -253,13 +397,16 @@ export default function ProductsPage() {
       </div>
 
       {/* create/edit modal */}
-      <Modal isOpen={createModal} onClose={() => setCreateModal(false)}>
+      <Modal isOpen={createModal} onClose={() => {
+        setCreateModal(false);
+        setEditingProduct(null);
+      }} size={editingProduct ? "lg" : "md"}>
         <ModalContent>
           <ModalHeader>
-            {editingProduct ? t("edit") : t("admin-products-modal-title")}
+            {editingProduct ? editingProduct.title : t("admin-products-modal-title")}
           </ModalHeader>
-          <ModalBody>
-            <form className="space-y-4" onSubmit={submitForm}>
+          <ModalBody className="space-y-4">
+            <form className="space-y-4" onSubmit={submitForm} id="product-form">
               <div>
                 <label className="block text-sm font-medium">
                   {t("admin-products-modal-field-title")}
@@ -293,18 +440,184 @@ export default function ProductsPage() {
                   <option value="draft">draft</option>
                 </select>
               </div>
-              <div className="flex justify-end gap-2">
-                <Button onPress={() => setCreateModal(false)}>
-                  {t("admin-products-btn-cancel")}
-                </Button>
-                <Button color="primary" type="submit">
-                  {editingProduct ? t("save") : t("admin-products-btn-create")}
-                </Button>
+            </form>
+
+            {/* Variants section */}
+            {editingProduct && (
+              <Card>
+                <CardBody className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold">
+                      {t("admin-products-variants")} ({editingProduct.variants.length})
+                    </h3>
+                    <Button
+                      size="sm"
+                      color="primary"
+                      onPress={openCreateVariant}
+                    >
+                      {t("admin-products-btn-add-variant")}
+                    </Button>
+                  </div>
+
+                  {editingProduct.variants.length === 0 ? (
+                    <p className="text-sm text-default-500">
+                      {t("admin-products-no-variants")}
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {editingProduct.variants.map((v) => (
+                        <VariantCard
+                          key={v.id}
+                          variant={v}
+                          onEdit={() => openEditVariant(v)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </CardBody>
+              </Card>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button onPress={() => {
+              setCreateModal(false);
+              setEditingProduct(null);
+            }}>
+              {t("admin-products-btn-cancel")}
+            </Button>
+            <Button color="primary" type="submit" form="product-form">
+              {editingProduct ? t("save") : t("admin-products-btn-create")}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Variant modal */}
+      <Modal isOpen={variantModal} onClose={() => {
+        setVariantModal(false);
+        resetVariantForm();
+      }} size="md">
+        <ModalContent>
+          <ModalHeader>
+            {editingVariant ? t("admin-products-edit-variant") : t("admin-products-add-variant")}
+          </ModalHeader>
+          <ModalBody>
+            <form className="space-y-4" onSubmit={submitVariant} id="variant-form">
+              <div>
+                <label className="block text-sm font-medium">
+                  {t("admin-products-field-sku")}
+                </label>
+                <Input
+                  required
+                  value={variantSku}
+                  onChange={(e) => setVariantSku(e.target.value)}
+                  placeholder="e.g. TEE-BLK-M"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium">
+                  {t("admin-products-field-variant-title")}
+                </label>
+                <Input
+                  required
+                  value={variantTitle}
+                  onChange={(e) => setVariantTitle(e.target.value)}
+                  placeholder="e.g. Black / Medium"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium">
+                  {t("admin-products-field-price")}
+                </label>
+                <Input
+                  required
+                  type="number"
+                  value={variantPrice}
+                  onChange={(e) => setVariantPrice(e.target.value)}
+                  placeholder="Price in cents (e.g. 2999 for $29.99)"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium">
+                  {t("admin-products-field-image")}
+                </label>
+                <div className="flex gap-2">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploadingImage}
+                  />
+                </div>
+                {variantImage && (
+                  <div className="mt-2">
+                    <img
+                      src={variantImage}
+                      alt="Preview"
+                      className="w-20 h-20 object-cover rounded border"
+                    />
+                  </div>
+                )}
               </div>
             </form>
           </ModalBody>
+          <ModalFooter>
+            <Button onPress={() => {
+              setVariantModal(false);
+              resetVariantForm();
+            }}>
+              {t("admin-products-btn-cancel")}
+            </Button>
+            <Button
+              color="primary"
+              type="submit"
+              form="variant-form"
+              isLoading={submittingVariant}
+              disabled={uploadingImage}
+            >
+              {editingVariant ? t("save") : t("admin-products-btn-add-variant")}
+            </Button>
+          </ModalFooter>
         </ModalContent>
       </Modal>
     </DefaultLayout>
+  );
+}
+
+/**
+ * Display a single variant with image thumbnail and pricing.
+ * Clickable to edit the variant.
+ */
+function VariantCard({
+  variant,
+  onEdit,
+}: {
+  variant: Variant;
+  onEdit: () => void;
+}) {
+  return (
+    <div
+      onClick={onEdit}
+      className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-default-100 transition-colors"
+    >
+      {variant.image_url ? (
+        <img
+          src={variant.image_url}
+          alt={variant.title}
+          className="w-12 h-12 object-cover rounded border"
+        />
+      ) : (
+        <div className="w-12 h-12 flex items-center justify-center rounded border bg-default-100">
+          <ImageIcon size={20} className="text-default-400" />
+        </div>
+      )}
+      <div className="flex-1 min-w-0">
+        <p className="font-mono text-sm">{variant.title}</p>
+        <p className="text-xs text-default-500">{variant.sku}</p>
+      </div>
+      <p className="font-mono text-sm font-semibold">
+        ${(variant.price_cents / 100).toFixed(2)}
+      </p>
+    </div>
   );
 }
