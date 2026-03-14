@@ -21,7 +21,7 @@ import { Suspense } from "react";
 
 import { SiteLoading } from "./components/site-loading";
 import { PageNotFound } from "./pages/404";
-import { AuthenticationGuard, useAuth } from "./authentication";
+import { AuthenticationGuard, AuthenticationGuardWithPermission, useAuth } from "./authentication";
 
 import IndexPage from "@/pages/index";
 import ApiPage from "@/pages/api";
@@ -74,47 +74,47 @@ function App() {
         />
         <Route element={<AboutPage />} path="/about" />
         <Route
-          element={<AuthenticationGuard component={UsersAndPermissionsPage} />}
+          element={<AuthenticationGuardWithPermission permission={import.meta.env.ADMIN_AUTH0_PERMISSION}><UsersAndPermissionsPage /></AuthenticationGuardWithPermission>}
           path="/admin/users"
         />
         <Route
-          element={<AuthenticationGuard component={ProductsPage} />}
+          element={<AuthenticationGuardWithPermission permission={import.meta.env.ADMIN_STORE_PERMISSION}><ProductsPage /></AuthenticationGuardWithPermission>}
           path="/admin/products"
         />
         <Route
-          element={<AuthenticationGuard component={CustomersPage} />}
+          element={<AuthenticationGuardWithPermission permission={import.meta.env.ADMIN_STORE_PERMISSION}><CustomersPage /></AuthenticationGuardWithPermission>}
           path="/admin/customers"
         />
         <Route
-          element={<AuthenticationGuard component={InventoryPage} />}
+          element={<AuthenticationGuardWithPermission permission={import.meta.env.ADMIN_STORE_PERMISSION}><InventoryPage /></AuthenticationGuardWithPermission>}
           path="/admin/inventory"
         />
         <Route
-          element={<AuthenticationGuard component={OrdersPage} />}
+          element={<AuthenticationGuardWithPermission permission={import.meta.env.ADMIN_STORE_PERMISSION}><OrdersPage /></AuthenticationGuardWithPermission>}
           path="/admin/orders"
         />
         <Route
-          element={<AuthenticationGuard component={WebhooksPage} />}
+          element={<AuthenticationGuardWithPermission permission={import.meta.env.ADMIN_STORE_PERMISSION}><WebhooksPage /></AuthenticationGuardWithPermission>}
           path="/admin/webhooks"
         />
         <Route
-          element={<AuthenticationGuard component={RegionsPage} />}
+          element={<AuthenticationGuardWithPermission permission={import.meta.env.ADMIN_STORE_PERMISSION}><RegionsPage /></AuthenticationGuardWithPermission>}
           path="/admin/regions"
         />
         <Route
-          element={<AuthenticationGuard component={CurrenciesPage} />}
+          element={<AuthenticationGuardWithPermission permission={import.meta.env.ADMIN_STORE_PERMISSION}><CurrenciesPage /></AuthenticationGuardWithPermission>}
           path="/admin/currencies"
         />
         <Route
-          element={<AuthenticationGuard component={CountriesPage} />}
+          element={<AuthenticationGuardWithPermission permission={import.meta.env.ADMIN_STORE_PERMISSION}><CountriesPage /></AuthenticationGuardWithPermission>}
           path="/admin/countries"
         />
         <Route
-          element={<AuthenticationGuard component={WarehousesPage} />}
+          element={<AuthenticationGuardWithPermission permission={import.meta.env.ADMIN_STORE_PERMISSION}><WarehousesPage /></AuthenticationGuardWithPermission>}
           path="/admin/warehouses"
         />
         <Route
-          element={<AuthenticationGuard component={ShippingRatesPage} />}
+          element={<AuthenticationGuardWithPermission permission={import.meta.env.ADMIN_STORE_PERMISSION}><ShippingRatesPage /></AuthenticationGuardWithPermission>}
           path="/admin/shipping-rates"
         />
         <Route
