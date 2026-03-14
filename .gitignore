@@ -14,3 +14,4 @@ npm-debug.log*
 apps/client/package-lock.json.bak
 apps/cloudflare-worker/package-lock.json.bak
 export.*
+openapi.json

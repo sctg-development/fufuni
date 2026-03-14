@@ -35,6 +35,39 @@ function languageForExtension(ext: string) {
     }
 }
 
+function buildTree(paths: string[]) {
+    const root = new Map<string, Map<string, any>>();
+
+    for (const p of paths) {
+        const parts = p.split("/");
+        let node = root;
+        for (const part of parts) {
+            if (!node.has(part)) node.set(part, new Map());
+            node = node.get(part);
+        }
+    }
+
+    const lines: string[] = [];
+
+    function walk(map: Map<string, any>, prefix: string, isLast: boolean) {
+        const entries = Array.from(map.keys()).sort();
+        entries.forEach((key, index) => {
+            const last = index === entries.length - 1;
+            const connector = last ? "└─ " : "├─ ";
+            lines.push(`${prefix}${connector}${key}`);
+
+            const child = map.get(key);
+            if (child && child.size > 0) {
+                const nextPrefix = prefix + (last ? "   " : "│  ");
+                walk(child, nextPrefix, last);
+            }
+        });
+    }
+
+    walk(root, "", false);
+    return lines;
+}
+
 async function main() {
     const outFile = process.argv[2] || "export.md";
     const root = process.cwd();
@@ -65,7 +98,17 @@ async function main() {
     codeFiles.sort((a, b) => a.rel.localeCompare(b.rel));
     configFiles.sort((a, b) => a.rel.localeCompare(b.rel));
 
+    const allFiles = [...codeFiles.map((f) => f.rel), ...configFiles.map((f) => f.rel)];
+    const treeLines = buildTree(allFiles);
+
     let md = "# Fufuni code details\n\n";
+
+    if (treeLines.length > 0) {
+        md += "## Project structure\n\n";
+        md += "```\n";
+        md += treeLines.join("\n") + "\n";
+        md += "```\n\n";
+    }
 
     if (codeFiles.length > 0) {
         md += "## Code\n\n";
