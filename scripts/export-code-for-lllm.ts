@@ -30,6 +30,10 @@ function languageForExtension(ext: string) {
             return "javascript";
         case ".json":
             return "json";
+        case ".css":
+            return "css";
+        case ".sql":
+            return "sql";
         default:
             return "";
     }
@@ -75,8 +79,16 @@ async function main() {
     const patterns = [
         "apps/client/src/**/*.{ts,tsx,js,jsx,json}",
         "apps/merchant/src/**/*.{ts,tsx,js,jsx,json}",
+        "apps/merchant/migrations/*.sql",
     ];
-    const ignore = ["**/node_modules/**", "**/dist/**", "**/.next/**", "**/*.d.ts"];
+    const ignore = [
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/.next/**",
+        "**/*.d.ts",
+        "apps/merchant/admin/**",
+        "apps/merchant/example/**",
+    ];
 
     const files = await fg(patterns, { cwd: root, absolute: true, onlyFiles: true, ignore });
 
@@ -94,6 +106,9 @@ async function main() {
             codeFiles.push({ rel, content, ext });
         }
     }
+    console.log(`Found ${files.length} files (${codeFiles.length} code files, ${configFiles.length} config files)`);
+    console.log(`. Code files: ${codeFiles.map(f => f.rel).join(", ")}`);
+    console.log(`. Config files: ${configFiles.map(f => f.rel).join(", ")}`);
 
     codeFiles.sort((a, b) => a.rel.localeCompare(b.rel));
     configFiles.sort((a, b) => a.rel.localeCompare(b.rel));
