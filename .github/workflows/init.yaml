@@ -56,3 +56,12 @@ jobs:
           cd apps/merchant
           npx tsx scripts/init.ts --remote
     
+      - name: Init Stripe
+        env:
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          MERCHANT_SK: ${{ secrets.MERCHANT_SK }}
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+        run: |
+          curl -X POST ${{ secrets.API_BASE_URL }}/v1/setup/stripe -H "Authorization: Bearer ${{ secrets.MERCHANT_SK }}" -H "Content-Type: application/json" -d '{"stripe_secret_key":"${{ secrets.MERCHANT_SK }}","stripe_webhook_secret":"${{ secrets.STRIPE_WEBHOOK_SECRET }}"}
