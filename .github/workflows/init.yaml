@@ -48,7 +48,7 @@ jobs:
           MERCHANT_PK: ${{ secrets.MERCHANT_PK }}
           MERCHANT_SK: ${{ secrets.MERCHANT_SK }}
         run: |
-          npm i -g tsx
+          npm i -g dotenv tsx
           cd apps/merchant
           npx tsx scripts/init.ts --remote
     
