@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { button as buttonStyles } from "@heroui/theme";
 import { StoreProduct } from "@/lib/store-api";
 import { useTranslation } from "react-i18next";
@@ -18,6 +19,7 @@ export const ProductCard: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation();
   const { addItem } = useCart();
+  const navigate = useNavigate();
 
   const variant =
     product.variants.find((v) => v.sku === selectedSku) ||
@@ -32,7 +34,17 @@ export const ProductCard: React.FC<Props> = ({
 
   return (
     <div className="group">
-      <div className="aspect-square bg-default-100 rounded-xl overflow-hidden mb-4 relative">
+      <div
+        className="aspect-square bg-default-100 rounded-xl overflow-hidden mb-4 relative cursor-pointer"
+        onClick={() => navigate(`/product/${product.id}`)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            navigate(`/product/${product.id}`);
+          }
+        }}
+      >
         <img
           src={image}
           alt={product.title}

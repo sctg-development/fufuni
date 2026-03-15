@@ -48,6 +48,7 @@ import { useSecuredApi } from "@/authentication";
 import { SearchIcon } from "@/components/icons";
 import { formatMoney } from "@/utils/currency";
 import { VariantPrices } from "@/components/VariantPrices";
+import { RichDescriptionEditor } from "@/components/RichDescriptionEditor";
 
 // --- Data types ----------------------------------------------------------
 /**
@@ -86,7 +87,7 @@ const STATUS_OPTIONS = ["", "active", "draft"];
  */
 export default function ProductsPage() {
   const { t } = useTranslation();
-  const { getJson, postJson, putJson } = useSecuredApi();
+  const { getJson, postJson, putJson, patchJson } = useSecuredApi();
 
   const apiBase = (import.meta as any).env?.API_BASE_URL
     ? (import.meta as any).env.API_BASE_URL
@@ -199,7 +200,7 @@ export default function ProductsPage() {
     e.preventDefault();
     try {
       if (editingProduct) {
-        await putJson(`${apiBase}/v1/products/${editingProduct.id}`, {
+        await patchJson(`${apiBase}/v1/products/${editingProduct.id}`, {
           title: formTitle,
           description: formDescription,
           status: formStatus,
@@ -308,7 +309,7 @@ export default function ProductsPage() {
 
       if (editingVariant) {
         // Update variant
-        await putJson(
+        await patchJson(
           `${apiBase}/v1/products/${editingProduct.id}/variants/${editingVariant.id}`,
           {
             sku: variantSku,
@@ -442,13 +443,12 @@ export default function ProductsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium">
+                <label className="block text-sm font-medium mb-1">
                   {t("admin-products-modal-field-description")}
                 </label>
-                <textarea
-                  className="w-full px-3 py-2 border rounded"
+                <RichDescriptionEditor
                   value={formDescription}
-                  onChange={(e) => setFormDescription(e.target.value)}
+                  onChange={setFormDescription}
                 />
               </div>
               <div>
