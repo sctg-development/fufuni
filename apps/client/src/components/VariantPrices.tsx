@@ -80,7 +80,6 @@ export function VariantPrices({
   // State
   const [prices, setPrices] = useState<VariantPrice[]>([]);
   const [currencies, setCurrencies] = useState<Currency[]>([]);
-  const [loading, setLoading] = useState(true);
 
   // Modal state for adding price
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -97,7 +96,6 @@ export function VariantPrices({
    * Fetch current variant prices and available currencies from API.
    */
   const loadData = async () => {
-    setLoading(true);
     try {
       const [pricesRes, currenciesRes] = await Promise.all([
         getJson(
@@ -110,8 +108,6 @@ export function VariantPrices({
       setCurrencies(currenciesRes.items || []);
     } catch (err) {
       console.error("Failed to load variant pricing data", err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -240,7 +236,7 @@ export function VariantPrices({
           </CardBody>
         </Card>
       ) : (
-        <Table isStriped size="sm">
+        <Table isStriped>
           <TableHeader>
             <TableColumn>
               {t("admin-variant-prices-currency", "Currency")}
@@ -248,7 +244,7 @@ export function VariantPrices({
             <TableColumn align="end">
               {t("admin-variant-prices-price", "Price")}
             </TableColumn>
-            <TableColumn align="end" width="60px">
+            <TableColumn align="end" width={60}>
               {t("admin-common-actions", "Actions")}
             </TableColumn>
           </TableHeader>
@@ -265,12 +261,12 @@ export function VariantPrices({
                     </p>
                   </div>
                 </TableCell>
-                <TableCell align="end">
+                <TableCell align="right">
                   <p className="font-mono font-semibold text-sm">
                     {formatMoney(price.price_cents, price.currency_code)}
                   </p>
                 </TableCell>
-                <TableCell align="end">
+                <TableCell align="right">
                   <Button
                     isIconOnly
                     size="sm"
@@ -306,7 +302,7 @@ export function VariantPrices({
                 }
               >
                 {availableCurrencies.map((curr) => (
-                  <SelectItem key={curr.id} value={curr.id}>
+                <SelectItem key={curr.id}>
                     {curr.code} - {curr.display_name} ({curr.symbol})
                   </SelectItem>
                 ))}

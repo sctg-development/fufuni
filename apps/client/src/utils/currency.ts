@@ -98,7 +98,7 @@ export function currencySymbol(currency: string, locale?: string): string {
  */
 export function formatAmount(
   cents: number,
-  currency: string,
+  _currency: string,
   locale?: string
 ): string {
   return new Intl.NumberFormat(locale ?? navigator.language, {
