@@ -87,7 +87,7 @@ const STATUS_OPTIONS = ["", "active", "draft"];
  */
 export default function ProductsPage() {
   const { t } = useTranslation();
-  const { getJson, postJson, putJson, patchJson } = useSecuredApi();
+  const { getJson, postJson, patchJson } = useSecuredApi();
 
   const apiBase = (import.meta as any).env?.API_BASE_URL
     ? (import.meta as any).env.API_BASE_URL
