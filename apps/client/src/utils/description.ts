@@ -180,3 +180,42 @@ export function titleMatchesTerm(raw: string, term: string): boolean {
   if (typeof parsed === 'string') return parsed.toLowerCase().includes(lower);
   return Object.values(parsed).some((v) => v.toLowerCase().includes(lower));
 }
+
+/**
+ * Resolves a title that combines product title and variant title.
+ * 
+ * Format in cart: "Product Title - Variant Title"
+ * OR: "Product Title" (no variant)
+ * OR: JSON for product title, plain text for variant
+ *
+ * This function extracts both parts, resolves the product title to the correct locale,
+ * and recombines them.
+ * 
+ * Examples:
+ * - Input: '{"en-US": "Cap", "fr-FR": "Casquette"} - Red', locale 'fr-FR'
+ *   Output: 'Casquette - Red'
+ * - Input: 'Cap - Red', locale 'en-US'
+ *   Output: 'Cap - Red'
+ */
+export function resolveTitleWithVariant(raw: string, locale: string): string {
+  if (!raw) return '';
+
+  // Try to split by ' - ' (the separator used in addItem)
+  const parts = raw.split(' - ');
+  
+  if (parts.length === 1) {
+    // No variant separator, just use resolveTitle
+    return resolveTitle(raw, locale);
+  }
+
+  // parts[0] is the product title (may be JSON)
+  // parts[1..] are the variant parts (concatenate them back in case variant has ' - ')
+  const productTitleRaw = parts[0];
+  const variantTitle = parts.slice(1).join(' - '); // rejoin in case variant contains ' - '
+
+  // Resolve the product title for the locale
+  const resolvedProductTitle = resolveTitle(productTitleRaw, locale);
+
+  // Combine with variant
+  return `${resolvedProductTitle} - ${variantTitle}`;
+}
