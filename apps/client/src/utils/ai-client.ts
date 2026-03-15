@@ -80,6 +80,13 @@ async function callOpenAiCompatibleApi(
   const baseUrl = aiParams.url.endsWith('/') ? aiParams.url : aiParams.url + '/';
   const endpoint = new URL('chat/completions', baseUrl).toString();
 
+  // Adapt max_tokens based on provider
+  // Groq has strict limits per model, OpenAI is more generous
+  let maxTokens = 2048;
+  if (aiParams.url.includes('groq')) {
+    maxTokens = 512; // Groq's typical limit
+  }
+
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
@@ -93,7 +100,7 @@ async function callOpenAiCompatibleApi(
         { role: 'user', content },
       ],
       temperature: 0.3,
-      max_tokens: 4096,
+      max_tokens: maxTokens,
     }),
   });
 
@@ -157,7 +164,7 @@ async function callAnthropicApi(
     },
     body: JSON.stringify({
       model: aiParams.model,
-      max_tokens: 4096,
+      max_tokens: 2048,
       system: systemPrompt,
       messages: [
         { role: 'user', content },
