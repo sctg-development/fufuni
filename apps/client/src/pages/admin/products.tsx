@@ -40,6 +40,8 @@ import { Image as ImageIcon, X } from "lucide-react";
 import DefaultLayout from "@/layouts/default";
 import { useSecuredApi } from "@/authentication";
 import { SearchIcon } from "@/components/icons";
+import { formatMoney } from "@/utils/currency";
+import { VariantPrices } from "@/components/VariantPrices";
 
 // --- Data types ----------------------------------------------------------
 /**
@@ -50,6 +52,7 @@ interface Variant {
   sku: string;
   title: string;
   price_cents: number;
+  currency?: string; // ISO 4217 code (e.g., "USD", "EUR")
   image_url?: string;
 }
 
@@ -496,7 +499,7 @@ export default function ProductsPage() {
       <Modal isOpen={variantModal} onClose={() => {
         setVariantModal(false);
         resetVariantForm();
-      }} size="md">
+      }} size="xl">
         <ModalContent>
           <ModalHeader>
             {editingVariant ? t("admin-products-edit-variant") : t("admin-products-add-variant")}
@@ -568,6 +571,19 @@ export default function ProductsPage() {
                 )}
               </div>
             </form>
+
+            {/* Multi-currency pricing section */}
+            {editingProduct && editingVariant && (
+              <div className="border-t pt-6">
+                <VariantPrices
+                  productId={editingProduct.id}
+                  variantId={editingVariant.id}
+                  variantTitle={editingVariant.title}
+                  basePriceCents={editingVariant.price_cents}
+                  currency={editingVariant.currency || "USD"}
+                />
+              </div>
+            )}
           </ModalBody>
           <ModalFooter>
             <Button onPress={() => {
@@ -624,7 +640,7 @@ function VariantCard({
         <p className="text-xs text-default-500">{variant.sku}</p>
       </div>
       <p className="font-mono text-sm font-semibold">
-        ${(variant.price_cents / 100).toFixed(2)}
+        {formatMoney(variant.price_cents, variant.currency || "USD")}
       </p>
     </div>
   );

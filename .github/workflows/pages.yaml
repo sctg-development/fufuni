@@ -87,6 +87,7 @@ jobs:
           echo "AUTH0_TEST_TOKEN=${{ secrets.AUTH0_TEST_TOKEN }}" >> .env
           echo "CLOUDFLARE_USE_PAGE_DEV_DOMAIN=${{ secrets.CLOUDFLARE_USE_PAGE_DEV_DOMAIN }}" >> .env
           echo "VITE_BASE_PATH=${{ github.event.repository.name }}" >> .env
+          echo "DATABASE_PERMISSION=${{ secrets.DATABASE_PERMISSION }}" >> .env
       # - name: Workaround Heroui in monorepo
       #   run: |
       #     source .env

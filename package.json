@@ -21,6 +21,7 @@
     "build:client:env": "bash -c 'npm --workspace=apps/client run build:env \"$@\"' --",
     "preview:env": "bash -c '(cd apps/merchant && npm run preview:env) & (cd apps/client && npm run preview:env -- \"$@\") && wait' --",
     "start": "npm run dev",
-    "export:llms": "tsx scripts/export-code-for-lllm.ts"
+    "export:llms": "tsx scripts/export-code-for-lllm.ts",
+    "clean:seed:start": "bash scripts/clean-seed-start.sh"
   }
 }

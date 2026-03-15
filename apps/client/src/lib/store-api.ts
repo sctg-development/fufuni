@@ -42,6 +42,7 @@ export interface StoreVariant {
   sku: string;
   title: string;
   price_cents: number;
+  currency?: string; // ISO 4217 code (e.g. USD, EUR)
   image_url?: string;
 }
 

@@ -136,6 +136,7 @@ export default defineConfig({
     "import.meta.env.AUTH0_AUTOMATIC_PERMISSIONS": JSON.stringify(process.env.AUTH0_AUTOMATIC_PERMISSIONS?.split(",") || []),
     "import.meta.env.ADMIN_AUTH0_PERMISSION": JSON.stringify(process.env.ADMIN_AUTH0_PERMISSION || "auth0:admin:api"),
     "import.meta.env.ADMIN_STORE_PERMISSION": JSON.stringify(process.env.ADMIN_STORE_PERMISSION || "admin:store"),
+    "import.meta.env.DATABASE_PERMISSION": JSON.stringify(process.env.DATABASE_PERMISSION || "admin:database"),
     "import.meta.env.MERCHANT_PK": JSON.stringify(process.env.MERCHANT_PK || "merchant_pk_placeholder"),
   },
   plugins: [react(), tsconfigPaths(), tailwindcss(), githubPagesSpa()],

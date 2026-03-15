@@ -32,6 +32,7 @@ import {
   createColumnHelper,
   SortingState,
 } from "@tanstack/react-table";
+import { formatMoney } from "@/utils/currency";
 import {
   Search,
   ChevronUp,
@@ -64,6 +65,7 @@ interface Order {
     subtotal_cents?: number;
     tax_cents?: number;
     shipping_cents?: number;
+    currency?: string;
   };
   created_at: string;
   items: Array<{
@@ -72,6 +74,7 @@ interface Order {
     qty: number;
     unit_price_cents: number;
   }>;
+  currency?: string;
   stripe?: { payment_intent_id?: string };
   tracking?: { number?: string; url?: string };
 }
@@ -189,11 +192,15 @@ export default function OrdersPage() {
       columnHelper.accessor((row) => row.amounts.total_cents, {
         id: "total",
         header: t("admin-orders-col-total"),
-        cell: (info) => (
-          <span className="font-mono text-sm">
-            ${(info.getValue() / 100).toFixed(2)}
-          </span>
-        ),
+        cell: (info) => {
+          const order = info.row.original;
+          const currency = order.amounts.currency || order.currency || "USD";
+          return (
+            <span className="font-mono text-sm">
+              {formatMoney(info.getValue(), currency)}
+            </span>
+          );
+        },
       }),
       columnHelper.accessor("created_at", {
         header: t("admin-orders-col-date"),
@@ -224,7 +231,7 @@ export default function OrdersPage() {
    * @param cents - amount in cents
    * @returns formatted string, e.g. "$12.34"
    */
-  const formatCurrency = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+  const formatCurrency = (cents: number, currency: string) => formatMoney(cents, currency);
 
   return (
     <DefaultLayout>
@@ -530,6 +537,7 @@ export default function OrdersPage() {
                               <p className="font-mono">
                                 {formatCurrency(
                                   item.unit_price_cents * item.qty,
+                                  selectedOrder.amounts.currency || selectedOrder.currency || "USD",
                                 )}
                               </p>
                             </div>
@@ -550,6 +558,7 @@ export default function OrdersPage() {
                             <span>
                               {formatCurrency(
                                 selectedOrder.amounts.subtotal_cents || 0,
+                                selectedOrder.amounts.currency || selectedOrder.currency || "USD",
                               )}
                             </span>
                           </div>
@@ -560,6 +569,7 @@ export default function OrdersPage() {
                             <span>
                               {formatCurrency(
                                 selectedOrder.amounts.tax_cents || 0,
+                                selectedOrder.amounts.currency || selectedOrder.currency || "USD",
                               )}
                             </span>
                           </div>
@@ -570,6 +580,7 @@ export default function OrdersPage() {
                             <span>
                               {formatCurrency(
                                 selectedOrder.amounts.shipping_cents || 0,
+                                selectedOrder.amounts.currency || selectedOrder.currency || "USD",
                               )}
                             </span>
                           </div>
@@ -581,6 +592,7 @@ export default function OrdersPage() {
                             <span>
                               {formatCurrency(
                                 selectedOrder.amounts.total_cents,
+                                selectedOrder.amounts.currency || selectedOrder.currency || "USD",
                               )}
                             </span>
                           </div>

@@ -17,6 +17,7 @@ type CartItem = {
   sku: string;
   title: string;
   price_cents: number;
+  currency?: string;
   image_url?: string;
   qty: number;
 };
@@ -64,7 +65,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
       const existing = prev.find((i) => i.sku === item.sku);
       if (existing) {
         return prev.map((i) =>
-          i.sku === item.sku ? { ...i, qty: i.qty + item.qty } : i,
+          i.sku === item.sku
+            ? { ...i, qty: i.qty + item.qty, currency: item.currency ?? i.currency }
+            : i,
         );
       }
       return [...prev, item];
