@@ -42,13 +42,17 @@ jobs:
         with:
           node-version: "24"
     
+      - name: Install dependencies
+        run: |
+          npm i
+          npm i -g tsx
+          
       - name: Initialize merchant
         env:
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
           MERCHANT_PK: ${{ secrets.MERCHANT_PK }}
           MERCHANT_SK: ${{ secrets.MERCHANT_SK }}
         run: |
-          npm i -g dotenv tsx
           cd apps/merchant
           npx tsx scripts/init.ts --remote
     
