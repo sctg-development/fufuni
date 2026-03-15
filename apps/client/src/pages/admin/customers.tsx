@@ -37,6 +37,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
 import DefaultLayout from "@/layouts/default";
 import { useSecuredApi } from "@/authentication";
 import { SearchIcon } from "@/components/icons";
+import { formatMoney } from "@/utils/currency";
 
 // --- typings -------------------------------------------------------------
 /**
@@ -190,14 +191,6 @@ export default function CustomersPage() {
     }
   };
 
-  /**
-   * Convert an amount in cents to a dollar string with two decimals.
-   *
-   * @param cents - value in cents
-   * @returns formatted currency string (e.g. "$12.34")
-   */
-  const formatCurrency = (cents: number) => `$${(cents / 100).toFixed(2)}`;
-
   return (
     <DefaultLayout>
       <div className="px-4 py-6">
@@ -242,7 +235,7 @@ export default function CustomersPage() {
                   <TableCell>{c.email}</TableCell>
                   <TableCell>{c.stats.order_count}</TableCell>
                   <TableCell>
-                    {formatCurrency(c.stats.total_spent_cents)}
+                    {formatMoney(c.stats.total_spent_cents, "EUR")}
                   </TableCell>
                   <TableCell>
                     {new Date(c.created_at).toLocaleDateString()}
@@ -377,8 +370,9 @@ export default function CustomersPage() {
                           Spent
                         </p>
                         <p className="text-xl font-semibold font-mono mt-1">
-                          {formatCurrency(
+                          {formatMoney(
                             customerDetail.stats.total_spent_cents,
+                            "EUR",
                           )}
                         </p>
                       </div>
@@ -478,7 +472,7 @@ export default function CustomersPage() {
                             </div>
                             <div className="text-right">
                               <p className="font-mono text-sm">
-                                {formatCurrency(order.amounts.total_cents)}
+                                {formatMoney(order.amounts.total_cents, "EUR")}
                               </p>
                               <p
                                 className="text-xs font-mono capitalize"

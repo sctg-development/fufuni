@@ -32,7 +32,6 @@ import {
   createColumnHelper,
   SortingState,
 } from "@tanstack/react-table";
-import { formatMoney } from "@/utils/currency";
 import {
   Search,
   ChevronUp,
@@ -47,6 +46,7 @@ import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
 
+import { formatMoney } from "@/utils/currency";
 import { useSecuredApi } from "@/authentication";
 import DefaultLayout from "@/layouts/default";
 
@@ -195,6 +195,7 @@ export default function OrdersPage() {
         cell: (info) => {
           const order = info.row.original;
           const currency = order.amounts.currency || order.currency || "USD";
+
           return (
             <span className="font-mono text-sm">
               {formatMoney(info.getValue(), currency)}
@@ -231,7 +232,8 @@ export default function OrdersPage() {
    * @param cents - amount in cents
    * @returns formatted string, e.g. "$12.34"
    */
-  const formatCurrency = (cents: number, currency: string) => formatMoney(cents, currency);
+  const formatCurrency = (cents: number, currency: string) =>
+    formatMoney(cents, currency);
 
   return (
     <DefaultLayout>
@@ -537,7 +539,9 @@ export default function OrdersPage() {
                               <p className="font-mono">
                                 {formatCurrency(
                                   item.unit_price_cents * item.qty,
-                                  selectedOrder.amounts.currency || selectedOrder.currency || "USD",
+                                  selectedOrder.amounts.currency ||
+                                    selectedOrder.currency ||
+                                    "USD",
                                 )}
                               </p>
                             </div>
@@ -558,7 +562,9 @@ export default function OrdersPage() {
                             <span>
                               {formatCurrency(
                                 selectedOrder.amounts.subtotal_cents || 0,
-                                selectedOrder.amounts.currency || selectedOrder.currency || "USD",
+                                selectedOrder.amounts.currency ||
+                                  selectedOrder.currency ||
+                                  "USD",
                               )}
                             </span>
                           </div>
@@ -569,7 +575,9 @@ export default function OrdersPage() {
                             <span>
                               {formatCurrency(
                                 selectedOrder.amounts.tax_cents || 0,
-                                selectedOrder.amounts.currency || selectedOrder.currency || "USD",
+                                selectedOrder.amounts.currency ||
+                                  selectedOrder.currency ||
+                                  "USD",
                               )}
                             </span>
                           </div>
@@ -580,7 +588,9 @@ export default function OrdersPage() {
                             <span>
                               {formatCurrency(
                                 selectedOrder.amounts.shipping_cents || 0,
-                                selectedOrder.amounts.currency || selectedOrder.currency || "USD",
+                                selectedOrder.amounts.currency ||
+                                  selectedOrder.currency ||
+                                  "USD",
                               )}
                             </span>
                           </div>
@@ -592,7 +602,9 @@ export default function OrdersPage() {
                             <span>
                               {formatCurrency(
                                 selectedOrder.amounts.total_cents,
-                                selectedOrder.amounts.currency || selectedOrder.currency || "USD",
+                                selectedOrder.amounts.currency ||
+                                  selectedOrder.currency ||
+                                  "USD",
                               )}
                             </span>
                           </div>

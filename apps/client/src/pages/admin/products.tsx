@@ -33,7 +33,13 @@ import {
   TableRow,
   TableCell,
 } from "@heroui/table";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@heroui/modal";
 import { Card, CardBody } from "@heroui/card";
 import { Image as ImageIcon, X } from "lucide-react";
 
@@ -173,6 +179,7 @@ export default function ProductsPage() {
     // Load full product details for variant management
     try {
       const full = await getJson(`${apiBase}/v1/products/${p.id}`);
+
       setEditingProduct(full);
     } catch (err) {
       console.error("Error loading product", err);
@@ -250,11 +257,13 @@ export default function ProductsPage() {
    */
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
     if (!file) return;
 
     setUploadingImage(true);
     try {
       const formData = new FormData();
+
       formData.append("file", file);
 
       const response = await fetch(`${apiBase}/v1/images`, {
@@ -267,6 +276,7 @@ export default function ProductsPage() {
 
       if (!response.ok) throw new Error("Upload failed");
       const result = await response.json();
+
       setVariantImage(result.url || result.key);
     } catch (err) {
       console.error("Image upload error", err);
@@ -288,9 +298,11 @@ export default function ProductsPage() {
     setSubmittingVariant(true);
     try {
       const price = parseInt(variantPrice, 10);
+
       if (isNaN(price)) {
         alert("Invalid price");
         setSubmittingVariant(false);
+
         return;
       }
 
@@ -303,7 +315,7 @@ export default function ProductsPage() {
             title: variantTitle,
             price_cents: price,
             image_url: variantImage || undefined,
-          }
+          },
         );
       } else {
         // Create variant
@@ -319,10 +331,13 @@ export default function ProductsPage() {
       resetVariantForm();
 
       // Reload product to show new/updated variant
-      const updated = await getJson(`${apiBase}/v1/products/${editingProduct.id}`);
+      const updated = await getJson(
+        `${apiBase}/v1/products/${editingProduct.id}`,
+      );
+
       setEditingProduct(updated);
       setProducts((prev) =>
-        prev.map((p) => (p.id === editingProduct.id ? updated : p))
+        prev.map((p) => (p.id === editingProduct.id ? updated : p)),
       );
     } catch (err) {
       console.error("Error saving variant", err);
@@ -400,16 +415,22 @@ export default function ProductsPage() {
       </div>
 
       {/* create/edit modal */}
-      <Modal isOpen={createModal} onClose={() => {
-        setCreateModal(false);
-        setEditingProduct(null);
-      }} size={editingProduct ? "lg" : "md"}>
+      <Modal
+        isOpen={createModal}
+        size={editingProduct ? "lg" : "md"}
+        onClose={() => {
+          setCreateModal(false);
+          setEditingProduct(null);
+        }}
+      >
         <ModalContent>
           <ModalHeader>
-            {editingProduct ? editingProduct.title : t("admin-products-modal-title")}
+            {editingProduct
+              ? editingProduct.title
+              : t("admin-products-modal-title")}
           </ModalHeader>
           <ModalBody className="space-y-4">
-            <form className="space-y-4" onSubmit={submitForm} id="product-form">
+            <form className="space-y-4" id="product-form" onSubmit={submitForm}>
               <div>
                 <label className="block text-sm font-medium">
                   {t("admin-products-modal-field-title")}
@@ -451,11 +472,12 @@ export default function ProductsPage() {
                 <CardBody className="space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold">
-                      {t("admin-products-variants")} ({editingProduct.variants.length})
+                      {t("admin-products-variants")} (
+                      {editingProduct.variants.length})
                     </h3>
                     <Button
-                      size="sm"
                       color="primary"
+                      size="sm"
                       onPress={openCreateVariant}
                     >
                       {t("admin-products-btn-add-variant")}
@@ -482,13 +504,15 @@ export default function ProductsPage() {
             )}
           </ModalBody>
           <ModalFooter>
-            <Button onPress={() => {
-              setCreateModal(false);
-              setEditingProduct(null);
-            }}>
+            <Button
+              onPress={() => {
+                setCreateModal(false);
+                setEditingProduct(null);
+              }}
+            >
               {t("admin-products-btn-cancel")}
             </Button>
-            <Button color="primary" type="submit" form="product-form">
+            <Button color="primary" form="product-form" type="submit">
               {editingProduct ? t("save") : t("admin-products-btn-create")}
             </Button>
           </ModalFooter>
@@ -496,25 +520,35 @@ export default function ProductsPage() {
       </Modal>
 
       {/* Variant modal */}
-      <Modal isOpen={variantModal} onClose={() => {
-        setVariantModal(false);
-        resetVariantForm();
-      }} size="xl">
+      <Modal
+        isOpen={variantModal}
+        size="xl"
+        onClose={() => {
+          setVariantModal(false);
+          resetVariantForm();
+        }}
+      >
         <ModalContent>
           <ModalHeader>
-            {editingVariant ? t("admin-products-edit-variant") : t("admin-products-add-variant")}
+            {editingVariant
+              ? t("admin-products-edit-variant")
+              : t("admin-products-add-variant")}
           </ModalHeader>
           <ModalBody>
-            <form className="space-y-4" onSubmit={submitVariant} id="variant-form">
+            <form
+              className="space-y-4"
+              id="variant-form"
+              onSubmit={submitVariant}
+            >
               <div>
                 <label className="block text-sm font-medium">
                   {t("admin-products-field-sku")}
                 </label>
                 <Input
                   required
+                  placeholder="e.g. TEE-BLK-M"
                   value={variantSku}
                   onChange={(e) => setVariantSku(e.target.value)}
-                  placeholder="e.g. TEE-BLK-M"
                 />
               </div>
               <div>
@@ -523,9 +557,9 @@ export default function ProductsPage() {
                 </label>
                 <Input
                   required
+                  placeholder="e.g. Black / Medium"
                   value={variantTitle}
                   onChange={(e) => setVariantTitle(e.target.value)}
-                  placeholder="e.g. Black / Medium"
                 />
               </div>
               <div>
@@ -534,10 +568,10 @@ export default function ProductsPage() {
                 </label>
                 <Input
                   required
+                  placeholder="Price in cents (e.g. 2999 for $29.99)"
                   type="number"
                   value={variantPrice}
                   onChange={(e) => setVariantPrice(e.target.value)}
-                  placeholder="Price in cents (e.g. 2999 for $29.99)"
                 />
               </div>
               <div>
@@ -547,14 +581,14 @@ export default function ProductsPage() {
                 {variantImage ? (
                   <div className="relative inline-block mt-2">
                     <img
-                      src={variantImage}
                       alt="Preview"
                       className="w-20 h-20 object-cover rounded border"
+                      src={variantImage}
                     />
                     <button
+                      className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
                       type="button"
                       onClick={() => setVariantImage(null)}
-                      className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
                     >
                       <X size={12} />
                     </button>
@@ -562,10 +596,10 @@ export default function ProductsPage() {
                 ) : (
                   <div className="mt-2">
                     <Input
-                      type="file"
                       accept="image/*"
-                      onChange={handleImageUpload}
                       disabled={uploadingImage}
+                      type="file"
+                      onChange={handleImageUpload}
                     />
                   </div>
                 )}
@@ -576,28 +610,30 @@ export default function ProductsPage() {
             {editingProduct && editingVariant && (
               <div className="border-t pt-6">
                 <VariantPrices
+                  basePriceCents={editingVariant.price_cents}
+                  currency={editingVariant.currency || "USD"}
                   productId={editingProduct.id}
                   variantId={editingVariant.id}
                   variantTitle={editingVariant.title}
-                  basePriceCents={editingVariant.price_cents}
-                  currency={editingVariant.currency || "USD"}
                 />
               </div>
             )}
           </ModalBody>
           <ModalFooter>
-            <Button onPress={() => {
-              setVariantModal(false);
-              resetVariantForm();
-            }}>
+            <Button
+              onPress={() => {
+                setVariantModal(false);
+                resetVariantForm();
+              }}
+            >
               {t("admin-products-btn-cancel")}
             </Button>
             <Button
               color="primary"
-              type="submit"
+              disabled={uploadingImage}
               form="variant-form"
               isLoading={submittingVariant}
-              disabled={uploadingImage}
+              type="submit"
             >
               {editingVariant ? t("save") : t("admin-products-btn-add-variant")}
             </Button>
@@ -621,18 +657,18 @@ function VariantCard({
 }) {
   return (
     <div
-      onClick={onEdit}
       className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-default-100 transition-colors"
+      onClick={onEdit}
     >
       {variant.image_url ? (
         <img
-          src={variant.image_url}
           alt={variant.title}
           className="w-12 h-12 object-cover rounded border"
+          src={variant.image_url}
         />
       ) : (
         <div className="w-12 h-12 flex items-center justify-center rounded border bg-default-100">
-          <ImageIcon size={20} className="text-default-400" />
+          <ImageIcon className="text-default-400" size={20} />
         </div>
       )}
       <div className="flex-1 min-w-0">

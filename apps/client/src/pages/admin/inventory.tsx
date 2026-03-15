@@ -245,7 +245,8 @@ export default function InventoryPage() {
    * @returns true if product exists in warehouse
    */
   const hasProductInWarehouse = (warehouseId: string) =>
-    selectedItem?.warehouses?.some((w) => w.warehouse_id === warehouseId) ?? false;
+    selectedItem?.warehouses?.some((w) => w.warehouse_id === warehouseId) ??
+    false;
 
   /**
    * Get the current quantity of a product in a specific warehouse.
@@ -493,7 +494,9 @@ export default function InventoryPage() {
                               key={warehouse.id}
                               className={clsx(
                                 "flex items-center justify-between gap-3 p-3 rounded-lg border transition-colors",
-                                isSelected ? "bg-blue-50 border-blue-300" : "hover:bg-gray-50",
+                                isSelected
+                                  ? "bg-blue-50 border-blue-300"
+                                  : "hover:bg-gray-50",
                               )}
                             >
                               {/* Warehouse info + status */}
@@ -522,25 +525,33 @@ export default function InventoryPage() {
                                 {/* Status badge */}
                                 {!exists && (
                                   <Chip
+                                    color="default"
                                     size="sm"
                                     variant="flat"
-                                    color="default"
                                   >
                                     {t("admin-inventory-not-stocked")}
                                   </Chip>
                                 )}
                                 {exists && qty === 0 && (
-                                  <Chip size="sm" variant="flat" color="danger">
+                                  <Chip color="danger" size="sm" variant="flat">
                                     {t("admin-inventory-badge-empty")}
                                   </Chip>
                                 )}
                                 {exists && qty > 0 && qty <= 5 && (
-                                  <Chip size="sm" variant="flat" color="warning">
+                                  <Chip
+                                    color="warning"
+                                    size="sm"
+                                    variant="flat"
+                                  >
                                     {t("admin-inventory-low")}
                                   </Chip>
                                 )}
                                 {exists && qty > 5 && (
-                                  <Chip size="sm" variant="flat" color="success">
+                                  <Chip
+                                    color="success"
+                                    size="sm"
+                                    variant="flat"
+                                  >
                                     {t("admin-inventory-in-stock")}
                                   </Chip>
                                 )}
@@ -551,17 +562,17 @@ export default function InventoryPage() {
                                 {!exists && (
                                   <Tooltip
                                     content={t(
-                                      "admin-inventory-init-warehouse"
+                                      "admin-inventory-init-warehouse",
                                     )}
                                   >
                                     <Button
                                       isIconOnly
-                                      size="sm"
-                                      variant="light"
                                       color="success"
                                       isLoading={
                                         initializeWarehouseMutation.isPending
                                       }
+                                      size="sm"
+                                      variant="light"
                                       onPress={() => {
                                         if (selectedItem) {
                                           initializeWarehouseMutation.mutate({
@@ -579,15 +590,17 @@ export default function InventoryPage() {
                                 {exists && qty === 0 && (
                                   <Tooltip
                                     content={t(
-                                      "admin-inventory-remove-warehouse"
+                                      "admin-inventory-remove-warehouse",
                                     )}
                                   >
                                     <Button
                                       isIconOnly
+                                      color="danger"
+                                      isLoading={
+                                        deleteWarehouseMutation.isPending
+                                      }
                                       size="sm"
                                       variant="light"
-                                      color="danger"
-                                      isLoading={deleteWarehouseMutation.isPending}
                                       onPress={() => {
                                         if (selectedItem) {
                                           deleteWarehouseMutation.mutate({
@@ -609,69 +622,68 @@ export default function InventoryPage() {
                     </div>
 
                     {/* Adjustment form for selected warehouse */}
-                    {selectedWarehouse && hasProductInWarehouse(selectedWarehouse) && (
-                      <div className="space-y-3 pt-3 border-t">
-                        <p className="text-xs font-medium text-gray-600">
-                          {t(
-                            "admin-inventory-adjust-section"
-                          )}
-                        </p>
-                        <div className="grid grid-cols-2 gap-3">
-                          <Tooltip
-                            content={t(
-                              "admin-inventory-field-quantity",
-                              "Enter quantity to add or remove",
-                            )}
-                          >
-                            <Input
-                              required
-                              label={t("admin-inventory-field-quantity")}
-                              placeholder="e.g. 50 or -10"
-                              type="number"
-                              value={adjustDelta}
-                              onValueChange={setAdjustDelta}
-                            />
-                          </Tooltip>
-                          <Tooltip
-                            content={t(
-                              "admin-inventory-field-reason",
-                              "Reason for adjustment",
-                            )}
-                          >
-                            <Select
-                              label={t("admin-inventory-field-reason")}
-                              selectedKeys={[adjustReason]}
-                              onSelectionChange={(key) =>
-                                setAdjustReason(Array.from(key).join(""))
-                              }
+                    {selectedWarehouse &&
+                      hasProductInWarehouse(selectedWarehouse) && (
+                        <div className="space-y-3 pt-3 border-t">
+                          <p className="text-xs font-medium text-gray-600">
+                            {t("admin-inventory-adjust-section")}
+                          </p>
+                          <div className="grid grid-cols-2 gap-3">
+                            <Tooltip
+                              content={t(
+                                "admin-inventory-field-quantity",
+                                "Enter quantity to add or remove",
+                              )}
                             >
-                              {ADJUST_REASONS.map((r) => (
-                                <SelectItem key={r}>
-                                  {r.charAt(0).toUpperCase() + r.slice(1)}
-                                </SelectItem>
-                              ))}
-                            </Select>
-                          </Tooltip>
-                        </div>
+                              <Input
+                                required
+                                label={t("admin-inventory-field-quantity")}
+                                placeholder="e.g. 50 or -10"
+                                type="number"
+                                value={adjustDelta}
+                                onValueChange={setAdjustDelta}
+                              />
+                            </Tooltip>
+                            <Tooltip
+                              content={t(
+                                "admin-inventory-field-reason",
+                                "Reason for adjustment",
+                              )}
+                            >
+                              <Select
+                                label={t("admin-inventory-field-reason")}
+                                selectedKeys={[adjustReason]}
+                                onSelectionChange={(key) =>
+                                  setAdjustReason(Array.from(key).join(""))
+                                }
+                              >
+                                {ADJUST_REASONS.map((r) => (
+                                  <SelectItem key={r}>
+                                    {r.charAt(0).toUpperCase() + r.slice(1)}
+                                  </SelectItem>
+                                ))}
+                              </Select>
+                            </Tooltip>
+                          </div>
 
-                        {/* Quick actions */}
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-600">
-                            {t("admin-inventory-quick-label")}
-                          </span>
-                          {[10, 25, 50, 100].map((n) => (
-                            <button
-                              key={n}
-                              className="px-2 py-1 text-xs font-mono rounded-lg border hover:bg-gray-100 transition-colors"
-                              type="button"
-                              onClick={() => setAdjustDelta(String(n))}
-                            >
-                              +{n}
-                            </button>
-                          ))}
+                          {/* Quick actions */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-600">
+                              {t("admin-inventory-quick-label")}
+                            </span>
+                            {[10, 25, 50, 100].map((n) => (
+                              <button
+                                key={n}
+                                className="px-2 py-1 text-xs font-mono rounded-lg border hover:bg-gray-100 transition-colors"
+                                type="button"
+                                onClick={() => setAdjustDelta(String(n))}
+                              >
+                                +{n}
+                              </button>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </form>
                 </div>
               )}
