@@ -402,7 +402,6 @@ export function VariantPrices({
                           variant="light"
                           aria-label="Edit price"
                           onPress={() => {
-                            console.log("VariantPrices: start editing", price.currency_id);
                             setEditingCurrencyId(price.currency_id);
                             setEditValue((price.price_cents / 100).toFixed(2));
                           }}
