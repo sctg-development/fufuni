@@ -1,5 +1,11 @@
 ![](https://tokeisrv.sctg.eu.org/b1/github.com/sctg-development/fufuni?type=TypeScript,TSX,html&category=code)
 ![](https://tokeisrv.sctg.eu.org/b1/github.com/sctg-development/fufuni?type=TypeScript,TSX,html&category=comments)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%203.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare)](https://workers.cloudflare.com/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
+[![HeroUI](https://img.shields.io/badge/HeroUI-v2-black)](https://www.heroui.com/)
+[![Auth0](https://img.shields.io/badge/Auth0-Secured-EB5424?logo=auth0)](https://auth0.com/)
 # Merchant, Vite, OAuth & HeroUI Template
 
 Welcome to a fully‑functional starter you can fork and deploy in minutes 🔥
@@ -35,21 +41,54 @@ Ths plugin uses our [@sctg/vite-plugin-github-pages-spa](https://github.com/sctg
 
 ## Features
 
-- 🚀 Fast development with Vite 7
-- 🎨 Beautiful UI components from HeroUI v2
-- 🔐 Flexible authentication with multiple OAuth providers (Auth0, Dex)
-- 🏠 Polished landing page with login button and quick links to API demo & built‑in OpenAPI/Swagger docs (works even when unauthenticated).
-- 🛠️ **Auth0 User & Permission Management**: Built-in administration panel to manage users and sync permissions.
-- 📊 **Localized Session Details**: Real-time technical information modal with JWT payload analysis.
-- 🌐 Internationalization with i18next (6 languages included)
-- 🌙 Dark/Light mode support
-- 📱 Responsive design
-- 🍪 Cookie consent management
-- 🧩 Type-safe with TypeScript
-- 🧹 Code quality with ESLint 9
-- 📦 Optimized build with manual chunk splitting
-- ⚡ Turborepo for intelligent caching and parallel builds
-- 🧶 npm workspaces for efficient dependency management
+### 🛍️ Store & Products
+- Product catalogue with variants, SKUs and per-variant multi-currency pricing
+- **Multilingual product titles** — plain text or JSON per locale, with AI translation
+- **Multilingual product descriptions** — rich HTML (Tiptap editor) or JSON per locale, with AI translation
+- RTL language support (Arabic, Hebrew)
+- Product image management (Cloudflare R2)
+- Inventory management across multiple warehouses
+
+### 💳 Payments & Orders
+- Stripe Checkout integration with webhook reconciliation
+- Multi-currency, multi-region pricing (explicit per-variant prices in `variantprices`)
+- Order lifecycle: `pending → paid → processing → shipped → delivered → refunded → canceled`
+- Tracking number and URL per order
+- Discount codes (fixed amount / percentage)
+
+### 👥 Customers & Auth
+- Auth0-based authentication for admin (JWT + RBAC permissions)
+- Customer accounts with address book
+- OAuth 2.0 UCP (Universal Checkout Protocol) for customer-facing flows
+- Magic-link checkout
+
+### 🌍 Internationalisation
+- 6 built-in locales: **English (US)**, **French**, **Spanish**, **Chinese (Simplified)**,
+  **Arabic**, **Hebrew**
+- `availableLanguages` registry with `nativeName`, `isRTL`, `isDefault` flags
+- Locale-aware price display (`Intl.NumberFormat`, ISO 4217)
+
+### 🤖 AI Translation
+- One-click translation for product titles and descriptions
+- Provider auto-detection: **Groq**, **OpenAI**, **Anthropic**
+- Permission-gated (`AI_PERMISSION` env var) — only visible to authorised admins
+- HTML-aware mode (preserves Tiptap markup) and plain-text mode for titles
+
+### 🔧 Admin Panel
+Full-featured back-office covering:
+- Products & variants · Inventory · Orders · Customers
+- Regions · Currencies · Countries · Warehouses · Shipping rates
+- Webhooks · Discounts · Users & permissions (Auth0)
+- OpenAPI / Swagger UI integrated
+
+### 🏗️ Infrastructure
+- **Cloudflare Workers** — zero-cold-start edge API (Hono + Zod-OpenAPI)
+- **Durable Objects** — strongly-consistent SQLite state (`merchant-db`)
+- **Cloudflare D1** — relational database with full migration history
+- **Cloudflare R2** — product image storage
+- Rate limiting middleware
+- Outbound webhooks with HMAC signing and delivery log
+- Scheduled cron for cart expiry cleanup
 
 ---
 
@@ -189,7 +228,16 @@ CORS_ORIGIN=http://localhost:5173
 READ_PERMISSION=read:api
 WRITE_PERMISSION=write:api
 ADMIN_PERMISSION=admin:api
+DATABASE_PERMISSION="admin:database"
+AI_PERMISSION="ai:api"
 AUTHENTICATION_PROVIDER_TYPE=auth0
+AI_API_KEY="sk_key"
+AI_MODEL="openai/gpt-oss-20b"
+AI_API_URL="https://api.example.com/openai/v1"
+AI_PERMISSION="ai:api"
+STRIPE_SECRET_KEY="sk_test_51TBaaa4"
+STRIPE_PUBLISHABLE_KEY="pk_test_51TaaaaX"
+STRIPE_WEBHOOK_SECRET="whsec_y4bbb"
 EOF
 
 # Spin up frontend + worker with environment vars
@@ -324,6 +372,16 @@ WRITE_PERMISSION=write:api
 ADMIN_PERMISSION=admin:api
 ADMIN_AUTH0_PERMISSION="auth0:admin:api"
 AUTHENTICATION_PROVIDER_TYPE=auth0
+DATABASE_PERMISSION="admin:database"
+AI_PERMISSION="ai:api"
+AUTHENTICATION_PROVIDER_TYPE=auth0
+AI_API_KEY="sk_key"
+AI_MODEL="openai/gpt-oss-20b"
+AI_API_URL="https://api.example.com/openai/v1"
+AI_PERMISSION="ai:api"
+STRIPE_SECRET_KEY="sk_test_51TBaaa4"
+STRIPE_PUBLISHABLE_KEY="pk_test_51TaaaaX"
+STRIPE_WEBHOOK_SECRET="whsec_y4bbb"
 ```
 
 ### GitHub secrets
@@ -345,6 +403,16 @@ WRITE_PERMISSION=write:api
 ADMIN_PERMISSION=admin:api
 ADMIN_AUTH0_PERMISSION="auth0:admin:api"
 AUTHENTICATION_PROVIDER_TYPE=auth0
+DATABASE_PERMISSION="admin:database"
+AI_PERMISSION="ai:api"
+AUTHENTICATION_PROVIDER_TYPE=auth0
+AI_API_KEY="sk_key"
+AI_MODEL="openai/gpt-oss-20b"
+AI_API_URL="https://api.example.com/openai/v1"
+AI_PERMISSION="ai:api"
+STRIPE_SECRET_KEY="sk_test_51TBaaa4"
+STRIPE_PUBLISHABLE_KEY="pk_test_51TaaaaX"
+STRIPE_WEBHOOK_SECRET="whsec_y4bbb"
 ```
 
 each secrets should be manually entered in Github like:
