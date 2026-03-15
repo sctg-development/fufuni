@@ -27,7 +27,7 @@ permissions:
   attestations: write
 
 jobs:
-  build:
+  init:
     runs-on: ubuntu-latest
 
     steps:

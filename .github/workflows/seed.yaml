@@ -27,7 +27,7 @@ permissions:
   attestations: write
 
 jobs:
-  build:
+  seed:
     runs-on: ubuntu-latest
 
     steps:
