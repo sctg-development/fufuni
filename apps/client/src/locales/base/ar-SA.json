@@ -316,5 +316,19 @@
   "admin-common-empty": "لا توجد بيانات",
   "admin-common-cancel": "إلغاء",
   "admin-common-save": "حفظ",
-  "admin-common-description": "الوصف"
+  "admin-common-description": "الوصف",
+  "admin-variant-prices-title": "أسعار متعددة العملات",
+  "admin-variant-prices-subtitle": "إدارة الأسعار لـ",
+  "admin-variant-prices-add": "إضافة سعر",
+  "admin-variant-prices-base": "السعر الأساسي",
+  "admin-variant-prices-base-note": "يُستخدم كقيمة افتراضية إذا لم يكن هناك سعر لعملة العميل",
+  "admin-variant-prices-editing": "تعديل السعر لـ",
+  "admin-variant-prices-editing-note": "أدخل مبلغًا جديدًا واحفظ. سيؤدي الإلغاء إلى تجاهل التغييرات.",
+  "admin-variant-prices-confirm-delete": "حذف هذا السعر؟",
+  "admin-variant-prices-empty": "لا توجد أسعار مُعدة. أضف سعرًا للبدء.",
+  "admin-variant-prices-currency": "العملة",
+  "admin-variant-prices-price": "السعر",
+  "admin-variant-prices-add-title": "إضافة سعر للنسخة",
+  "admin-variant-prices-select-currency": "اختر العملة",
+  "admin-variant-prices-enter-price": "السعر"
 }

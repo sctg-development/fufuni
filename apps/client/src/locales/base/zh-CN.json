@@ -316,5 +316,19 @@
   "admin-common-empty": "无数据",
   "admin-common-cancel": "取消",
   "admin-common-save": "保存",
-  "admin-common-description": "描述"
+  "admin-common-description": "描述",
+  "admin-variant-prices-title": "多货币价格",
+  "admin-variant-prices-subtitle": "管理以下价格",
+  "admin-variant-prices-add": "添加价格",
+  "admin-variant-prices-base": "基础价格",
+  "admin-variant-prices-base-note": "如果客户货币没有价格，则使用此价格",
+  "admin-variant-prices-editing": "正在编辑价格：",
+  "admin-variant-prices-editing-note": "输入新金额并保存。取消将丢弃更改。",
+  "admin-variant-prices-confirm-delete": "删除此价格？",
+  "admin-variant-prices-empty": "尚未配置价格。添加价格以开始。",
+  "admin-variant-prices-currency": "货币",
+  "admin-variant-prices-price": "价格",
+  "admin-variant-prices-add-title": "为变体添加价格",
+  "admin-variant-prices-select-currency": "选择货币",
+  "admin-variant-prices-enter-price": "价格"
 }

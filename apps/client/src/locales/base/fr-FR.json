@@ -316,5 +316,19 @@
   "admin-common-empty": "Pas de données",
   "admin-common-cancel": "Annuler",
   "admin-common-save": "Enregistrer",
-  "admin-common-description": "Description"
+  "admin-common-description": "Description",
+  "admin-variant-prices-title": "Prix multi-devises",
+  "admin-variant-prices-subtitle": "Gérer les prix pour",
+  "admin-variant-prices-add": "Ajouter un prix",
+  "admin-variant-prices-base": "Prix de base",
+  "admin-variant-prices-base-note": "Utilisé comme valeur de secours si aucun prix n'existe pour la devise du client",
+  "admin-variant-prices-editing": "Modification du prix pour",
+  "admin-variant-prices-editing-note": "Saisissez un nouveau montant et enregistrez. Annuler supprimera les modifications.",
+  "admin-variant-prices-confirm-delete": "Supprimer ce prix ?",
+  "admin-variant-prices-empty": "Aucun prix configuré. Ajoutez un prix pour commencer.",
+  "admin-variant-prices-currency": "Devise",
+  "admin-variant-prices-price": "Prix",
+  "admin-variant-prices-add-title": "Ajouter un prix pour la variante",
+  "admin-variant-prices-select-currency": "Sélectionner une devise",
+  "admin-variant-prices-enter-price": "Prix"
 }

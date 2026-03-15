@@ -314,5 +314,19 @@
   "admin-common-empty": "אין נתונים",
   "admin-common-cancel": "ביטול",
   "admin-common-save": "שמור",
-  "admin-common-description": "תיאור"
+  "admin-common-description": "תיאור",
+  "admin-variant-prices-title": "מחירים מרובי מטבעות",
+  "admin-variant-prices-subtitle": "ניהול מחירים עבור",
+  "admin-variant-prices-add": "הוסף מחיר",
+  "admin-variant-prices-base": "מחיר בסיס",
+  "admin-variant-prices-base-note": "ישמש כברירת מחדל אם אין מחיר לזמ"ר הלקוח",
+  "admin-variant-prices-editing": "עורכים מחיר עבור",
+  "admin-variant-prices-editing-note": "הזן סכום חדש ושמור. ביטול יסיר את השינויים.",
+  "admin-variant-prices-confirm-delete": "למחוק מחיר זה?",
+  "admin-variant-prices-empty": "אין מחירים מוגדרים. הוסף מחיר כדי להתחיל.",
+  "admin-variant-prices-currency": "מטבע",
+  "admin-variant-prices-price": "מחיר",
+  "admin-variant-prices-add-title": "הוסף מחיר לוריאנט",
+  "admin-variant-prices-select-currency": "בחר מטבע",
+  "admin-variant-prices-enter-price": "מחיר"
 }

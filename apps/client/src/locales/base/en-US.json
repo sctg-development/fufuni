@@ -315,5 +315,19 @@
   "admin-common-empty": "No data",
   "admin-common-cancel": "Cancel",
   "admin-common-save": "Save",
-  "admin-common-description": "Description"
+  "admin-common-description": "Description",
+  "admin-variant-prices-title": "Multi-Currency Prices",
+  "admin-variant-prices-subtitle": "Manage prices for",
+  "admin-variant-prices-add": "Add Price",
+  "admin-variant-prices-base": "Base Price",
+  "admin-variant-prices-base-note": "Used as fallback if no price exists for the customer's currency",
+  "admin-variant-prices-editing": "Editing price for",
+  "admin-variant-prices-editing-note": "Enter a new amount and save. Cancelling will discard changes.",
+  "admin-variant-prices-confirm-delete": "Delete this price?",
+  "admin-variant-prices-empty": "No prices configured. Add a price to get started.",
+  "admin-variant-prices-currency": "Currency",
+  "admin-variant-prices-price": "Price",
+  "admin-variant-prices-add-title": "Add Price for Variant",
+  "admin-variant-prices-select-currency": "Select Currency",
+  "admin-variant-prices-enter-price": "Price"
 }

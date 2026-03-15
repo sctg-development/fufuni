@@ -316,5 +316,19 @@
   "admin-common-empty": "Sin datos",
   "admin-common-cancel": "Cancelar",
   "admin-common-save": "Guardar",
-  "admin-common-description": "Descripción"
+  "admin-common-description": "Descripción",
+  "admin-variant-prices-title": "Precios multimoneda",
+  "admin-variant-prices-subtitle": "Administra precios para",
+  "admin-variant-prices-add": "Agregar precio",
+  "admin-variant-prices-base": "Precio base",
+  "admin-variant-prices-base-note": "Usado como valor predeterminado si no existe precio para la moneda del cliente",
+  "admin-variant-prices-editing": "Editando precio para",
+  "admin-variant-prices-editing-note": "Ingresa un nuevo monto y guarda. Cancelar descartará los cambios.",
+  "admin-variant-prices-confirm-delete": "¿Eliminar este precio?",
+  "admin-variant-prices-empty": "No hay precios configurados. Agrega un precio para comenzar.",
+  "admin-variant-prices-currency": "Moneda",
+  "admin-variant-prices-price": "Precio",
+  "admin-variant-prices-add-title": "Agregar precio para variante",
+  "admin-variant-prices-select-currency": "Selecciona moneda",
+  "admin-variant-prices-enter-price": "Precio"
 }

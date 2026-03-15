@@ -29,7 +29,7 @@ import {
   useDisclosure,
 } from "@heroui/modal";
 import { Card, CardBody } from "@heroui/card";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, Pencil, Save } from "lucide-react";
 
 import { useSecuredApi } from "@/authentication";
 import { formatMoney } from "@/utils/currency";
@@ -86,6 +86,10 @@ export function VariantPrices({
   const [selectedCurrency, setSelectedCurrency] = useState<string>("");
   const [priceInput, setPriceInput] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Inline edit state: only one currency can be edited at a time.
+  const [editingCurrencyId, setEditingCurrencyId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState<string>("");
 
   // Load initial data
   useEffect(() => {
@@ -152,6 +156,42 @@ export function VariantPrices({
       console.error("Failed to add price", err);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  /**
+   * Edit/save a price inline.
+   * This uses the same POST endpoint as add price (which is an upsert on the backend).
+   */
+  const handleSaveEdit = async (currencyId: string) => {
+    const parsed = parseFloat(editValue);
+    if (!editValue || isNaN(parsed) || parsed < 0) {
+      // Invalid or empty value: exit edit mode without applying changes.
+      setEditingCurrencyId(null);
+      setEditValue("");
+      return;
+    }
+
+    const priceCents = Math.round(parsed * 100);
+
+    try {
+      const response = await postJson(
+        `${apiBase}/v1/products/${productId}/variants/${variantId}/prices`,
+        { currency_id: currencyId, price_cents: priceCents }
+      );
+
+      if (response) {
+        setPrices(
+          prices.map((p) =>
+            p.currency_id === currencyId ? { ...p, price_cents: priceCents } : p
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Failed to update price", err);
+    } finally {
+      setEditingCurrencyId(null);
+      setEditValue("");
     }
   };
 
@@ -225,6 +265,57 @@ export function VariantPrices({
         </CardBody>
       </Card>
 
+      {/* Inline edit bar (shows when a currency is being edited) */}
+      {editingCurrencyId && (
+        <Card>
+          <CardBody className="text-sm">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-semibold text-sm">
+                  {t("admin-variant-prices-editing", "Editing price for")}{" "}
+                  {prices.find((p) => p.currency_id === editingCurrencyId)
+                    ?.currency_code || editingCurrencyId}
+                </p>
+                <p className="text-xs text-default-500">
+                  {t(
+                    "admin-variant-prices-editing-note",
+                    "Enter a new amount and save. Cancelling will discard changes."
+                  )}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Input
+                  size="sm"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  className="w-28"
+                  value={editValue}
+                  onValueChange={setEditValue}
+                />
+                <Button
+                  color="success"
+                  size="sm"
+                  onPress={() => handleSaveEdit(editingCurrencyId)}
+                >
+                  {t("admin-common-save", "Save")}
+                </Button>
+                <Button
+                  color="default"
+                  size="sm"
+                  onPress={() => {
+                    setEditingCurrencyId(null);
+                    setEditValue("");
+                  }}
+                >
+                  {t("admin-common-cancel", "Cancel")}
+                </Button>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
       {/* Prices table */}
       {prices.length === 0 ? (
         <Card>
@@ -249,36 +340,93 @@ export function VariantPrices({
             </TableColumn>
           </TableHeader>
           <TableBody items={prices} emptyContent="No prices">
-            {(price) => (
-              <TableRow key={price.currency_id}>
-                <TableCell>
-                  <div>
-                    <p className="font-mono font-semibold text-sm">
-                      {price.currency_code}
-                    </p>
-                    <p className="text-xs text-default-500">
-                      {price.currency_symbol}
-                    </p>
-                  </div>
-                </TableCell>
-                <TableCell align="right">
-                  <p className="font-mono font-semibold text-sm">
-                    {formatMoney(price.price_cents, price.currency_code)}
-                  </p>
-                </TableCell>
-                <TableCell align="right">
-                  <Button
-                    isIconOnly
-                    size="sm"
-                    color="danger"
-                    variant="light"
-                    onPress={() => handleDeletePrice(price.currency_id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            )}
+            {(price) => {
+              const isEditing = editingCurrencyId === price.currency_id;
+
+              return (
+                <TableRow key={price.currency_id}>
+                  <TableCell>
+                    <div>
+                      <p className="font-mono font-semibold text-sm">
+                        {price.currency_code}
+                      </p>
+                      <p className="text-xs text-default-500">
+                        {price.currency_symbol}
+                      </p>
+                    </div>
+                  </TableCell>
+
+                  <TableCell align="right">
+                    {isEditing ? (
+                      <div className="flex items-center justify-end gap-1">
+                        <Input
+                          size="sm"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          className="w-28"
+                          value={editValue}
+                          onValueChange={setEditValue}
+                          autoFocus
+                          aria-label={`Edit price for ${price.currency_code}`}
+                        />
+                        <span className="text-xs text-default-400 font-mono">
+                          {price.currency_code}
+                        </span>
+                      </div>
+                    ) : (
+                      <p className="font-mono font-semibold text-sm">
+                        {formatMoney(price.price_cents, price.currency_code)}
+                      </p>
+                    )}
+                  </TableCell>
+
+                  <TableCell align="right">
+                    <div className="flex items-center justify-end gap-1">
+                      {isEditing ? (
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          color="success"
+                          variant="light"
+                          aria-label="Save price"
+                          onPress={() => handleSaveEdit(price.currency_id)}
+                        >
+                          <Save className="w-4 h-4" />
+                        </Button>
+                      ) : (
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          color="primary"
+                          variant="light"
+                          aria-label="Edit price"
+                          onPress={() => {
+                            console.log("VariantPrices: start editing", price.currency_id);
+                            setEditingCurrencyId(price.currency_id);
+                            setEditValue((price.price_cents / 100).toFixed(2));
+                          }}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                      )}
+
+                      <Button
+                        isIconOnly
+                        size="sm"
+                        color="danger"
+                        variant="light"
+                        aria-label="Delete price"
+                        isDisabled={isEditing}
+                        onPress={() => handleDeletePrice(price.currency_id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            }}
           </TableBody>
         </Table>
       )}
