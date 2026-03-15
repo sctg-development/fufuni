@@ -102,6 +102,8 @@ export function RichDescriptionEditor({
     (locale: string) => {
       if (!editor) return;
       setSelectedLocale(locale);
+      // Update ref immediately before changing editor content to avoid stale closure
+      localeRef.current = locale;
       const currentValue = valueRef.current;
       const parsed       = parseDescription(currentValue);
 

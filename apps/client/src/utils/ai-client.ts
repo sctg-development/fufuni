@@ -38,21 +38,26 @@ function detectProvider(url: string, explicit?: string): 'openai' | 'groq' | 'an
  * Translate HTML content using AI
  * Automatically detects the provider and formats requests accordingly
  */
+/**
+ * Translate content using AI
+ * Automatically detects the provider and formats requests accordingly
+ */
 export async function translateWithAi(
-  sourceHtml: string,
+  sourceContent: string,
   targetLanguage: string,
-  aiParams: AiParams
+  aiParams: AiParams,
+  isHtml = true
 ): Promise<TranslationResult> {
   const provider = detectProvider(aiParams.url, aiParams.provider);
 
   try {
     switch (provider) {
       case 'anthropic':
-        return await callAnthropicApi(sourceHtml, targetLanguage, aiParams);
+        return await callAnthropicApi(sourceContent, targetLanguage, aiParams, isHtml);
       case 'groq':
       case 'openai':
       default:
-        return await callOpenAiCompatibleApi(sourceHtml, targetLanguage, aiParams);
+        return await callOpenAiCompatibleApi(sourceContent, targetLanguage, aiParams, isHtml);
     }
   } catch (error) {
     return {
@@ -68,13 +73,17 @@ export async function translateWithAi(
 async function callOpenAiCompatibleApi(
   content: string,
   targetLanguage: string,
-  aiParams: AiParams
+  aiParams: AiParams,
+  isHtml = true
 ): Promise<TranslationResult> {
-  const systemPrompt =
-    `You are a professional e-commerce translator and copywriter. ` +
-    `Translate the following HTML product description to ${targetLanguage}. ` +
-    `Important: Preserve ALL HTML tags exactly as they are. ` +
-    `Return ONLY the translated HTML content, no explanations or extra text.`;
+  const systemPrompt = isHtml
+    ? `You are a professional e-commerce translator and copywriter. ` +
+      `Translate the following HTML product description to ${targetLanguage}. ` +
+      `Important: Preserve ALL HTML tags exactly as they are. ` +
+      `Return ONLY the translated HTML content, no explanations or extra text.`
+    : `You are a professional e-commerce copywriter. ` +
+      `Translate the following product title to ${targetLanguage}. ` +
+      `Return only the translated title as plain text, no quotes, no HTML, no extra text.`;
 
   // Ensure base URL ends with /
   const baseUrl = aiParams.url.endsWith('/') ? aiParams.url : aiParams.url + '/';
@@ -143,13 +152,17 @@ async function callOpenAiCompatibleApi(
 async function callAnthropicApi(
   content: string,
   targetLanguage: string,
-  aiParams: AiParams
+  aiParams: AiParams,
+  isHtml = true
 ): Promise<TranslationResult> {
-  const systemPrompt =
-    `You are a professional e-commerce translator and copywriter. ` +
-    `Translate the following HTML product description to ${targetLanguage}. ` +
-    `Important: Preserve ALL HTML tags exactly as they are. ` +
-    `Return ONLY the translated HTML content, no explanations or extra text.`;
+  const systemPrompt = isHtml
+    ? `You are a professional e-commerce translator and copywriter. ` +
+      `Translate the following HTML product description to ${targetLanguage}. ` +
+      `Important: Preserve ALL HTML tags exactly as they are. ` +
+      `Return ONLY the translated HTML content, no explanations or extra text.`
+    : `You are a professional e-commerce copywriter. ` +
+      `Translate the following product title to ${targetLanguage}. ` +
+      `Return only the translated title as plain text, no quotes, no HTML, no extra text.`;
 
   // Ensure base URL ends with /
   const baseUrl = aiParams.url.endsWith('/') ? aiParams.url : aiParams.url + '/';

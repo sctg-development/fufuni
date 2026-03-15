@@ -4,7 +4,7 @@ import { StoreProduct } from "@/lib/store-api";
 import { useTranslation } from "react-i18next";
 import { useCart } from "@/hooks/useCart";
 import { formatMoney } from "@/utils/currency";
-import { resolveDescription } from "@/utils/description";
+import { resolveDescription, resolveTitle } from "@/utils/description";
 import { Button } from "@heroui/button";
 
 interface Props {
@@ -43,6 +43,9 @@ export const ProductCardFull: React.FC<Props> = ({ product }) => {
     i18n.language
   );
 
+  // Resolve title for current locale
+  const displayTitle = resolveTitle(product.title, i18n.language);
+
   /**
    * Handle variant selection and update state
    */
@@ -69,7 +72,7 @@ export const ProductCardFull: React.FC<Props> = ({ product }) => {
         )}
       </div>
 
-      <h3 className="font-medium text-default-900 mb-2">{product.title}</h3>
+      <h3 className="font-medium text-default-900 mb-2">{displayTitle}</h3>
 
       {/* Rich description section */}
       {descriptionHtml && (

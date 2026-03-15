@@ -83,3 +83,100 @@ export function getEditorContent(raw: string, locale: string): string {
 export function isLocalized(raw: string): boolean {
   return typeof parseDescription(raw) === 'object';
 }
+
+// ─── Plain-text title helpers (same logic, HTML-free) ─────────────────────────
+
+/**
+ * Strips any accidental HTML tags from a plain-text title value.
+ * Titles must never contain HTML — this is a safety guard.
+ */
+export function stripHtml(input: string): string {
+  return input.replace(/<[^>]*>/g, '').trim();
+}
+
+/**
+ * Parses a raw DB title string: plain text (legacy) or LocalizedDesc JSON.
+ * Identical to parseDescription but strips HTML from all values as a guard.
+ */
+export function parseTitle(raw: string): LocalizedDesc | string {
+  if (!raw) return '';
+  const parsed = parseDescription(raw);
+  if (typeof parsed === 'string') return stripHtml(parsed);
+
+  // Strip HTML from every locale value (safety guard)
+  return Object.fromEntries(
+    Object.entries(parsed).map(([k, v]) => [k, stripHtml(v)])
+  ) as LocalizedDesc;
+}
+
+/**
+ * Resolves the best plain-text title for a given locale.
+ * Walks the same fallback chain as resolveDescription.
+ */
+export function resolveTitle(raw: string, locale: string): string {
+  const parsed = parseTitle(raw);
+  if (typeof parsed === 'string') return parsed;
+
+  for (const lang of [locale, ...DESCRIPTION_FALLBACK]) {
+    if (parsed[lang]) return parsed[lang];
+  }
+  return '';
+}
+
+/**
+ * Merges a new plain-text string for a locale into the existing raw title.
+ * - Legacy plain string → migrates to JSON on first write.
+ * - Existing JSON → updates or adds the locale key.
+ * HTML is stripped before storing.
+ * 
+ * IMPORTANT: When migrating from plain text, we preserve the original content
+ * in the default locale (en-US) as a fallback, so other locales can inherit it.
+ */
+export function mergeTitleLocale(
+  raw: string,
+  locale: string,
+  text: string
+): string {
+  const safe   = stripHtml(text);
+  const parsed = parseTitle(raw);
+  if (typeof parsed === 'string') {
+    // Migration: when converting plain text to JSON,
+    // preserve the original text as fallback in en-US
+    const defaultLocale = 'en-US';
+    if (locale === defaultLocale) {
+      // We're editing the default locale directly
+      return JSON.stringify({ [locale]: safe });
+    } else {
+      // We're adding a new locale: preserve the plain text as en-US fallback
+      return JSON.stringify({ [defaultLocale]: parsed, [locale]: safe });
+    }
+  }
+  return JSON.stringify({ ...parsed, [locale]: safe });
+}
+
+/**
+ * Returns the value to display in the title input for a given locale.
+ * - Plain text → always returns it as-is.
+ * - JSON → returns the locale value, with fallback.
+ */
+export function getTitleForLocale(raw: string, locale: string): string {
+  return resolveTitle(raw, locale);
+}
+
+/**
+ * Returns true if the raw title is stored as LocalizedDesc JSON.
+ */
+export function isTitleLocalized(raw: string): boolean {
+  return typeof parseTitle(raw) === 'object';
+}
+
+/**
+ * Searches the raw title value across ALL stored locales.
+ * Used for admin search — matches if any locale contains the term.
+ */
+export function titleMatchesTerm(raw: string, term: string): boolean {
+  const parsed = parseTitle(raw);
+  const lower  = term.toLowerCase();
+  if (typeof parsed === 'string') return parsed.toLowerCase().includes(lower);
+  return Object.values(parsed).some((v) => v.toLowerCase().includes(lower));
+}

@@ -49,6 +49,8 @@ import { SearchIcon } from "@/components/icons";
 import { formatMoney } from "@/utils/currency";
 import { VariantPrices } from "@/components/VariantPrices";
 import { RichDescriptionEditor } from "@/components/RichDescriptionEditor";
+import { LocalizedTitleInput } from "@/components/LocalizedTitleInput";
+import { resolveTitle, titleMatchesTerm, resolveDescription } from "@/utils/description";
 
 // --- Data types ----------------------------------------------------------
 /**
@@ -86,7 +88,7 @@ const STATUS_OPTIONS = ["", "active", "draft"];
  * create/edit basic product records.
  */
 export default function ProductsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { getJson, postJson, patchJson } = useSecuredApi();
 
   const apiBase = (import.meta as any).env?.API_BASE_URL
@@ -149,7 +151,7 @@ export default function ProductsPage() {
 
     return products.filter(
       (p) =>
-        p.title.toLowerCase().includes(term) ||
+        titleMatchesTerm(p.title, term) ||
         p.description.toLowerCase().includes(term) ||
         p.variants.some((v) => v.sku.toLowerCase().includes(term)),
     );
@@ -399,8 +401,8 @@ export default function ProductsPage() {
             <TableBody emptyContent={t("admin-products-empty")}>
               {displayed.map((p) => (
                 <TableRow key={p.id}>
-                  <TableCell>{p.title}</TableCell>
-                  <TableCell>{p.description || "-"}</TableCell>
+                  <TableCell>{resolveTitle(p.title, i18n.language)}</TableCell>
+                  <TableCell>{resolveDescription(p.description, i18n.language) || "-"}</TableCell>
                   <TableCell>{p.variants.length}</TableCell>
                   <TableCell>{p.status}</TableCell>
                   <TableCell>
@@ -427,19 +429,19 @@ export default function ProductsPage() {
         <ModalContent>
           <ModalHeader>
             {editingProduct
-              ? editingProduct.title
+              ? resolveTitle(editingProduct.title, i18n.language)
               : t("admin-products-modal-title")}
           </ModalHeader>
           <ModalBody className="space-y-4">
             <form className="space-y-4" id="product-form" onSubmit={submitForm}>
               <div>
-                <label className="block text-sm font-medium">
+                <label className="block text-sm font-medium mb-1">
                   {t("admin-products-modal-field-title")}
                 </label>
-                <Input
-                  required
+                <LocalizedTitleInput
                   value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
+                  onChange={setFormTitle}
+                  required
                 />
               </div>
               <div>

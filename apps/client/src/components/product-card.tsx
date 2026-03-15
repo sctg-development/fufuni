@@ -5,6 +5,7 @@ import { StoreProduct } from "@/lib/store-api";
 import { useTranslation } from "react-i18next";
 import { useCart } from "@/hooks/useCart";
 import { formatMoney } from "@/utils/currency";
+import { resolveTitle } from "@/utils/description";
 
 interface Props {
   product: StoreProduct;
@@ -17,9 +18,11 @@ export const ProductCard: React.FC<Props> = ({
   selectedSku,
   onSelectVariant,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { addItem } = useCart();
   const navigate = useNavigate();
+
+  const displayTitle = resolveTitle(product.title, i18n.language);
 
   const variant =
     product.variants.find((v) => v.sku === selectedSku) ||
@@ -47,7 +50,7 @@ export const ProductCard: React.FC<Props> = ({
       >
         <img
           src={image}
-          alt={product.title}
+          alt={displayTitle}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           onError={(e) =>
             ((e.target as HTMLImageElement).src =
@@ -60,7 +63,7 @@ export const ProductCard: React.FC<Props> = ({
           </span>
         )}
       </div>
-      <h3 className="font-medium text-default-900 mb-1">{product.title}</h3>
+      <h3 className="font-medium text-default-900 mb-1">{displayTitle}</h3>
       <p className="text-default-500 text-sm mb-3">{price}</p>
       {product.variants.length > 1 && onSelectVariant && (
         <select
@@ -83,7 +86,7 @@ export const ProductCard: React.FC<Props> = ({
           const sku = selectedSku || variant.sku;
           addItem({
             sku,
-            title: `${product.title}${variant.title ? ` - ${variant.title}` : ""}`,
+            title: `${displayTitle}${variant.title ? ` - ${variant.title}` : ""}`,
             price_cents: variant.price_cents,
             currency: variant.currency ?? "USD",
             image_url: variant.image_url || product.image_url,
