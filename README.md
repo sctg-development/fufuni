@@ -382,7 +382,32 @@ AI_PERMISSION="ai:api"
 STRIPE_SECRET_KEY="sk_test_51TBaaa4"
 STRIPE_PUBLISHABLE_KEY="pk_test_51TaaaaX"
 STRIPE_WEBHOOK_SECRET="whsec_y4bbb"
+
+# Optional: order tracking email (Stripe webhook)
+ORDER_TOKEN_SECRET="a-very-long-random-secret-32+chars"
+STOREURL="https://yourstore.example.com"
+STORENAME="My Store"
+
+# Optional: Mailgun (required to send the order tracking email)
+MAILGUN_USER="postmaster@yourdomain.com"
+MAILGUN_API_KEY="key-..."
+MAILGUN_DOMAIN="yourdomain.com"
+MAILGUN_BASE_URL="https://api.mailgun.net"
 ```
+
+### Order tracking & email (Stripe webhook)
+
+After a successful Stripe Checkout, a webhook handler generates a signed "view token" and stores a **hash of the token** on the order record (never the raw token).
+
+- The token is signed using `ORDER_TOKEN_SECRET` and is valid for **30 days**.
+- The email contains a link of the form:
+  `https://<STOREURL>/order/<orderId>?token=<viewToken>`
+- On the frontend, the `/order/:id` page validates the token and returns order details without requiring login.
+- To revoke access, clear `viewtoken` on the order record (the token is stored as a hash).
+
+If Mailgun is configured, the worker will send an order confirmation email to the customer containing the tracking link. If Mailgun is not configured, the token is still generated and stored, but no email is sent.
+
+> **IMPORTANT:** `STOREURL` must point to your public storefront (including protocol). The link is built using this value.
 
 ### GitHub secrets
 
@@ -413,6 +438,17 @@ AI_PERMISSION="ai:api"
 STRIPE_SECRET_KEY="sk_test_51TBaaa4"
 STRIPE_PUBLISHABLE_KEY="pk_test_51TaaaaX"
 STRIPE_WEBHOOK_SECRET="whsec_y4bbb"
+
+# Optional: order tracking email (Stripe webhook)
+ORDER_TOKEN_SECRET="a-very-long-random-secret-32+chars"
+STOREURL="https://yourstore.example.com"
+STORENAME="My Store"
+
+# Optional: Mailgun (required to send the order tracking email)
+MAILGUN_USER="postmaster@yourdomain.com"
+MAILGUN_API_KEY="key-..."
+MAILGUN_DOMAIN="yourdomain.com"
+MAILGUN_BASE_URL="https://api.mailgun.net"
 ```
 
 each secrets should be manually entered in Github like:
