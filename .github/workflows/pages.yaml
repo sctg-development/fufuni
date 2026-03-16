@@ -91,6 +91,7 @@ jobs:
           echo "STORE_NAME=${{ secrets.STORE_NAME }}" >> .env
           echo "TURBO_TEAM=${{ vars.TURBO_TEAM }}" >> .env
           echo "TURBO_TOKEN=${{ secrets.TURBO_TOKEN }}" >> .env
+          echo "VITE_BASE_PATH=${{ github.event.repository.name }}" >> .env
       
       - name: Build project
         # You can change the base path to your repository name
