@@ -138,6 +138,7 @@ export default defineConfig({
     "import.meta.env.DATABASE_PERMISSION": JSON.stringify(process.env.DATABASE_PERMISSION || "admin:database"),
     "import.meta.env.AI_PERMISSION": JSON.stringify(process.env.AI_PERMISSION || "ai:api"),
     "import.meta.env.MERCHANT_PK": JSON.stringify(process.env.MERCHANT_PK || "merchant_pk_placeholder"),
+    "import.meta.env.MAIL_PERMISSION": JSON.stringify(process.env.MAIL_PERMISSION || "mail:api"),
   },
   resolve: {
     tsconfigPaths: true,

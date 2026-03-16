@@ -26,6 +26,9 @@ declare namespace Cloudflare {
 		BACKUP_GPG: string;
 		BACKUP_SSH: string;
 		RATE_LIMITER: RateLimit;
+		MAILGUN_API_KEY: string;
+		MAILGUN_DOMAIN: string;
+		MAILGUN_BASE_URL: string;
 	}
 }
 interface Env extends Cloudflare.Env {}
