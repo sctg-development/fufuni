@@ -333,5 +333,9 @@
   "admin-variant-prices-price": "Precio",
   "admin-variant-prices-add-title": "Agregar precio para variante",
   "admin-variant-prices-select-currency": "Selecciona moneda",
-  "admin-variant-prices-enter-price": "Precio"
+  "admin-variant-prices-enter-price": "Precio",
+  "checkout-session-id": "ID de sesión",
+  "checkout-success-message": "Gracias por tu compra. \nLe hemos enviado un correo electrónico de confirmación con los detalles de su pedido.",
+  "continue-shopping": "Continuar comprando",
+  "view-cart": "Ver carrito"
 }

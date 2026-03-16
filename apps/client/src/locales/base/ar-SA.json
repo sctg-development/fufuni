@@ -333,5 +333,9 @@
   "admin-variant-prices-price": "السعر",
   "admin-variant-prices-add-title": "إضافة سعر للنسخة",
   "admin-variant-prices-select-currency": "اختر العملة",
-  "admin-variant-prices-enter-price": "السعر"
+  "admin-variant-prices-enter-price": "السعر",
+  "checkout-session-id": "معرف الجلسة",
+  "checkout-success-message": "شكرا على الشراء. \nلقد أرسلنا رسالة تأكيد بالبريد الإلكتروني تحتوي على تفاصيل طلبك.",
+  "continue-shopping": "مواصلة التسوق",
+  "view-cart": "عرض العربة"
 }

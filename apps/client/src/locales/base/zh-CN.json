@@ -333,5 +333,9 @@
   "admin-variant-prices-price": "价格",
   "admin-variant-prices-add-title": "为变体添加价格",
   "admin-variant-prices-select-currency": "选择货币",
-  "admin-variant-prices-enter-price": "价格"
+  "admin-variant-prices-enter-price": "价格",
+  "checkout-session-id": "会话ID",
+  "checkout-success-message": "感谢您的购买。\n我们已发送一封确认电子邮件，其中包含您的订单详细信息。",
+  "continue-shopping": "继续购物",
+  "view-cart": "查看购物车"
 }

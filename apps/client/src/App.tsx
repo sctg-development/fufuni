@@ -42,6 +42,7 @@ import ShippingRatesPage from "@/pages/admin/shipping-rates";
 import { SwaggerPage } from "@/pages/swagger";
 import CartPage from "@/pages/cart";
 import ProductPage from "@/pages/product";
+import SuccessPage from "@/pages/success";
 
 function App() {
   const { isLoading } = useAuth();
@@ -61,6 +62,7 @@ function App() {
       <Routes>
         <Route element={<IndexPage />} path="/" />
         <Route element={<CartPage />} path="/cart" />
+        <Route element={<SuccessPage />} path="/success" />
         <Route element={<ProductPage />} path="/product/:id" />
         <Route
           element={<AuthenticationGuard component={ApiPage} />}
