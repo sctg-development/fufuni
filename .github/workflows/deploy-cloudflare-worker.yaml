@@ -93,6 +93,9 @@ jobs:
           echo "AI_MODEL=${{ secrets.AI_MODEL }}" >> .env
           echo "AI_API_URL=${{ secrets.AI_API_URL }}" >> .env
           echo "AI_PERMISSION=${{ secrets.AI_PERMISSION }}" >> .env
+          echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
+          echo "STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}" >> .env
+          echo "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" >> .env
 
       - name: Replace "// vars.*" in wrangler.jsonc with a json string
         run: |
@@ -101,7 +104,7 @@ jobs:
           cp wrangler.jsonc wrangler.jsonc.bak
           set -a && source .env && set +a 
           cat .env
-          cat wrangler.jsonc.bak | sed 's|// "vars".*.|,"vars": { "CRYPTOKEN": "'"${CRYPTOKEN}"'", "AUTHENTICATION_PROVIDER_TYPE": "'"${AUTHENTICATION_PROVIDER_TYPE}"'", "AUTH0_DOMAIN": "'"${AUTH0_DOMAIN}"'", "AUTH0_CLIENT_ID": "'"${AUTH0_CLIENT_ID}"'","AUTH0_CLIENT_SECRET": "'"${AUTH0_CLIENT_SECRET}"'", "AUTH0_SCOPE": "'"${AUTH0_SCOPE}"'", "AUTH0_AUDIENCE": "'"${AUTH0_AUDIENCE}"'", "API_BASE_URL": "'"${API_BASE_URL}"'", "CORS_ORIGIN": "'"${CORS_ORIGIN}"'", "ADMIN_AUTH0_PERMISSION": "'"${ADMIN_AUTH0_PERMISSION}"'", "ADMIN_STORE_PERMISSION": "'"${ADMIN_STORE_PERMISSION}"'", "AUTH0_MANAGEMENT_API_CLIENT_ID": "'"${AUTH0_MANAGEMENT_API_CLIENT_ID}"'", "AUTH0_MANAGEMENT_API_CLIENT_SECRET": "'"${AUTH0_MANAGEMENT_API_CLIENT_SECRET}"'", "AUTH0_AUTOMATIC_PERMISSIONS": "'"${AUTH0_AUTOMATIC_PERMISSIONS}"'", "MERCHANT_PK": "'"${MERCHANT_PK}"'", "MERCHANT_SK": "'"${MERCHANT_SK}"'", "BACKUP_GPG": "'"${BACKUP_GPG}"'", "BACKUP_SSH": "'"${BACKUP_SSH}"'", "AUTH0_TEST_TOKEN": "'"${AUTH0_TEST_TOKEN}"'", "CLOUDFLARE_USE_PAGE_DEV_DOMAIN": "'"${CLOUDFLARE_USE_PAGE_DEV_DOMAIN}"'", "KV_CACHE_ID": "'"${KV_CACHE_ID}"'", "WANT_PERMISSION": "'"${WANT_PERMISSION}"'", "DATABASE_PERMISSION": "'"${DATABASE_PERMISSION}"'", "AI_API_KEY": "'"${AI_API_KEY}"'", "AI_MODEL": "'"${AI_MODEL}"'", "AI_API_URL": "'"${AI_API_URL}"'", "AI_PERMISSION": "'"${AI_PERMISSION}"'" }|' \
+          cat wrangler.jsonc.bak | sed 's|// "vars".*.|,"vars": { "CRYPTOKEN": "'"${CRYPTOKEN}"'", "AUTHENTICATION_PROVIDER_TYPE": "'"${AUTHENTICATION_PROVIDER_TYPE}"'", "AUTH0_DOMAIN": "'"${AUTH0_DOMAIN}"'", "AUTH0_CLIENT_ID": "'"${AUTH0_CLIENT_ID}"'","AUTH0_CLIENT_SECRET": "'"${AUTH0_CLIENT_SECRET}"'", "AUTH0_SCOPE": "'"${AUTH0_SCOPE}"'", "AUTH0_AUDIENCE": "'"${AUTH0_AUDIENCE}"'", "API_BASE_URL": "'"${API_BASE_URL}"'", "CORS_ORIGIN": "'"${CORS_ORIGIN}"'", "ADMIN_AUTH0_PERMISSION": "'"${ADMIN_AUTH0_PERMISSION}"'", "ADMIN_STORE_PERMISSION": "'"${ADMIN_STORE_PERMISSION}"'", "AUTH0_MANAGEMENT_API_CLIENT_ID": "'"${AUTH0_MANAGEMENT_API_CLIENT_ID}"'", "AUTH0_MANAGEMENT_API_CLIENT_SECRET": "'"${AUTH0_MANAGEMENT_API_CLIENT_SECRET}"'", "AUTH0_AUTOMATIC_PERMISSIONS": "'"${AUTH0_AUTOMATIC_PERMISSIONS}"'", "MERCHANT_PK": "'"${MERCHANT_PK}"'", "MERCHANT_SK": "'"${MERCHANT_SK}"'", "BACKUP_GPG": "'"${BACKUP_GPG}"'", "BACKUP_SSH": "'"${BACKUP_SSH}"'", "AUTH0_TEST_TOKEN": "'"${AUTH0_TEST_TOKEN}"'", "CLOUDFLARE_USE_PAGE_DEV_DOMAIN": "'"${CLOUDFLARE_USE_PAGE_DEV_DOMAIN}"'", "KV_CACHE_ID": "'"${KV_CACHE_ID}"'", "WANT_PERMISSION": "'"${WANT_PERMISSION}"'", "DATABASE_PERMISSION": "'"${DATABASE_PERMISSION}"'", "AI_API_KEY": "'"${AI_API_KEY}"'", "AI_MODEL": "'"${AI_MODEL}"'", "AI_API_URL": "'"${AI_API_URL}"'", "AI_PERMISSION": "'"${AI_PERMISSION}"'", "STRIPE_SECRET_KEY": "'"${STRIPE_SECRET_KEY}"'", "STRIPE_PUBLISHABLE_KEY": "'"${STRIPE_PUBLISHABLE_KEY}"'", "STRIPE_WEBHOOK_SECRET": "'"${STRIPE_WEBHOOK_SECRET}"'" }|' \
             | sed '/"binding": "KV_CACHE"/,/}/ s|"id": "[^"]*"|"id": "'"${KV_CACHE_ID}"'"|' > wrangler.jsonc.2
           # inject a custom-domain route only when we're *not* configured to use the page.dev domain
           # treat any non‑empty, non‑false/0 value as "use page.dev"
@@ -150,6 +153,9 @@ jobs:
             AUTH0_TEST_TOKEN
             CLOUDFLARE_USE_PAGE_DEV_DOMAIN
             KV_CACHE_ID
+            STRIPE_SECRET_KEY
+            STRIPE_PUBLISHABLE_KEY
+            STRIPE_WEBHOOK_SECRET
         env:
           CRYPTOKEN: ${{ secrets.CRYPTOKEN }}
           AUTHENTICATION_PROVIDER_TYPE: ${{ secrets.AUTHENTICATION_PROVIDER_TYPE }}
@@ -180,3 +186,6 @@ jobs:
           AI_MODEL: ${{ secrets.AI_MODEL }}
           AI_API_URL: ${{ secrets.AI_API_URL }}
           AI_PERMISSION: ${{ secrets.AI_PERMISSION }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
