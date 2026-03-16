@@ -131,7 +131,7 @@ export default defineConfig({
       process.env.AUTH0_CACHE_DURATION_S || "300",
     ),
     "import.meta.env.MERCHANT_PK": JSON.stringify(process.env.MERCHANT_PK || "merchant_pk_placeholder"),
-    "import.meta.env.STORE_URL": JSON.stringify(process.env.STORE_URL || "http://localhost:8787"),
+    "import.meta.env.STORE_URL": JSON.stringify(process.env.STORE_URL || "https://github.com/sctg-development/fufuni"),
     "import.meta.env.STORE_NAME": JSON.stringify(process.env.STORE_NAME || "Fufuni Store"),
     // Permissions
     "import.meta.env.PERMISSIONS": JSON.stringify(scopesArray),

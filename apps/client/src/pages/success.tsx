@@ -84,7 +84,7 @@ export default function SuccessPage() {
     setError(null);
 
     // Call the public lookup endpoint — no auth token needed
-    const merchantAPI = import.meta.env.VITE_MERCHANT_API || "http://localhost:8787";
+    const merchantAPI = import.meta.env.API_BASE_URL || "http://localhost:8787";
     fetch(`${merchantAPI}/v1/orders/lookup?session_id=${encodeURIComponent(sessionId)}`)
       .then((res) => {
         if (!res.ok) {
