@@ -64,4 +64,7 @@ jobs:
           MERCHANT_SK: ${{ secrets.MERCHANT_SK }}
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
         run: |
-          curl -X POST ${{ secrets.API_BASE_URL }}/v1/setup/stripe -H "Authorization: Bearer ${{ secrets.MERCHANT_SK }}" -H "Content-Type: application/json" -d '{"stripe_secret_key":"${{ secrets.MERCHANT_SK }}","stripe_webhook_secret":"${{ secrets.STRIPE_WEBHOOK_SECRET }}"}
+          curl -X POST "$API_BASE_URL/v1/setup/stripe" \
+            -H "Authorization: Bearer $MERCHANT_SK" \
+            -H "Content-Type: application/json" \
+            -d "{\"stripe_secret_key\":\"$STRIPE_SECRET_KEY\",\"stripe_webhook_secret\":\"$STRIPE_WEBHOOK_SECRET\"}"
