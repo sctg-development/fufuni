@@ -88,7 +88,7 @@ export default function OrderPage() {
     }
 
     // Call the public status endpoint — no Authorization header needed
-    const merchantAPI = import.meta.env.STORE_URL || "http://localhost:8787";
+    const merchantAPI = import.meta.env.API_BASE_URL || "http://localhost:8787";
     fetch(`${merchantAPI}/v1/orders/${id}/status?token=${encodeURIComponent(token)}`)
       .then((res) => {
         if (res.status === 401) throw new Error("Link expired or invalid.");
