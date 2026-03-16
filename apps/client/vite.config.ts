@@ -21,7 +21,6 @@ import dotenv from "dotenv";
 import path from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "@tailwindcss/vite";
 import { githubPagesSpa } from "@sctg/vite-plugin-github-pages-spa";
 
@@ -140,7 +139,10 @@ export default defineConfig({
     "import.meta.env.AI_PERMISSION": JSON.stringify(process.env.AI_PERMISSION || "ai:api"),
     "import.meta.env.MERCHANT_PK": JSON.stringify(process.env.MERCHANT_PK || "merchant_pk_placeholder"),
   },
-  plugins: [react(), tsconfigPaths(), tailwindcss(), githubPagesSpa()],
+  resolve: {
+    tsconfigPaths: true,
+  },
+  plugins: [react(), tailwindcss(), githubPagesSpa()],
   build: {
     // Inline assets smaller than 1KB
     // This is for demonstration purposes only
@@ -161,17 +163,28 @@ export default defineConfig({
          * Groups all @heroui dependencies into a single chunk
          * to optimize loading performance and avoid oversized chunks
          */
-        manualChunks: {
-          react: [
-            "react",
-            "react-dom",
-            "react-router-dom",
-            "react-i18next",
-            "i18next",
-            "i18next-http-backend",
-          ],
-          heroui: extractPerVendorDependencies(packageJson, "@heroui"),
-          auth0: extractPerVendorDependencies(packageJson, "@auth0"),
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+
+          // Group core React + i18n dependencies into a single chunk
+          if (
+            [
+              "react",
+              "react-dom",
+              "react-router-dom",
+              "react-i18next",
+              "i18next",
+              "i18next-http-backend",
+            ].some((name) => id.includes(`/node_modules/${name}/`))
+          ) {
+            return "react";
+          }
+
+          // Group Heroui packages together for better caching
+          if (id.includes("/node_modules/@heroui/")) return "heroui";
+
+          // Group Auth0 packages together
+          if (id.includes("/node_modules/@auth0/")) return "auth0";
         },
       },
     },
