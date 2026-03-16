@@ -46,7 +46,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           submodules: "recursive"
-          depth: 1
+          fetch-depth: 1
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -88,20 +88,17 @@ jobs:
           echo "CLOUDFLARE_USE_PAGE_DEV_DOMAIN=${{ secrets.CLOUDFLARE_USE_PAGE_DEV_DOMAIN }}" >> .env
           echo "VITE_BASE_PATH=${{ github.event.repository.name }}" >> .env
           echo "DATABASE_PERMISSION=${{ secrets.DATABASE_PERMISSION }}" >> .env
-      # - name: Workaround Heroui in monorepo
-      #   run: |
-      #     source .env
-      #     npm i -g turbo
-      #     ./build-reproductible-dev.sh 
+          echo "STORE_URL=${{ secrets.STORE_URL }}" >> .env
+          echo "STORE_NAME=${{ secrets.STORE_NAME }}" >> .env
+          echo "TURBO_TEAM=${{ vars.TURBO_TEAM }}" >> .env
+          echo "TURBO_TOKEN=${{ secrets.TURBO_TOKEN }}" >> .env
       
       - name: Build project
         # You can change the base path to your repository name
         run: |
           source .env
           npm run build:env -- --base="/${{ github.event.repository.name }}/"
-        env:
-          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+        
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v4
