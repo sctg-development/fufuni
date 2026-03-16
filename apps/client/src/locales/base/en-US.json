@@ -132,7 +132,6 @@
   "status": "Status",
   "all": "All",
   "actions": "Actions",
-
   "admin-customers-title": "Customers",
   "admin-customers-loading": "Loading customers...",
   "admin-customers-empty": "No customers yet. Customers are created automatically when orders are placed.",
@@ -169,7 +168,6 @@
   "template_welcome_back": "Welcome {{name}}, explore the example pages below or log out to start over.",
   "template_clone_instructions": "Clone this repo, edit .env and run npm install && npm run dev:env to get started.",
   "template_login_required": "(login required to access)",
-
   "admin-inventory-title": "Inventory",
   "admin-inventory-loading": "Loading inventory...",
   "admin-inventory-empty": "No inventory yet",
@@ -191,7 +189,6 @@
   "admin-inventory-init-warehouse": "Initialize in this warehouse",
   "admin-inventory-remove-warehouse": "Remove from this warehouse",
   "admin-inventory-adjust-section": "Adjust quantity in selected warehouse",
-
   "admin-orders-title": "Orders",
   "admin-orders-loading": "Loading orders...",
   "admin-orders-empty": "No orders yet",
@@ -219,7 +216,6 @@
   "admin-orders-confirm-refund": "Are you sure you want to refund this order?",
   "admin-orders-refunding": "Refunding...",
   "admin-orders-btn-refund": "Refund Order",
-
   "admin-webhooks-title": "Webhooks",
   "admin-webhooks-btn-add": "Add Webhook",
   "admin-webhooks-empty": "No webhooks configured",
@@ -313,7 +309,7 @@
   "admin-common-default": "Default",
   "admin-common-status": "Status",
   "admin-common-actions": "Actions",
-  "admin-common-search": "Search",
+  "admin-common-search": "Search...",
   "admin-common-loading": "Loading...",
   "admin-common-empty": "No data",
   "admin-common-cancel": "Cancel",
@@ -333,9 +329,29 @@
   "admin-variant-prices-add-title": "Add Price for Variant",
   "admin-variant-prices-select-currency": "Select Currency",
   "admin-variant-prices-enter-price": "Price",
-
   "checkout-success-message": "Thanks for your purchase. We've sent a confirmation email with your order details.",
   "checkout-session-id": "Session ID",
   "continue-shopping": "Continue shopping",
-  "view-cart": "View cart"
+  "view-cart": "View cart",
+  "loading": "Loading...",
+  "status-pending": "Pending",
+  "status-paid": "Paid",
+  "status-processing": "Processing",
+  "status-shipped": "Shipped",
+  "status-delivered": "Delivered",
+  "status-refunded": "Refunded",
+  "status-canceled": "Canceled",
+  "order-confirmed": "Order confirmed!",
+  "order-number": "Order #",
+  "qty": "Qty",
+  "order-tracking": "Order Tracking",
+  "tracking-link-invalid": "Link invalid or expired",
+  "unable-to-load-order": "Unable to load order details.",
+  "tracking-link-valid-30days": "Order tracking links are valid for 30 days. Check your email.",
+  "return-home": "Return home",
+  "tracking": "Tracking",
+  "tracking-number": "Tracking number",
+  "shipped-on": "Shipped on",
+  "track-on-carrier": "Track on carrier website",
+  "confirmation-email-sent": "Confirmation email sent"
 }

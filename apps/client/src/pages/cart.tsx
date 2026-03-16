@@ -35,7 +35,7 @@ export default function CartPage() {
       );
       const { checkout_url } = await checkoutCart(
         cart.id,
-        window.location.origin + "/success",
+        `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
         window.location.href,
       );
       clear();

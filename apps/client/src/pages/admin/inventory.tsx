@@ -328,7 +328,7 @@ export default function InventoryPage() {
             <Input
               isClearable
               className="w-full"
-              placeholder={t("admin-common-search", "Search...")}
+              placeholder={t("admin-common-search")}
               startContent={<SearchIcon className="w-4 h-4" />}
               value={globalFilter}
               onValueChange={setGlobalFilter}
@@ -361,7 +361,7 @@ export default function InventoryPage() {
                 isLoading={loading}
                 items={displayed}
                 loadingContent={
-                  <div>{t("admin-common-loading", "Loading...")}</div>
+                  <div>{t("admin-common-loading")}</div>
                 }
               >
                 {(item) => {
@@ -695,7 +695,7 @@ export default function InventoryPage() {
                 variant="light"
                 onPress={() => onOpenChange()}
               >
-                {t("admin-common-cancel", "Cancel")}
+                {t("admin-common-cancel")}
               </Button>
               <Button
                 color="primary"

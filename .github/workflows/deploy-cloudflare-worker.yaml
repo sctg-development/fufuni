@@ -101,6 +101,9 @@ jobs:
           echo "MAILGUN_DOMAIN=${{ secrets.MAILGUN_DOMAIN }}" >> .env
           echo "MAILGUN_BASE_URL=${{ secrets.MAILGUN_BASE_URL }}" >> .env
           echo "MAIL_PERMISSION=${{ secrets.MAIL_PERMISSION }}" >> .env
+          echo "ORDER_TOKEN_SECRET=${{ secrets.ORDER_TOKEN_SECRET }}" >> .env
+          echo "STORE_URL=${{ secrets.STORE_URL }}" >> .env
+          echo "STORE_NAME=${{ secrets.STORE_NAME }}" >> .env
 
       - name: Replace "// vars.*" in wrangler.jsonc with a json string
         run: |
@@ -109,7 +112,7 @@ jobs:
           cp wrangler.jsonc wrangler.jsonc.bak
           set -a && source .env && set +a 
           cat .env
-          cat wrangler.jsonc.bak | sed 's|// "vars".*.|,"vars": { "CRYPTOKEN": "'"${CRYPTOKEN}"'", "AUTHENTICATION_PROVIDER_TYPE": "'"${AUTHENTICATION_PROVIDER_TYPE}"'", "AUTH0_DOMAIN": "'"${AUTH0_DOMAIN}"'", "AUTH0_CLIENT_ID": "'"${AUTH0_CLIENT_ID}"'","AUTH0_CLIENT_SECRET": "'"${AUTH0_CLIENT_SECRET}"'", "AUTH0_SCOPE": "'"${AUTH0_SCOPE}"'", "AUTH0_AUDIENCE": "'"${AUTH0_AUDIENCE}"'", "API_BASE_URL": "'"${API_BASE_URL}"'", "CORS_ORIGIN": "'"${CORS_ORIGIN}"'", "ADMIN_AUTH0_PERMISSION": "'"${ADMIN_AUTH0_PERMISSION}"'", "ADMIN_STORE_PERMISSION": "'"${ADMIN_STORE_PERMISSION}"'", "AUTH0_MANAGEMENT_API_CLIENT_ID": "'"${AUTH0_MANAGEMENT_API_CLIENT_ID}"'", "AUTH0_MANAGEMENT_API_CLIENT_SECRET": "'"${AUTH0_MANAGEMENT_API_CLIENT_SECRET}"'", "AUTH0_AUTOMATIC_PERMISSIONS": "'"${AUTH0_AUTOMATIC_PERMISSIONS}"'", "MERCHANT_PK": "'"${MERCHANT_PK}"'", "MERCHANT_SK": "'"${MERCHANT_SK}"'", "BACKUP_GPG": "'"${BACKUP_GPG}"'", "BACKUP_SSH": "'"${BACKUP_SSH}"'", "AUTH0_TEST_TOKEN": "'"${AUTH0_TEST_TOKEN}"'", "CLOUDFLARE_USE_PAGE_DEV_DOMAIN": "'"${CLOUDFLARE_USE_PAGE_DEV_DOMAIN}"'", "KV_CACHE_ID": "'"${KV_CACHE_ID}"'", "WANT_PERMISSION": "'"${WANT_PERMISSION}"'", "DATABASE_PERMISSION": "'"${DATABASE_PERMISSION}"'", "AI_API_KEY": "'"${AI_API_KEY}"'", "AI_MODEL": "'"${AI_MODEL}"'", "AI_API_URL": "'"${AI_API_URL}"'", "AI_PERMISSION": "'"${AI_PERMISSION}"'", "STRIPE_SECRET_KEY": "'"${STRIPE_SECRET_KEY}"'", "STRIPE_PUBLISHABLE_KEY": "'"${STRIPE_PUBLISHABLE_KEY}"'", "STRIPE_WEBHOOK_SECRET": "'"${STRIPE_WEBHOOK_SECRET}"'", "MAILGUN_USER": "'"${MAILGUN_USER}"'", "MAILGUN_API_KEY": "'"${MAILGUN_API_KEY}"'", "MAILGUN_DOMAIN": "'"${MAILGUN_DOMAIN}"'", "MAILGUN_BASE_URL": "'"${MAILGUN_BASE_URL}"'", "MAIL_PERMISSION": "'"${MAIL_PERMISSION}"'" }|' \
+          cat wrangler.jsonc.bak | sed 's|// "vars".*.|,"vars": { "CRYPTOKEN": "'"${CRYPTOKEN}"'", "AUTHENTICATION_PROVIDER_TYPE": "'"${AUTHENTICATION_PROVIDER_TYPE}"'", "AUTH0_DOMAIN": "'"${AUTH0_DOMAIN}"'", "AUTH0_CLIENT_ID": "'"${AUTH0_CLIENT_ID}"'","AUTH0_CLIENT_SECRET": "'"${AUTH0_CLIENT_SECRET}"'", "AUTH0_SCOPE": "'"${AUTH0_SCOPE}"'", "AUTH0_AUDIENCE": "'"${AUTH0_AUDIENCE}"'", "API_BASE_URL": "'"${API_BASE_URL}"'", "CORS_ORIGIN": "'"${CORS_ORIGIN}"'", "ADMIN_AUTH0_PERMISSION": "'"${ADMIN_AUTH0_PERMISSION}"'", "ADMIN_STORE_PERMISSION": "'"${ADMIN_STORE_PERMISSION}"'", "AUTH0_MANAGEMENT_API_CLIENT_ID": "'"${AUTH0_MANAGEMENT_API_CLIENT_ID}"'", "AUTH0_MANAGEMENT_API_CLIENT_SECRET": "'"${AUTH0_MANAGEMENT_API_CLIENT_SECRET}"'", "AUTH0_AUTOMATIC_PERMISSIONS": "'"${AUTH0_AUTOMATIC_PERMISSIONS}"'", "MERCHANT_PK": "'"${MERCHANT_PK}"'", "MERCHANT_SK": "'"${MERCHANT_SK}"'", "BACKUP_GPG": "'"${BACKUP_GPG}"'", "BACKUP_SSH": "'"${BACKUP_SSH}"'", "AUTH0_TEST_TOKEN": "'"${AUTH0_TEST_TOKEN}"'", "CLOUDFLARE_USE_PAGE_DEV_DOMAIN": "'"${CLOUDFLARE_USE_PAGE_DEV_DOMAIN}"'", "KV_CACHE_ID": "'"${KV_CACHE_ID}"'", "WANT_PERMISSION": "'"${WANT_PERMISSION}"'", "DATABASE_PERMISSION": "'"${DATABASE_PERMISSION}"'", "AI_API_KEY": "'"${AI_API_KEY}"'", "AI_MODEL": "'"${AI_MODEL}"'", "AI_API_URL": "'"${AI_API_URL}"'", "AI_PERMISSION": "'"${AI_PERMISSION}"'", "STRIPE_SECRET_KEY": "'"${STRIPE_SECRET_KEY}"'", "STRIPE_PUBLISHABLE_KEY": "'"${STRIPE_PUBLISHABLE_KEY}"'", "STRIPE_WEBHOOK_SECRET": "'"${STRIPE_WEBHOOK_SECRET}"'", "MAILGUN_USER": "'"${MAILGUN_USER}"'", "MAILGUN_API_KEY": "'"${MAILGUN_API_KEY}"'", "MAILGUN_DOMAIN": "'"${MAILGUN_DOMAIN}"'", "MAILGUN_BASE_URL": "'"${MAILGUN_BASE_URL}"'", "MAIL_PERMISSION": "'"${MAIL_PERMISSION}"'", "ORDER_TOKEN_SECRET": "'"${ORDER_TOKEN_SECRET}"'", "STORE_URL": "'"${STORE_URL}"'", "STORE_NAME": "'"${STORE_NAME}"'" }|' \
             | sed '/"binding": "KV_CACHE"/,/}/ s|"id": "[^"]*"|"id": "'"${KV_CACHE_ID}"'"|' > wrangler.jsonc.2
           # inject a custom-domain route only when we're *not* configured to use the page.dev domain
           # treat any non‑empty, non‑false/0 value as "use page.dev"
@@ -166,6 +169,9 @@ jobs:
             MAILGUN_DOMAIN
             MAILGUN_BASE_URL
             MAIL_PERMISSION
+            ORDER_TOKEN_SECRET
+            STORE_URL
+            STORE_NAME
 
         env:
           CRYPTOKEN: ${{ secrets.CRYPTOKEN }}
@@ -205,3 +211,6 @@ jobs:
           MAILGUN_DOMAIN: ${{ secrets.MAILGUN_DOMAIN }}
           MAILGUN_BASE_URL: ${{ secrets.MAILGUN_BASE_URL }}
           MAIL_PERMISSION: ${{ secrets.MAIL_PERMISSION }}
+          ORDER_TOKEN_SECRET: ${{ secrets.ORDER_TOKEN_SECRET }}
+          STORE_URL: ${{ secrets.STORE_URL }}
+          STORE_NAME: ${{ secrets.STORE_NAME }}

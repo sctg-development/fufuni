@@ -43,6 +43,7 @@ import { SwaggerPage } from "@/pages/swagger";
 import CartPage from "@/pages/cart";
 import ProductPage from "@/pages/product";
 import SuccessPage from "@/pages/success";
+import OrderPage from "@/pages/order";
 
 function App() {
   const { isLoading } = useAuth();
@@ -63,6 +64,7 @@ function App() {
         <Route element={<IndexPage />} path="/" />
         <Route element={<CartPage />} path="/cart" />
         <Route element={<SuccessPage />} path="/success" />
+        <Route element={<OrderPage />} path="/order/:id" />
         <Route element={<ProductPage />} path="/product/:id" />
         <Route
           element={<AuthenticationGuard component={ApiPage} />}

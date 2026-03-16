@@ -130,6 +130,9 @@ export default defineConfig({
     "import.meta.env.AUTH0_CACHE_DURATION_S": JSON.stringify(
       process.env.AUTH0_CACHE_DURATION_S || "300",
     ),
+    "import.meta.env.MERCHANT_PK": JSON.stringify(process.env.MERCHANT_PK || "merchant_pk_placeholder"),
+    "import.meta.env.STORE_URL": JSON.stringify(process.env.STORE_URL || "http://localhost:8787"),
+    "import.meta.env.STORE_NAME": JSON.stringify(process.env.STORE_NAME || "Fufuni Store"),
     // Permissions
     "import.meta.env.PERMISSIONS": JSON.stringify(scopesArray),
     "import.meta.env.AUTH0_AUTOMATIC_PERMISSIONS": JSON.stringify(process.env.AUTH0_AUTOMATIC_PERMISSIONS?.split(",") || []),
@@ -137,7 +140,6 @@ export default defineConfig({
     "import.meta.env.ADMIN_STORE_PERMISSION": JSON.stringify(process.env.ADMIN_STORE_PERMISSION || "admin:store"),
     "import.meta.env.DATABASE_PERMISSION": JSON.stringify(process.env.DATABASE_PERMISSION || "admin:database"),
     "import.meta.env.AI_PERMISSION": JSON.stringify(process.env.AI_PERMISSION || "ai:api"),
-    "import.meta.env.MERCHANT_PK": JSON.stringify(process.env.MERCHANT_PK || "merchant_pk_placeholder"),
     "import.meta.env.MAIL_PERMISSION": JSON.stringify(process.env.MAIL_PERMISSION || "mail:api"),
   },
   resolve: {
