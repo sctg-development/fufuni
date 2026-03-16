@@ -86,7 +86,6 @@ jobs:
           echo "BACKUP_SSH=${{ secrets.BACKUP_SSH }}" >> .env
           echo "AUTH0_TEST_TOKEN=${{ secrets.AUTH0_TEST_TOKEN }}" >> .env
           echo "CLOUDFLARE_USE_PAGE_DEV_DOMAIN=${{ secrets.CLOUDFLARE_USE_PAGE_DEV_DOMAIN }}" >> .env
-          echo "VITE_BASE_PATH=${{ github.event.repository.name }}" >> .env
           echo "DATABASE_PERMISSION=${{ secrets.DATABASE_PERMISSION }}" >> .env
           echo "STORE_URL=${{ secrets.STORE_URL }}" >> .env
           echo "STORE_NAME=${{ secrets.STORE_NAME }}" >> .env
