@@ -52,6 +52,7 @@ import clsx from "clsx";
 import { SearchIcon } from "@/components/icons";
 import DefaultLayout from "@/layouts/default";
 import { useSecuredApi } from "@/authentication";
+import { resolveTitle } from "@/utils/description";
 
 // --- typings -------------------------------------------------------------
 /**
@@ -104,7 +105,7 @@ const ADJUST_REASONS = ["restock", "correction", "damaged", "return"] as const;
  * and making warehouse-specific quantity adjustments.
  */
 export default function InventoryPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { getJson, postJson } = useSecuredApi();
 
   const apiBase = (import.meta as any).env?.API_BASE_URL
@@ -378,7 +379,7 @@ export default function InventoryPage() {
                       </TableCell>
                       <TableCell>
                         <span className="font-mono text-sm">
-                          {item.product_title || "-"}
+                          {resolveTitle(item.product_title || "-", i18n.language)}
                         </span>
                       </TableCell>
                       <TableCell>
