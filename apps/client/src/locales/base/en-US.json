@@ -353,5 +353,13 @@
   "tracking-number": "Tracking number",
   "shipped-on": "Shipped on",
   "track-on-carrier": "Track on carrier website",
-  "confirmation-email-sent": "Confirmation email sent"
+  "confirmation-email-sent": "Confirmation email sent",
+  "admin-orders-btn-resend-confirmation": "Resend confirmation email",
+  "admin-orders-resend-sending": "Sending...",
+  "admin-orders-resend-success": "Confirmation email sent",
+  "admin-orders-resend-error": "Failed to send confirmation email",
+  "admin-orders-btn-regenerate-link": "Regenerate tracking link",
+  "admin-orders-regenerating": "Regenerating...",
+  "admin-orders-regenerate-success": "New tracking link sent",
+  "admin-orders-regenerate-error": "Failed to regenerate tracking link"
 }

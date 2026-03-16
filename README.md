@@ -385,8 +385,8 @@ STRIPE_WEBHOOK_SECRET="whsec_y4bbb"
 
 # Optional: order tracking email (Stripe webhook)
 ORDER_TOKEN_SECRET="a-very-long-random-secret-32+chars"
-STOREURL="https://yourstore.example.com"
-STORENAME="My Store"
+STORE_URL="https://yourstore.example.com"
+STORE_NAME="My Store"
 
 # Optional: Mailgun (required to send the order tracking email)
 MAILGUN_USER="postmaster@yourdomain.com"
@@ -401,13 +401,22 @@ After a successful Stripe Checkout, a webhook handler generates a signed "view t
 
 - The token is signed using `ORDER_TOKEN_SECRET` and is valid for **30 days**.
 - The email contains a link of the form:
-  `https://<STOREURL>/order/<orderId>?token=<viewToken>`
+  `https://<STORE_URL>/order/<orderId>?token=<viewToken>`
 - On the frontend, the `/order/:id` page validates the token and returns order details without requiring login.
 - To revoke access, clear `viewtoken` on the order record (the token is stored as a hash).
 
 If Mailgun is configured, the worker will send an order confirmation email to the customer containing the tracking link. If Mailgun is not configured, the token is still generated and stored, but no email is sent.
 
-> **IMPORTANT:** `STOREURL` must point to your public storefront (including protocol). The link is built using this value.
+> **IMPORTANT:** `STORE_URL` must point to your public storefront (including protocol). The link is built using this value.
+
+### Admin actions
+
+For store admins, the API exposes two helper routes to manage the tracking link and confirmation email:
+
+- `POST /v1/orders/:orderId/resend-confirmation` — resends the confirmation email (reuses existing token if present)
+- `POST /v1/orders/:orderId/regenerate-tracking-link` — generates a fresh token (invalidating the old link) and sends a new email
+
+Both endpoints require an admin API key (e.g. `sk_...`) or an authenticated Auth0 user with the proper permissions.
 
 ### GitHub secrets
 
@@ -441,8 +450,8 @@ STRIPE_WEBHOOK_SECRET="whsec_y4bbb"
 
 # Optional: order tracking email (Stripe webhook)
 ORDER_TOKEN_SECRET="a-very-long-random-secret-32+chars"
-STOREURL="https://yourstore.example.com"
-STORENAME="My Store"
+STORE_URL="https://yourstore.example.com"
+STORE_NAME="My Store"
 
 # Optional: Mailgun (required to send the order tracking email)
 MAILGUN_USER="postmaster@yourdomain.com"

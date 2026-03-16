@@ -358,5 +358,13 @@
   "tracking-number": "رقم التتبع",
   "shipped-on": "تم الشحن في",
   "track-on-carrier": "تتبع على موقع الناقل",
-  "confirmation-email-sent": "تم إرسال رسالة تأكيد بالبريد الإلكتروني"
+  "confirmation-email-sent": "تم إرسال رسالة تأكيد بالبريد الإلكتروني",
+  "admin-orders-btn-regenerate-link": "إعادة إنشاء رابط التتبع",
+  "admin-orders-btn-resend-confirmation": "إعادة إرسال رسالة التأكيد الإلكترونية",
+  "admin-orders-regenerate-error": "فشل في إعادة إنشاء رابط التتبع",
+  "admin-orders-regenerate-success": "تم إرسال رابط التتبع الجديد",
+  "admin-orders-regenerating": "تجديد...",
+  "admin-orders-resend-error": "فشل في إرسال رسالة تأكيد بالبريد الإلكتروني",
+  "admin-orders-resend-sending": "إرسال...",
+  "admin-orders-resend-success": "تم إرسال رسالة تأكيد بالبريد الإلكتروني"
 }

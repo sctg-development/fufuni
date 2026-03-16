@@ -358,5 +358,13 @@
   "tracking-number": "跟踪编号",
   "shipped-on": "发货日期",
   "track-on-carrier": "在承运商网站上跟踪",
-  "confirmation-email-sent": "确认电子邮件已发送"
+  "confirmation-email-sent": "确认电子邮件已发送",
+  "admin-orders-btn-regenerate-link": "重新生成跟踪链接",
+  "admin-orders-btn-resend-confirmation": "重新发送确认电子邮件",
+  "admin-orders-regenerate-error": "无法重新生成跟踪链接",
+  "admin-orders-regenerate-success": "新的跟踪链接已发送",
+  "admin-orders-regenerating": "正在再生...",
+  "admin-orders-resend-error": "发送确认邮件失败",
+  "admin-orders-resend-sending": "正在发送...",
+  "admin-orders-resend-success": "确认电子邮件已发送"
 }

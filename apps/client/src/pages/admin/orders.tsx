@@ -160,6 +160,28 @@ export default function OrdersPage() {
     },
   });
 
+  const resendConfirmationMutation = useMutation({
+    mutationFn: (id: string) =>
+      postJson(`${apiBase}/v1/orders/${id}/resend-confirmation`, {}),
+    onSuccess: () => {
+      window.alert(t('admin-orders-resend-success'));
+    },
+    onError: () => {
+      window.alert(t('admin-orders-resend-error'));
+    },
+  });
+
+  const regenerateLinkMutation = useMutation({
+    mutationFn: (id: string) =>
+      postJson(`${apiBase}/v1/orders/${id}/regenerate-tracking-link`, {}),
+    onSuccess: () => {
+      window.alert(t('admin-orders-regenerate-success'));
+    },
+    onError: () => {
+      window.alert(t('admin-orders-regenerate-error'));
+    },
+  });
+
   const columns = useMemo(
     () => [
       columnHelper.accessor("number", {
@@ -715,22 +737,48 @@ export default function OrdersPage() {
                       {t("admin-orders-created")}{" "}
                       {new Date(selectedOrder.created_at).toLocaleString()}
                     </p>
-                    {selectedOrder.status === "paid" &&
-                      selectedOrder.stripe?.payment_intent_id && (
-                        <button
-                          className="text-sm font-medium text-red-500 hover:text-red-600 disabled:opacity-50"
-                          disabled={refundMutation.isPending}
-                          onClick={() => {
-                            if (confirm(t("admin-orders-confirm-refund"))) {
-                              refundMutation.mutate(selectedOrder.id);
-                            }
-                          }}
-                        >
-                          {refundMutation.isPending
-                            ? t("admin-orders-refunding")
-                            : t("admin-orders-btn-refund")}
-                        </button>
-                      )}
+                    <div className="flex items-center gap-3">
+                      <button
+                        className="text-sm font-medium text-blue-500 hover:text-blue-600 disabled:opacity-50"
+                        disabled={resendConfirmationMutation.isPending}
+                        onClick={() => {
+                          resendConfirmationMutation.mutate(selectedOrder.id);
+                        }}
+                      >
+                        {resendConfirmationMutation.isPending
+                          ? t("admin-orders-resend-sending")
+                          : t("admin-orders-btn-resend-confirmation")}
+                      </button>
+
+                      <button
+                        className="text-sm font-medium text-indigo-500 hover:text-indigo-600 disabled:opacity-50"
+                        disabled={regenerateLinkMutation.isPending}
+                        onClick={() => {
+                          regenerateLinkMutation.mutate(selectedOrder.id);
+                        }}
+                      >
+                        {regenerateLinkMutation.isPending
+                          ? t("admin-orders-regenerating")
+                          : t("admin-orders-btn-regenerate-link")}
+                      </button>
+
+                      {selectedOrder.status === "paid" &&
+                        selectedOrder.stripe?.payment_intent_id && (
+                          <button
+                            className="text-sm font-medium text-red-500 hover:text-red-600 disabled:opacity-50"
+                            disabled={refundMutation.isPending}
+                            onClick={() => {
+                              if (confirm(t("admin-orders-confirm-refund"))) {
+                                refundMutation.mutate(selectedOrder.id);
+                              }
+                            }}
+                          >
+                            {refundMutation.isPending
+                              ? t("admin-orders-refunding")
+                              : t("admin-orders-btn-refund")}
+                          </button>
+                        )}
+                    </div>
                   </div>
                 </div>
               )}

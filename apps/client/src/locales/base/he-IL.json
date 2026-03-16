@@ -358,5 +358,13 @@
   "tracking-number": "מספר מעקב",
   "shipped-on": "נשלח ב-",
   "track-on-carrier": "מעקב באתר המוביל",
-  "confirmation-email-sent": "מייל אישור נשלח"
+  "confirmation-email-sent": "מייל אישור נשלח",
+  "admin-orders-btn-regenerate-link": "צור מחדש את קישור המעקב",
+  "admin-orders-btn-resend-confirmation": "שלח שוב דוא\"ל אישור",
+  "admin-orders-regenerate-error": "יצירת קישור המעקב נכשלה",
+  "admin-orders-regenerate-success": "קישור מעקב חדש נשלח",
+  "admin-orders-regenerating": "מתחדש...",
+  "admin-orders-resend-error": "שליחת אימייל אישור נכשלה",
+  "admin-orders-resend-sending": "שְׁלִיחָה...",
+  "admin-orders-resend-success": "מייל אישור נשלח"
 }

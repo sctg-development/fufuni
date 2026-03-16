@@ -358,5 +358,13 @@
   "tracking-number": "N° de suivi",
   "shipped-on": "Expédié le",
   "track-on-carrier": "Suivre sur le transporteur",
-  "confirmation-email-sent": "E-mail de confirmation envoyé"
+  "confirmation-email-sent": "E-mail de confirmation envoyé",
+  "admin-orders-btn-resend-confirmation": "Renvoyer l'e-mail de confirmation",
+  "admin-orders-resend-sending": "Envoi…",
+  "admin-orders-resend-success": "E-mail de confirmation envoyé",
+  "admin-orders-resend-error": "Échec de l'envoi de l'e-mail de confirmation",
+  "admin-orders-btn-regenerate-link": "Régénérer le lien de suivi",
+  "admin-orders-regenerating": "Régénération…",
+  "admin-orders-regenerate-success": "Nouveau lien de suivi envoyé",
+  "admin-orders-regenerate-error": "Échec de la régénération du lien"
 }
