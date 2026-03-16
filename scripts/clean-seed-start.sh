@@ -42,6 +42,8 @@ if [ -f "$ROOT_DIR/.env" ]; then
   # Extract API_BASE_URL and MERCHANT_SK safely
   API_BASE_URL=$(grep "^API_BASE_URL" "$ROOT_DIR/.env" | cut -d'=' -f2 | tr -d '"')
   MERCHANT_SK=$(grep "^MERCHANT_SK" "$ROOT_DIR/.env" | cut -d'=' -f2 | tr -d '"')
+  STRIPE_SECRET_KEY=$(grep "^STRIPE_SECRET_KEY" "$ROOT_DIR/.env" | cut -d'=' -f2 | tr -d '"')
+  STRIPE_WEBHOOK_SECRET=$(grep "^STRIPE_WEBHOOK_SECRET" "$ROOT_DIR/.env" | cut -d'=' -f2 | tr -d '"')
   
   if [ -z "$API_BASE_URL" ]; then
     API_BASE_URL="http://localhost:8787"
@@ -89,6 +91,15 @@ echo "📝 Initializing database..."
 cd "$MERCHANT_DIR"
 npx tsx scripts/init.ts
 echo "   ✓ Initialization complete"
+
+echo ""
+echo "\nInitializing Stripe"
+curl -s -X POST http://localhost:8787/v1/setup/stripe \
+  -H "Authorization: Bearer ${MERCHANT_SK}" \
+  -H "Content-Type: application/json" \
+  -d "{\"stripe_secret_key\": \"${STRIPE_SECRET_KEY}\", \"stripe_webhook_secret\": \"${STRIPE_WEBHOOK_SECRET}\"}"
+echo "   ✓ Stripe initialization complete"
+
 
 echo ""
 echo "🌱 Seeding database..."
