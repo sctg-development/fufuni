@@ -33,9 +33,13 @@ export default function CartPage() {
         cart.id,
         items.map((i) => ({ sku: i.sku, qty: i.qty })),
       );
+
+      // Remove last / from import.meta.env.STORE_URL if exists to prevent double slash in redirect URL
+      const storeUrl = import.meta.env.STORE_URL.replace(/\/$/, "");
+
       const { checkout_url } = await checkoutCart(
         cart.id,
-        `${import.meta.env.STORE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+        `${storeUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
         window.location.href,
       );
       clear();
