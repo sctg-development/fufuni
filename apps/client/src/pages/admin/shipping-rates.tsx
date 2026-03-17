@@ -49,6 +49,7 @@ import { Plus, Edit2, Trash2 } from "lucide-react";
 import { SearchIcon } from "@/components/icons";
 import DefaultLayout from "@/layouts/default";
 import { useSecuredApi } from "@/authentication";
+import { formatMoney } from "@/utils/currency";
 
 /**
  * Defines a shipping rate available in a region, including weight and
@@ -62,6 +63,19 @@ interface ShippingRate {
   min_delivery_days?: number;
   max_delivery_days?: number;
   status: "active" | "inactive";
+  created_at: string;
+  updated_at: string;
+  price_cents?: number;
+  currency_code?: string;
+}
+
+interface Currency {
+  id: string;
+  code: string;
+  display_name: string;
+  symbol: string;
+  decimal_places: number;
+  status: string;
   created_at: string;
   updated_at: string;
 }
@@ -81,6 +95,7 @@ export default function ShippingRatesPage() {
 
   // List state
   const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
+  const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [loading, setLoading] = useState(true);
   const [globalFilter, setGlobalFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
@@ -89,6 +104,7 @@ export default function ShippingRatesPage() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingRate, setEditingRate] = useState<ShippingRate | null>(null);
+  const [pricesByDivisa, setPricesByDivisa] = useState<Record<string, number>>({});
   const [formData, setFormData] = useState({
     display_name: "",
     description: "",
@@ -96,6 +112,8 @@ export default function ShippingRatesPage() {
     min_delivery_days: "",
     max_delivery_days: "",
     status: "active" as "active" | "inactive",
+    price: "",
+    currency_id: "",
   });
 
   // Load shipping rates
@@ -106,13 +124,66 @@ export default function ShippingRatesPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const response = await getJson(
-        `${apiBase}/v1/regions/shipping-rates?limit=100`,
-      );
+      const apiUrl = `${apiBase}/v1/regions/shipping-rates?limit=100`;
+      console.log('📍 Loading shipping rates from:', apiUrl);
+      
+      const ratesResp = await getJson(apiUrl);
+      console.log('📦 Rates Response:', ratesResp);
 
-      setShippingRates(response.items || []);
+      if (!ratesResp || !ratesResp.items) {
+        console.warn('⚠️ Rates response invalid:', ratesResp);
+        setShippingRates([]);
+        setLoading(false);
+        return;
+      }
+
+      // First, set rates without prices to show them immediately
+      const rates: ShippingRate[] = ratesResp.items || [];
+      console.log('✅ Found rates:', rates.length);
+      setShippingRates(rates);
+
+      // Then, load currencies and prices asynchronously
+      try {
+        const currenciesResp = await getJson(`${apiBase}/v1/regions/currencies?limit=100`);
+        const currencies: Currency[] = currenciesResp.items || [];
+        setCurrencies(currencies);
+        console.log('💱 Currencies loaded:', currencies.length);
+
+        const defaultCurrency = currencies[0];
+        if (!defaultCurrency) {
+          console.warn('⚠️ No default currency found');
+          return;
+        }
+
+        // Load prices for each rate
+        const ratesWithPrices = await Promise.all(
+          rates.map(async (rate) => {
+            try {
+              const priceResp = await getJson(
+                `${apiBase}/v1/regions/shipping-rates/${rate.id}/prices?currency_id=${defaultCurrency.id}`,
+              );
+              const priceItem = Array.isArray(priceResp.items) ? priceResp.items[0] : null;
+              return {
+                ...rate,
+                price_cents: priceItem?.amount_cents,
+                currency_code: defaultCurrency.code,
+              };
+            } catch (err) {
+              console.warn(`⚠️ No price for rate ${rate.id}:`, err);
+              return { ...rate, currency_code: defaultCurrency.code };
+            }
+          })
+        );
+        
+        console.log('💰 Rates with prices:', ratesWithPrices.length);
+        setShippingRates(ratesWithPrices);
+      } catch (priceErr) {
+        console.warn('⚠️ Failed to load prices, showing rates without prices:', priceErr);
+        // Keep the rates without prices - they're already set above
+      }
     } catch (err) {
-      console.error("Failed to load shipping rates", err);
+      console.error('❌ Failed to load shipping rates:', err);
+      setShippingRates([]);
     } finally {
       setLoading(false);
     }
@@ -152,6 +223,7 @@ export default function ShippingRatesPage() {
   const handleOpenCreate = () => {
     setIsEditMode(false);
     setEditingRate(null);
+    setPricesByDivisa({});
     setFormData({
       display_name: "",
       description: "",
@@ -159,6 +231,8 @@ export default function ShippingRatesPage() {
       min_delivery_days: "",
       max_delivery_days: "",
       status: "active",
+      price: "",
+      currency_id: currencies[0]?.id ?? "",
     });
     onOpen();
   };
@@ -168,9 +242,46 @@ export default function ShippingRatesPage() {
    *
    * @param rate - shipping rate to modify
    */
-  const handleOpenEdit = (rate: ShippingRate) => {
+  const handleOpenEdit = async (rate: ShippingRate) => {
     setIsEditMode(true);
     setEditingRate(rate);
+
+    const defaultCurrency = currencies[0];
+    let price = "";
+    let currency_id = defaultCurrency?.id ?? "";
+
+    // Load prices for ALL currencies to cache them
+    const priceCache: Record<string, number> = {};
+    if (currencies.length > 0) {
+      await Promise.all(
+        currencies.map(async (currency) => {
+          try {
+            const priceResp = await getJson(
+              `${apiBase}/v1/regions/shipping-rates/${rate.id}/prices?currency_id=${currency.id}`,
+            );
+            console.log(`💰 Price for currency ${currency.code} (${currency.id}):`, priceResp);
+            const priceItem = Array.isArray(priceResp.items) ? priceResp.items[0] : null;
+            if (priceItem?.amount_cents != null) {
+              priceCache[currency.id] = priceItem.amount_cents;
+              console.log(`✅ Cached ${currency.code}: ${priceItem.amount_cents} cents`);
+            } else {
+              console.warn(`⚠️ No price found for ${currency.code}`);
+            }
+          } catch (err) {
+            console.warn(`⚠️ Failed to load price for ${currency.code}:`, err);
+          }
+        })
+      );
+    }
+    console.log('📦 Final price cache:', priceCache);
+    setPricesByDivisa(priceCache);
+
+    // Use default currency price
+    if (defaultCurrency && priceCache[defaultCurrency.id] != null) {
+      price = (priceCache[defaultCurrency.id] / 100).toFixed(2);
+      currency_id = defaultCurrency.id;
+    }
+
     setFormData({
       display_name: rate.display_name,
       description: rate.description || "",
@@ -182,6 +293,8 @@ export default function ShippingRatesPage() {
         ? rate.max_delivery_days.toString()
         : "",
       status: rate.status,
+      price,
+      currency_id,
     });
     onOpen();
   };
@@ -208,16 +321,43 @@ export default function ShippingRatesPage() {
         status: formData.status,
       };
 
+      const upsertPrice = async (rateId: string) => {
+        if (!formData.currency_id || !formData.price) return;
+        const amount = parseFloat(formData.price);
+        if (Number.isNaN(amount)) return;
+        const amount_cents = Math.round(amount * 100);
+        await postJson(
+          `${apiBase}/v1/regions/shipping-rates/${rateId}/prices`,
+          {
+            currency_id: formData.currency_id,
+            amount_cents,
+          },
+        );
+      };
+
+      const currencyCode =
+        currencies.find((c) => c.id === formData.currency_id)?.code;
+
       if (isEditMode && editingRate) {
         const response = await patchJson(
           `${apiBase}/v1/regions/shipping-rates/${editingRate.id}`,
           saveData,
         );
 
+        await upsertPrice(editingRate.id);
+
         // Mettre à jour le state local
         if (response) {
           setShippingRates(
-            shippingRates.map((r) => (r.id === editingRate.id ? response : r)),
+            shippingRates.map((r) =>
+              r.id === editingRate.id
+                ? {
+                    ...response,
+                    price_cents: formData.price ? Math.round(parseFloat(formData.price) * 100) : r.price_cents,
+                    currency_code: currencyCode ?? r.currency_code,
+                  }
+                : r,
+            ),
           );
         } else {
           await loadData();
@@ -230,7 +370,15 @@ export default function ShippingRatesPage() {
 
         // Ajouter le nouveau tarif
         if (response) {
-          setShippingRates([...shippingRates, response]);
+          await upsertPrice(response.id);
+          setShippingRates([
+            ...shippingRates,
+            {
+              ...response,
+              price_cents: formData.price ? Math.round(parseFloat(formData.price) * 100) : undefined,
+              currency_code: currencyCode,
+            },
+          ]);
         } else {
           await loadData();
         }
@@ -311,6 +459,9 @@ export default function ShippingRatesPage() {
                 <TableColumn key="max_weight">
                   {t("admin-shipping-rates-max-weight", "Max Weight (g)")}
                 </TableColumn>
+                <TableColumn key="price">
+                  {t("admin-shipping-rates-price", "Price")}
+                </TableColumn>
                 <TableColumn key="delivery_days">
                   {t("admin-shipping-rates-delivery-days", "Delivery Days")}
                 </TableColumn>
@@ -339,6 +490,11 @@ export default function ShippingRatesPage() {
                     </TableCell>
                     <TableCell>
                       {rate.max_weight_g ? `${rate.max_weight_g}g` : "-"}
+                    </TableCell>
+                    <TableCell>
+                      {rate.price_cents != null && rate.currency_code
+                        ? formatMoney(rate.price_cents, rate.currency_code)
+                        : "-"}
                     </TableCell>
                     <TableCell>
                       {rate.min_delivery_days || rate.max_delivery_days
@@ -494,6 +650,54 @@ export default function ShippingRatesPage() {
                     <SelectItem key={opt}>{opt}</SelectItem>
                   ))}
                 </Select>
+              </Tooltip>
+
+              <Tooltip
+                content={t(
+                  "admin-shipping-rates-price-help",
+                  "Shipping cost for this rate (in selected currency)",
+                )}
+              >
+                <div className="flex gap-2">
+                  <Select
+                    label={t("admin-common-currency", "Currency")}
+                    selectedKeys={formData.currency_id ? [formData.currency_id] : []}
+                    onSelectionChange={(key) => {
+                      const newCurrencyId = Array.from(key).join("");
+                      console.log('💱 Changing currency to:', newCurrencyId);
+                      console.log('📦 pricesByDivisa:', pricesByDivisa);
+                      console.log('💰 Price for this currency:', pricesByDivisa[newCurrencyId]);
+                      
+                      const newPrice = pricesByDivisa[newCurrencyId] !== undefined
+                        ? (pricesByDivisa[newCurrencyId] / 100).toFixed(2)
+                        : "";
+                      
+                      console.log('✅ Setting price to:', newPrice);
+                      
+                      setFormData({
+                        ...formData,
+                        currency_id: newCurrencyId,
+                        price: newPrice,
+                      });
+                    }}
+                    className="w-32"
+                  >
+                    {currencies.map((c) => (
+                      <SelectItem key={c.id}>{c.code}</SelectItem>
+                    ))}
+                  </Select>
+                  <Input
+                    label={t("admin-shipping-rates-price", "Price")}
+                    placeholder="0.00"
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    value={formData.price}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, price: value })
+                    }
+                  />
+                </div>
               </Tooltip>
             </ModalBody>
             <ModalFooter>

@@ -32,6 +32,7 @@
     "@heroui/navbar": "^2.2.29",
     "@heroui/number-input": "^2.0.22",
     "@heroui/pagination": "^2.2.26",
+    "@heroui/radio": "^2.3.32",
     "@heroui/scroll-shadow": "^2.3.19",
     "@heroui/select": "^2.4.32",
     "@heroui/shared-utils": "^2.1.12",

@@ -103,6 +103,10 @@ export async function createCart(email: string): Promise<CartResponse> {
   });
 }
 
+export async function getCart(cartId: string): Promise<CartResponse> {
+  return request<CartResponse>(`/v1/carts/${cartId}`);
+}
+
 export async function addItemsToCart(
   cartId: string,
   items: Array<{ sku: string; qty: number }>,
@@ -124,6 +128,62 @@ export async function checkoutCart(
       success_url: successUrl,
       cancel_url: cancelUrl,
     }),
+  });
+}
+
+export interface ShippingAddressInput {
+  name: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state?: string;
+  postal_code: string;
+  country: string;
+  billing_same_as_shipping?: boolean;
+}
+
+export async function setShippingAddress(
+  cartId: string,
+  address: ShippingAddressInput,
+): Promise<CartResponse> {
+  return request<CartResponse>(`/v1/carts/${cartId}/shipping-address`, {
+    method: 'PUT',
+    body: JSON.stringify(address),
+  });
+}
+
+export interface AvailableShippingRateItem {
+  id: string;
+  display_name: string;
+  description?: string;
+  amount_cents: number;
+  currency: string;
+  min_delivery_days?: number;
+  max_delivery_days?: number;
+}
+
+export interface AvailableShippingRatesResponse {
+  items: AvailableShippingRateItem[];
+  cart_weight_g?: number;
+}
+
+export async function getAvailableShippingRates(
+  cartId: string,
+): Promise<AvailableShippingRatesResponse> {
+  return request<AvailableShippingRatesResponse>(`/v1/carts/${cartId}/available-shipping-rates`);
+}
+
+export interface SelectShippingRateBody {
+  shipping_rate_id: string;
+}
+
+export async function selectShippingRate(
+  cartId: string,
+  rateId: string,
+): Promise<CartResponse> {
+  return request<CartResponse>(`/v1/carts/${cartId}/shipping-rate`, {
+    method: 'PUT',
+    body: JSON.stringify({ shipping_rate_id: rateId }),
   });
 }
 
