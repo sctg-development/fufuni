@@ -10,7 +10,7 @@ import {
   RedirectLoginOptions,
 } from "@auth0/auth0-react";
 import React, { JSX, useCallback, useMemo, useRef } from "react";
-import { JWTPayload, jwtVerify } from "jose";
+import { JWTPayload, decodeJwt, jwtVerify } from "jose";
 
 import {
   AuthProvider,
@@ -36,19 +36,74 @@ export const useAuth0Provider = (): AuthProvider => {
     logout: auth0Logout,
   } = useAuth0();
 
+  const parseJwtPayload = (token: string): JWTPayload | null => {
+    try {
+      return decodeJwt(token) as JWTPayload;
+    } catch {
+      return null;
+    }
+  };
+
+  const resolveAccessTokenString = (
+    tokenOrVerbose: unknown,
+  ): string | null => {
+    if (!tokenOrVerbose) return null;
+
+    if (typeof tokenOrVerbose === "string") {
+      return tokenOrVerbose;
+    }
+
+    if (
+      typeof tokenOrVerbose === "object" &&
+      tokenOrVerbose !== null &&
+      "access_token" in tokenOrVerbose
+    ) {
+      return (tokenOrVerbose as any).access_token;
+    }
+
+    return null;
+  };
+
+  const getAccessTokenWithAutoRefresh = async (
+    options?: TokenOptions,
+  ): Promise<string | null> => {
+    const baseOptions = {
+      authorizationParams: {
+        audience: options?.audience || import.meta.env.AUTH0_AUDIENCE,
+        scope: options?.scope || import.meta.env.AUTH0_SCOPE,
+      },
+      ...options,
+    };
+
+    const accessTokenRaw = await getAccessTokenSilently(baseOptions as any);
+    const accessToken = resolveAccessTokenString(accessTokenRaw);
+    if (!accessToken) return null;
+
+    const payload = parseJwtPayload(accessToken);
+
+    if (!payload?.exp) {
+      return accessToken;
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    const secondsLeft = payload.exp - now;
+
+    // If the token is about to expire, force a refresh.
+    // This avoids using a token that will expire mid-request.
+    if (secondsLeft < 60) {
+      const refreshOptions = { ...baseOptions, ignoreCache: true } as any;
+      const refreshedTokenRaw = await getAccessTokenSilently(refreshOptions);
+      return resolveAccessTokenString(refreshedTokenRaw);
+    }
+
+    return accessToken;
+  };
+
   const getAccessToken = async (
     options?: TokenOptions,
   ): Promise<string | null> => {
     try {
-      const token = await getAccessTokenSilently({
-        authorizationParams: {
-          audience: options?.audience || import.meta.env.AUTH0_AUDIENCE,
-          scope: options?.scope || import.meta.env.AUTH0_SCOPE,
-        },
-        ...options,
-      });
-
-      return token;
+      return await getAccessTokenWithAutoRefresh(options);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Error getting access token:", error);
@@ -129,7 +184,11 @@ export const useAuth0Provider = (): AuthProvider => {
   const getJson = useCallback(
     async (url: string): Promise<any> => {
       try {
-        const accessToken = await getAccessToken();
+        const accessToken = await getAccessTokenWithAutoRefresh();
+
+        if (!accessToken) {
+          throw new Error("Unable to retrieve access token");
+        }
 
         const cacheKey = `${accessToken}:${url}`;
 
@@ -138,11 +197,35 @@ export const useAuth0Provider = (): AuthProvider => {
         }
 
         const promise = (async () => {
-          const apiResponse = await fetch(url, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          });
+          const fetchWithRetry = async (token: string): Promise<Response> => {
+            const apiResponse = await fetch(url, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+
+            if (apiResponse.status !== 401) {
+              return apiResponse;
+            }
+
+            // Try to refresh the token once on 401
+            const refreshedToken =
+              (await getAccessTokenWithAutoRefresh({ ignoreCache: true } as any)) ||
+              token;
+
+            return fetch(url, {
+              headers: {
+                Authorization: `Bearer ${refreshedToken}`,
+              },
+            });
+          };
+
+          const apiResponse = await fetchWithRetry(accessToken);
+
+          // If we still get 401, clear the cache so retries can re-run.
+          if (apiResponse.status === 401) {
+            requestCacheRef.current.delete(cacheKey);
+          }
 
           return await apiResponse.json();
         })();
@@ -168,23 +251,47 @@ export const useAuth0Provider = (): AuthProvider => {
         throw error;
       }
     },
-    [getAccessToken],
+    [getAccessTokenWithAutoRefresh],
   );
 
   const postJson = useCallback(
     async (url: string, data: any): Promise<any> => {
       try {
-        const accessToken = await getAccessToken();
+        const accessToken = await getAccessTokenWithAutoRefresh();
 
-        const apiResponse = await fetch(url, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
+        if (!accessToken) {
+          throw new Error("Unable to retrieve access token");
+        }
 
+        const makeRequest = async (token: string): Promise<Response> => {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+
+          if (response.status !== 401) {
+            return response;
+          }
+
+          const refreshedToken =
+            (await getAccessTokenWithAutoRefresh({ ignoreCache: true } as any)) ||
+            token;
+
+          return fetch(url, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${refreshedToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+        };
+
+        const apiResponse = await makeRequest(accessToken);
         return await apiResponse.json();
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -192,22 +299,45 @@ export const useAuth0Provider = (): AuthProvider => {
         throw error;
       }
     },
-    [getAccessToken],
+    [getAccessTokenWithAutoRefresh],
   );
 
   const deleteJson = useCallback(
     async (url: string): Promise<any> => {
       try {
-        const accessToken = await getAccessToken();
+        const accessToken = await getAccessTokenWithAutoRefresh();
 
-        const apiResponse = await fetch(url, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        });
+        if (!accessToken) {
+          throw new Error("Unable to retrieve access token");
+        }
 
+        const makeRequest = async (token: string): Promise<Response> => {
+          const response = await fetch(url, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (response.status !== 401) {
+            return response;
+          }
+
+          const refreshedToken =
+            (await getAccessTokenWithAutoRefresh({ ignoreCache: true } as any)) ||
+            token;
+
+          return fetch(url, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${refreshedToken}`,
+              "Content-Type": "application/json",
+            },
+          });
+        };
+
+        const apiResponse = await makeRequest(accessToken);
         return await apiResponse.json();
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -215,23 +345,47 @@ export const useAuth0Provider = (): AuthProvider => {
         throw error;
       }
     },
-    [getAccessToken],
+    [getAccessTokenWithAutoRefresh],
   );
 
   const putJson = useCallback(
     async (url: string, data: any): Promise<any> => {
       try {
-        const accessToken = await getAccessToken();
+        const accessToken = await getAccessTokenWithAutoRefresh();
 
-        const apiResponse = await fetch(url, {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
+        if (!accessToken) {
+          throw new Error("Unable to retrieve access token");
+        }
 
+        const makeRequest = async (token: string): Promise<Response> => {
+          const response = await fetch(url, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+
+          if (response.status !== 401) {
+            return response;
+          }
+
+          const refreshedToken =
+            (await getAccessTokenWithAutoRefresh({ ignoreCache: true } as any)) ||
+            token;
+
+          return fetch(url, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${refreshedToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+        };
+
+        const apiResponse = await makeRequest(accessToken);
         return await apiResponse.json();
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -239,23 +393,47 @@ export const useAuth0Provider = (): AuthProvider => {
         throw error;
       }
     },
-    [getAccessToken],
+    [getAccessTokenWithAutoRefresh],
   );
 
   const patchJson = useCallback(
     async (url: string, data: any): Promise<any> => {
       try {
-        const accessToken = await getAccessToken();
+        const accessToken = await getAccessTokenWithAutoRefresh();
 
-        const apiResponse = await fetch(url, {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
+        if (!accessToken) {
+          throw new Error("Unable to retrieve access token");
+        }
 
+        const makeRequest = async (token: string): Promise<Response> => {
+          const response = await fetch(url, {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+
+          if (response.status !== 401) {
+            return response;
+          }
+
+          const refreshedToken =
+            (await getAccessTokenWithAutoRefresh({ ignoreCache: true } as any)) ||
+            token;
+
+          return fetch(url, {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${refreshedToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+        };
+
+        const apiResponse = await makeRequest(accessToken);
         return await apiResponse.json();
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -263,7 +441,7 @@ export const useAuth0Provider = (): AuthProvider => {
         throw error;
       }
     },
-    [getAccessToken],
+    [getAccessTokenWithAutoRefresh],
   );
 
   // Memoize the returned API surface so consumers receive stable function identities

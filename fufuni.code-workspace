@@ -56,13 +56,16 @@
       }
     },
     "npm.packageManager": "yarn",
-    "i18n-ally-next.keystyle": "flat",
-    "i18n-ally-next.localesPaths": [
+    "i18n-ally.keystyle": "flat",
+    "i18n-ally.localesPaths": [
       "./src/locales/base"
     ],
-    "i18n-ally-next.sourceLanguage": "en-US",
-    "i18n-ally-next.displayLanguage": "fr-FR",
-    "i18n-ally-next.languageTagSystem": "bcp47"
+    "i18n-ally.sourceLanguage": "en-US",
+    "i18n-ally.displayLanguage": "fr-FR",
+    "i18n-ally.languageTagSystem": "bcp47",
+    "chat.tools.terminal.autoApprove": {
+      "npm run type-check": true
+    }
   },
   "extensions": {
     "recommendations": [
@@ -70,7 +73,8 @@
       "bradlc.vscode-tailwindcss",
       "esbenp.prettier-vscode",
       "ms-vscode.vscode-json",
-      "bierner.markdown-mermaid"
+      "bierner.markdown-mermaid",
+      "lokalise.i18n-ally"
     ]
   }
 }
