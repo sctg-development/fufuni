@@ -76,6 +76,15 @@ async function main() {
     const outFile = process.argv[2] || "export.md";
     const root = process.cwd();
 
+    const readmePath = path.join(root, "README.md");
+    let readmeContent = "";
+
+    try {
+        readmeContent = await fs.readFile(readmePath, "utf8");
+    } catch {
+        // ignore if README.md is missing
+    }
+
     const patterns = [
         "apps/client/src/**/*.{ts,tsx,js,jsx,json}",
         "apps/merchant/src/**/*.{ts,tsx,js,jsx,json}",
@@ -106,9 +115,9 @@ async function main() {
             codeFiles.push({ rel, content, ext });
         }
     }
-    console.log(`Found ${files.length} files (${codeFiles.length} code files, ${configFiles.length} config files)`);
-    console.log(`. Code files: ${codeFiles.map(f => f.rel).join(", ")}`);
-    console.log(`. Config files: ${configFiles.map(f => f.rel).join(", ")}`);
+    // console.log(`Found ${files.length} files (${codeFiles.length} code files, ${configFiles.length} config files)`);
+    // console.log(`. Code files: ${codeFiles.map(f => f.rel).join(", ")}`);
+    // console.log(`. Config files: ${configFiles.map(f => f.rel).join(", ")}`);
 
     codeFiles.sort((a, b) => a.rel.localeCompare(b.rel));
     configFiles.sort((a, b) => a.rel.localeCompare(b.rel));
@@ -116,7 +125,16 @@ async function main() {
     const allFiles = [...codeFiles.map((f) => f.rel), ...configFiles.map((f) => f.rel)];
     const treeLines = buildTree(allFiles);
 
-    let md = "# Fufuni code details\n\n";
+    let md = "";
+
+    if (readmeContent) {
+        md += readmeContent;
+
+        // Separate README content from generated export output
+        md += "\n\n---\n\n";
+    }
+
+    md += "# Fufuni code details\n\n";
 
     if (treeLines.length > 0) {
         md += "## Project structure\n\n";
