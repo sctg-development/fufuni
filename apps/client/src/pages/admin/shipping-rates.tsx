@@ -80,6 +80,17 @@ interface Currency {
   updated_at: string;
 }
 
+interface ShippingClass {
+  id: string;
+  code: string;
+  display_name: string;
+  description?: string;
+  resolution: "exclusive" | "additive";
+  status: "active" | "inactive";
+  created_at: string;
+  updated_at: string;
+}
+
 /**
  * Available status choices for shipping rates.
  */
@@ -96,6 +107,7 @@ export default function ShippingRatesPage() {
   // List state
   const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
   const [currencies, setCurrencies] = useState<Currency[]>([]);
+  const [shippingClasses, setShippingClasses] = useState<ShippingClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [globalFilter, setGlobalFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
@@ -114,6 +126,23 @@ export default function ShippingRatesPage() {
     status: "active" as "active" | "inactive",
     price: "",
     currency_id: "",
+    shipping_class_id: "",
+  });
+
+  // Shipping Classes Modal state
+  const { 
+    isOpen: isClassModalOpen, 
+    onOpen: onClassModalOpen, 
+    onOpenChange: onClassModalOpenChange 
+  } = useDisclosure();
+  const [isClassEditMode, setIsClassEditMode] = useState(false);
+  const [editingClass, setEditingClass] = useState<ShippingClass | null>(null);
+  const [classFormData, setClassFormData] = useState({
+    code: "",
+    display_name: "",
+    description: "",
+    resolution: "exclusive" as "exclusive" | "additive",
+    status: "active" as "active" | "inactive",
   });
 
   // Load shipping rates
@@ -193,6 +222,19 @@ export default function ShippingRatesPage() {
     loadData();
   }, []);
 
+  // Load shipping classes for selector
+  useEffect(() => {
+    const loadShippingClasses = async () => {
+      try {
+        const resp = await getJson(`${apiBase}/v1/regions/shipping-classes?limit=100`);
+        setShippingClasses(resp.items || []);
+      } catch (err) {
+        console.error("Failed to load shipping classes", err);
+      }
+    };
+    loadShippingClasses();
+  }, []);
+
   // Filtered shipping rates
   /**
    * Compute the list of rates matching the current status and search filter.
@@ -233,6 +275,7 @@ export default function ShippingRatesPage() {
       status: "active",
       price: "",
       currency_id: currencies[0]?.id ?? "",
+      shipping_class_id: "",
     });
     onOpen();
   };
@@ -295,6 +338,7 @@ export default function ShippingRatesPage() {
       status: rate.status,
       price,
       currency_id,
+      shipping_class_id: (rate as any).shipping_class_id || "",
     });
     onOpen();
   };
@@ -319,6 +363,7 @@ export default function ShippingRatesPage() {
           ? parseInt(formData.max_delivery_days)
           : null,
         status: formData.status,
+        shipping_class_id: formData.shipping_class_id || null,
       };
 
       const upsertPrice = async (rateId: string) => {
@@ -402,6 +447,109 @@ export default function ShippingRatesPage() {
         await loadData();
       } catch (err) {
         console.error("Failed to delete shipping rate", err);
+      }
+    }
+  };
+
+  // ─── Shipping Classes Handlers ─────────────────────────────────────────
+
+  /**
+   * Reset the form and show the modal for creating a new shipping class.
+   */
+  const handleOpenCreateClass = () => {
+    setIsClassEditMode(false);
+    setEditingClass(null);
+    setClassFormData({
+      code: "",
+      display_name: "",
+      description: "",
+      resolution: "exclusive",
+      status: "active",
+    });
+    onClassModalOpen();
+  };
+
+  /**
+   * Populate the form with an existing class and open modal for editing.
+   *
+   * @param cls - shipping class to modify
+   */
+  const handleOpenEditClass = (cls: ShippingClass) => {
+    setIsClassEditMode(true);
+    setEditingClass(cls);
+    setClassFormData({
+      code: cls.code,
+      display_name: cls.display_name,
+      description: cls.description || "",
+      resolution: cls.resolution,
+      status: cls.status,
+    });
+    onClassModalOpen();
+  };
+
+  /**
+   * Send either a create or update request for a shipping class to the API.
+   * Update local list or reload on failure, then close the modal.
+   */
+  const handleSaveClass = async () => {
+    try {
+      const saveData = {
+        code: classFormData.code,
+        display_name: classFormData.display_name,
+        description: classFormData.description || null,
+        resolution: classFormData.resolution,
+        status: classFormData.status,
+      };
+
+      if (isClassEditMode && editingClass) {
+        const response = await patchJson(
+          `${apiBase}/v1/regions/shipping-classes/${editingClass.id}`,
+          saveData,
+        );
+
+        if (response) {
+          setShippingClasses(
+            shippingClasses.map((c) =>
+              c.id === editingClass.id ? response : c,
+            ),
+          );
+        } else {
+          // Reload if response is null
+          const resp = await getJson(`${apiBase}/v1/regions/shipping-classes?limit=100`);
+          setShippingClasses(resp.items || []);
+        }
+      } else {
+        const response = await postJson(
+          `${apiBase}/v1/regions/shipping-classes`,
+          saveData,
+        );
+
+        if (response) {
+          setShippingClasses([...shippingClasses, response]);
+        } else {
+          // Reload if response is null
+          const resp = await getJson(`${apiBase}/v1/regions/shipping-classes?limit=100`);
+          setShippingClasses(resp.items || []);
+        }
+      }
+      onClassModalOpenChange();
+    } catch (err) {
+      console.error("Failed to save shipping class", err);
+    }
+  };
+
+  /**
+   * Delete a shipping class after confirmation and refresh the list.
+   *
+   * @param id - identifier of the class to delete
+   */
+  const handleDeleteClass = async (id: string) => {
+    if (confirm("Are you sure you want to delete this shipping class?")) {
+      try {
+        await deleteJson(`${apiBase}/v1/regions/shipping-classes/${id}`);
+        setShippingClasses(shippingClasses.filter((c) => c.id !== id));
+      } catch (err) {
+        console.error("Failed to delete shipping class", err);
       }
     }
   };
@@ -540,6 +688,110 @@ export default function ShippingRatesPage() {
           </CardBody>
         </Card>
 
+        {/* ─── Shipping Classes Section ──────────────────────────────────── */}
+        <div className="mt-12 pt-6 border-t">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">
+              {t("admin-shipping-classes-title", "Shipping Classes")}
+            </h2>
+            <Button
+              color="primary"
+              endContent={<Plus className="w-4 h-4" />}
+              onPress={handleOpenCreateClass}
+            >
+              {t("admin-shipping-classes-btn-new", "New Class")}
+            </Button>
+          </div>
+
+          <Card>
+            <CardBody>
+              <Table isStriped>
+                <TableHeader>
+                  <TableColumn key="code">
+                    {t("admin-shipping-classes-col-code", "Code")}
+                  </TableColumn>
+                  <TableColumn key="display_name">
+                    {t("admin-shipping-classes-col-name", "Name")}
+                  </TableColumn>
+                  <TableColumn key="resolution">
+                    {t("admin-shipping-classes-col-resolution", "Mode")}
+                  </TableColumn>
+                  <TableColumn key="description">
+                    {t("admin-shipping-classes-col-description", "Description")}
+                  </TableColumn>
+                  <TableColumn key="status">
+                    {t("admin-shipping-classes-col-status", "Status")}
+                  </TableColumn>
+                  <TableColumn key="actions">
+                    {t("admin-shipping-classes-col-actions", "Actions")}
+                  </TableColumn>
+                </TableHeader>
+                <TableBody
+                  emptyContent={<div>{t("admin-shipping-classes-empty", "No shipping classes")}</div>}
+                  items={shippingClasses}
+                >
+                  {(cls) => (
+                    <TableRow key={cls.id}>
+                      <TableCell>
+                        <code className="text-xs bg-default-100 px-2 py-0.5 rounded">
+                          {cls.code}
+                        </code>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {cls.display_name}
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-xs px-2 py-1 rounded" style={{
+                          backgroundColor: cls.resolution === 'exclusive' ? '#fed7aa' : '#dbeafe',
+                          color: cls.resolution === 'exclusive' ? '#92400e' : '#0c2340'
+                        }}>
+                          {cls.resolution === 'exclusive' 
+                            ? t("admin-shipping-classes-exclusive", "Exclusive")
+                            : t("admin-shipping-classes-additive", "Additive")}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-default-500 text-sm">
+                        {cls.description ? cls.description.substring(0, 40) + (cls.description.length > 40 ? '...' : '') : '—'}
+                      </TableCell>
+                      <TableCell>
+                        <span className={cls.status === 'active' ? 'text-green-600 font-medium' : 'text-gray-400'}>
+                          {cls.status}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Tooltip content={t("admin-shipping-classes-btn-edit", "Edit")}>
+                            <Button
+                              isIconOnly
+                              size="sm"
+                              variant="light"
+                              onPress={() => handleOpenEditClass(cls)}
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </Button>
+                          </Tooltip>
+                          <Tooltip content={t("admin-shipping-classes-btn-delete", "Delete")} color="danger">
+                            <Button
+                              isIconOnly
+                              color="danger"
+                              size="sm"
+                              variant="light"
+                              onPress={() => handleDeleteClass(cls.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </Tooltip>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardBody>
+          </Card>
+        </div>
+
+        {/* Create / Edit Shipping Rate Modal */}
         <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
           <ModalContent>
             <ModalHeader className="flex flex-col gap-1">
@@ -594,6 +846,34 @@ export default function ShippingRatesPage() {
                     setFormData({ ...formData, max_weight_g: value })
                   }
                 />
+              </Tooltip>
+              <Tooltip
+                content={t(
+                  "admin-shipping-rates-shipping-class-help",
+                  "Classe d'expédition (laissez vide pour un tarif universel)",
+                )}
+              >
+                <Select
+                  label="Classe d'expédition (optionnel)"
+                  description="Laissez vide pour un tarif universel (tous les produits standards)"
+                  selectedKeys={formData.shipping_class_id ? [formData.shipping_class_id] : []}
+                  onSelectionChange={(keys) => {
+                    const val = Array.from(keys).join("");
+                    setFormData({ ...formData, shipping_class_id: val });
+                  }}
+                >
+                  <SelectItem key="">Universel — tous produits standards</SelectItem>
+                  <>
+                    {shippingClasses.map((cls) => (
+                      <SelectItem 
+                        key={cls.id} 
+                        textValue={`[${cls.resolution === "exclusive" ? "EXCL" : "ADD"}] ${cls.display_name}`}
+                      >
+                        {`[${cls.resolution === "exclusive" ? "EXCL" : "ADD"}] ${cls.display_name}`}
+                      </SelectItem>
+                    ))}
+                  </>
+                </Select>
               </Tooltip>
               <Tooltip
                 content={t(
@@ -714,6 +994,102 @@ export default function ShippingRatesPage() {
                 onPress={handleSave}
               >
                 {t("admin-common-save", "Save")}
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* Create / Edit Shipping Class Modal */}
+        <Modal isOpen={isClassModalOpen} onOpenChange={onClassModalOpenChange} size="lg">
+          <ModalContent>
+            <ModalHeader className="flex flex-col gap-1">
+              {isClassEditMode
+                ? t("admin-shipping-classes-modal-title-edit", "Edit Shipping Class")
+                : t("admin-shipping-classes-modal-title-create", "New Shipping Class")}
+            </ModalHeader>
+            <ModalBody className="gap-4">
+              <Tooltip content={t("admin-shipping-classes-code-help", "Unique lowercase identifier")}>
+                <Input
+                  isRequired
+                  isDisabled={isClassEditMode}
+                  label={t("admin-shipping-classes-code", "Code")}
+                  placeholder={t("admin-shipping-classes-code-placeholder", "e.g., oversized")}
+                  value={classFormData.code}
+                  onValueChange={(v) =>
+                    setClassFormData({ ...classFormData, code: v.toLowerCase() })
+                  }
+                />
+              </Tooltip>
+              <Input
+                isRequired
+                label={t("admin-shipping-classes-display-name", "Display Name")}
+                placeholder={t("admin-shipping-classes-display-name-placeholder", "e.g., Oversized Items")}
+                value={classFormData.display_name}
+                onValueChange={(v) =>
+                  setClassFormData({ ...classFormData, display_name: v })
+                }
+              />
+              <Input
+                label={t("admin-shipping-classes-description", "Description (optional)")}
+                placeholder={t("admin-shipping-classes-description-placeholder", "e.g., For items > 50kg")}
+                value={classFormData.description}
+                onValueChange={(v) =>
+                  setClassFormData({ ...classFormData, description: v })
+                }
+              />
+              <Select
+                isRequired
+                label={t("admin-shipping-classes-resolution-mode", "Resolution Mode")}
+                description={
+                  classFormData.resolution === 'exclusive'
+                    ? t("admin-shipping-classes-resolution-exclusive-desc", "⚠ Exclusive: hides all other rates")
+                    : t("admin-shipping-classes-resolution-additive-desc", "✓ Additive: adds to other rates")
+                }
+                selectedKeys={[classFormData.resolution]}
+                onSelectionChange={(key) =>
+                  setClassFormData({
+                    ...classFormData,
+                    resolution: Array.from(key).join('') as any,
+                  })
+                }
+              >
+                <SelectItem key="exclusive">
+                  {t("admin-shipping-classes-resolution-exclusive-label", "Exclusive — replaces other rates")}
+                </SelectItem>
+                <SelectItem key="additive">
+                  {t("admin-shipping-classes-resolution-additive-label", "Additive — adds to other rates")}
+                </SelectItem>
+              </Select>
+              {isClassEditMode && (
+                <Select
+                  label={t("admin-shipping-classes-status", "Status")}
+                  selectedKeys={[classFormData.status]}
+                  onSelectionChange={(key) =>
+                    setClassFormData({
+                      ...classFormData,
+                      status: Array.from(key).join('') as any,
+                    })
+                  }
+                >
+                  <SelectItem key="active">{t("admin-shipping-classes-active", "Active")}</SelectItem>
+                  <SelectItem key="inactive">{t("admin-shipping-classes-inactive", "Inactive")}</SelectItem>
+                </Select>
+              )}
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                color="default"
+                variant="light"
+                onPress={() => onClassModalOpenChange()}
+              >
+                {t("admin-shipping-classes-modal-cancel", "Cancel")}
+              </Button>
+              <Button
+                color="primary"
+                isDisabled={!classFormData.code || !classFormData.display_name}
+                onPress={handleSaveClass}
+              >
+                {t("admin-shipping-classes-modal-save", "Save")}
               </Button>
             </ModalFooter>
           </ModalContent>

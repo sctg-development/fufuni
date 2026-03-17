@@ -25,6 +25,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/select";
 import {
   Table,
   TableHeader,
@@ -78,6 +79,20 @@ interface Product {
 }
 
 /**
+ * Shipping class for products that require specific shipping options.
+ */
+interface ShippingClass {
+  id: string;
+  code: string;
+  display_name: string;
+  description?: string;
+  resolution: "exclusive" | "additive";
+  status: "active" | "inactive";
+  created_at: string;
+  updated_at: string;
+}
+
+/**
  * Options for filtering products by status, including an empty value for all.
  */
 const STATUS_OPTIONS = ["", "active", "draft"];
@@ -100,6 +115,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [globalFilter, setGlobalFilter] = useState<string>("");
+  const [shippingClasses, setShippingClasses] = useState<ShippingClass[]>([]);
 
   // create / edit modal
   const [createModal, setCreateModal] = useState(false);
@@ -107,6 +123,7 @@ export default function ProductsPage() {
   const [formTitle, setFormTitle] = useState("");
   const [formDescription, setFormDescription] = useState("");
   const [formStatus, setFormStatus] = useState<"active" | "draft">("active");
+  const [formShippingClassId, setFormShippingClassId] = useState<string>("");
 
   // variants modal state
   const [variantModal, setVariantModal] = useState(false);
@@ -143,6 +160,19 @@ export default function ProductsPage() {
     loadProducts();
   }, [statusFilter]);
 
+  // load shipping classes for selector
+  useEffect(() => {
+    const loadShippingClasses = async () => {
+      try {
+        const resp = await getJson(`${apiBase}/v1/regions/shipping-classes?limit=100`);
+        setShippingClasses(resp.items || []);
+      } catch (err) {
+        console.error("Failed to load shipping classes", err);
+      }
+    };
+    loadShippingClasses();
+  }, []);
+
   // filtered list according to global search
   const displayed = useMemo(() => {
     const term = globalFilter.trim().toLowerCase();
@@ -165,6 +195,7 @@ export default function ProductsPage() {
     setFormTitle("");
     setFormDescription("");
     setFormStatus("active");
+    setFormShippingClassId("");
     setCreateModal(true);
   };
 
@@ -178,12 +209,14 @@ export default function ProductsPage() {
     setFormTitle(p.title);
     setFormDescription(p.description);
     setFormStatus(p.status);
+    setFormShippingClassId("");
 
     // Load full product details for variant management
     try {
       const full = await getJson(`${apiBase}/v1/products/${p.id}`);
 
       setEditingProduct(full);
+      setFormShippingClassId((full as any).shipping_class_id || "");
     } catch (err) {
       console.error("Error loading product", err);
       setEditingProduct(p);
@@ -206,11 +239,13 @@ export default function ProductsPage() {
           title: formTitle,
           description: formDescription,
           status: formStatus,
+          shipping_class_id: formShippingClassId || null,
         });
       } else {
         await postJson(`${apiBase}/v1/products`, {
           title: formTitle,
           description: formDescription || undefined,
+          shipping_class_id: formShippingClassId || null,
         });
       }
       setCreateModal(false);
@@ -465,6 +500,32 @@ export default function ProductsPage() {
                   <option value="active">active</option>
                   <option value="draft">draft</option>
                 </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Classe d'expédition (optionnel)
+                </label>
+                <Select
+                  label="Sélectionnez une classe"
+                  description="Laissez vide pour un produit standard"
+                  selectedKeys={formShippingClassId ? [formShippingClassId] : []}
+                  onSelectionChange={(keys) => {
+                    const val = Array.from(keys).join("");
+                    setFormShippingClassId(val);
+                  }}
+                >
+                  <SelectItem key="">Standard (aucune contrainte)</SelectItem>
+                  <>
+                    {shippingClasses.map((cls) => (
+                      <SelectItem 
+                        key={cls.id} 
+                        textValue={`[${cls.resolution === "exclusive" ? "EXCLUSIF" : "ADDITIF"}] ${cls.display_name}`}
+                      >
+                        {`[${cls.resolution === "exclusive" ? "EXCLUSIF" : "ADDITIF"}] ${cls.display_name}${cls.description ? ` — ${cls.description}` : ""}`}
+                      </SelectItem>
+                    ))}
+                  </>
+                </Select>
               </div>
             </form>
 

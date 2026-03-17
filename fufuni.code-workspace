@@ -65,7 +65,10 @@
     "i18n-ally.languageTagSystem": "bcp47",
     "chat.tools.terminal.autoApprove": {
       "npm run type-check": true
-    }
+    },
+    "i18n-ally-next.localesPaths": [
+      "apps/client/src/locales"
+    ]
   },
   "extensions": {
     "recommendations": [

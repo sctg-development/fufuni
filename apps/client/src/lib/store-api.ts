@@ -438,6 +438,59 @@ export async function deleteWarehouse(id: string): Promise<{ deleted: boolean }>
   });
 }
 
+// Shipping Classes
+export interface ShippingClass {
+  id: string;
+  code: string;
+  display_name: string;
+  description: string | null;
+  resolution: 'exclusive' | 'additive';
+  status: 'active' | 'inactive';
+  created_at: string;
+  updated_at: string;
+}
+
+export async function getShippingClasses(limit?: number, cursor?: string): Promise<PaginationResponse<ShippingClass>> {
+  const params = new URLSearchParams();
+  if (limit) params.append('limit', limit.toString());
+  if (cursor) params.append('cursor', cursor);
+  return request<PaginationResponse<ShippingClass>>(`/v1/regions/shipping-classes?${params.toString()}`);
+}
+
+export async function getShippingClass(id: string): Promise<ShippingClass> {
+  return request<ShippingClass>(`/v1/regions/shipping-classes/${id}`);
+}
+
+export async function createShippingClass(data: {
+  code: string;
+  display_name: string;
+  description?: string;
+  resolution?: 'exclusive' | 'additive';
+}): Promise<ShippingClass> {
+  return request<ShippingClass>(`/v1/regions/shipping-classes`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateShippingClass(id: string, data: {
+  display_name?: string;
+  description?: string | null;
+  resolution?: 'exclusive' | 'additive';
+  status?: 'active' | 'inactive';
+}): Promise<ShippingClass> {
+  return request<ShippingClass>(`/v1/regions/shipping-classes/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteShippingClass(id: string): Promise<{ deleted: boolean }> {
+  return request<{ deleted: boolean }>(`/v1/regions/shipping-classes/${id}`, {
+    method: 'DELETE',
+  });
+}
+
 // Shipping Rates
 export async function getShippingRates(limit?: number, cursor?: string): Promise<PaginationResponse<ShippingRate>> {
   const params = new URLSearchParams();
