@@ -4,7 +4,7 @@ import { StoreProduct } from "@/lib/store-api";
 import { useTranslation } from "react-i18next";
 import { useCart } from "@/hooks/useCart";
 import { formatMoney } from "@/utils/currency";
-import { resolveDescription, resolveTitle } from "@/utils/description";
+import { resolveDescription, resolveTitle, resolveVendor, resolveTags, resolveHandle } from "@/utils/description";
 import { Button } from "@heroui/button";
 
 interface Props {
@@ -32,6 +32,17 @@ export const ProductCardFull: React.FC<Props> = ({ product }) => {
 
   const currency = variant?.currency ?? "USD";
   const price = variant ? formatMoney(variant.price_cents, currency) : formatMoney(0, currency);
+  const comparePrice = variant?.compare_at_price_cents
+    ? formatMoney(variant.compare_at_price_cents, currency)
+    : null;
+
+  const vendor = resolveVendor(product.vendor ?? "", i18n.language);
+  const tagsRaw = Array.isArray(product.tags) ? product.tags.join(",") : product.tags ?? "";
+  const tags = resolveTags(tagsRaw, i18n.language)
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+  const handle = resolveHandle(product.handle ?? "", i18n.language);
 
   const image =
     variant?.image_url || product.image_url ||
@@ -74,6 +85,31 @@ export const ProductCardFull: React.FC<Props> = ({ product }) => {
 
       <h3 className="font-medium text-default-900 mb-2">{displayTitle}</h3>
 
+      {vendor && (
+        <p className="text-xs text-default-500 mb-1">
+          {t("vendor", "Vendor")}: {vendor}
+        </p>
+      )}
+
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {tags.map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex items-center rounded-full bg-default-200 px-2 py-1 text-[11px] font-semibold text-default-700"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {handle && (
+        <p className="text-xs text-default-400 mb-2">
+          {t("handle", "Handle")}: {handle}
+        </p>
+      )}
+
       {/* Rich description section */}
       {descriptionHtml && (
         <div
@@ -82,7 +118,12 @@ export const ProductCardFull: React.FC<Props> = ({ product }) => {
         />
       )}
 
-      <p className="text-default-500 text-sm mb-4 font-semibold">{price}</p>
+      <p className="text-default-500 text-sm mb-2 font-semibold">
+        {price}
+        {comparePrice && (
+          <span className="ml-2 text-default-400 line-through">{comparePrice}</span>
+        )}
+      </p>
 
       {/* Variants selection */}
       {product.variants.length > 1 && (
@@ -122,6 +163,28 @@ export const ProductCardFull: React.FC<Props> = ({ product }) => {
               );
             })}
           </select>
+        </div>
+      )}
+
+      {/* Variant details (optional enrichment fields) */}
+      {(variant?.barcode || variant?.tax_code || variant?.requires_shipping !== undefined) && (
+        <div className="mb-4 text-xs text-default-600">
+          {variant?.barcode && (
+            <p>
+              <span className="font-semibold">{t("barcode", "Barcode")}:</span> {variant.barcode}
+            </p>
+          )}
+          {variant?.tax_code && (
+            <p>
+              <span className="font-semibold">{t("tax-code", "Tax code")}:</span> {variant.tax_code}
+            </p>
+          )}
+          {variant?.requires_shipping !== undefined && (
+            <p>
+              <span className="font-semibold">{t("requires-shipping", "Requires shipping")}:</span>{' '}
+              {variant.requires_shipping ? t("yes", "Yes") : t("no", "No")}
+            </p>
+          )}
         </div>
       )}
 
