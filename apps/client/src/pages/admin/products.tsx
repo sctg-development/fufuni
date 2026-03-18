@@ -42,7 +42,7 @@ import {
   ModalFooter,
 } from "@heroui/modal";
 import { Card, CardBody } from "@heroui/card";
-import { Image as ImageIcon, X } from "lucide-react";
+import { Image as ImageIcon, X, Wand2 } from "lucide-react";
 
 import DefaultLayout from "@/layouts/default";
 import { useSecuredApi } from "@/authentication";
@@ -51,7 +51,17 @@ import { formatMoney } from "@/utils/currency";
 import { VariantPrices } from "@/components/VariantPrices";
 import { RichDescriptionEditor } from "@/components/RichDescriptionEditor";
 import { LocalizedTitleInput } from "@/components/LocalizedTitleInput";
-import { resolveTitle, titleMatchesTerm, resolveDescription } from "@/utils/description";
+import {
+  resolveTitle,
+  titleMatchesTerm,
+  resolveDescription,
+  getVendorForLocale,
+  mergeVendorLocale,
+  getTagsForLocale,
+  mergeTagsLocale,
+  getHandleForLocale,
+  mergeHandleLocale,
+} from "@/utils/description";
 import { availableLanguages } from "@/i18n";
 
 // --- Data types ----------------------------------------------------------
@@ -143,10 +153,13 @@ export default function ProductsPage() {
   const [formDescription, setFormDescription] = useState("");
   const [formStatus, setFormStatus] = useState<"active" | "draft">("active");
   const [formShippingClassId, setFormShippingClassId] = useState<string>("");
-  // enrichment fields
+  // enrichment fields - stored as JSON (multilingue)
   const [formVendor, setFormVendor] = useState("");
+  const [formVendorValue, setFormVendorValue] = useState(""); // display value for current locale
   const [formTags, setFormTags] = useState("");
+  const [formTagsValue, setFormTagsValue] = useState(""); // display value for current locale
   const [formHandle, setFormHandle] = useState("");
+  const [formHandleValue, setFormHandleValue] = useState(""); // display value for current locale
 
   // variants modal state
   const [variantModal, setVariantModal] = useState(false);
@@ -205,6 +218,13 @@ export default function ProductsPage() {
     loadShippingClasses();
   }, []);
 
+  // sync display values when locale changes
+  useEffect(() => {
+    setFormVendorValue(getVendorForLocale(formVendor, selectedLocale));
+    setFormTagsValue(getTagsForLocale(formTags, selectedLocale));
+    setFormHandleValue(getHandleForLocale(formHandle, selectedLocale));
+  }, [selectedLocale, formVendor, formTags, formHandle]);
+
   // filtered list according to global search
   const displayed = useMemo(() => {
     const term = globalFilter.trim().toLowerCase();
@@ -229,8 +249,11 @@ export default function ProductsPage() {
     setFormStatus("active");
     setFormShippingClassId("");
     setFormVendor("");
+    setFormVendorValue("");
     setFormTags("");
+    setFormTagsValue("");
     setFormHandle("");
+    setFormHandleValue("");
     setCreateModal(true);
   };
 
@@ -245,8 +268,9 @@ export default function ProductsPage() {
     setFormDescription(p.description);
     setFormStatus(p.status);
     setFormShippingClassId("");
+    // vendor, tags, and handle are stored as JSON (multilingue)
     setFormVendor(p.vendor || "");
-    setFormTags((p.tags || []).join(", "));
+    setFormTags(p.tags ? (typeof p.tags === "string" ? p.tags : (p.tags as string[]).join(", ")) : "");
     setFormHandle(p.handle || "");
 
     // Load full product details for variant management
@@ -256,7 +280,7 @@ export default function ProductsPage() {
       setEditingProduct(full);
       setFormShippingClassId((full as any).shipping_class_id || "");
       setFormVendor((full as any).vendor || "");
-      setFormTags(((full as any).tags || []).join(", "));
+      setFormTags((full as any).tags ? ((full as any).tags as string[]).join(", ") : "");
       setFormHandle((full as any).handle || "");
     } catch (err) {
       console.error("Error loading product", err);
@@ -275,18 +299,18 @@ export default function ProductsPage() {
   const submitForm = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Parse tags from comma-separated input
-      const tags = formTags
-        ? formTags.split(",").map((t) => t.trim()).filter((t) => t.length > 0)
-        : [];
+      // Merge enrichment fields with current locale
+      const mergedVendor = mergeVendorLocale(formVendor, selectedLocale, formVendorValue);
+      const mergedTags = mergeTagsLocale(formTags, selectedLocale, formTagsValue);
+      const mergedHandle = mergeHandleLocale(formHandle, selectedLocale, formHandleValue);
 
       const productData = {
         title: formTitle,
         description: formDescription || undefined,
         shipping_class_id: formShippingClassId || null,
-        vendor: formVendor || undefined,
-        tags: tags.length > 0 ? tags : undefined,
-        handle: formHandle || undefined,
+        vendor: mergedVendor || undefined,
+        tags: mergedTags || undefined,
+        handle: mergedHandle || undefined,
       };
 
       if (editingProduct) {
@@ -299,6 +323,33 @@ export default function ProductsPage() {
     } catch (err) {
       console.error("Error saving product", err);
     }
+  };
+
+  /**
+   * Translate vendor to selected locale (AI).
+   * Placeholder for now — would call an AI translation API.
+   */
+  const handleTranslateVendor = () => {
+    // TODO: Implement AI translation
+    console.log("Translate vendor");
+  };
+
+  /**
+   * Translate tags to selected locale (AI).
+   * Placeholder for now — would call an AI translation API.
+   */
+  const handleTranslateTags = () => {
+    // TODO: Implement AI translation
+    console.log("Translate tags");
+  };
+
+  /**
+   * Translate handle to selected locale (AI).
+   * Placeholder for now — would call an AI translation API.
+   */
+  const handleTranslateHandle = () => {
+    // TODO: Implement AI translation
+    console.log("Translate handle");
   };
 
   /**
@@ -633,7 +684,7 @@ export default function ProductsPage() {
                 </Select>
               </div>
               
-              {/* Enrichment Fields */}
+              {/* Enrichment Fields - Simple values (not localized) */}
               <div className="border-t pt-4 mt-4">
                 <h3 className="font-semibold text-sm mb-3">
                   {t("admin-products-enrichment-heading")}
@@ -641,37 +692,82 @@ export default function ProductsPage() {
 
                 {/* Vendor */}
                 <div className="mb-3">
-                  <label className="block text-sm font-medium">
-                    {t("admin-products-field-vendor")}
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-medium">
+                      {t("admin-products-field-vendor")} <span className="text-xs text-default-500">(optional)</span>
+                    </label>
+                    <div className="flex gap-2">
+                      <p className="text-xs text-default-500">
+                        {selectedLocale}
+                      </p>
+                      <Button
+                        isIconOnly
+                        size="sm"
+                        variant="light"
+                        onPress={handleTranslateVendor}
+                      >
+                        <Wand2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
                   <Input
                     placeholder={t("admin-products-field-vendor-placeholder")}
-                    value={formVendor}
-                    onChange={(e) => setFormVendor(e.target.value)}
+                    value={formVendorValue}
+                    onChange={(e) => setFormVendorValue(e.target.value)}
                   />
                 </div>
 
                 {/* Tags */}
                 <div className="mb-3">
-                  <label className="block text-sm font-medium">
-                    {t("admin-products-field-tags")}
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-medium">
+                      {t("admin-products-field-tags")} <span className="text-xs text-default-500">(comma-separated)</span>
+                    </label>
+                    <div className="flex gap-2">
+                      <p className="text-xs text-default-500">
+                        {selectedLocale}
+                      </p>
+                      <Button
+                        isIconOnly
+                        size="sm"
+                        variant="light"
+                        onPress={handleTranslateTags}
+                      >
+                        <Wand2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
                   <Input
                     placeholder={t("admin-products-field-tags-placeholder")}
-                    value={formTags}
-                    onChange={(e) => setFormTags(e.target.value)}
+                    value={formTagsValue}
+                    onChange={(e) => setFormTagsValue(e.target.value)}
                   />
                 </div>
 
                 {/* Handle */}
                 <div>
-                  <label className="block text-sm font-medium">
-                    {t("admin-products-field-handle")}
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-medium">
+                      {t("admin-products-field-handle")} <span className="text-xs text-default-500">(URL slug - optional, auto-generated if empty)</span>
+                    </label>
+                    <div className="flex gap-2">
+                      <p className="text-xs text-default-500">
+                        {selectedLocale}
+                      </p>
+                      <Button
+                        isIconOnly
+                        size="sm"
+                        variant="light"
+                        onPress={handleTranslateHandle}
+                      >
+                        <Wand2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
                   <Input
                     placeholder={t("admin-products-field-handle-placeholder")}
-                    value={formHandle}
-                    onChange={(e) => setFormHandle(e.target.value)}
+                    value={formHandleValue}
+                    onChange={(e) => setFormHandleValue(e.target.value)}
                   />
                 </div>
               </div>

@@ -181,6 +181,201 @@ export function titleMatchesTerm(raw: string, term: string): boolean {
   return Object.values(parsed).some((v) => v.toLowerCase().includes(lower));
 }
 
+// ─── Vendor helpers (localized string) ────────────────────────────────────
+
+/**
+ * Parses vendor string: plain text (legacy) or LocalizedDesc JSON.
+ */
+export function parseVendor(raw: string): LocalizedDesc | string {
+  if (!raw) return '';
+  const trimmed = raw.trimStart();
+  if (trimmed.startsWith('{')) {
+    try {
+      return JSON.parse(raw) as LocalizedDesc;
+    } catch {
+      return stripHtml(raw);
+    }
+  }
+  return stripHtml(raw);
+}
+
+/**
+ * Resolves the best vendor string for a given locale.
+ */
+export function resolveVendor(raw: string, locale: string): string {
+  const parsed = parseVendor(raw);
+  if (typeof parsed === 'string') return parsed;
+  for (const lang of [locale, ...DESCRIPTION_FALLBACK]) {
+    if (parsed[lang]) return parsed[lang];
+  }
+  return '';
+}
+
+/**
+ * Merges vendor for a specific locale with fallback logic:
+ * - If raw is plain text: migrate to JSON, use provided locale, copy to en-US if not provided
+ * - If raw is JSON: update/add the locale value
+ */
+export function mergeVendorLocale(
+  raw: string,
+  locale: string,
+  text: string
+): string {
+  const safe   = stripHtml(text);
+  const parsed = parseVendor(raw);
+  if (typeof parsed === 'string') {
+    // Migration from plain text to JSON
+    const result: LocalizedDesc = { [locale]: safe };
+    // If editing a non-default locale and parsed is non-empty, use it as fallback for en-US
+    if (locale !== 'en-US' && parsed) {
+      result['en-US'] = parsed;
+    }
+    return JSON.stringify(result);
+  }
+  // Already JSON: update and ensure en-US exists
+  const result = { ...parsed, [locale]: safe };
+  if (!result['en-US'] && safe) {
+    result['en-US'] = safe; // Use current value as fallback for en-US
+  }
+  return JSON.stringify(result);
+}
+
+/**
+ * Gets vendor for a specific locale.
+ */
+export function getVendorForLocale(raw: string, locale: string): string {
+  return resolveVendor(raw, locale);
+}
+
+// ─── Tags helpers (localized array/string) ───────────────────────────────────
+
+/**
+ * Parses tags: plain comma-separated (legacy) or LocalizedDesc JSON with comma-separated values.
+ */
+export function parseTags(raw: string): LocalizedDesc | string {
+  if (!raw) return '';
+  const trimmed = raw.trimStart();
+  if (trimmed.startsWith('{')) {
+    try {
+      return JSON.parse(raw) as LocalizedDesc;
+    } catch {
+      return raw;
+    }
+  }
+  return raw;
+}
+
+/**
+ * Resolves the best tags string for a given locale (comma-separated).
+ */
+export function resolveTags(raw: string, locale: string): string {
+  const parsed = parseTags(raw);
+  if (typeof parsed === 'string') return parsed;
+  for (const lang of [locale, ...DESCRIPTION_FALLBACK]) {
+    if (parsed[lang]) return parsed[lang];
+  }
+  return '';
+}
+
+/**
+ * Merges tags for a specific locale (stored as comma-separated within JSON).
+ */
+export function mergeTagsLocale(
+  raw: string,
+  locale: string,
+  tags: string
+): string {
+  const safe   = tags.trim();
+  const parsed = parseTags(raw);
+  if (typeof parsed === 'string') {
+    // Migration from plain text to JSON
+    const result: LocalizedDesc = { [locale]: safe };
+    if (locale !== 'en-US' && parsed) {
+      result['en-US'] = parsed;
+    }
+    return JSON.stringify(result);
+  }
+  // Already JSON: update and ensure en-US exists
+  const result = { ...parsed, [locale]: safe };
+  if (!result['en-US'] && safe) {
+    result['en-US'] = safe;
+  }
+  return JSON.stringify(result);
+}
+
+/**
+ * Gets tags for a specific locale (comma-separated string).
+ */
+export function getTagsForLocale(raw: string, locale: string): string {
+  return resolveTags(raw, locale);
+}
+
+// ─── Handle helpers (localized URL slug) ───────────────────────────────────
+
+/**
+ * Parses handle: plain text (legacy) or LocalizedDesc JSON.
+ */
+export function parseHandle(raw: string): LocalizedDesc | string {
+  if (!raw) return '';
+  const trimmed = raw.trimStart();
+  if (trimmed.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(raw) as LocalizedDesc;
+      return Object.fromEntries(
+        Object.entries(parsed).map(([k, v]) => [k, (v as string).toLowerCase()])
+      ) as LocalizedDesc;
+    } catch {
+      return raw.toLowerCase();
+    }
+  }
+  return raw.toLowerCase();
+}
+
+/**
+ * Resolves the best handle for a given locale.
+ */
+export function resolveHandle(raw: string, locale: string): string {
+  const parsed = parseHandle(raw);
+  if (typeof parsed === 'string') return parsed;
+  for (const lang of [locale, ...DESCRIPTION_FALLBACK]) {
+    if (parsed[lang]) return parsed[lang];
+  }
+  return '';
+}
+
+/**
+ * Merges handle for a specific locale.
+ */
+export function mergeHandleLocale(
+  raw: string,
+  locale: string,
+  handle: string
+): string {
+  const safe   = handle.toLowerCase().trim();
+  const parsed = parseHandle(raw);
+  if (typeof parsed === 'string') {
+    // Migration from plain text to JSON
+    const result: LocalizedDesc = { [locale]: safe };
+    if (locale !== 'en-US' && parsed) {
+      result['en-US'] = parsed;
+    }
+    return JSON.stringify(result);
+  }
+  // Already JSON: update and ensure en-US exists
+  const result = { ...parsed, [locale]: safe };
+  if (!result['en-US'] && safe) {
+    result['en-US'] = safe;
+  }
+  return JSON.stringify(result);
+}
+
+/**
+ * Gets handle for a specific locale.
+ */
+export function getHandleForLocale(raw: string, locale: string): string {
+  return resolveHandle(raw, locale);
+}
+
 /**
  * Resolves a title that combines product title and variant title.
  * 

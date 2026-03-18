@@ -13,18 +13,6 @@
       "path": "./apps/merchant"
     },
     {
-      "name": "Merchant Admin",
-      "path": "./apps/merchant/admin"
-    },
-    {
-      "name": "Merchant example",
-      "path": "./apps/merchant/example"
-    },
-    {
-      "name": "Cloudflare Worker",
-      "path": "./apps/cloudflare-worker"
-    },
-    {
       "name": "Sensitive datas",
       "path": "./_sensitive_datas"
     },
