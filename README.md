@@ -110,7 +110,7 @@ Visitors see an attractive landing page with a Log in button and direct links to
 ### 👤 Customers & Auth
 - **Auth0-based authentication** for admin (JWT, RBAC, configurable permissions)
 - **Customer accounts** with address book
-- **OAuth 2.0 / UCP** (Universal Checkout Protocol) for customer-facing flows
+- **OAuth 2.0 / UCP** (Universal Commerce Protocol) for customer-facing flows
 - Magic-link checkout
 
 ### 🌍 Internationalisation
