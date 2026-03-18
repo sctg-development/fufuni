@@ -149,7 +149,7 @@ Full-featured back-office covering:
 ```mermaid
 flowchart LR
   subgraph Cloudflare Edge
-    React["React SPA<br/>(Vite 7)<br/>HeroUI v2<br/>Auth0"]
+    React["React SPA<br/>(Vite 8)<br/>HeroUI v2<br/>Auth0"]
     Merchant["Merchant Worker<br/>Hono + Zod-OpenAPI<br/>Durable Object (SQLite)"]
     Stripe["Stripe Checkout"]
     Mailgun["Mailgun (email)"]
@@ -226,6 +226,7 @@ curl -X POST http://localhost:8787/v1/setup/stripe \
 ```bash
 cp apps/client/.env.example apps/client/.env
 # → Fill in AUTH0_*, API_BASE_URL, MERCHANT_PK, STRIPE_PUBLISHABLE_KEY
+#    (don’t forget AUTH0_SCOPE and AUTH0_AUTOMATIC_PERMISSIONS for Auth0 auth)
 
 npm run dev   # from monorepo root
 # → http://localhost:5173
@@ -317,10 +318,18 @@ Sensitive values (secrets) should be set with `wrangler secret put`.
 | `AUTH0_CLIENT_ID` | ✅ | Auth0 SPA Client ID |
 | `AUTH0_DOMAIN` | ✅ | Auth0 tenant domain |
 | `AUTH0_AUDIENCE` | ✅ | Auth0 API identifier |
+| `AUTH0_SCOPE` | ✅ | Auth0 OAuth scopes (e.g. `openid profile email`) |
+| `AUTH0_CACHE_DURATION_S` | ⚙️ | Cache duration (seconds) for Auth0 Management API tokens (default: 300) |
+| `AUTH0_AUTOMATIC_PERMISSIONS` | ⚙️ | Comma-separated permissions to auto-assign to the signed-in user |
 | `API_BASE_URL` | ✅ | Worker base URL |
 | `MERCHANT_PK` | ✅ | Public API key for storefront calls |
 | `ADMIN_AUTH0_PERMISSION` | ✅ | Auth0 permission granting admin panel access |
 | `ADMIN_STORE_PERMISSION` | ✅ | Auth0 permission granting store management |
+| `DATABASE_PERMISSION` | ⚙️ | Auth0 permission for database admin routes (used by backend) |
+| `AI_PERMISSION` | ⚙️ | Auth0 permission for AI credentials endpoint |
+| `MAIL_PERMISSION` | ⚙️ | Auth0 permission for test mail endpoint |
+| `STORE_URL` | ⚙️ | Public storefront URL (used in emails) |
+| `STORE_NAME` | ⚙️ | Store name (used in emails) |
 | `STRIPE_PUBLISHABLE_KEY` | ⚙️ | Stripe publishable key |
 
 ---
