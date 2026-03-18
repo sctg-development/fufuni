@@ -160,6 +160,7 @@ export interface AvailableShippingRateItem {
   currency: string;
   min_delivery_days?: number;
   max_delivery_days?: number;
+  shipping_class_id?: string | null;
 }
 
 export interface AvailableShippingRatesResponse {
@@ -235,6 +236,7 @@ export interface ShippingRate {
   max_weight_g?: number;
   min_delivery_days?: number;
   max_delivery_days?: number;
+  shipping_class_id?: string | null;
   status: 'active' | 'inactive';
   created_at: string;
   updated_at: string;
