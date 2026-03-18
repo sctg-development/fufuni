@@ -422,9 +422,9 @@ export const useSecuredApi = () => {
 
   const auth0Domain =
     typeof import.meta !== "undefined" &&
-    (import.meta as any).env?.VITE_AUTH0_DOMAIN
-      ? (import.meta as any).env.VITE_AUTH0_DOMAIN
-      : ((import.meta as any)?.env?.AUTH0_DOMAIN ?? "");
+    (import.meta as any).env?.AUTH0_DOMAIN
+      ? (import.meta as any).env.AUTH0_DOMAIN
+      : ((import.meta as any)?.env?.VITE_AUTH0_DOMAIN ?? "");
 
   /**
    * Liste tous les utilisateurs depuis Auth0 Management API.
