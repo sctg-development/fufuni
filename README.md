@@ -275,10 +275,10 @@ Sensitive values (secrets) should be set with `wrangler secret put`.
 | `AUTH0_SCOPE` | ⚙️ | OAuth scopes (default: `openid profile email`) |
 | `AUTH0_AUTOMATIC_PERMISSIONS` | ⚙️ | Comma-separated permissions to auto-provision |
 | `ADMIN_STORE_PERMISSION` | ⚙️ | JWT permission for store admin routes (default: `admin:store`) |
-| `ADMIN_AUTH0_PERMISSION` | ⚙️ | JWT permission for Auth0 management routes (default: `auth0adminapi`) |
-| `DATABASE_PERMISSION` | ⚙️ | JWT permission for database admin routes (default: `admindatabase`) |
-| `AI_PERMISSION` | ⚙️ | JWT permission for AI parameter endpoint (default: `aiapi`) |
-| `MAIL_PERMISSION` | ⚙️ | JWT permission for test mail endpoint (default: `mailapi`) |
+| `ADMIN_AUTH0_PERMISSION` | ⚙️ | JWT permission for Auth0 management routes (default: `auth0:admin:api`) |
+| `DATABASE_PERMISSION` | ⚙️ | JWT permission for database admin routes (default: `admin:database`) |
+| `AI_PERMISSION` | ⚙️ | JWT permission for AI parameter endpoint (default: `ai:api`) |
+| `MAIL_PERMISSION` | ⚙️ | JWT permission for test mail endpoint (default: `mail:api`) |
 | `WANT_PERMISSION` | ⚙️ | JWT permission for UCP/want routes (default: `wantapi`) |
 | `AI_API_KEY` | ⚙️ | AI provider API key (returned to authorised clients) |
 | `AI_MODEL` | ⚙️ | AI model name (e.g. `openai/gpt-oss-20b`) |
@@ -617,7 +617,7 @@ All outbound webhooks are signed with `X-Merchant-Signature` (HMAC-SHA256).
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
-| `POST` | `/v1/mails/send` | `mailapi` | Send a test email via Mailgun |
+| `POST` | `/v1/mails/send` | `mail:api` | Send a test email via Mailgun |
 
 ---
 
@@ -625,8 +625,8 @@ All outbound webhooks are signed with `X-Merchant-Signature` (HMAC-SHA256).
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
-| `POST` | `/v1/__auth0/token` | `auth0adminapi` | Get Auth0 Management API access token (cached) |
-| `POST` | `/v1/__auth0/autopermissions` | `auth0adminapi` | Auto-assign configured permissions to current user |
+| `POST` | `/v1/__auth0/token` | `auth0:admin:api` | Get Auth0 Management API access token (cached) |
+| `POST` | `/v1/__auth0/autopermissions` | `auth0:admin:api` | Auto-assign configured permissions to current user |
 
 ---
 
@@ -634,7 +634,7 @@ All outbound webhooks are signed with `X-Merchant-Signature` (HMAC-SHA256).
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
-| `GET` | `/v1/ai/parameters` | `aiapi` | Returns `{apiKey, model, url}` for the AI provider |
+| `GET` | `/v1/ai/parameters` | `ai:api` | Returns `{apiKey, model, url}` for the AI provider |
 
 > The backend only transmits credentials — **all AI calls (LLM requests) are executed client-side** in `utils/ai-client.ts`. This keeps the server stateless with respect to AI and avoids proxying large payloads.
 
@@ -646,8 +646,11 @@ All outbound webhooks are signed with `X-Merchant-Signature` (HMAC-SHA256).
 |---|---|---|---|
 | `POST` | `/v1/setup/init` | public (once) | Create initial API keys (only works if no keys exist) |
 | `POST` | `/v1/setup/stripe` | `admin:store` | Configure Stripe API keys |
-| `GET` | `/v1/setup/config` | `admindatabase` | Read all config key-value pairs |
-| `POST` | `/v1/setup/reset` | `admindatabase` | **Wipe and reset** the database |
+| `GET` | `/v1/setup/config` | `admin:database` | Read all config key-value pairs |
+| `POST` | `/v1/setup/reset` | `admin:database` | **Wipe and reset** the database |
+| `GET` | `/v1/setup/migrations/list` | `admin:database` | List applied migrations |
+| `POST` | `/v1/setup/migrations/clean` | `admin:database` | Delete all migration records |
+| `POST` | `/v1/setup/migrations/run` | `admin:database` | Re-run pending migrations |
 
 ---
 
@@ -808,7 +811,7 @@ The backend exposes a single endpoint that returns AI credentials to the client:
 
 ```
 GET /v1/ai/parameters
-Authorization: Bearer <token-with-aiapi-permission>
+Authorization: Bearer <token-with-ai:api-permission>
 
 Response: { "apiKey": "...", "model": "...", "url": "..." }
 ```
