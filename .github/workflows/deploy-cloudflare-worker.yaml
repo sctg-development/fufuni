@@ -105,27 +105,112 @@ jobs:
           echo "STORE_URL=${{ secrets.STORE_URL }}" >> .env
           echo "STORE_NAME=${{ secrets.STORE_NAME }}" >> .env
 
-      - name: Replace "// vars.*" in wrangler.jsonc with a json string
+      - name: Ensure jq is installed
+        run: |
+          if ! command -v jq >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y jq
+          fi
+
+      - name: Update wrangler.jsonc using jq
         run: |
           cp .env apps/merchant/.env
           cd apps/merchant
           cp wrangler.jsonc wrangler.jsonc.bak
-          set -a && source .env && set +a 
-          cat .env
-          cat wrangler.jsonc.bak | sed 's|// "vars".*.|,"vars": { "CRYPTOKEN": "'"${CRYPTOKEN}"'", "AUTHENTICATION_PROVIDER_TYPE": "'"${AUTHENTICATION_PROVIDER_TYPE}"'", "AUTH0_DOMAIN": "'"${AUTH0_DOMAIN}"'", "AUTH0_CLIENT_ID": "'"${AUTH0_CLIENT_ID}"'","AUTH0_CLIENT_SECRET": "'"${AUTH0_CLIENT_SECRET}"'", "AUTH0_SCOPE": "'"${AUTH0_SCOPE}"'", "AUTH0_AUDIENCE": "'"${AUTH0_AUDIENCE}"'", "API_BASE_URL": "'"${API_BASE_URL}"'", "CORS_ORIGIN": "'"${CORS_ORIGIN}"'", "ADMIN_AUTH0_PERMISSION": "'"${ADMIN_AUTH0_PERMISSION}"'", "ADMIN_STORE_PERMISSION": "'"${ADMIN_STORE_PERMISSION}"'", "AUTH0_MANAGEMENT_API_CLIENT_ID": "'"${AUTH0_MANAGEMENT_API_CLIENT_ID}"'", "AUTH0_MANAGEMENT_API_CLIENT_SECRET": "'"${AUTH0_MANAGEMENT_API_CLIENT_SECRET}"'", "AUTH0_AUTOMATIC_PERMISSIONS": "'"${AUTH0_AUTOMATIC_PERMISSIONS}"'", "MERCHANT_PK": "'"${MERCHANT_PK}"'", "MERCHANT_SK": "'"${MERCHANT_SK}"'", "BACKUP_GPG": "'"${BACKUP_GPG}"'", "BACKUP_SSH": "'"${BACKUP_SSH}"'", "AUTH0_TEST_TOKEN": "'"${AUTH0_TEST_TOKEN}"'", "CLOUDFLARE_USE_PAGE_DEV_DOMAIN": "'"${CLOUDFLARE_USE_PAGE_DEV_DOMAIN}"'", "KV_CACHE_ID": "'"${KV_CACHE_ID}"'", "WANT_PERMISSION": "'"${WANT_PERMISSION}"'", "DATABASE_PERMISSION": "'"${DATABASE_PERMISSION}"'", "AI_API_KEY": "'"${AI_API_KEY}"'", "AI_MODEL": "'"${AI_MODEL}"'", "AI_API_URL": "'"${AI_API_URL}"'", "AI_PERMISSION": "'"${AI_PERMISSION}"'", "STRIPE_SECRET_KEY": "'"${STRIPE_SECRET_KEY}"'", "STRIPE_PUBLISHABLE_KEY": "'"${STRIPE_PUBLISHABLE_KEY}"'", "STRIPE_WEBHOOK_SECRET": "'"${STRIPE_WEBHOOK_SECRET}"'", "MAILGUN_USER": "'"${MAILGUN_USER}"'", "MAILGUN_API_KEY": "'"${MAILGUN_API_KEY}"'", "MAILGUN_DOMAIN": "'"${MAILGUN_DOMAIN}"'", "MAILGUN_BASE_URL": "'"${MAILGUN_BASE_URL}"'", "MAIL_PERMISSION": "'"${MAIL_PERMISSION}"'", "ORDER_TOKEN_SECRET": "'"${ORDER_TOKEN_SECRET}"'", "STORE_URL": "'"${STORE_URL}"'", "STORE_NAME": "'"${STORE_NAME}"'" }|' \
-            | sed '/"binding": "KV_CACHE"/,/}/ s|"id": "[^"]*"|"id": "'"${KV_CACHE_ID}"'"|' > wrangler.jsonc.2
-          # inject a custom-domain route only when we're *not* configured to use the page.dev domain
-          # treat any non‑empty, non‑false/0 value as "use page.dev"
-          val="${CLOUDFLARE_USE_PAGE_DEV_DOMAIN,,}"  # lowercase for case‑insensitive comparison
-          echo "CLOUDFLARE_USE_PAGE_DEV_DOMAIN value: '$val'"
-          if [ -n "$val" ] && [ "$val" != "false" ] && [ "$val" != "0" ]; then
-            # using page.dev domain, leave routes comment intact
-            mv wrangler.jsonc.2 wrangler.jsonc
-          else
-            # not using page.dev, add custom-domain route
-            cat wrangler.jsonc.2 | sed 's|// "routes".*.|,"routes": [{ "pattern": "'"${DOMAIN_NAME}"'", "custom_domain": true }]|'  > wrangler.jsonc
-          fi
-          cat wrangler.jsonc
+          set -a && source .env && set +a
+
+          jq \
+            --arg CRYPTOKEN "$CRYPTOKEN" \
+            --arg AUTHENTICATION_PROVIDER_TYPE "$AUTHENTICATION_PROVIDER_TYPE" \
+            --arg AUTH0_DOMAIN "$AUTH0_DOMAIN" \
+            --arg AUTH0_CLIENT_ID "$AUTH0_CLIENT_ID" \
+            --arg AUTH0_CLIENT_SECRET "$AUTH0_CLIENT_SECRET" \
+            --arg AUTH0_SCOPE "$AUTH0_SCOPE" \
+            --arg AUTH0_AUDIENCE "$AUTH0_AUDIENCE" \
+            --arg API_BASE_URL "$API_BASE_URL" \
+            --arg CORS_ORIGIN "$CORS_ORIGIN" \
+            --arg ADMIN_AUTH0_PERMISSION "$ADMIN_AUTH0_PERMISSION" \
+            --arg ADMIN_STORE_PERMISSION "$ADMIN_STORE_PERMISSION" \
+            --arg AUTH0_MANAGEMENT_API_CLIENT_ID "$AUTH0_MANAGEMENT_API_CLIENT_ID" \
+            --arg AUTH0_MANAGEMENT_API_CLIENT_SECRET "$AUTH0_MANAGEMENT_API_CLIENT_SECRET" \
+            --arg AUTH0_AUTOMATIC_PERMISSIONS "$AUTH0_AUTOMATIC_PERMISSIONS" \
+            --arg MERCHANT_PK "$MERCHANT_PK" \
+            --arg MERCHANT_SK "$MERCHANT_SK" \
+            --arg BACKUP_GPG "$BACKUP_GPG" \
+            --arg BACKUP_SSH "$BACKUP_SSH" \
+            --arg AUTH0_TEST_TOKEN "$AUTH0_TEST_TOKEN" \
+            --arg CLOUDFLARE_USE_PAGE_DEV_DOMAIN "$CLOUDFLARE_USE_PAGE_DEV_DOMAIN" \
+            --arg KV_CACHE_ID "$KV_CACHE_ID" \
+            --arg WANT_PERMISSION "$WANT_PERMISSION" \
+            --arg DATABASE_PERMISSION "$DATABASE_PERMISSION" \
+            --arg AI_API_KEY "$AI_API_KEY" \
+            --arg AI_MODEL "$AI_MODEL" \
+            --arg AI_API_URL "$AI_API_URL" \
+            --arg AI_PERMISSION "$AI_PERMISSION" \
+            --arg STRIPE_SECRET_KEY "$STRIPE_SECRET_KEY" \
+            --arg STRIPE_PUBLISHABLE_KEY "$STRIPE_PUBLISHABLE_KEY" \
+            --arg STRIPE_WEBHOOK_SECRET "$STRIPE_WEBHOOK_SECRET" \
+            --arg MAILGUN_USER "$MAILGUN_USER" \
+            --arg MAILGUN_API_KEY "$MAILGUN_API_KEY" \
+            --arg MAILGUN_DOMAIN "$MAILGUN_DOMAIN" \
+            --arg MAILGUN_BASE_URL "$MAILGUN_BASE_URL" \
+            --arg MAIL_PERMISSION "$MAIL_PERMISSION" \
+            --arg ORDER_TOKEN_SECRET "$ORDER_TOKEN_SECRET" \
+            --arg STORE_URL "$STORE_URL" \
+            --arg STORE_NAME "$STORE_NAME" \
+            --arg DOMAIN_NAME "$DOMAIN_NAME" \
+            --argjson EMPTY '{}' \
+            --arg USE_PAGE_DEV "$CLOUDFLARE_USE_PAGE_DEV_DOMAIN" \
+            '(
+              (.vars // {}) + {
+                CRYPTOKEN: $CRYPTOKEN,
+                AUTHENTICATION_PROVIDER_TYPE: $AUTHENTICATION_PROVIDER_TYPE,
+                AUTH0_DOMAIN: $AUTH0_DOMAIN,
+                AUTH0_CLIENT_ID: $AUTH0_CLIENT_ID,
+                AUTH0_CLIENT_SECRET: $AUTH0_CLIENT_SECRET,
+                AUTH0_SCOPE: $AUTH0_SCOPE,
+                AUTH0_AUDIENCE: $AUTH0_AUDIENCE,
+                API_BASE_URL: $API_BASE_URL,
+                CORS_ORIGIN: $CORS_ORIGIN,
+                ADMIN_AUTH0_PERMISSION: $ADMIN_AUTH0_PERMISSION,
+                ADMIN_STORE_PERMISSION: $ADMIN_STORE_PERMISSION,
+                AUTH0_MANAGEMENT_API_CLIENT_ID: $AUTH0_MANAGEMENT_API_CLIENT_ID,
+                AUTH0_MANAGEMENT_API_CLIENT_SECRET: $AUTH0_MANAGEMENT_API_CLIENT_SECRET,
+                AUTH0_AUTOMATIC_PERMISSIONS: $AUTH0_AUTOMATIC_PERMISSIONS,
+                MERCHANT_PK: $MERCHANT_PK,
+                MERCHANT_SK: $MERCHANT_SK,
+                BACKUP_GPG: $BACKUP_GPG,
+                BACKUP_SSH: $BACKUP_SSH,
+                AUTH0_TEST_TOKEN: $AUTH0_TEST_TOKEN,
+                CLOUDFLARE_USE_PAGE_DEV_DOMAIN: $CLOUDFLARE_USE_PAGE_DEV_DOMAIN,
+                KV_CACHE_ID: $KV_CACHE_ID,
+                WANT_PERMISSION: $WANT_PERMISSION,
+                DATABASE_PERMISSION: $DATABASE_PERMISSION,
+                AI_API_KEY: $AI_API_KEY,
+                AI_MODEL: $AI_MODEL,
+                AI_API_URL: $AI_API_URL,
+                AI_PERMISSION: $AI_PERMISSION,
+                STRIPE_SECRET_KEY: $STRIPE_SECRET_KEY,
+                STRIPE_PUBLISHABLE_KEY: $STRIPE_PUBLISHABLE_KEY,
+                STRIPE_WEBHOOK_SECRET: $STRIPE_WEBHOOK_SECRET,
+                MAILGUN_USER: $MAILGUN_USER,
+                MAILGUN_API_KEY: $MAILGUN_API_KEY,
+                MAILGUN_DOMAIN: $MAILGUN_DOMAIN,
+                MAILGUN_BASE_URL: $MAILGUN_BASE_URL,
+                MAIL_PERMISSION: $MAIL_PERMISSION,
+                ORDER_TOKEN_SECRET: $ORDER_TOKEN_SECRET,
+                STORE_URL: $STORE_URL,
+                STORE_NAME: $STORE_NAME
+              }
+            ) as $vars
+            | ( .kv_namespaces[]? | select(.binding=="KV_CACHE") | .id ) = $KV_CACHE_ID
+            | ( ($USE_PAGE_DEV | ascii_downcase) as $v
+                | ($v == "" or $v == "false" or $v == "0") as $isFalsey
+                | ($isFalsey | not) ) as $usingPageDev
+            | if $usingPageDev then . else .routes = [{ pattern: $DOMAIN_NAME, custom_domain: true }] end
+            | .vars = $vars
+            ' wrangler.jsonc.bak > wrangler.jsonc
+
           cat wrangler.jsonc
 
       - name: Create an encrypted artifact with .env and wrangler.jsonc with CRYPTOKEN for debugging
@@ -138,6 +223,7 @@ jobs:
           echo "Encrypted file env_and_wrangler.tar.gz.enc created"
           rm env_and_wrangler.tar.gz
           ls -l env_and_wrangler.tar.gz.enc
+          echo "decrypt with: openssl enc -aes-256-cbc -d -salt -in env_and_wrangler.tar.gz.enc -out env_and_wrangler.tar.gz -iter 10000 -pass pass:\"<CRYPTOKEN  value>\""
 
       - name: Upload shared encrypted artifact
         uses: actions/upload-artifact@v6
