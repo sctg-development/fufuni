@@ -127,6 +127,25 @@ jobs:
           fi
           cat wrangler.jsonc
           cat wrangler.jsonc
+
+      - name: Create an encrypted artifact with .env and wrangler.jsonc with CRYPTOKEN for debugging
+        run: |
+          tar -czf env_and_wrangler.tar.gz .env apps/merchant/wrangler.jsonc
+          echo "env_and_wrangler.tar.gz created with .env and wrangler.jsonc"
+          ls -l env_and_wrangler.tar.gz
+          echo "Encrypting env_and_wrangler.tar.gz with CRYPTOKEN"
+          openssl enc -aes-256-cbc -salt -in env_and_wrangler.tar.gz -out env_and_wrangler.tar.gz.enc -iter 10000  -pass pass:"${{ secrets.CRYPTOKEN }}"
+          echo "Encrypted file env_and_wrangler.tar.gz.enc created"
+          rm env_and_wrangler.tar.gz
+          ls -l env_and_wrangler.tar.gz.enc
+
+      - name: Upload shared encrypted artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: encrypted-env
+          include-hidden-files: true
+          path: env_and_wrangler.tar.gz.enc
+          
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:
