@@ -44,6 +44,12 @@ export interface StoreVariant {
   price_cents: number;
   currency?: string; // ISO 4217 code (e.g. USD, EUR)
   image_url?: string;
+  weight_g?: number;
+  dims_cm?: { l: number; w: number; h: number } | null;
+  requires_shipping?: boolean;
+  barcode?: string | null;
+  compare_at_price_cents?: number | null;
+  tax_code?: string | null;
 }
 
 export interface StoreProduct {
@@ -53,6 +59,9 @@ export interface StoreProduct {
   status?: string;
   variants: StoreVariant[];
   image_url?: string;
+  vendor?: string | null;
+  tags?: string[] | null;
+  handle?: string | null;
 }
 
 export async function getProducts(): Promise<StoreProduct[]> {

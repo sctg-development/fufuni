@@ -713,6 +713,7 @@ Migrations are run both via `ensureInitialized()` (inline in `do.ts`) and as sta
 | `016` | Order view token + confirmation email audit fields |
 | `017` | Shipping address fields on carts |
 | `018` | **Shipping classes** + `shippingclassid` on products, variants, rates |
+| `019` | **Variant enrichment** — weight, dimensions, requires_shipping, barcode, compare_at_price, tax_code; product enrichment — vendor, tags, handle |
 
 ---
 

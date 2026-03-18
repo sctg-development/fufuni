@@ -23,12 +23,18 @@ interface LocalizedTitleInputProps {
   onChange: (newValue: string) => void;
   /** Whether the field is required */
   required?: boolean;
+  /** Optional controlled locale (if provided, hides the internal selector) */
+  locale?: string;
+  /** Optional callback to change locale (used by parent) */
+  onLocaleChange?: (locale: string) => void;
 }
 
 export function LocalizedTitleInput({
   value,
   onChange,
   required = false,
+  locale,
+  onLocaleChange,
 }: LocalizedTitleInputProps) {
   const { t } = useTranslation();
   const { getJson, hasPermission } = useSecuredApi();
@@ -36,7 +42,8 @@ export function LocalizedTitleInput({
   // --- Locale state ---------------------------------------------------------
   const defaultLocale =
     availableLanguages.find((l) => l.isDefault)?.code ?? 'en-US';
-  const [selectedLocale, setSelectedLocale] = useState(defaultLocale);
+  const [internalLocale, setInternalLocale] = useState(defaultLocale);
+  const selectedLocale = locale ?? internalLocale;
   const [inputValue, setInputValue]         = useState('');
   const [isTranslating, setIsTranslating]   = useState(false);
   const [canUseAi, setCanUseAi]             = useState(false);
@@ -99,9 +106,13 @@ export function LocalizedTitleInput({
   // --- Locale switch --------------------------------------------------------
   // When locale changes, just update the UI.
   // Migration to JSON will happen on save via the parent component.
-  const handleLocaleChange = useCallback((locale: string) => {
-    setSelectedLocale(locale);
-  }, []);
+  const handleLocaleChange = useCallback((newLocale: string) => {
+    if (onLocaleChange) {
+      onLocaleChange(newLocale);
+    } else {
+      setInternalLocale(newLocale);
+    }
+  }, [onLocaleChange]);
 
   // --- AI translation -------------------------------------------------------
   const handleAiTranslate = useCallback(async () => {
@@ -156,20 +167,22 @@ export function LocalizedTitleInput({
   return (
     <div className="flex items-center gap-2" dir={isRTL ? 'rtl' : 'ltr'}>
 
-      {/* Language selector */}
-      <Select
-        size="sm"
-        className="w-36 shrink-0"
-        aria-label={t('admin-products-title-locale', 'Language')}
-        selectedKeys={[selectedLocale]}
-        onSelectionChange={(keys) =>
-          handleLocaleChange(Array.from(keys).join(''))
-        }
-      >
-        {availableLanguages.map((lang) => (
-          <SelectItem key={lang.code}>{lang.nativeName}</SelectItem>
-        ))}
-      </Select>
+      {/* Language selector (hidden when controlled by parent) */}
+      {!locale && (
+        <Select
+          size="sm"
+          className="w-36 shrink-0"
+          aria-label={t('admin-products-title-locale', 'Language')}
+          selectedKeys={[selectedLocale]}
+          onSelectionChange={(keys) =>
+            handleLocaleChange(Array.from(keys).join(''))
+          }
+        >
+          {availableLanguages.map((lang) => (
+            <SelectItem key={lang.code}>{lang.nativeName}</SelectItem>
+          ))}
+        </Select>
+      )}
 
       {/* Title input */}
       <Input

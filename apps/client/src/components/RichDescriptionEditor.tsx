@@ -28,11 +28,17 @@ interface RichDescriptionEditorProps {
   value: string;
   /** Called every time the user edits or switches locale */
   onChange: (newValue: string) => void;
+  /** Optional controlled locale (if provided, hides the internal selector) */
+  locale?: string;
+  /** Optional callback to change locale (used by parent) */
+  onLocaleChange?: (locale: string) => void;
 }
 
 export function RichDescriptionEditor({
   value,
   onChange,
+  locale,
+  onLocaleChange,
 }: RichDescriptionEditorProps) {
   const { t } = useTranslation();
   const { getJson, hasPermission } = useSecuredApi();
@@ -40,7 +46,8 @@ export function RichDescriptionEditor({
   // --- Locale state ---------------------------------------------------------
   const defaultLocale =
     availableLanguages.find((l) => l.isDefault)?.code ?? 'en-US';
-  const [selectedLocale, setSelectedLocale] = useState(defaultLocale);
+  const [internalLocale, setInternalLocale] = useState(defaultLocale);
+  const selectedLocale = locale ?? internalLocale;
   const [isTranslating, setIsTranslating] = useState(false);
   
   // --- AI permission state --------------------------------------------------
@@ -84,8 +91,8 @@ export function RichDescriptionEditor({
         ),
       }),
     ],
-    // Load initial content for the default locale
-    content: getEditorContent(value, defaultLocale),
+    // Load initial content for the current locale
+    content: getEditorContent(value, selectedLocale),
     onUpdate: ({ editor: e }) => {
       const html    = e.getHTML();
       const updated = mergeLocale(valueRef.current, localeRef.current, html);
@@ -93,17 +100,39 @@ export function RichDescriptionEditor({
     },
   });
 
+  // Sync editor content when the selected locale changes (controlled or internal)
+  useEffect(() => {
+    if (!editor) return;
+
+    const currentValue = valueRef.current;
+    const parsed = parseDescription(currentValue);
+
+    if (typeof parsed === 'string') {
+      editor.commands.setContent(parsed);
+    } else {
+      editor.commands.setContent(getEditorContent(currentValue, selectedLocale));
+    }
+
+    localeRef.current = selectedLocale;
+  }, [editor, selectedLocale]);
+
   // Set RTL/LTR direction on the editor wrapper when locale changes
   const isRTL =
     availableLanguages.find((l) => l.code === selectedLocale)?.isRTL ?? false;
 
   // --- Locale switch --------------------------------------------------------
   const handleLocaleChange = useCallback(
-    (locale: string) => {
+    (newLocale: string) => {
       if (!editor) return;
-      setSelectedLocale(locale);
+
+      if (onLocaleChange) {
+        onLocaleChange(newLocale);
+      } else {
+        setInternalLocale(newLocale);
+      }
+
       // Update ref immediately before changing editor content to avoid stale closure
-      localeRef.current = locale;
+      localeRef.current = newLocale;
       const currentValue = valueRef.current;
       const parsed       = parseDescription(currentValue);
 
@@ -113,11 +142,11 @@ export function RichDescriptionEditor({
         editor.commands.setContent(parsed);
       } else {
         // JSON: load the content for the new locale (with fallback)
-        const content = getEditorContent(currentValue, locale);
+        const content = getEditorContent(currentValue, newLocale);
         editor.commands.setContent(content);
       }
     },
-    [editor]
+    [editor, onLocaleChange]
   );
 
   // --- AI translation -------------------------------------------------------
@@ -187,20 +216,22 @@ export function RichDescriptionEditor({
       {/* ── Toolbar ────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-1 p-2 border-b bg-default-50 flex-wrap">
 
-        {/* Language selector */}
-        <Select
-          size="sm"
-          className="w-36"
-          aria-label={t('admin-products-description-locale', 'Language')}
-          selectedKeys={[selectedLocale]}
-          onSelectionChange={(keys) =>
-            handleLocaleChange(Array.from(keys).join(''))
-          }
-        >
-          {availableLanguages.map((lang) => (
-            <SelectItem key={lang.code}>{lang.nativeName}</SelectItem>
-          ))}
-        </Select>
+        {/* Language selector (hidden when controlled by parent) */}
+        {!locale && (
+          <Select
+            size="sm"
+            className="w-36"
+            aria-label={t('admin-products-description-locale', 'Language')}
+            selectedKeys={[selectedLocale]}
+            onSelectionChange={(keys) =>
+              handleLocaleChange(Array.from(keys).join(''))
+            }
+          >
+            {availableLanguages.map((lang) => (
+              <SelectItem key={lang.code}>{lang.nativeName}</SelectItem>
+            ))}
+          </Select>
+        )}
 
         <div className="w-px h-6 bg-default-200 mx-1" />
 

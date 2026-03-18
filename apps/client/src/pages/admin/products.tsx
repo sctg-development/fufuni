@@ -52,6 +52,7 @@ import { VariantPrices } from "@/components/VariantPrices";
 import { RichDescriptionEditor } from "@/components/RichDescriptionEditor";
 import { LocalizedTitleInput } from "@/components/LocalizedTitleInput";
 import { resolveTitle, titleMatchesTerm, resolveDescription } from "@/utils/description";
+import { availableLanguages } from "@/i18n";
 
 // --- Data types ----------------------------------------------------------
 /**
@@ -64,6 +65,12 @@ interface Variant {
   price_cents: number;
   currency?: string; // ISO 4217 code (e.g., "USD", "EUR")
   image_url?: string;
+  weight_g?: number;
+  dims_cm?: { l: number; w: number; h: number } | null;
+  requires_shipping?: boolean;
+  barcode?: string | null;
+  compare_at_price_cents?: number | null;
+  tax_code?: string | null;
 }
 
 /**
@@ -76,6 +83,9 @@ interface Product {
   status: "active" | "draft";
   variants: Variant[];
   created_at: string;
+  vendor?: string | null;
+  tags?: string[] | null;
+  handle?: string | null;
 }
 
 /**
@@ -106,6 +116,15 @@ export default function ProductsPage() {
   const { t, i18n } = useTranslation();
   const { getJson, postJson, patchJson } = useSecuredApi();
 
+  const defaultLocale =
+    availableLanguages.find((l) => l.isDefault)?.code ?? 'en-US';
+  const [selectedLocale, setSelectedLocale] = useState<string>(() => {
+    const current = i18n.language;
+    return availableLanguages.some((l) => l.code === current)
+      ? current
+      : defaultLocale;
+  });
+
   const apiBase = (import.meta as any).env?.API_BASE_URL
     ? (import.meta as any).env.API_BASE_URL
     : "";
@@ -124,6 +143,10 @@ export default function ProductsPage() {
   const [formDescription, setFormDescription] = useState("");
   const [formStatus, setFormStatus] = useState<"active" | "draft">("active");
   const [formShippingClassId, setFormShippingClassId] = useState<string>("");
+  // enrichment fields
+  const [formVendor, setFormVendor] = useState("");
+  const [formTags, setFormTags] = useState("");
+  const [formHandle, setFormHandle] = useState("");
 
   // variants modal state
   const [variantModal, setVariantModal] = useState(false);
@@ -134,6 +157,15 @@ export default function ProductsPage() {
   const [variantImage, setVariantImage] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [submittingVariant, setSubmittingVariant] = useState(false);
+  // enrichment fields
+  const [variantWeightG, setVariantWeightG] = useState("");
+  const [variantDimsL, setVariantDimsL] = useState("");
+  const [variantDimsW, setVariantDimsW] = useState("");
+  const [variantDimsH, setVariantDimsH] = useState("");
+  const [variantRequiresShipping, setVariantRequiresShipping] = useState(true);
+  const [variantBarcode, setVariantBarcode] = useState("");
+  const [variantCompareAtPrice, setVariantCompareAtPrice] = useState("");
+  const [variantTaxCode, setVariantTaxCode] = useState("");
 
   // fetch products from backend
   /**
@@ -196,6 +228,9 @@ export default function ProductsPage() {
     setFormDescription("");
     setFormStatus("active");
     setFormShippingClassId("");
+    setFormVendor("");
+    setFormTags("");
+    setFormHandle("");
     setCreateModal(true);
   };
 
@@ -210,6 +245,9 @@ export default function ProductsPage() {
     setFormDescription(p.description);
     setFormStatus(p.status);
     setFormShippingClassId("");
+    setFormVendor(p.vendor || "");
+    setFormTags((p.tags || []).join(", "));
+    setFormHandle(p.handle || "");
 
     // Load full product details for variant management
     try {
@@ -217,6 +255,9 @@ export default function ProductsPage() {
 
       setEditingProduct(full);
       setFormShippingClassId((full as any).shipping_class_id || "");
+      setFormVendor((full as any).vendor || "");
+      setFormTags(((full as any).tags || []).join(", "));
+      setFormHandle((full as any).handle || "");
     } catch (err) {
       console.error("Error loading product", err);
       setEditingProduct(p);
@@ -234,19 +275,24 @@ export default function ProductsPage() {
   const submitForm = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Parse tags from comma-separated input
+      const tags = formTags
+        ? formTags.split(",").map((t) => t.trim()).filter((t) => t.length > 0)
+        : [];
+
+      const productData = {
+        title: formTitle,
+        description: formDescription || undefined,
+        shipping_class_id: formShippingClassId || null,
+        vendor: formVendor || undefined,
+        tags: tags.length > 0 ? tags : undefined,
+        handle: formHandle || undefined,
+      };
+
       if (editingProduct) {
-        await patchJson(`${apiBase}/v1/products/${editingProduct.id}`, {
-          title: formTitle,
-          description: formDescription,
-          status: formStatus,
-          shipping_class_id: formShippingClassId || null,
-        });
+        await patchJson(`${apiBase}/v1/products/${editingProduct.id}`, productData);
       } else {
-        await postJson(`${apiBase}/v1/products`, {
-          title: formTitle,
-          description: formDescription || undefined,
-          shipping_class_id: formShippingClassId || null,
-        });
+        await postJson(`${apiBase}/v1/products`, productData);
       }
       setCreateModal(false);
       loadProducts();
@@ -264,6 +310,14 @@ export default function ProductsPage() {
     setVariantTitle("");
     setVariantPrice("");
     setVariantImage(null);
+    setVariantWeightG("");
+    setVariantDimsL("");
+    setVariantDimsW("");
+    setVariantDimsH("");
+    setVariantRequiresShipping(true);
+    setVariantBarcode("");
+    setVariantCompareAtPrice("");
+    setVariantTaxCode("");
   };
 
   /**
@@ -285,6 +339,14 @@ export default function ProductsPage() {
     setVariantTitle(v.title);
     setVariantPrice(String(v.price_cents));
     setVariantImage(v.image_url || null);
+    setVariantWeightG(String(v.weight_g || 0));
+    setVariantDimsL(String(v.dims_cm?.l || ""));
+    setVariantDimsW(String(v.dims_cm?.w || ""));
+    setVariantDimsH(String(v.dims_cm?.h || ""));
+    setVariantRequiresShipping(v.requires_shipping !== false);
+    setVariantBarcode(v.barcode || "");
+    setVariantCompareAtPrice(String(v.compare_at_price_cents || ""));
+    setVariantTaxCode(v.tax_code || "");
     setVariantModal(true);
   };
 
@@ -344,25 +406,37 @@ export default function ProductsPage() {
         return;
       }
 
+      // Build enrichment object
+      const variantData: Record<string, any> = {
+        sku: variantSku,
+        title: variantTitle,
+        price_cents: price,
+        image_url: variantImage || undefined,
+        weight_g: variantWeightG ? parseFloat(variantWeightG) : undefined,
+        requires_shipping: variantRequiresShipping,
+        barcode: variantBarcode || undefined,
+        compare_at_price_cents: variantCompareAtPrice ? parseInt(variantCompareAtPrice, 10) : undefined,
+        tax_code: variantTaxCode || undefined,
+      };
+
+      // Add dimensions if provided
+      if (variantDimsL || variantDimsW || variantDimsH) {
+        variantData.dims_cm = {
+          l: variantDimsL ? parseFloat(variantDimsL) : 0,
+          w: variantDimsW ? parseFloat(variantDimsW) : 0,
+          h: variantDimsH ? parseFloat(variantDimsH) : 0,
+        };
+      }
+
       if (editingVariant) {
         // Update variant
         await patchJson(
           `${apiBase}/v1/products/${editingProduct.id}/variants/${editingVariant.id}`,
-          {
-            sku: variantSku,
-            title: variantTitle,
-            price_cents: price,
-            image_url: variantImage || undefined,
-          },
+          variantData,
         );
       } else {
         // Create variant
-        await postJson(`${apiBase}/v1/products/${editingProduct.id}/variants`, {
-          sku: variantSku,
-          title: variantTitle,
-          price_cents: price,
-          image_url: variantImage || undefined,
-        });
+        await postJson(`${apiBase}/v1/products/${editingProduct.id}/variants`, variantData);
       }
 
       setVariantModal(false);
@@ -469,6 +543,24 @@ export default function ProductsPage() {
           </ModalHeader>
           <ModalBody className="space-y-4">
             <form className="space-y-4" id="product-form" onSubmit={submitForm}>
+              <div className="flex items-center gap-2">
+                <label className="block text-sm font-medium">
+                  {t("admin-products-title-locale")}
+                </label>
+                <Select
+                  size="sm"
+                  className="w-36"
+                  selectedKeys={[selectedLocale]}
+                  onSelectionChange={(keys) =>
+                    setSelectedLocale(Array.from(keys).join("") )
+                  }
+                >
+                  {availableLanguages.map((lang) => (
+                    <SelectItem key={lang.code}>{lang.nativeName}</SelectItem>
+                  ))}
+                </Select>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium mb-1">
                   {t("admin-products-modal-field-title")}
@@ -477,6 +569,8 @@ export default function ProductsPage() {
                   value={formTitle}
                   onChange={setFormTitle}
                   required
+                  locale={selectedLocale}
+                  onLocaleChange={setSelectedLocale}
                 />
               </div>
               <div>
@@ -486,6 +580,8 @@ export default function ProductsPage() {
                 <RichDescriptionEditor
                   value={formDescription}
                   onChange={setFormDescription}
+                  locale={selectedLocale}
+                  onLocaleChange={setSelectedLocale}
                 />
               </div>
               <div>
@@ -503,29 +599,81 @@ export default function ProductsPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Classe d'expédition (optionnel)
+                  {t("admin-products-shipping-class-label")}
                 </label>
                 <Select
-                  label="Sélectionnez une classe"
-                  description="Laissez vide pour un produit standard"
+                  label={t("admin-products-shipping-class-select-label")}
+                  description={t("admin-products-shipping-class-select-description")}
                   selectedKeys={formShippingClassId ? [formShippingClassId] : []}
                   onSelectionChange={(keys) => {
                     const val = Array.from(keys).join("");
                     setFormShippingClassId(val);
                   }}
                 >
-                  <SelectItem key="">Standard (aucune contrainte)</SelectItem>
+                  <SelectItem key="">{t("admin-products-shipping-class-default")}</SelectItem>
                   <>
-                    {shippingClasses.map((cls) => (
-                      <SelectItem 
-                        key={cls.id} 
-                        textValue={`[${cls.resolution === "exclusive" ? "EXCLUSIF" : "ADDITIF"}] ${cls.display_name}`}
-                      >
-                        {`[${cls.resolution === "exclusive" ? "EXCLUSIF" : "ADDITIF"}] ${cls.display_name}${cls.description ? ` — ${cls.description}` : ""}`}
-                      </SelectItem>
-                    ))}
+                    {shippingClasses.map((cls) => {
+                      const resolutionLabel =
+                        cls.resolution === "exclusive"
+                          ? t("admin-products-shipping-class-resolution-exclusive")
+                          : t("admin-products-shipping-class-resolution-additive");
+
+                      const displayLabel = `${resolutionLabel} ${cls.display_name}`;
+                      const fullLabel = cls.description
+                        ? `${displayLabel} — ${cls.description}`
+                        : displayLabel;
+
+                      return (
+                        <SelectItem key={cls.id} textValue={displayLabel}>
+                          {fullLabel}
+                        </SelectItem>
+                      );
+                    })}
                   </>
                 </Select>
+              </div>
+              
+              {/* Enrichment Fields */}
+              <div className="border-t pt-4 mt-4">
+                <h3 className="font-semibold text-sm mb-3">
+                  {t("admin-products-enrichment-heading")}
+                </h3>
+
+                {/* Vendor */}
+                <div className="mb-3">
+                  <label className="block text-sm font-medium">
+                    {t("admin-products-field-vendor")}
+                  </label>
+                  <Input
+                    placeholder={t("admin-products-field-vendor-placeholder")}
+                    value={formVendor}
+                    onChange={(e) => setFormVendor(e.target.value)}
+                  />
+                </div>
+
+                {/* Tags */}
+                <div className="mb-3">
+                  <label className="block text-sm font-medium">
+                    {t("admin-products-field-tags")}
+                  </label>
+                  <Input
+                    placeholder={t("admin-products-field-tags-placeholder")}
+                    value={formTags}
+                    onChange={(e) => setFormTags(e.target.value)}
+                  />
+                </div>
+
+                {/* Handle */}
+                <div>
+                  <label className="block text-sm font-medium">
+                    {t("admin-products-field-handle")}
+                  </label>
+                  <Input
+                    placeholder={t("admin-products-field-handle-placeholder")}
+                    value={formHandle}
+                    onChange={(e) => setFormHandle(e.target.value)}
+                  />
+                </div>
               </div>
             </form>
 
@@ -609,7 +757,7 @@ export default function ProductsPage() {
                 </label>
                 <Input
                   required
-                  placeholder="e.g. TEE-BLK-M"
+                  placeholder={t("admin-products-field-sku-placeholder")}
                   value={variantSku}
                   onChange={(e) => setVariantSku(e.target.value)}
                 />
@@ -620,7 +768,7 @@ export default function ProductsPage() {
                 </label>
                 <Input
                   required
-                  placeholder="e.g. Black / Medium"
+                  placeholder={t("admin-products-field-variant-title-placeholder")}
                   value={variantTitle}
                   onChange={(e) => setVariantTitle(e.target.value)}
                 />
@@ -631,7 +779,7 @@ export default function ProductsPage() {
                 </label>
                 <Input
                   required
-                  placeholder="Price in cents (e.g. 2999 for $29.99)"
+                  placeholder={t("admin-products-field-price-placeholder")}
                   type="number"
                   value={variantPrice}
                   onChange={(e) => setVariantPrice(e.target.value)}
@@ -666,6 +814,105 @@ export default function ProductsPage() {
                     />
                   </div>
                 )}
+              </div>
+              
+              {/* Enrichment Fields */}
+              <div className="border-t pt-4 mt-4">
+                <h3 className="font-semibold text-sm mb-3">
+                  {t("admin-products-enrichment-heading")}
+                </h3>
+
+                {/* Weight */}
+                <div className="mb-3">
+                  <label className="block text-sm font-medium">
+                    {t("admin-products-field-weight")}
+                  </label>
+                  <Input
+                    placeholder={t("admin-products-field-weight-placeholder")}
+                    type="number"
+                    value={variantWeightG}
+                    onChange={(e) => setVariantWeightG(e.target.value)}
+                  />
+                </div>
+
+                {/* Dimensions */}
+                <div className="mb-3">
+                  <label className="block text-sm font-medium mb-2">
+                    {t("admin-products-field-dimensions")}
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Input
+                      placeholder={t("admin-products-field-dimension-length")}
+                      type="number"
+                      size="sm"
+                      value={variantDimsL}
+                      onChange={(e) => setVariantDimsL(e.target.value)}
+                    />
+                    <Input
+                      placeholder={t("admin-products-field-dimension-width")}
+                      type="number"
+                      size="sm"
+                      value={variantDimsW}
+                      onChange={(e) => setVariantDimsW(e.target.value)}
+                    />
+                    <Input
+                      placeholder={t("admin-products-field-dimension-height")}
+                      type="number"
+                      size="sm"
+                      value={variantDimsH}
+                      onChange={(e) => setVariantDimsH(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Requires Shipping Toggle */}
+                <div className="mb-3 flex items-center">
+                  <label className="block text-sm font-medium mr-2">
+                    {t("admin-products-field-requires-shipping")}
+                  </label>
+                  <input
+                    type="checkbox"
+                    checked={variantRequiresShipping}
+                    onChange={(e) => setVariantRequiresShipping(e.target.checked)}
+                  />
+                </div>
+
+                {/* Barcode */}
+                <div className="mb-3">
+                  <label className="block text-sm font-medium">
+                    {t("admin-products-field-barcode")}
+                  </label>
+                  <Input
+                    placeholder={t("admin-products-field-barcode-placeholder")}
+                    value={variantBarcode}
+                    onChange={(e) => setVariantBarcode(e.target.value)}
+                  />
+                </div>
+
+                {/* Compare at Price */}
+                <div className="mb-3">
+                  <label className="block text-sm font-medium">
+                    {t("admin-products-field-compare-at-price")}
+                  </label>
+                  <Input
+                    placeholder={t("admin-products-field-compare-at-price-placeholder")}
+                    type="number"
+                    value={variantCompareAtPrice}
+                    onChange={(e) => setVariantCompareAtPrice(e.target.value)}
+                  />
+                </div>
+
+                {/* Tax Code */}
+                <div>
+                  <label className="block text-sm font-medium">
+                    {t("admin-products-field-tax-code")}
+                  </label>
+                  <Input
+                    placeholder={t("admin-products-field-tax-code-placeholder")}
+                    value={variantTaxCode}
+                    onChange={(e) => setVariantTaxCode(e.target.value)}
+                  />
+                </div>
               </div>
             </form>
 
