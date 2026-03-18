@@ -18,7 +18,7 @@ A single Durable Object backed by SQLite holds your entire store state — no ex
 
 ## Live Demo
 
-Click the screenshot below to try the public deployment.
+Click the screenshot below to try the public deployment. You can checkout with [any Stripe test card](https://docs.stripe.com/testing#cards) for example `4242 4242 4242 4242` (any future expiry, CVC, and ZIP) — no real charges will be made.
 
 [![Demo screenshot](https://github.com/user-attachments/assets/276ba064-4483-40ac-acd7-fd19345200ba)](https://sctg-development.github.io/fufuni)
 
