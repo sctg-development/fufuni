@@ -21,8 +21,8 @@ on:
     branches:
       - main
     paths:
-      - apps/cloudflare-worker/**
-      - yarn.lock
+      - apps/merchant/**
+      - package-lock.json
       - .github/workflows/deploy-cloudflare-worker.yaml
 
   workflow_dispatch:
