@@ -1254,6 +1254,8 @@ app.openapi(listShippingRates, async (c) => {
       min_delivery_days: item.min_delivery_days,
       max_delivery_days: item.max_delivery_days,
       shipping_class_id: item.shipping_class_id ?? null,
+      tax_code: item.tax_code ?? null,
+      tax_inclusive: !!item.tax_inclusive,
       status: item.status,
       created_at: item.created_at,
       updated_at: item.updated_at,
@@ -1286,16 +1288,16 @@ const createShippingRate = createRoute({
 });
 
 app.openapi(createShippingRate, async (c) => {
-  const { display_name, description, max_weight_g, min_delivery_days, max_delivery_days, shipping_class_id } = c.req.valid('json');
+  const { display_name, description, max_weight_g, min_delivery_days, max_delivery_days, shipping_class_id, tax_code, tax_inclusive } = c.req.valid('json');
   const db = getDb(c.var.db);
 
   const id = uuid();
   const timestamp = now();
 
   await db.run(
-    `INSERT INTO shipping_rates (id, display_name, description, max_weight_g, min_delivery_days, max_delivery_days, shipping_class_id, status, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)`,
-    [id, display_name, description, max_weight_g, min_delivery_days, max_delivery_days, shipping_class_id ?? null, timestamp, timestamp]
+    `INSERT INTO shipping_rates (id, display_name, description, max_weight_g, min_delivery_days, max_delivery_days, shipping_class_id, tax_code, tax_inclusive, status, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)`,
+    [id, display_name, description, max_weight_g, min_delivery_days, max_delivery_days, shipping_class_id ?? null, tax_code ?? null, tax_inclusive ? 1 : 0, timestamp, timestamp]
   );
 
   const [rate] = await db.query<any>('SELECT * FROM shipping_rates WHERE id = ?', [id]);
@@ -1308,6 +1310,8 @@ app.openapi(createShippingRate, async (c) => {
     min_delivery_days: rate.min_delivery_days,
     max_delivery_days: rate.max_delivery_days,
     shipping_class_id: rate.shipping_class_id ?? null,
+    tax_code: rate.tax_code ?? null,
+    tax_inclusive: !!rate.tax_inclusive,
     status: rate.status,
     created_at: rate.created_at,
     updated_at: rate.updated_at,
@@ -1338,7 +1342,7 @@ app.openapi(getShippingRate, async (c) => {
   const { id } = c.req.valid('param');
   const db = getDb(c.var.db);
 
-  const [rate] = await db.query<any>('SELECT * FROM shipping_rates WHERE id = ?', [id]);
+  const [rate] = await db.query<any>('SELECT id, display_name, description, max_weight_g, min_delivery_days, max_delivery_days, shipping_class_id, tax_code, tax_inclusive, status, created_at, updated_at FROM shipping_rates WHERE id = ?', [id]);
   if (!rate) throw ApiError.notFound('Shipping rate not found');
 
   return c.json({
@@ -1349,6 +1353,8 @@ app.openapi(getShippingRate, async (c) => {
     min_delivery_days: rate.min_delivery_days,
     max_delivery_days: rate.max_delivery_days,
     shipping_class_id: rate.shipping_class_id ?? null,
+    tax_code: rate.tax_code ?? null,
+    tax_inclusive: !!rate.tax_inclusive,
     status: rate.status,
     created_at: rate.created_at,
     updated_at: rate.updated_at,
@@ -1380,7 +1386,7 @@ const updateShippingRate = createRoute({
 
 app.openapi(updateShippingRate, async (c) => {
   const { id } = c.req.valid('param');
-  const { display_name, description, max_weight_g, min_delivery_days, max_delivery_days, shipping_class_id, status } = c.req.valid('json');
+  const { display_name, description, max_weight_g, min_delivery_days, max_delivery_days, shipping_class_id, tax_code, tax_inclusive, status } = c.req.valid('json');
   const db = getDb(c.var.db);
 
   const [existing] = await db.query<any>('SELECT * FROM shipping_rates WHERE id = ?', [id]);
@@ -1393,6 +1399,8 @@ app.openapi(updateShippingRate, async (c) => {
   if (min_delivery_days !== undefined) updates.min_delivery_days = min_delivery_days;
   if (max_delivery_days !== undefined) updates.max_delivery_days = max_delivery_days;
   if (shipping_class_id !== undefined) updates.shipping_class_id = shipping_class_id;
+  if (tax_code !== undefined) updates.tax_code = tax_code;
+  if (tax_inclusive !== undefined) updates.tax_inclusive = tax_inclusive ? 1 : 0;
   if (status) updates.status = status;
 
   const setClauses = Object.keys(updates).map((key) => `${key} = ?`).join(', ');
@@ -1400,7 +1408,7 @@ app.openapi(updateShippingRate, async (c) => {
 
   await db.run(`UPDATE shipping_rates SET ${setClauses} WHERE id = ?`, [...values, id]);
 
-  const [updated] = await db.query<any>('SELECT * FROM shipping_rates WHERE id = ?', [id]);
+  const [updated] = await db.query<any>('SELECT id, display_name, description, max_weight_g, min_delivery_days, max_delivery_days, shipping_class_id, tax_code, tax_inclusive, status, created_at, updated_at FROM shipping_rates WHERE id = ?', [id]);
 
   return c.json({
     id: updated.id,
@@ -1410,6 +1418,8 @@ app.openapi(updateShippingRate, async (c) => {
     min_delivery_days: updated.min_delivery_days,
     max_delivery_days: updated.max_delivery_days,
     shipping_class_id: updated.shipping_class_id ?? null,
+    tax_code: updated.tax_code ?? null,
+    tax_inclusive: !!updated.tax_inclusive,
     status: updated.status,
     created_at: updated.created_at,
     updated_at: updated.updated_at,
@@ -1496,8 +1506,8 @@ app.openapi(listRegions, async (c) => {
       display_name: item.display_name,
       currency_id: item.currency_id,
       currency_code: item.currency_code,
-      is_default: item.is_default === 1,
-      tax_inclusive: item.tax_inclusive === 1,
+      is_default: !!item.is_default,
+      tax_inclusive: !!item.tax_inclusive,
       status: item.status,
       created_at: item.created_at,
       updated_at: item.updated_at,
@@ -1592,8 +1602,8 @@ app.openapi(createRegion, async (c) => {
     display_name: region.display_name,
     currency_id: region.currency_id,
     currency_code: region.currency_code,
-    is_default: region.is_default === 1,
-    tax_inclusive: region.tax_inclusive === 1,
+    is_default: !!region.is_default,
+    tax_inclusive: !!region.tax_inclusive,
     status: region.status,
     created_at: region.created_at,
     updated_at: region.updated_at,
@@ -1636,8 +1646,8 @@ app.openapi(getRegion, async (c) => {
     display_name: region.display_name,
     currency_id: region.currency_id,
     currency_code: region.currency_code,
-    is_default: region.is_default === 1,
-    tax_inclusive: region.tax_inclusive === 1,
+    is_default: !!region.is_default,
+    tax_inclusive: !!region.tax_inclusive,
     status: region.status,
     created_at: region.created_at,
     updated_at: region.updated_at,
@@ -1703,8 +1713,8 @@ app.openapi(updateRegion, async (c) => {
     display_name: updated.display_name,
     currency_id: updated.currency_id,
     currency_code: updated.currency_code,
-    is_default: updated.is_default === 1,
-    tax_inclusive: updated.tax_inclusive === 1,
+    is_default: !!updated.is_default,
+    tax_inclusive: !!updated.tax_inclusive,
     status: updated.status,
     created_at: updated.created_at,
     updated_at: updated.updated_at,

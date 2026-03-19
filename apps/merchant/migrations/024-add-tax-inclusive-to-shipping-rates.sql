@@ -1,0 +1,1 @@
+ALTER TABLE shipping_rates ADD COLUMN tax_inclusive INTEGER NOT NULL DEFAULT 0;

@@ -102,30 +102,30 @@ async function api(path: string, body?: any) {
 
 async function apiWithRetry(path: string, body?: any, maxRetries = 5): Promise<any> {
   let attempt = 0;
-  
+
   while (attempt < maxRetries) {
     try {
       return await api(path, body);
     } catch (error: any) {
       const message = error.message;
-      
+
       // Check if it's a rate limit error
       if (message.includes('Rate limit exceeded')) {
         // Extract wait time from message or use exponential backoff
         const match = message.match(/Try again in (\d+) seconds/);
         const waitTime = match ? parseInt(match[1]) * 1000 : Math.pow(2, attempt) * 1000;
-        
+
         attempt++;
         console.log(`   ⏳ Rate limited. Waiting ${waitTime}ms before retry (attempt ${attempt}/${maxRetries})...`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
         continue;
       }
-      
+
       // For other errors, throw immediately
       throw error;
     }
   }
-  
+
   throw new Error(`Max retries exceeded for ${path}`);
 }
 
@@ -140,9 +140,35 @@ function convertCents(cents: number, rate: number): number {
 const EUR_TO_USD = 1.14;
 const EUR_TO_GBP = 0.86;
 
+async function seedTaxes() {
+  console.log('💰 Creating VAT rates...');
+  const vatNames = JSON.stringify({
+    'en-US': 'VAT',
+    'fr-FR': 'TVA',
+    'es-ES': 'IVA',
+    'ar-SA': 'ضريبة القيمة المضافة',
+    'zh-CN': '增值税',
+    'he-IL': 'מע"מ',
+  });
+
+  const tax20 = await api('/v1/tax-rates', {
+    display_name: vatNames,
+    tax_code: 'txcd_99999999',
+    rate_percentage: 20.0,
+  });
+
+  const tax5 = await api('/v1/tax-rates', {
+    display_name: vatNames,
+    tax_code: 'txcd_20010000', // Reduced VAT for food in France
+    rate_percentage: 5.5,
+  });
+
+  return { tax20, tax5 };
+}
+
 async function seedRegions() {
   console.log('📋 Fetching existing currencies and countries...');
-  
+
   // Fetch existing currencies
   const { items: currencies } = await api('/v1/regions/currencies');
   const currencyMap: Record<string, string> = {};
@@ -153,19 +179,19 @@ async function seedRegions() {
   // Fetch all countries in one batch request (no pagination)
   const countriesResponse = await api('/v1/regions/countries/batch');
   const countryMap: Record<string, string> = {};
-  
+
   for (const country of countriesResponse.items) {
     countryMap[country.code] = country.id;
   }
-  
+
   // Debug: verify we have countries
   if (Object.keys(countryMap).length === 0) {
     console.error('❌ No countries found! Make sure to run init.ts first.');
     process.exit(1);
   }
-  
+
   console.log(`   Found ${Object.keys(countryMap).length} countries in database`);
-  
+
   // Log sample countries
   const sampleCodes = ['FR', 'GB', 'US', 'IT'];
   const missingCodes = sampleCodes.filter(code => !countryMap[code]);
@@ -192,12 +218,17 @@ async function seedRegions() {
     priority: 2,
   });
 
+  console.log('💰 Seeding taxes...');
+  await seedTaxes();
+
   console.log('📦 Creating shipping rates...');
   const shippingRate = await api('/v1/regions/shipping-rates', {
     display_name: 'Standard Shipping',
     description: 'Standard international shipping',
     min_delivery_days: 5,
     max_delivery_days: 10,
+    tax_code: 'txcd_99999999',
+    tax_inclusive: true,
   });
 
   // Add shipping rate prices for each currency
@@ -223,6 +254,7 @@ async function seedRegions() {
     display_name: 'Europe',
     currency_id: currencyMap.EUR,
     is_default: true,
+    tax_inclusive: true,
   });
 
   // Add countries to Europe
@@ -249,6 +281,7 @@ async function seedRegions() {
     display_name: 'United Kingdom',
     currency_id: currencyMap.GBP,
     is_default: false,
+    tax_inclusive: true,
   });
 
   for (const country of UK_COUNTRIES) {
@@ -270,6 +303,7 @@ async function seedRegions() {
     display_name: 'North America',
     currency_id: currencyMap.USD,
     is_default: false,
+    tax_inclusive: true,
   });
 
   for (const country of US_COUNTRIES) {
@@ -292,6 +326,7 @@ async function seedRegions() {
     display_name: 'Rest of World',
     currency_id: currencyMap.EUR,
     is_default: false,
+    tax_inclusive: true,
   });
 
   for (const country of OTHER_COUNTRIES) {
@@ -326,7 +361,7 @@ async function seed() {
   const products = [
     {
       title: '{"en-US":"Classic Tee", "fr-FR":"T-Shirt Classique", "es-ES":"Camiseta Clásica","zh-CN":"经典T恤","ar-SA":"تي شيرت كلاسيكي" ,"he-IL":"טי שירט קלאסי" }',
-      description:'{"en-US":"<p>Premium cotton t-shirt. Soft, breathable, and built to last, with our logo…</p>", "fr-FR":"<p>T-shirt en coton premium. Doux, respirant et conçu pour durer, avec notre logo…</p>", "es-ES":"<p>Camiseta de algodón premium. Suave, transpirable y duradera, con nuestro logo…</p>","zh-CN":"<p>优质棉质T恤。柔软、透气、经久耐用，印有我们的标志…</p>","ar-SA":"<p>تي شيرت قطني فاخر. ناعم، قابل للتنفس، ومصمم ليدوم طويلاً، مع شعارنا…</p>" ,"he-IL":"<p>חולצת טי כותנה פרימיום. רכה, נושמת ובנויה להחזיק מעמד, עם הלוגו שלנו…</p>" }',
+      description: '{"en-US":"<p>Premium cotton t-shirt. Soft, breathable, and built to last, with our logo…</p>", "fr-FR":"<p>T-shirt en coton premium. Doux, respirant et conçu pour durer, avec notre logo…</p>", "es-ES":"<p>Camiseta de algodón premium. Suave, transpirable y duradera, con nuestro logo…</p>","zh-CN":"<p>优质棉质T恤。柔软、透气、经久耐用，印有我们的标志…</p>","ar-SA":"<p>تي شيرت قطني فاخر. ناعم، قابل للتنفس، ومصمم ليدوم طويلاً، مع شعارنا…</p>" ,"he-IL":"<p>חולצת טי כותנה פרימיום. רכה, נושמת ובנויה להחזיק מעמד, עם הלוגו שלנו…</p>" }',
       vendor: '{"en-US":"SCTG","fr-FR":"SCTG","es-ES":"SCTG","zh-CN":"SCTG","ar-SA":"SCTG","he-IL":"SCTG"}',
     },
     {
@@ -398,7 +433,7 @@ async function seed() {
       typeof rawTitle === 'string' && !titleObj
         ? rawTitle
         : (titleObj && (titleObj['en-US'] || Object.values(titleObj)[0])) ||
-          (typeof rawTitle === 'string' ? rawTitle : String(rawTitle));
+        (typeof rawTitle === 'string' ? rawTitle : String(rawTitle));
 
     const displayTitle =
       (titleObj && (titleObj['en-US'] || Object.values(titleObj)[0])) ||
@@ -430,6 +465,7 @@ async function seed() {
       const createdVariant = await api(`/v1/products/${product.id}/variants`, {
         ...variant,
         currency: 'EUR',
+        tax_code: 'txcd_99999999',
       });
 
       // Add EUR/USD/GBP prices based on fixed conversion rates (EUR is the base currency here)
@@ -619,15 +655,15 @@ async function seed() {
   for (const [regionKey, orders] of Object.entries(testOrdersByRegion)) {
     const regionId = regionData.regions[regionKey as keyof typeof regionData.regions];
     const shippingRateId = regionData.shippingRate.id; // from seedRegions()
-    
+
     // Use region-specific shipping prices
     let shippingCents = 999; // EUR default
     if (regionKey === 'uk') shippingCents = 799; // GBP
     if (regionKey === 'us') shippingCents = 1299; // USD
-    
+
     for (const order of orders) {
       const address = addressesByRegion[regionKey]?.[order.customer_email];
-      
+
       const result = await api('/v1/orders/test', {
         ...order,
         region_id: regionId,

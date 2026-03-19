@@ -140,6 +140,8 @@ CREATE TABLE IF NOT EXISTS shipping_rates (
   max_weight_g INTEGER,
   min_delivery_days INTEGER,
   max_delivery_days INTEGER,
+  tax_code TEXT,
+  tax_inclusive INTEGER NOT NULL DEFAULT 0,
   shipping_class_id TEXT REFERENCES shipping_classes(id),
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -812,6 +814,14 @@ export class MerchantDO extends DurableObject<MerchantEnv> {
         {
           name: '022_add_taxes_json',
           sql: "ALTER TABLE carts ADD COLUMN taxes_json TEXT; ALTER TABLE orders ADD COLUMN taxes_json TEXT;",
+        },
+        {
+          name: '023_shipping_rates_add_tax_code',
+          sql: "ALTER TABLE shipping_rates ADD COLUMN tax_code TEXT",
+        },
+        {
+          name: '024_shipping_rates_add_tax_inclusive',
+          sql: "ALTER TABLE shipping_rates ADD COLUMN tax_inclusive INTEGER NOT NULL DEFAULT 0",
         },
       ];
 

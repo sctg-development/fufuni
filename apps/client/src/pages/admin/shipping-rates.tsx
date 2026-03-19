@@ -39,12 +39,14 @@ import {
 } from "@heroui/modal";
 import { Card, CardBody } from "@heroui/card";
 import { Tooltip } from "@heroui/tooltip";
+import { Switch } from "@heroui/switch";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
 import { SearchIcon } from "@/components/icons";
 import DefaultLayout from "@/layouts/default";
 import { useSecuredApi } from "@/authentication";
 import { formatMoney } from "@/utils/currency";
+import { resolveTaxName } from "@/utils/description";
 
 /**
  * Defines a shipping rate available in a region, including weight and
@@ -62,6 +64,8 @@ interface ShippingRate {
   updated_at: string;
   price_cents?: number;
   currency_code?: string;
+  tax_code?: string | null;
+  tax_inclusive?: boolean;
 }
 
 interface Currency {
@@ -92,7 +96,7 @@ interface ShippingClass {
 const STATUS_OPTIONS = ["active", "inactive"];
 
 export default function ShippingRatesPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { getJson, postJson, deleteJson, patchJson } = useSecuredApi();
 
   const apiBase = (import.meta as any).env?.API_BASE_URL
@@ -106,6 +110,7 @@ export default function ShippingRatesPage() {
   const [loading, setLoading] = useState(true);
   const [globalFilter, setGlobalFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [taxRates, setTaxRates] = useState<{ tax_code: string | null; display_name: string }[]>([]);
 
   // Modal state
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -122,6 +127,8 @@ export default function ShippingRatesPage() {
     price: "",
     currency_id: "",
     shipping_class_id: "",
+    tax_code: "",
+    tax_inclusive: false,
   });
 
   // Shipping Classes Modal state
@@ -229,6 +236,23 @@ export default function ShippingRatesPage() {
     };
     loadShippingClasses();
   }, []);
+  
+  // Load tax rates for dropdown
+  useEffect(() => {
+    const loadTaxRates = async () => {
+      try {
+        const resp = await getJson(`${apiBase}/v1/tax-rates?limit=500`);
+        const uniqueRates = new Map<string | null, string>();
+        (resp.items || []).forEach((r: any) => {
+          uniqueRates.set(r.tax_code, r.display_name);
+        });
+        setTaxRates(Array.from(uniqueRates.entries()).map(([tax_code, display_name]) => ({ tax_code, display_name })));
+      } catch (err) {
+        console.error("Failed to load tax rates", err);
+      }
+    };
+    loadTaxRates();
+  }, []);
 
   // Filtered shipping rates
   /**
@@ -271,6 +295,8 @@ export default function ShippingRatesPage() {
       price: "",
       currency_id: currencies[0]?.id ?? "",
       shipping_class_id: "",
+      tax_code: "",
+      tax_inclusive: false,
     });
     onOpen();
   };
@@ -334,6 +360,8 @@ export default function ShippingRatesPage() {
       price,
       currency_id,
       shipping_class_id: (rate as any).shipping_class_id || "",
+      tax_code: (rate as any).tax_code || "",
+      tax_inclusive: (rate as any).tax_inclusive || false,
     });
     onOpen();
   };
@@ -359,6 +387,8 @@ export default function ShippingRatesPage() {
           : null,
         status: formData.status,
         shipping_class_id: formData.shipping_class_id || null,
+        tax_code: formData.tax_code || null,
+        tax_inclusive: formData.tax_inclusive,
       };
 
       const upsertPrice = async (rateId: string) => {
@@ -926,6 +956,49 @@ export default function ShippingRatesPage() {
                   ))}
                 </Select>
               </Tooltip>
+              <Tooltip
+                content={t(
+                  "admin-shipping-rates-tax-code-help",
+                  "Tax code for this shipping rate (e.g. VAT for Chronopost)"
+                )}
+              >
+                <Select
+                  label={t("admin-shipping-rates-tax-code", "Code de taxe (optionnel)")}
+                  description={t("admin-shipping-rates-tax-code-desc", "Laissez vide pour aucune taxe spécifique")}
+                  selectedKeys={formData.tax_code ? [formData.tax_code] : []}
+                  onSelectionChange={(keys) => {
+                    const val = Array.from(keys).join("");
+                    setFormData({ ...formData, tax_code: val });
+                  }}
+                  items={[
+                    { tax_code: "", display_name: "Aucune taxe spécifique" },
+                    ...taxRates as { tax_code: string | null; display_name: string }[]
+                  ]}
+                >
+                  {(rate: any) => (
+                    <SelectItem
+                      key={rate.tax_code || "null"}
+                      textValue={rate.tax_code ? `${resolveTaxName(rate.display_name, i18n.language)} (${rate.tax_code})` : rate.display_name}
+                    >
+                      {rate.tax_code ? `${resolveTaxName(rate.display_name, i18n.language)} (${rate.tax_code})` : rate.display_name}
+                    </SelectItem>
+                  )}
+                </Select>
+              </Tooltip>
+
+              <div className="flex items-center gap-4 mt-2 mb-4">
+                <Switch
+                  isSelected={formData.tax_inclusive}
+                  onValueChange={(val) => setFormData({ ...formData, tax_inclusive: val })}
+                >
+                  {t("admin-shipping-rates-tax-inclusive", "Les prix incluent les taxes")}
+                </Switch>
+                <Tooltip content={t("admin-shipping-rates-tax-inclusive-help", "Cochez si le tarif de livraison configuré est TTC")}>
+                  <div className="text-xs text-default-400 cursor-help underline decoration-dotted">
+                    {t("common-help", "Aide")}
+                  </div>
+                </Tooltip>
+              </div>
 
               <Tooltip
                 content={t(

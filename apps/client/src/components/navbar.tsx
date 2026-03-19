@@ -113,7 +113,7 @@ export const Navbar = () => {
             <p className="font-bold text-inherit">Fufuni</p>
           </LinkUniversal>
         </NavbarBrand>
-        <div className="hidden lg:flex gap-4 justify-start ml-2">
+        <div className="hidden lg:flex gap-4 justify-start items-center ml-2">
           {siteConfig().navItems.filter(item => !item.permissions || item.permissions.length === 0).map((item) => (
             <NavbarItem key={item.href}>
               <LinkUniversal

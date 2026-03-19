@@ -552,8 +552,8 @@ app.openapi(checkoutCart, async (c) => {
   );
 
   // Retrieve tax rates for all items to handle HT/TTC properly per line
-  const { taxes: taxesDetail, itemRates } = await calculateCartTaxes(db, cartId, cart.shipping_country);
-  const taxInclusive = taxesDetail.length > 0 ? taxesDetail[0].tax_inclusive : false;
+  const { taxes: taxesDetail, itemRates, shipping_ht_cents } = await calculateCartTaxes(db, cartId, cart.shipping_country);
+  const taxInclusive = cart.region_id && (await db.query<any>(`SELECT tax_inclusive FROM regions WHERE id = ?`, [cart.region_id]))[0]?.tax_inclusive === 1; // Fallback for general behavior
 
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = enrichedItems.map((item) => {
     const productData: Stripe.Checkout.SessionCreateParams.LineItem.PriceData.ProductData = {
@@ -562,20 +562,14 @@ app.openapi(checkoutCart, async (c) => {
     if (item.tax_code) {
       productData.tax_code = item.tax_code;
     }
+    if (item.image_url) {
+      productData.images = [item.image_url];
+    }
     
     let unitAmount = item.unit_price_cents;
     
     if (taxInclusive) {
-      const rate = itemRates.get(item.sku) || 0;
-      if (rate > 0) {
-        // unitAmount HT calculation: ensure total HT + Tax = Total TTC
-        const lineTotalTTC = item.unit_price_cents * item.qty;
-        const lineTax = Math.round(lineTotalTTC - (lineTotalTTC / (1 + rate / 100)));
-        const lineTotalHT = lineTotalTTC - lineTax;
-        
-        // Use Math.floor to be safe, remaining rounding will be added to tax line
-        unitAmount = Math.floor(lineTotalHT / item.qty);
-      }
+      unitAmount = Math.round(item.unit_price_cents / (1 + (itemRates.get(item.sku) || 0) / 100));
     }
 
     return {
@@ -589,11 +583,14 @@ app.openapi(checkoutCart, async (c) => {
   });
 
   const totalLineItemsHT = lineItems.reduce((acc, item) => acc + (item.price_data?.unit_amount as number) * (item.quantity as number), 0);
-  const totalTTCProducts = enrichedItems.reduce((acc, item) => acc + item.unit_price_cents * item.qty, 0);
+  const totalTTC = (enrichedItems.reduce((acc, item) => acc + item.unit_price_cents * item.qty, 0)) + (cart.shipping_cents || 0);
+  
+  // HT amount reported to stripe (products HT + shipping HT)
+  const totalReportedHT = totalLineItemsHT + (shipping_ht_cents || 0);
 
   // Add internal taxes as separate line items
   // If inclusive, we adjust the tax amount to match the difference between TotalTTC and TotalHT reported to Stripe
-  let remainingTaxToCollect = totalTTCProducts - totalLineItemsHT;
+  let remainingTaxToCollect = totalTTC - totalReportedHT;
   const orderTaxes: { name: string; amount_cents: number }[] = [];
 
   for (const tax of taxesDetail) {
@@ -632,7 +629,9 @@ app.openapi(checkoutCart, async (c) => {
   }
 
   // Pick up any remaining rounding error in the last tax line
-  if (taxInclusive && remainingTaxToCollect > 0 && lineItems.length > 0) {
+  // Safeguard: only absorb small differences (e.g. < 10 cents). 
+  // Large differences indicate a calculation error elsewhere.
+  if (taxInclusive && Math.abs(remainingTaxToCollect) < 10 && remainingTaxToCollect !== 0 && lineItems.length > 0) {
       const lastLine = lineItems[lineItems.length - 1];
       if (lastLine.price_data) {
           (lastLine.price_data as any).unit_amount += remainingTaxToCollect;
@@ -653,22 +652,28 @@ app.openapi(checkoutCart, async (c) => {
   );
 
   const dynamicShippingOptions: Stripe.Checkout.SessionCreateParams.ShippingOption[] =
-    compatibleRates.map((rate) => ({
-      shipping_rate_data: {
-        type: 'fixed_amount',
-        fixed_amount: { amount: rate.amount_cents, currency: cart.currency.toLowerCase() },
-        display_name: rate.display_name,
-        metadata: { merchant_shippingrateid: rate.id },
-        ...(rate.min_delivery_days && rate.max_delivery_days
-          ? {
-              delivery_estimate: {
-                minimum: { unit: 'business_day', value: rate.min_delivery_days },
-                maximum: { unit: 'business_day', value: rate.max_delivery_days },
-              },
-            }
-          : {}),
-      },
-    }));
+    compatibleRates
+      .filter((rate) => !cart.shipping_rate_id || rate.id === cart.shipping_rate_id)
+      .map((rate) => {
+        // Use shipping_ht_cents for the selected rate, or rate.amount_cents if not selected/not inclusive
+        const amount = (rate.id === cart.shipping_rate_id) ? shipping_ht_cents : rate.amount_cents;
+        return {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount, currency: cart.currency.toLowerCase() },
+            display_name: rate.display_name,
+            metadata: { merchant_shippingrateid: rate.id },
+            ...(rate.min_delivery_days && rate.max_delivery_days
+              ? {
+                  delivery_estimate: {
+                    minimum: { unit: 'business_day', value: rate.min_delivery_days },
+                    maximum: { unit: 'business_day', value: rate.max_delivery_days },
+                  },
+                }
+              : {}),
+          },
+        };
+      });
 
   const defaultShippingOptions: Stripe.Checkout.SessionCreateParams.ShippingOption[] = [
     {

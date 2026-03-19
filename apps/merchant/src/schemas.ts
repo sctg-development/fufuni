@@ -937,6 +937,8 @@ export const ShippingRateResponse = z.object({
   min_delivery_days: z.number().int().nullable().openapi({ example: 5 }),
   max_delivery_days: z.number().int().nullable().openapi({ example: 7 }),
   shipping_class_id: z.string().uuid().nullable().openapi({ example: null, description: 'null = universal rate; otherwise restricted to this class' }),
+  tax_code: z.string().nullable().optional().openapi({ example: 'txcd_92010001' }),
+  tax_inclusive: z.boolean().default(false).openapi({ example: true }),
   status: z.enum(['active', 'inactive']),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
@@ -949,6 +951,8 @@ export const CreateShippingRateBody = z.object({
   min_delivery_days: z.number().int().optional().openapi({ example: 5 }),
   max_delivery_days: z.number().int().optional().openapi({ example: 7 }),
   shipping_class_id: z.string().uuid().nullable().optional().openapi({ example: null, description: 'null = universal rate; otherwise restricted to this class' }),
+  tax_code: z.string().nullable().optional().openapi({ example: 'txcd_92010001' }),
+  tax_inclusive: z.boolean().optional().default(false).openapi({ example: true }),
 }).openapi('CreateShippingRate');
 
 export const UpdateShippingRateBody = z.object({
@@ -958,6 +962,8 @@ export const UpdateShippingRateBody = z.object({
   min_delivery_days: z.number().int().nullable().optional(),
   max_delivery_days: z.number().int().nullable().optional(),
   shipping_class_id: z.string().uuid().nullable().optional(),
+  tax_code: z.string().nullable().optional(),
+  tax_inclusive: z.boolean().optional(),
   status: z.enum(['active', 'inactive']).optional(),
 }).openapi('UpdateShippingRate');
 

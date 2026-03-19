@@ -35,8 +35,9 @@ export interface ShippingRateItem {
   currency: string;
   min_delivery_days: number | null;
   max_delivery_days: number | null;
-  max_weight_g: number | null;
   shipping_class_id: string | null;
+  tax_code: string | null;
+  tax_inclusive: boolean;
 }
 
 // Resolved cart class information
@@ -171,6 +172,8 @@ export async function getCompatibleShippingRates(
       sr.min_delivery_days,
       sr.max_delivery_days,
       sr.shipping_class_id,
+      sr.tax_code,
+      sr.tax_inclusive,
       COALESCE(srp.amount_cents, 0)  AS amount_cents,
       COALESCE(c.code, 'USD')       AS currency
     FROM shipping_rates sr
@@ -201,5 +204,7 @@ export async function getCompatibleShippingRates(
     max_delivery_days: r.max_delivery_days ?? null,
     max_weight_g: r.max_weight_g ?? null,
     shipping_class_id: r.shipping_class_id ?? null,
+    tax_code: r.tax_code ?? null,
+    tax_inclusive: r.tax_inclusive === 1,
   }));
 }

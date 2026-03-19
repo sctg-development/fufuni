@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 
 import DefaultLayout from "@/layouts/default";
 import { useCart } from "@/hooks/useCart";
+import { resolveTaxName } from "@/utils/description";
 
 // Shape of the order returned by GET /v1/orders/lookup
 interface OrderDetails {
@@ -254,7 +255,7 @@ export default function SuccessPage() {
           {order.taxes && order.taxes.length > 0 ? (
             order.taxes.map((tax, index) => (
               <div key={index} className="flex justify-between">
-                <span className="text-default-600">{tax.name}</span>
+                <span className="text-default-600">{resolveTaxName(tax.name, i18n.language)}</span>
                 <span>{formatPrice(tax.amount_cents, order.currency, i18n.language)}</span>
               </div>
             ))
