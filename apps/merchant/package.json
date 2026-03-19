@@ -17,7 +17,8 @@
     "test:advanced": "vitest run tests/advanced-routes.test.ts --reporter=verbose",
     "test:schema": "vitest run tests/schema-validation.test.ts --reporter=verbose",
     "test:api-helpers": "vitest run tests/api-helpers.test.ts --reporter=verbose",
-    "test:all": "vitest run --reporter=verbose"
+    "test:all": "vitest run --reporter=verbose",
+    "typegen": "bash -c 'cp ../../.env .dev.vars && wrangler types'"
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.6.0",

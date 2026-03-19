@@ -16,3 +16,4 @@ apps/cloudflare-worker/package-lock.json.bak
 export.*
 openapi.json
 .DS_Store
+_sensitive_datas/gpg_key_id.txt
