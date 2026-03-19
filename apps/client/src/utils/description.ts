@@ -109,7 +109,13 @@ export function isLocalized(raw: string): boolean {
  * Titles must never contain HTML — this is a safety guard.
  */
 export function stripHtml(input: string): string {
-  return input.replace(/<[^>]*>/g, '').trim();
+  // First remove obvious HTML-like tags, then escape any remaining
+  // angle brackets so they cannot form actual HTML elements.
+  return input
+    .replace(/<[^>]*>/g, '')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .trim();
 }
 
 /**
