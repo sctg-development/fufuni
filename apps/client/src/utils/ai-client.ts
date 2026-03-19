@@ -1,4 +1,22 @@
 /**
+ * Copyright (c) 2024-2026 Ronan LE MEILLAT
+ * License: AGPL-3.0-or-later
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
  * ai-client.ts
  * 
  * Multi-provider AI client for client-side translation requests.
@@ -78,12 +96,12 @@ async function callOpenAiCompatibleApi(
 ): Promise<TranslationResult> {
   const systemPrompt = isHtml
     ? `You are a professional e-commerce translator and copywriter. ` +
-      `Translate the following HTML product description to ${targetLanguage}. ` +
-      `Important: Preserve ALL HTML tags exactly as they are. ` +
-      `Return ONLY the translated HTML content, no explanations or extra text.`
+    `Translate the following HTML product description to ${targetLanguage}. ` +
+    `Important: Preserve ALL HTML tags exactly as they are. ` +
+    `Return ONLY the translated HTML content, no explanations or extra text.`
     : `You are a professional e-commerce copywriter. ` +
-      `Translate the following product title to ${targetLanguage}. ` +
-      `Return only the translated title as plain text, no quotes, no HTML, no extra text.`;
+    `Translate the following product title to ${targetLanguage}. ` +
+    `Return only the translated title as plain text, no quotes, no HTML, no extra text.`;
 
   // Ensure base URL ends with /
   const baseUrl = aiParams.url.endsWith('/') ? aiParams.url : aiParams.url + '/';
@@ -157,12 +175,12 @@ async function callAnthropicApi(
 ): Promise<TranslationResult> {
   const systemPrompt = isHtml
     ? `You are a professional e-commerce translator and copywriter. ` +
-      `Translate the following HTML product description to ${targetLanguage}. ` +
-      `Important: Preserve ALL HTML tags exactly as they are. ` +
-      `Return ONLY the translated HTML content, no explanations or extra text.`
+    `Translate the following HTML product description to ${targetLanguage}. ` +
+    `Important: Preserve ALL HTML tags exactly as they are. ` +
+    `Return ONLY the translated HTML content, no explanations or extra text.`
     : `You are a professional e-commerce copywriter. ` +
-      `Translate the following product title to ${targetLanguage}. ` +
-      `Return only the translated title as plain text, no quotes, no HTML, no extra text.`;
+    `Translate the following product title to ${targetLanguage}. ` +
+    `Return only the translated title as plain text, no quotes, no HTML, no extra text.`;
 
   // Ensure base URL ends with /
   const baseUrl = aiParams.url.endsWith('/') ? aiParams.url : aiParams.url + '/';

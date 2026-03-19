@@ -1,3 +1,21 @@
+/**
+ * Copyright (c) 2024-2026 Ronan LE MEILLAT
+ * License: AGPL-3.0-or-later
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 // apps/client/src/utils/description.ts
 
 /** Map locale → HTML content, stored as JSON string in the DB */
@@ -137,7 +155,7 @@ export function mergeTitleLocale(
   locale: string,
   text: string
 ): string {
-  const safe   = stripHtml(text);
+  const safe = stripHtml(text);
   const parsed = parseTitle(raw);
   if (typeof parsed === 'string') {
     // Migration: when converting plain text to JSON,
@@ -176,7 +194,7 @@ export function isTitleLocalized(raw: string): boolean {
  */
 export function titleMatchesTerm(raw: string, term: string): boolean {
   const parsed = parseTitle(raw);
-  const lower  = term.toLowerCase();
+  const lower = term.toLowerCase();
   if (typeof parsed === 'string') return parsed.toLowerCase().includes(lower);
   return Object.values(parsed).some((v) => v.toLowerCase().includes(lower));
 }
@@ -221,7 +239,7 @@ export function mergeVendorLocale(
   locale: string,
   text: string
 ): string {
-  const safe   = stripHtml(text);
+  const safe = stripHtml(text);
   const parsed = parseVendor(raw);
   if (typeof parsed === 'string') {
     // Migration from plain text to JSON
@@ -285,7 +303,7 @@ export function mergeTagsLocale(
   locale: string,
   tags: string
 ): string {
-  const safe   = tags.trim();
+  const safe = tags.trim();
   const parsed = parseTags(raw);
   if (typeof parsed === 'string') {
     // Migration from plain text to JSON
@@ -351,7 +369,7 @@ export function mergeHandleLocale(
   locale: string,
   handle: string
 ): string {
-  const safe   = handle.toLowerCase().trim();
+  const safe = handle.toLowerCase().trim();
   const parsed = parseHandle(raw);
   if (typeof parsed === 'string') {
     // Migration from plain text to JSON
@@ -397,7 +415,7 @@ export function resolveTitleWithVariant(raw: string, locale: string): string {
 
   // Try to split by ' - ' (the separator used in addItem)
   const parts = raw.split(' - ');
-  
+
   if (parts.length === 1) {
     // No variant separator, just use resolveTitle
     return resolveTitle(raw, locale);

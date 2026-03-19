@@ -1,26 +1,21 @@
 /**
- * MIT License
+ * Copyright (c) 2024-2026 Ronan LE MEILLAT
+ * License: AGPL-3.0-or-later
  *
- * Copyright (c) 2026 Ronan LE MEILLAT - SCTG Development
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@heroui/button";
@@ -130,10 +125,10 @@ export default function ShippingRatesPage() {
   });
 
   // Shipping Classes Modal state
-  const { 
-    isOpen: isClassModalOpen, 
-    onOpen: onClassModalOpen, 
-    onOpenChange: onClassModalOpenChange 
+  const {
+    isOpen: isClassModalOpen,
+    onOpen: onClassModalOpen,
+    onOpenChange: onClassModalOpenChange
   } = useDisclosure();
   const [isClassEditMode, setIsClassEditMode] = useState(false);
   const [editingClass, setEditingClass] = useState<ShippingClass | null>(null);
@@ -155,7 +150,7 @@ export default function ShippingRatesPage() {
     try {
       const apiUrl = `${apiBase}/v1/regions/shipping-rates?limit=100`;
       console.log('📍 Loading shipping rates from:', apiUrl);
-      
+
       const ratesResp = await getJson(apiUrl);
       console.log('📦 Rates Response:', ratesResp);
 
@@ -203,7 +198,7 @@ export default function ShippingRatesPage() {
             }
           })
         );
-        
+
         console.log('💰 Rates with prices:', ratesWithPrices.length);
         setShippingRates(ratesWithPrices);
       } catch (priceErr) {
@@ -397,10 +392,10 @@ export default function ShippingRatesPage() {
             shippingRates.map((r) =>
               r.id === editingRate.id
                 ? {
-                    ...response,
-                    price_cents: formData.price ? Math.round(parseFloat(formData.price) * 100) : r.price_cents,
-                    currency_code: currencyCode ?? r.currency_code,
-                  }
+                  ...response,
+                  price_cents: formData.price ? Math.round(parseFloat(formData.price) * 100) : r.price_cents,
+                  currency_code: currencyCode ?? r.currency_code,
+                }
                 : r,
             ),
           );
@@ -745,7 +740,7 @@ export default function ShippingRatesPage() {
                           backgroundColor: cls.resolution === 'exclusive' ? '#fed7aa' : '#dbeafe',
                           color: cls.resolution === 'exclusive' ? '#92400e' : '#0c2340'
                         }}>
-                          {cls.resolution === 'exclusive' 
+                          {cls.resolution === 'exclusive'
                             ? t("admin-shipping-classes-exclusive", "Exclusive")
                             : t("admin-shipping-classes-additive", "Additive")}
                         </span>
@@ -865,8 +860,8 @@ export default function ShippingRatesPage() {
                   <SelectItem key="">Universel — tous produits standards</SelectItem>
                   <>
                     {shippingClasses.map((cls) => (
-                      <SelectItem 
-                        key={cls.id} 
+                      <SelectItem
+                        key={cls.id}
                         textValue={`[${cls.resolution === "exclusive" ? "EXCL" : "ADD"}] ${cls.display_name}`}
                       >
                         {`[${cls.resolution === "exclusive" ? "EXCL" : "ADD"}] ${cls.display_name}`}
@@ -947,13 +942,13 @@ export default function ShippingRatesPage() {
                       console.log('💱 Changing currency to:', newCurrencyId);
                       console.log('📦 pricesByDivisa:', pricesByDivisa);
                       console.log('💰 Price for this currency:', pricesByDivisa[newCurrencyId]);
-                      
+
                       const newPrice = pricesByDivisa[newCurrencyId] !== undefined
                         ? (pricesByDivisa[newCurrencyId] / 100).toFixed(2)
                         : "";
-                      
+
                       console.log('✅ Setting price to:', newPrice);
-                      
+
                       setFormData({
                         ...formData,
                         currency_id: newCurrencyId,

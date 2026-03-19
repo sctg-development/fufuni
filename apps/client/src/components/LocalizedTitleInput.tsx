@@ -1,3 +1,21 @@
+/**
+ * Copyright (c) 2024-2026 Ronan LE MEILLAT
+ * License: AGPL-3.0-or-later
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 // apps/client/src/components/LocalizedTitleInput.tsx
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Input } from '@heroui/input';
@@ -44,15 +62,15 @@ export function LocalizedTitleInput({
     availableLanguages.find((l) => l.isDefault)?.code ?? 'en-US';
   const [internalLocale, setInternalLocale] = useState(defaultLocale);
   const selectedLocale = locale ?? internalLocale;
-  const [inputValue, setInputValue]         = useState('');
-  const [isTranslating, setIsTranslating]   = useState(false);
-  const [canUseAi, setCanUseAi]             = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [canUseAi, setCanUseAi] = useState(false);
 
   // --- Refs to avoid stale closures -----------------------------------------
-  const valueRef  = useRef(value);
+  const valueRef = useRef(value);
   const localeRef = useRef(selectedLocale);
 
-  useEffect(() => { valueRef.current  = value;          }, [value]);
+  useEffect(() => { valueRef.current = value; }, [value]);
   useEffect(() => { localeRef.current = selectedLocale; }, [selectedLocale]);
 
   // --- Sync inputValue when value or locale changes -------------------------
@@ -119,12 +137,12 @@ export function LocalizedTitleInput({
     setIsTranslating(true);
     try {
       // 1. Fetch AI configuration
-      const params  = await getJson(`${import.meta.env.API_BASE_URL}/v1/ai/parameters`) as AiParams;
+      const params = await getJson(`${import.meta.env.API_BASE_URL}/v1/ai/parameters`) as AiParams;
 
       // 2. Find best source to translate from
       const FALLBACK = ['en-US', 'fr-FR', 'es-ES', 'zh-CN', 'ar-SA', 'he-IL'];
       const currentValue = valueRef.current;
-      const parsed       = parseTitle(currentValue);
+      const parsed = parseTitle(currentValue);
 
       let sourceText = '';
       if (typeof parsed === 'string') {

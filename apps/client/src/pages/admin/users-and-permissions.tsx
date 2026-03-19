@@ -1,15 +1,19 @@
 /**
- * @copyright Copyright (c) 2024-2026 Ronan LE MEILLAT (base) / KduFoot adaptation
- * @license AGPL-3.0-or-later
+ * Copyright (c) 2024-2026 Ronan LE MEILLAT
+ * License: AGPL-3.0-or-later
  *
- * Administration Page: Management of Auth0 users and their KduFoot permissions.
- * Restricted to users with the `auth0:admin:api` permission.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * Workflow:
- *  1. On mount, POST call to /api/__auth0/token (via Cloudflare worker) to get the Management API token.
- *     → The token is cached in the worker KV Store to minimize Auth0 API calls.
- *  2. The Management token is used client-side to call the Auth0 Management API directly.
- *     → Listing users, fetching permissions, and performing add/remove operations.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 import type {

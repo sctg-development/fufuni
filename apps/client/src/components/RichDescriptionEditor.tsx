@@ -1,3 +1,21 @@
+/**
+ * Copyright (c) 2024-2026 Ronan LE MEILLAT
+ * License: AGPL-3.0-or-later
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 // apps/client/src/components/RichDescriptionEditor.tsx
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -49,7 +67,7 @@ export function RichDescriptionEditor({
   const [internalLocale, setInternalLocale] = useState(defaultLocale);
   const selectedLocale = locale ?? internalLocale;
   const [isTranslating, setIsTranslating] = useState(false);
-  
+
   // --- AI permission state --------------------------------------------------
   const [canUseAi, setCanUseAi] = useState(false);
   const aiPermission = (import.meta as any).env?.AI_PERMISSION || 'ai:api';
@@ -57,13 +75,13 @@ export function RichDescriptionEditor({
   // --- Refs to avoid stale closures in Tiptap callbacks --------------------
   // Tiptap's onUpdate callback captures its dependencies at creation time.
   // Using refs lets us always read the latest values without recreating the editor.
-  const valueRef    = useRef(value);
-  const localeRef   = useRef(selectedLocale);
+  const valueRef = useRef(value);
+  const localeRef = useRef(selectedLocale);
   const onChangeRef = useRef(onChange);
 
-  useEffect(() => { valueRef.current    = value;          }, [value]);
-  useEffect(() => { localeRef.current   = selectedLocale; }, [selectedLocale]);
-  useEffect(() => { onChangeRef.current = onChange;       }, [onChange]);
+  useEffect(() => { valueRef.current = value; }, [value]);
+  useEffect(() => { localeRef.current = selectedLocale; }, [selectedLocale]);
+  useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
 
   // --- Check AI permission on mount -----------------------------------------
   useEffect(() => {
@@ -94,7 +112,7 @@ export function RichDescriptionEditor({
     // Load initial content for the current locale
     content: getEditorContent(value, selectedLocale),
     onUpdate: ({ editor: e }) => {
-      const html    = e.getHTML();
+      const html = e.getHTML();
       const updated = mergeLocale(valueRef.current, localeRef.current, html);
       onChangeRef.current(updated);
     },
@@ -134,7 +152,7 @@ export function RichDescriptionEditor({
       // Update ref immediately before changing editor content to avoid stale closure
       localeRef.current = newLocale;
       const currentValue = valueRef.current;
-      const parsed       = parseDescription(currentValue);
+      const parsed = parseDescription(currentValue);
 
       if (typeof parsed === 'string') {
         // Legacy plain HTML: show it as-is in the editor for any locale.
@@ -161,7 +179,7 @@ export function RichDescriptionEditor({
       //    (first non-empty locale in the fallback chain, excluding current)
       const FALLBACK = ['en-US', 'fr-FR', 'es-ES', 'zh-CN', 'ar-SA', 'he-IL'];
       const currentValue = valueRef.current;
-      const parsed       = parseDescription(currentValue);
+      const parsed = parseDescription(currentValue);
 
       let sourceHtml = '';
       if (typeof parsed === 'string') {
