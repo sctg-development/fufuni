@@ -153,7 +153,7 @@ export default function ProductsPage() {
   const [formDescription, setFormDescription] = useState("");
   const [formStatus, setFormStatus] = useState<"active" | "draft">("active");
   const [formShippingClassId, setFormShippingClassId] = useState<string>("");
-  // enrichment fields - stored as JSON (multilingue)
+  // enrichment fields - stored as JSON (multilingual)
   const [formVendor, setFormVendor] = useState("");
   const [formVendorValue, setFormVendorValue] = useState(""); // display value for current locale
   const [formTags, setFormTags] = useState("");
@@ -264,20 +264,27 @@ export default function ProductsPage() {
    */
   const openEdit = async (p: Product) => {
     setEditingProduct(null);
+
+    // Phase 1: immediate pre-fill from local data (may be stale)
     setFormTitle(p.title);
     setFormDescription(p.description);
     setFormStatus(p.status);
     setFormShippingClassId("");
-    // vendor, tags, and handle are stored as JSON (multilingue)
     setFormVendor(p.vendor || "");
     setFormTags(p.tags ? (typeof p.tags === "string" ? p.tags : (p.tags as string[]).join(", ")) : "");
     setFormHandle(p.handle || "");
 
-    // Load full product details for variant management
+    // Open the modal before the network load completes
+    setCreateModal(true);
+
+    // Phase 2: fetch authoritative product data from the API
     try {
       const full = await getJson(`${apiBase}/v1/products/${p.id}`);
 
       setEditingProduct(full);
+      setFormTitle(full.title);
+      setFormDescription(full.description || "");
+      setFormStatus((full as any).status || "active");
       setFormShippingClassId((full as any).shipping_class_id || "");
       setFormVendor((full as any).vendor || "");
       setFormTags((full as any).tags ? ((full as any).tags as string[]).join(", ") : "");
@@ -286,8 +293,6 @@ export default function ProductsPage() {
       console.error("Error loading product", err);
       setEditingProduct(p);
     }
-
-    setCreateModal(true);
   };
 
   /**
@@ -315,11 +320,29 @@ export default function ProductsPage() {
 
       if (editingProduct) {
         await patchJson(`${apiBase}/v1/products/${editingProduct.id}`, productData);
+
+        // Optimistic local update to avoid stale states
+        const updatedProduct: Product = {
+          ...editingProduct,
+          title: productData.title,
+          description: productData.description || "",
+          status: formStatus,
+          vendor: (productData.vendor as string) || null,
+          tags: (productData.tags as unknown as string[]) || null,
+          handle: (productData.handle as string) || null,
+        };
+
+        setProducts((prev) =>
+          prev.map((prod) => (prod.id === editingProduct.id ? updatedProduct : prod))
+        );
+        setEditingProduct(updatedProduct);
+
+        setCreateModal(false);
       } else {
         await postJson(`${apiBase}/v1/products`, productData);
+        setCreateModal(false);
+        await loadProducts();
       }
-      setCreateModal(false);
-      loadProducts();
     } catch (err) {
       console.error("Error saving product", err);
     }
