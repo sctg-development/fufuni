@@ -27,7 +27,7 @@ import { getAvailableShippingRates, selectShippingRate, type AvailableShippingRa
 export interface ShippingRateSelectorProps {
   cartId: string;
   isLoading?: boolean;
-  onSelect: (rate: AvailableShippingRateItem) => void;
+  onSelect: (cart: any) => void;
   onBack?: () => void;
 }
 
@@ -72,9 +72,8 @@ export default function ShippingRateSelector({
     setError(null);
 
     try {
-      const selected = rates.find((r) => r.id === selectedId)!;
-      await selectShippingRate(cartId, selectedId);
-      onSelect(selected);
+      const cart = await selectShippingRate(cartId, selectedId);
+      onSelect(cart);
     } catch (err: any) {
       setError(err.message);
     } finally {

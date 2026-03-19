@@ -29,6 +29,7 @@ import {
   TableRow,
   TableCell,
 } from "@heroui/table";
+import { Checkbox } from "@heroui/checkbox";
 import {
   Modal,
   ModalContent,
@@ -54,6 +55,7 @@ interface Region {
   currency_id: string;
   currency_code?: string;
   is_default: boolean;
+  tax_inclusive: boolean;
   status: "active" | "inactive";
   created_at: string;
   updated_at: string;
@@ -96,6 +98,7 @@ export default function RegionsPage() {
     display_name: "",
     currency_id: "",
     is_default: false,
+    tax_inclusive: false,
     status: "active" as "active" | "inactive",
   });
 
@@ -155,6 +158,7 @@ export default function RegionsPage() {
       display_name: "",
       currency_id: "",
       is_default: false,
+      tax_inclusive: false,
       status: "active",
     });
     onOpen();
@@ -172,6 +176,7 @@ export default function RegionsPage() {
       display_name: region.display_name,
       currency_id: region.currency_id,
       is_default: region.is_default,
+      tax_inclusive: region.tax_inclusive,
       status: region.status,
     });
     onOpen();
@@ -295,6 +300,9 @@ export default function RegionsPage() {
                 <TableColumn key="is_default">
                   {t("admin-common-default", "Default")}
                 </TableColumn>
+                <TableColumn key="tax_inclusive">
+                  {t("admin-regions-tax-inclusive", "Tax Inclusive")}
+                </TableColumn>
                 <TableColumn key="status">
                   {t("admin-common-status", "Status")}
                 </TableColumn>
@@ -310,7 +318,7 @@ export default function RegionsPage() {
                   <div>{t("admin-common-loading", "Loading...")}</div>
                 }
               >
-                {(region) => (
+                {(region: Region) => (
                   <TableRow key={region.id}>
                     <TableCell>{region.display_name}</TableCell>
                     <TableCell>
@@ -328,6 +336,13 @@ export default function RegionsPage() {
                         >
                           Set Default
                         </Button>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {region.tax_inclusive ? (
+                        <span className="text-blue-600">TTC</span>
+                      ) : (
+                        <span className="text-gray-500">HT</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -436,6 +451,20 @@ export default function RegionsPage() {
                   ))}
                 </Select>
               </Tooltip>
+
+              <div className="flex flex-col gap-2 mt-2">
+                <Checkbox
+                  isSelected={formData.tax_inclusive}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, tax_inclusive: value })
+                  }
+                >
+                  {t("admin-regions-tax-inclusive-label", "Prices include taxes (TTC)")}
+                </Checkbox>
+                <p className="text-small text-default-500 ml-7">
+                  {t("admin-regions-tax-inclusive-help", "If checked, product prices in this region are considered tax-inclusive.")}
+                </p>
+              </div>
             </ModalBody>
             <ModalFooter>
               <Button

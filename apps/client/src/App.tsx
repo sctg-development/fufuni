@@ -40,6 +40,7 @@ import CountriesPage from "@/pages/admin/countries";
 import WarehousesPage from "@/pages/admin/warehouses";
 import ShippingRatesPage from "@/pages/admin/shipping-rates";
 import ShippingClassesPage from "@/pages/admin/shipping-classes";
+import TaxRatesPage from "@/pages/admin/tax-rates";
 import { SwaggerPage } from "@/pages/swagger";
 import CartPage from "@/pages/cart";
 import ProductPage from "@/pages/product";
@@ -127,6 +128,10 @@ function App() {
         <Route
           element={<AuthenticationGuardWithPermission permission={import.meta.env.ADMIN_STORE_PERMISSION}><ShippingClassesPage /></AuthenticationGuardWithPermission>}
           path="/admin/shipping-classes"
+        />
+        <Route
+          element={<AuthenticationGuardWithPermission permission={import.meta.env.ADMIN_STORE_PERMISSION}><TaxRatesPage /></AuthenticationGuardWithPermission>}
+          path="/admin/tax-rates"
         />
         <Route
           element={<AuthenticationGuard component={SwaggerPage} />}

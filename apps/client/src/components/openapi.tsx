@@ -171,10 +171,12 @@ export function OpenAPI({
   };
 
   return (
-    <SwaggerUI
-      plugins={[ScopeChipsPlugin]}
-      spec={openApiSpec as unknown as Object}
-      onComplete={onComplete}
-    />
+    <div className="w-full">
+      <SwaggerUI
+        plugins={[ScopeChipsPlugin]}
+        spec={openApiSpec as unknown as Object}
+        onComplete={onComplete}
+      />
+    </div>
   );
 }

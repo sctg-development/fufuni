@@ -21,7 +21,7 @@ export default function CartPage() {
   // Checkout workflow state
   const [step, setStep] = useState<CheckoutStep>("initial");
   const [email, setEmail] = useState("");
-  const [cartId, setCartId] = useState<string | null>(null);
+  const [currentCart, setCurrentCart] = useState<any>(null);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const handleInitialCheckout = async () => {
@@ -33,15 +33,16 @@ export default function CartPage() {
     setCheckoutError(null);
 
     try {
-      // Create cart with email
-      const cart = await createCart(email);
-      setCartId(cart.id);
+      // Create cart with email and current language
+      const cart = await createCart(email, i18n.language);
+      setCurrentCart(cart);
 
       // Add items to cart
-      await addItemsToCart(
+      const updatedCart = await addItemsToCart(
         cart.id,
         items.map((i) => ({ sku: i.sku, qty: i.qty })),
       );
+      setCurrentCart(updatedCart);
 
       // Move to shipping address step
       setStep("shipping-address");
@@ -51,27 +52,27 @@ export default function CartPage() {
     }
   };
 
-  const handleShippingAddressSuccess = async (_cart: any) => {
+  const handleShippingAddressSuccess = async (cart: any) => {
     // Cart already has the address saved, move to shipping rate selection
+    setCurrentCart(cart);
     setStep("shipping-rate");
   };
 
-  const handleShippingRateSelect = async (_rate: any) => {
+  const handleShippingRateSelect = async (cart: any) => {
     // Shipping rate is already saved on cart, now proceed to Stripe checkout
+    setCurrentCart(cart);
     setStep("processing");
-    
-    try {
-      if (!cartId) throw new Error("Cart ID not found");
 
+    try {
       // Remove last / from import.meta.env.STORE_URL if exists to prevent double slash
       const storeUrl = (import.meta.env.STORE_URL || "").replace(/\/$/, "");
 
       const { checkout_url } = await checkoutCart(
-        cartId,
+        currentCart.id,
         `${storeUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
         window.location.href,
       );
-      
+
       clear();
       window.location.href = checkout_url;
     } catch (err: any) {
@@ -87,7 +88,7 @@ export default function CartPage() {
 
   const handleBackToCart = () => {
     setStep("initial");
-    setCartId(null);
+    setCurrentCart(null);
     setCheckoutError(null);
   };
 
@@ -154,9 +155,32 @@ export default function CartPage() {
                 ))}
 
                 <Card className="border-default-200">
-                  <CardBody>
-                    <div className="text-right font-semibold text-lg">
-                      {t("total")} : {formatMoney(totalCents, items[0]?.currency || "USD")}
+                  <CardBody className="space-y-2">
+                    <div className="flex justify-between text-sm text-default-600">
+                      <span>{t("admin-orders-subtotal") || "Subtotal"}</span>
+                      <span>{formatMoney(currentCart?.totals?.subtotal_cents ?? totalCents, items[0]?.currency || "USD")}</span>
+                    </div>
+                    {currentCart?.totals && currentCart.totals.discount_cents > 0 && (
+                      <div className="flex justify-between text-sm text-green-600">
+                        <span>{t("admin-orders-discount") || "Discount"}</span>
+                        <span>-{formatMoney(currentCart.totals.discount_cents, items[0]?.currency || "USD")}</span>
+                      </div>
+                    )}
+                    {currentCart?.totals && currentCart.totals.shipping_cents > 0 && (
+                      <div className="flex justify-between text-sm text-default-600">
+                        <span>{t("admin-orders-shipping") || "Shipping"}</span>
+                        <span>{formatMoney(currentCart.totals.shipping_cents, items[0]?.currency || "USD")}</span>
+                      </div>
+                    )}
+                    {currentCart?.totals && currentCart.totals.tax_cents > 0 && (
+                      <div className="flex justify-between text-sm text-default-600">
+                        <span>{t("admin-orders-tax") || "Tax"}</span>
+                        <span>{formatMoney(currentCart.totals.tax_cents, items[0]?.currency || "USD")}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-lg font-bold border-t pt-2 mt-2">
+                      <span>{t("total")}</span>
+                      <span>{formatMoney(currentCart?.totals?.total_cents ?? totalCents, items[0]?.currency || "USD")}</span>
                     </div>
                   </CardBody>
                 </Card>
@@ -215,17 +239,17 @@ export default function CartPage() {
             )}
 
             {/* Step 2: Shipping address */}
-            {step === "shipping-address" && cartId && (
+            {step === "shipping-address" && currentCart && (
               <ShippingAddressForm
-                cartId={cartId}
+                cartId={currentCart.id}
                 onSuccess={handleShippingAddressSuccess}
               />
             )}
 
             {/* Step 3: Shipping rate selection */}
-            {step === "shipping-rate" && cartId && (
+            {step === "shipping-rate" && currentCart && (
               <ShippingRateSelector
-                cartId={cartId}
+                cartId={currentCart.id}
                 onSelect={handleShippingRateSelect}
                 onBack={handleBackToAddresses}
               />

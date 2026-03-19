@@ -90,6 +90,17 @@ CREATE TABLE IF NOT EXISTS countries (
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS tax_rates (
+  id TEXT PRIMARY KEY,
+  display_name TEXT NOT NULL,
+  country_code TEXT, -- ISO 3166-1 alpha-2 (e.g., 'FR', 'US'). NULL means fallback for all.
+  tax_code TEXT,     -- e.g., 'txcd_99999999'. NULL means default rate.
+  rate_percentage REAL NOT NULL, -- e.g., 20.0 for 20%
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS warehouses (
   id TEXT PRIMARY KEY,
   display_name TEXT NOT NULL,
@@ -148,6 +159,7 @@ CREATE TABLE IF NOT EXISTS regions (
   id TEXT PRIMARY KEY,
   display_name TEXT NOT NULL,
   currency_id TEXT NOT NULL REFERENCES currencies(id),
+  tax_inclusive INTEGER NOT NULL DEFAULT 0,
   is_default INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -269,6 +281,7 @@ CREATE TABLE IF NOT EXISTS carts (
   discount_amount_cents INTEGER DEFAULT 0,
   shipping_rate_id TEXT,
   shipping_cents INTEGER DEFAULT 0,
+  locale TEXT NOT NULL DEFAULT 'en-US',
   -- GAP-01: Shipping address fields
   shipping_name TEXT,
   shipping_line1 TEXT,
@@ -278,6 +291,7 @@ CREATE TABLE IF NOT EXISTS carts (
   shipping_postal_code TEXT,
   shipping_country TEXT,
   billing_same_as_shipping INTEGER DEFAULT 1,
+  taxes_json TEXT,
   expires_at TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -318,6 +332,7 @@ CREATE TABLE IF NOT EXISTS orders (
   shipped_at TEXT,
   stripe_checkout_session_id TEXT,
   stripe_payment_intent_id TEXT,
+  taxes_json TEXT,
   viewtoken TEXT,
   viewtoken_issued_at TEXT,
   confirmationemailsentat TEXT,
@@ -565,6 +580,8 @@ CREATE INDEX IF NOT EXISTS idx_variant_prices_currency ON variant_prices(currenc
 CREATE INDEX IF NOT EXISTS idx_carts_region ON carts(region_id);
 CREATE INDEX IF NOT EXISTS idx_orders_region ON orders(region_id);
 CREATE INDEX IF NOT EXISTS idx_orders_warehouse ON orders(warehouse_id);
+CREATE INDEX IF NOT EXISTS idx_tax_rates_country ON tax_rates(country_code);
+CREATE INDEX IF NOT EXISTS idx_tax_rates_tax_code ON tax_rates(tax_code);
 `;
 
 export class MerchantDO extends DurableObject<MerchantEnv> {
@@ -762,6 +779,39 @@ export class MerchantDO extends DurableObject<MerchantEnv> {
           name: 'idx_products_handle',
           // Enforce uniqueness for non-null handles.
           sql: 'CREATE UNIQUE INDEX IF NOT EXISTS idx_products_handle ON products(handle) WHERE handle IS NOT NULL',
+        },
+        {
+          name: '020_add_tax_rates',
+          sql: `CREATE TABLE IF NOT EXISTS tax_rates (
+            id TEXT PRIMARY KEY,
+            display_name TEXT NOT NULL,
+            country_code TEXT,
+            tax_code TEXT,
+            rate_percentage REAL NOT NULL,
+            status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+            created_at TEXT NOT NULL DEFAULT datetime('now'),
+            updated_at TEXT NOT NULL DEFAULT datetime('now')
+          );`,
+        },
+        {
+          name: 'idx_tax_rates_country',
+          sql: `CREATE INDEX IF NOT EXISTS idx_tax_rates_country ON tax_rates(country_code);`,
+        },
+        {
+          name: 'idx_tax_rates_tax_code',
+          sql: `CREATE INDEX IF NOT EXISTS idx_tax_rates_tax_code ON tax_rates(tax_code);`,
+        },
+        {
+          name: 'carts_add_locale',
+          sql: "ALTER TABLE carts ADD COLUMN locale TEXT NOT NULL DEFAULT 'en-US'",
+        },
+        {
+          name: '021_regions_add_tax_inclusive',
+          sql: "ALTER TABLE regions ADD COLUMN tax_inclusive INTEGER NOT NULL DEFAULT 0",
+        },
+        {
+          name: '022_add_taxes_json',
+          sql: "ALTER TABLE carts ADD COLUMN taxes_json TEXT; ALTER TABLE orders ADD COLUMN taxes_json TEXT;",
         },
       ];
 

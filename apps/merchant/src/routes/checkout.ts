@@ -33,6 +33,7 @@ import { validateDiscount, calculateDiscount, type Discount } from './discounts'
 import { resolveVariantPrice, getCurrencyIdForRegion } from '../lib/pricing';
 import { getAvailableQty, reserveInventory, releaseReservation } from '../lib/inventory';
 import { getCompatibleShippingRates, computeCartWeightG } from '../lib/shipping';
+import { calculateCartTaxes } from '../lib/tax';
 import {
   CartIdParam,
   CartResponse,
@@ -96,6 +97,7 @@ app.openapi(getCart, async (c) => {
     currency: cart.currency,
     region_id: cart.region_id,
     customer_email: cart.customer_email,
+    locale: cart.locale,
     items: items.map((i) => ({
       sku: i.sku,
       title: i.title,
@@ -133,7 +135,7 @@ const createCart = createRoute({
 });
 
 app.openapi(createCart, async (c) => {
-  const { customer_email, region_id } = c.req.valid('json');
+  const { customer_email, region_id, locale } = c.req.valid('json');
 
   if (!isValidEmail(customer_email)) {
     throw ApiError.invalidRequest('A valid customer_email is required');
@@ -170,8 +172,8 @@ app.openapi(createCart, async (c) => {
   }
 
   await db.run(
-    `INSERT INTO carts (id, customer_email, currency, region_id, expires_at) VALUES (?, ?, ?, ?, ?)`,
-    [id, customer_email, currency, resolvedRegionId, expiresAt]
+    `INSERT INTO carts (id, customer_email, currency, region_id, locale, expires_at) VALUES (?, ?, ?, ?, ?, ?)`,
+    [id, customer_email, currency, resolvedRegionId, locale || 'en-US', expiresAt]
   );
 
   return c.json({
@@ -196,6 +198,7 @@ app.openapi(createCart, async (c) => {
       total_cents: 0,
     },
     expires_at: expiresAt,
+    locale: locale || 'en-US',
   }, 200);
 });
 
@@ -305,45 +308,48 @@ app.openapi(addCartItems, async (c) => {
     }
   }
 
-  return c.json({
-    id: cart.id,
-    status: cart.status,
-    currency: cart.currency,
-    region_id: cart.region_id,
-    customer_email: cart.customer_email,
-    items: allCartItems.map((item) => ({
-      sku: item.sku,
-      title: item.title,
-      qty: item.qty,
-      unit_price_cents: item.unit_price_cents,
-    })),
-    discount: discountInfo,
-    shipping: {
-      rate_id: null,
-      rate_name: null,
-      amount_cents: 0,
-    },
-    shipping_address: cart.shipping_line1
-      ? {
-          name: cart.shipping_name ?? null,
-          line1: cart.shipping_line1,
-          line2: cart.shipping_line2 ?? null,
-          city: cart.shipping_city ?? null,
-          state: cart.shipping_state ?? null,
-          postal_code: cart.shipping_postal_code ?? null,
-          country: cart.shipping_country ?? null,
-          billing_same_as_shipping: cart.billing_same_as_shipping === 1,
-        }
-      : null,
-    totals: {
-      subtotal_cents: subtotalCents,
-      discount_cents: discountAmountCents,
-      shipping_cents: 0,
-      tax_cents: 0,
-      total_cents: subtotalCents - discountAmountCents,
-    },
-    expires_at: cart.expires_at,
-  }, 200);
+    const { taxes } = await calculateCartTaxes(db, cartId, cart.shipping_country);
+    const taxCents = taxes.reduce((sum, t) => sum + t.amount_cents, 0);
+    return c.json({
+      id: cart.id,
+      status: cart.status,
+      currency: cart.currency,
+      region_id: cart.region_id,
+      customer_email: cart.customer_email,
+      locale: cart.locale,
+      items: allCartItems.map((item) => ({
+        sku: item.sku,
+        title: item.title,
+        qty: item.qty,
+        unit_price_cents: item.unit_price_cents,
+      })),
+      discount: discountInfo,
+      shipping: {
+        rate_id: null,
+        rate_name: null,
+        amount_cents: 0,
+      },
+      shipping_address: cart.shipping_line1
+        ? {
+            name: cart.shipping_name ?? null,
+            line1: cart.shipping_line1,
+            line2: cart.shipping_line2 ?? null,
+            city: cart.shipping_city ?? null,
+            state: cart.shipping_state ?? null,
+            postal_code: cart.shipping_postal_code ?? null,
+            country: cart.shipping_country ?? null,
+            billing_same_as_shipping: cart.billing_same_as_shipping === 1,
+          }
+        : null,
+      totals: {
+        subtotal_cents: subtotalCents,
+        discount_cents: discountAmountCents,
+        shipping_cents: 0,
+        tax_cents: taxCents,
+        total_cents: subtotalCents - discountAmountCents + taxCents,
+      },
+      expires_at: cart.expires_at,
+    }, 200);
 });
 
 const checkoutCart = createRoute({
@@ -545,6 +551,10 @@ app.openapi(checkoutCart, async (c) => {
     })
   );
 
+  // Retrieve tax rates for all items to handle HT/TTC properly per line
+  const { taxes: taxesDetail, itemRates } = await calculateCartTaxes(db, cartId, cart.shipping_country);
+  const taxInclusive = taxesDetail.length > 0 ? taxesDetail[0].tax_inclusive : false;
+
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = enrichedItems.map((item) => {
     const productData: Stripe.Checkout.SessionCreateParams.LineItem.PriceData.ProductData = {
       name: item.title,
@@ -552,15 +562,86 @@ app.openapi(checkoutCart, async (c) => {
     if (item.tax_code) {
       productData.tax_code = item.tax_code;
     }
+    
+    let unitAmount = item.unit_price_cents;
+    
+    if (taxInclusive) {
+      const rate = itemRates.get(item.sku) || 0;
+      if (rate > 0) {
+        // unitAmount HT calculation: ensure total HT + Tax = Total TTC
+        const lineTotalTTC = item.unit_price_cents * item.qty;
+        const lineTax = Math.round(lineTotalTTC - (lineTotalTTC / (1 + rate / 100)));
+        const lineTotalHT = lineTotalTTC - lineTax;
+        
+        // Use Math.floor to be safe, remaining rounding will be added to tax line
+        unitAmount = Math.floor(lineTotalHT / item.qty);
+      }
+    }
+
     return {
       price_data: {
         currency: cart.currency.toLowerCase(),
         product_data: productData,
-        unit_amount: item.unit_price_cents,
+        unit_amount: unitAmount,
       },
       quantity: item.qty,
     };
   });
+
+  const totalLineItemsHT = lineItems.reduce((acc, item) => acc + (item.price_data?.unit_amount as number) * (item.quantity as number), 0);
+  const totalTTCProducts = enrichedItems.reduce((acc, item) => acc + item.unit_price_cents * item.qty, 0);
+
+  // Add internal taxes as separate line items
+  // If inclusive, we adjust the tax amount to match the difference between TotalTTC and TotalHT reported to Stripe
+  let remainingTaxToCollect = totalTTCProducts - totalLineItemsHT;
+  const orderTaxes: { name: string; amount_cents: number }[] = [];
+
+  for (const tax of taxesDetail) {
+    if (tax.amount_cents > 0) {
+      // Resolve localized tax name
+      let resolvedName = tax.name;
+      if (resolvedName.startsWith('{')) {
+        try {
+          const parsed = JSON.parse(resolvedName);
+          resolvedName = parsed[cart.locale] || parsed['en-US'] || Object.values(parsed)[0] as string || 'Tax';
+        } catch {
+          // Fallback
+        }
+      }
+
+      let taxAmount = tax.amount_cents;
+      if (taxInclusive) {
+        // Balance the tax amount to ensure Stripe total matches TTC sum exactly
+        taxAmount = Math.min(remainingTaxToCollect, tax.amount_cents); 
+        remainingTaxToCollect -= taxAmount;
+      }
+
+      orderTaxes.push({ name: resolvedName, amount_cents: taxAmount });
+
+      lineItems.push({
+        price_data: {
+          currency: cart.currency.toLowerCase(),
+          product_data: {
+            name: resolvedName,
+          },
+          unit_amount: taxAmount,
+        },
+        quantity: 1,
+      });
+    }
+  }
+
+  // Pick up any remaining rounding error in the last tax line
+  if (taxInclusive && remainingTaxToCollect > 0 && lineItems.length > 0) {
+      const lastLine = lineItems[lineItems.length - 1];
+      if (lastLine.price_data) {
+          (lastLine.price_data as any).unit_amount += remainingTaxToCollect;
+      }
+    // Also update orderTaxes for storage
+    if (orderTaxes.length > 0) {
+      orderTaxes[orderTaxes.length - 1].amount_cents += remainingTaxToCollect;
+    }
+  }
 
   // Build dynamic shipping options from compatible shipping rates (Stripe shipping_options)
   const currencyId = await getCurrencyIdForRegion(db, cart.region_id);
@@ -644,7 +725,7 @@ app.openapi(checkoutCart, async (c) => {
     session = await stripe.checkout.sessions.create({
       mode: 'payment',
       customer_email: cart.customer_email,
-      automatic_tax: { enabled: true },
+      automatic_tax: { enabled: false }, // Internal tax used instead
       ...(collect_shipping && {
         shipping_address_collection: {
           allowed_countries:
@@ -665,16 +746,18 @@ app.openapi(checkoutCart, async (c) => {
         }),
       },
     });
-  } catch {
+  } catch (err: any) {
+    console.error('Stripe session creation failed:', err);
     await releaseReservedDiscount();
     await releaseReservedInventory();
     await revertCartStatus();
-    throw ApiError.invalidRequest('Payment processing error. Please try again.');
+    throw ApiError.invalidRequest(`Payment processing error. ${err.message || 'Please try again.'}`);
   }
 
+  // Store metadata, session ID & taxes in cart
   await db.run(
-    `UPDATE carts SET stripe_checkout_session_id = ?, discount_amount_cents = ?, updated_at = ? WHERE id = ?`,
-    [session.id, discountAmountCents, now(), cartId]
+    `UPDATE carts SET stripe_checkout_session_id = ?, taxes_json = ?, updated_at = ? WHERE id = ?`,
+    [session.id, JSON.stringify(orderTaxes), now(), cartId]
   );
 
   return c.json({
@@ -729,6 +812,9 @@ app.openapi(applyDiscount, async (c) => {
     [discount.code, discount.id, discountAmountCents, cartId]
   );
 
+  const { taxes } = await calculateCartTaxes(db, cartId, cart.shipping_country);
+  const taxCents = taxes.reduce((sum, t) => sum + t.amount_cents, 0);
+
   return c.json({
     discount: {
       code: discount.code,
@@ -739,8 +825,8 @@ app.openapi(applyDiscount, async (c) => {
       subtotal_cents: subtotalCents,
       discount_cents: discountAmountCents,
       shipping_cents: 0,
-      tax_cents: 0,
-      total_cents: subtotalCents - discountAmountCents,
+      tax_cents: taxCents,
+      total_cents: subtotalCents - discountAmountCents + taxCents,
     },
   }, 200);
 });
@@ -776,14 +862,17 @@ app.openapi(removeDiscount, async (c) => {
     return sum + item.unit_price_cents * item.qty;
   }, 0);
 
+  const { taxes } = await calculateCartTaxes(db, cartId, cart.shipping_country);
+  const taxCents = taxes.reduce((sum, t) => sum + t.amount_cents, 0);
+
   return c.json({
     discount: null,
     totals: {
       subtotal_cents: subtotalCents,
       discount_cents: 0,
       shipping_cents: 0,
-      tax_cents: 0,
-      total_cents: subtotalCents,
+      tax_cents: taxCents,
+      total_cents: subtotalCents + taxCents,
     },
   }, 200);
 });
@@ -884,12 +973,16 @@ app.openapi(setShippingAddress, async (c) => {
 
   const subtotalCents = items.reduce((sum: number, i: any) => sum + i.unit_price_cents * i.qty, 0);
 
+  const { taxes } = await calculateCartTaxes(db, updatedCart.id, updatedCart.shipping_country);
+  const taxCents = taxes.reduce((sum, t) => sum + t.amount_cents, 0);
+
   return c.json({
     id: updatedCart.id,
     status: updatedCart.status,
     currency: updatedCart.currency,
     region_id: updatedCart.region_id,
     customer_email: updatedCart.customer_email,
+    locale: updatedCart.locale,
     items: items.map((i: any) => ({
       sku: i.sku,
       title: i.title,
@@ -911,8 +1004,8 @@ app.openapi(setShippingAddress, async (c) => {
       subtotal_cents: subtotalCents,
       discount_cents: updatedCart.discount_amount_cents ?? 0,
       shipping_cents: updatedCart.shipping_cents ?? 0,
-      tax_cents: 0,
-      total_cents: subtotalCents - (updatedCart.discount_amount_cents ?? 0) + (updatedCart.shipping_cents ?? 0),
+      tax_cents: taxCents,
+      total_cents: subtotalCents - (updatedCart.discount_amount_cents ?? 0) + (updatedCart.shipping_cents ?? 0) + taxCents,
     },
     expires_at: updatedCart.expires_at,
   }, 200);
@@ -1045,12 +1138,16 @@ app.openapi(selectShippingRate, async (c) => {
   const items = await db.query<any>(`SELECT * FROM cart_items WHERE cart_id = ?`, [cartId]);
   const subtotalCents = items.reduce((sum: number, i: any) => sum + i.unit_price_cents * i.qty, 0);
 
+  const { taxes } = await calculateCartTaxes(db, updatedCart.id, updatedCart.shipping_country);
+  const taxCents = taxes.reduce((sum, t) => sum + t.amount_cents, 0);
+
   return c.json({
     id: updatedCart.id,
     status: updatedCart.status,
     currency: updatedCart.currency,
     region_id: updatedCart.region_id,
     customer_email: updatedCart.customer_email,
+    locale: updatedCart.locale,
     items: items.map((i: any) => ({
       sku: i.sku,
       title: i.title,
@@ -1078,8 +1175,8 @@ app.openapi(selectShippingRate, async (c) => {
       subtotal_cents: subtotalCents,
       discount_cents: updatedCart.discount_amount_cents ?? 0,
       shipping_cents: chosenRate.amount_cents,
-      tax_cents: 0,
-      total_cents: subtotalCents - (updatedCart.discount_amount_cents ?? 0) + chosenRate.amount_cents,
+      tax_cents: taxCents,
+      total_cents: subtotalCents - (updatedCart.discount_amount_cents ?? 0) + chosenRate.amount_cents + taxCents,
     },
     expires_at: updatedCart.expires_at,
   }, 200);

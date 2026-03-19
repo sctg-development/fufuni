@@ -463,5 +463,18 @@
   "admin-shipping-classes-delete-success": "Clase de envío eliminada",
   "admin-shipping-classes-save-error": "Error al guardar la clase de envío",
   "admin-shipping-classes-delete-error": "Error al eliminar la clase de envío",
-  "admin-shipping-classes-status-disabled": "Solo editable en la creación"
+  "admin-shipping-classes-status-disabled": "Solo editable en la creación",
+  "admin-shipping-rates-price": "Precio",
+  "admin-shipping-rates-price-help": "Costo de envío en la moneda seleccionada",
+  "admin-tax-rates-add": "Agregar tasa impositiva",
+  "admin-tax-rates-country-code": "Código del país",
+  "admin-tax-rates-country-help": "Código de país ISO (por ejemplo, FR, EE. UU.). \nDéjelo en blanco para obtener una tasa de reserva global.",
+  "admin-tax-rates-create": "Crear tasa impositiva",
+  "admin-tax-rates-edit": "Editar tasa impositiva",
+  "admin-tax-rates-fallback": "Predeterminado/Retroceso",
+  "admin-tax-rates-rate": "Tasa (%)",
+  "admin-tax-rates-rate-help": "Porcentaje de impuesto (por ejemplo, 20,0 por 20%)",
+  "admin-tax-rates-tax-code": "código fiscal",
+  "admin-tax-rates-tax-code-help": "Código fiscal compatible con Stripe (p. ej., txcd_10000000).",
+  "admin-tax-rates-title": "Tasas de impuestos"
 }

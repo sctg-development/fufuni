@@ -297,6 +297,7 @@ export const CartResponse = z.object({
   currency: z.string().openapi({ example: 'USD' }),
   region_id: z.string().uuid().nullable().optional().openapi({ example: '550e8400-e29b-41d4-a716-446655440000' }),
   customer_email: z.string().email(),
+  locale: z.string().default('en-US').openapi({ example: 'en-US', description: 'User preferred language for localized strings' }),
   items: z.array(CartItem),
   discount: CartDiscount.optional(),
   shipping: z.object({
@@ -312,6 +313,7 @@ export const CartResponse = z.object({
 
 export const CreateCartBody = z.object({
   customer_email: z.string().email().openapi({ example: 'customer@example.com' }),
+  locale: z.string().optional().openapi({ example: 'fr-FR', description: 'User preferred language for localized strings' }),
   region_id: z.string().uuid().optional().openapi({ example: '550e8400-e29b-41d4-a716-446655440000', description: 'Optional region for this cart' }),
 }).openapi('CreateCart');
 
@@ -424,6 +426,10 @@ export const OrderResponse = z.object({
     subtotal_cents: z.number().int(),
     discount_cents: z.number().int(),
     tax_cents: z.number().int(),
+    taxes: z.array(z.object({
+      name: z.string(),
+      amount_cents: z.number().int(),
+    })).optional(),
     shipping_cents: z.number().int(),
     total_cents: z.number().int(),
     currency: z.string(),
@@ -800,6 +806,41 @@ export const CreateCountryBody = z.object({
   language_code: z.string().min(2).optional().default('en').openapi({ example: 'en' }),
 }).openapi('CreateCountry');
 
+// ============================================================
+// TAX RATE SCHEMAS
+// ============================================================
+
+export const TaxRateResponse = z.object({
+  id: z.string().uuid(),
+  display_name: z.string().openapi({ example: '{"en-US":"VAT FR","fr-FR":"TVA FR"}', description: 'Localized tax name (JSON string)' }),
+  country_code: z.string().length(2).toUpperCase().nullable().openapi({ example: 'FR', description: 'ISO 3166-1 alpha-2 country code' }),
+  tax_code: z.string().nullable().openapi({ example: 'txcd_99999999' }),
+  rate_percentage: z.number().openapi({ example: 20.0 }),
+  status: z.enum(['active', 'inactive']),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
+}).openapi('TaxRate');
+
+export const TaxRateListResponse = z.object({
+  items: z.array(TaxRateResponse),
+  pagination: PaginationResponse,
+}).openapi('TaxRateList');
+
+export const CreateTaxRateBody = z.object({
+  display_name: z.string().min(1).openapi({ example: '{"en-US":"VAT FR","fr-FR":"TVA FR"}', description: 'Localized tax name (JSON string or plain text for migration)' }),
+  country_code: z.string().length(2).toUpperCase().nullable().optional().openapi({ example: 'FR' }),
+  tax_code: z.string().nullable().optional().openapi({ example: 'txcd_99999999' }),
+  rate_percentage: z.number().min(0).openapi({ example: 20.0 }),
+}).openapi('CreateTaxRate');
+
+export const UpdateTaxRateBody = z.object({
+  display_name: z.string().min(1).optional(),
+  country_code: z.string().length(2).toUpperCase().nullable().optional(),
+  tax_code: z.string().nullable().optional(),
+  rate_percentage: z.number().min(0).optional(),
+  status: z.enum(['active', 'inactive']).optional(),
+}).openapi('UpdateTaxRate');
+
 export const UpdateCountryBody = z.object({
   display_name: z.string().min(1).optional(),
   country_name: z.string().min(1).optional(),
@@ -932,6 +973,7 @@ export const RegionResponse = z.object({
   currency_id: z.string().uuid(),
   currency_code: z.string().optional().openapi({ example: 'USD' }),
   is_default: z.boolean(),
+  tax_inclusive: z.boolean().default(false).openapi({ description: 'True if prices in this region already include tax' }),
   status: z.enum(['active', 'inactive']),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
@@ -941,6 +983,7 @@ export const CreateRegionBody = z.object({
   display_name: z.string().min(1).openapi({ example: 'North America' }),
   currency_id: z.string().uuid().openapi({ example: '550e8400-e29b-41d4-a716-446655440000' }),
   is_default: z.boolean().optional().default(false).openapi({ example: false }),
+  tax_inclusive: z.boolean().optional().default(false).openapi({ example: false }),
   country_ids: z.array(z.string().uuid()).optional().default([]).openapi({ example: [] }),
   warehouse_ids: z.array(z.string().uuid()).optional().default([]).openapi({ example: [] }),
   shipping_rate_ids: z.array(z.string().uuid()).optional().default([]).openapi({ example: [] }),
@@ -950,6 +993,7 @@ export const UpdateRegionBody = z.object({
   display_name: z.string().min(1).optional(),
   currency_id: z.string().uuid().optional(),
   is_default: z.boolean().optional(),
+  tax_inclusive: z.boolean().optional(),
   status: z.enum(['active', 'inactive']).optional(),
 }).openapi('UpdateRegion');
 

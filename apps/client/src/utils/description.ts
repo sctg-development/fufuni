@@ -432,3 +432,65 @@ export function resolveTitleWithVariant(raw: string, locale: string): string {
   // Combine with variant
   return `${resolvedProductTitle} - ${variantTitle}`;
 }
+// ─── Tax Name helpers (localized string) ───────────────────────────────────
+
+/**
+ * Parses tax name: plain text (legacy) or LocalizedDesc JSON.
+ */
+export function parseTaxName(raw: string): LocalizedDesc | string {
+  if (!raw) return '';
+  const trimmed = raw.trimStart();
+  if (trimmed.startsWith('{')) {
+    try {
+      return JSON.parse(raw) as LocalizedDesc;
+    } catch {
+      return stripHtml(raw);
+    }
+  }
+  return stripHtml(raw);
+}
+
+/**
+ * Resolves the best tax name string for a given locale.
+ */
+export function resolveTaxName(raw: string, locale: string): string {
+  const parsed = parseTaxName(raw);
+  if (typeof parsed === 'string') return parsed;
+  for (const lang of [locale, ...DESCRIPTION_FALLBACK]) {
+    if (parsed[lang]) return parsed[lang];
+  }
+  return '';
+}
+
+/**
+ * Merges tax name for a specific locale.
+ */
+export function mergeTaxNameLocale(
+  raw: string,
+  locale: string,
+  text: string
+): string {
+  const safe = stripHtml(text);
+  const parsed = parseTaxName(raw);
+  if (typeof parsed === 'string') {
+    // Migration from plain text to JSON
+    const result: LocalizedDesc = { [locale]: safe };
+    if (locale !== 'en-US' && parsed) {
+      result['en-US'] = parsed;
+    }
+    return JSON.stringify(result);
+  }
+  // Already JSON: update and ensure en-US exists
+  const result = { ...parsed, [locale]: safe };
+  if (!result['en-US'] && safe) {
+    result['en-US'] = safe;
+  }
+  return JSON.stringify(result);
+}
+
+/**
+ * Gets tax name for a specific locale.
+ */
+export function getTaxNameForLocale(raw: string, locale: string): string {
+  return resolveTaxName(raw, locale);
+}

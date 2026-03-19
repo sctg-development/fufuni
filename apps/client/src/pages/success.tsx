@@ -38,6 +38,7 @@ interface OrderDetails {
   tracking_number: string | null;
   tracking_url: string | null;
   shipped_at: string | null;
+  taxes?: { name: string; amount_cents: number }[];
   items: { sku: string; title: string; qty: number; unit_price_cents: number }[];
 }
 
@@ -250,10 +251,19 @@ export default function SuccessPage() {
               <span>−{formatPrice(order.discount_cents, order.currency, i18n.language)}</span>
             </div>
           )}
-          <div className="flex justify-between">
-            <span className="text-default-600">{t("tax")}</span>
-            <span>{formatPrice(order.tax_cents, order.currency, i18n.language)}</span>
-          </div>
+          {order.taxes && order.taxes.length > 0 ? (
+            order.taxes.map((tax, index) => (
+              <div key={index} className="flex justify-between">
+                <span className="text-default-600">{tax.name}</span>
+                <span>{formatPrice(tax.amount_cents, order.currency, i18n.language)}</span>
+              </div>
+            ))
+          ) : order.tax_cents > 0 ? (
+            <div className="flex justify-between">
+              <span className="text-default-600">{t("tax")}</span>
+              <span>{formatPrice(order.tax_cents, order.currency, i18n.language)}</span>
+            </div>
+          ) : null}
           <div className="flex justify-between">
             <span className="text-default-600">{t("shipping")}</span>
             <span>{formatPrice(order.shipping_cents, order.currency, i18n.language)}</span>

@@ -463,5 +463,15 @@
   "admin-shipping-classes-delete-success": "Classe d'expédition supprimmée",
   "admin-shipping-classes-save-error": "Erreur lors de l'enregistrement de la classe d'expédition",
   "admin-shipping-classes-delete-error": "Erreur lors de la suppression de la classe d'expédition",
-  "admin-shipping-classes-status-disabled": "Modifiable uniquement à la création"
+  "admin-shipping-classes-status-disabled": "Uniquement modifiable à la création",
+  "admin-tax-rates-title": "Taux de Taxe",
+  "admin-tax-rates-add": "Ajouter un Taux",
+  "admin-tax-rates-create": "Créer un Taux",
+  "admin-tax-rates-edit": "Modifier le Taux",
+  "admin-tax-rates-rate": "Taux (%)",
+  "admin-tax-rates-country-code": "Code pays",
+  "admin-tax-rates-fallback": "Par défaut / Repli",
+  "admin-tax-rates-rate-help": "Pourcentage de taxe (ex: 20.0 pour 20%)",
+  "admin-tax-rates-tax-code-help": "Code de taxe optionnel compatible Stripe (ex: txcd_99999999)",
+  "admin-tax-rates-country-help": "Code pays ISO (ex: FR, US). Laissez vide pour un taux de repli global."
 }

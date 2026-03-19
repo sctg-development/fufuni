@@ -13,6 +13,18 @@ CREATE TABLE IF NOT EXISTS api_keys (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Tax Rates
+CREATE TABLE IF NOT EXISTS tax_rates (
+  id TEXT PRIMARY KEY,
+  display_name TEXT NOT NULL,
+  country_code TEXT, -- ISO 3166-1 alpha-2 (e.g., 'FR', 'US'). NULL means fallback for all.
+  tax_code TEXT,     -- e.g., 'txcd_99999999'. NULL means default rate.
+  rate_percentage REAL NOT NULL, -- e.g., 20.0 for 20%
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Products
 CREATE TABLE IF NOT EXISTS products (
   id TEXT PRIMARY KEY,
@@ -304,3 +316,5 @@ CREATE INDEX IF NOT EXISTS idx_oauth_authorizations_client ON oauth_authorizatio
 CREATE INDEX IF NOT EXISTS idx_oauth_tokens_access ON oauth_tokens(access_token_hash);
 CREATE INDEX IF NOT EXISTS idx_oauth_tokens_refresh ON oauth_tokens(refresh_token_hash);
 CREATE INDEX IF NOT EXISTS idx_oauth_tokens_customer ON oauth_tokens(customer_id);
+CREATE INDEX IF NOT EXISTS idx_tax_rates_country ON tax_rates(country_code);
+CREATE INDEX IF NOT EXISTS idx_tax_rates_tax_code ON tax_rates(tax_code);

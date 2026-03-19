@@ -112,7 +112,18 @@ export async function searchProducts(query: string): Promise<StoreProduct[]> {
 
 export interface CartResponse {
   id: string;
-  // other fields may be present but we only care about id for now
+  status: string;
+  currency: string;
+  customer_email: string;
+  locale: string;
+  items: any[];
+  totals?: {
+    subtotal_cents: number;
+    discount_cents: number;
+    shipping_cents: number;
+    tax_cents: number;
+    total_cents: number;
+  };
 }
 
 export interface AddItemsResponse {
@@ -123,10 +134,10 @@ export interface CheckoutResponse {
   checkout_url: string;
 }
 
-export async function createCart(email: string): Promise<CartResponse> {
+export async function createCart(email: string, locale?: string): Promise<CartResponse> {
   return request<CartResponse>(`/v1/carts`, {
     method: 'POST',
-    body: JSON.stringify({ customer_email: email }),
+    body: JSON.stringify({ customer_email: email, locale }),
   });
 }
 
@@ -137,8 +148,8 @@ export async function getCart(cartId: string): Promise<CartResponse> {
 export async function addItemsToCart(
   cartId: string,
   items: Array<{ sku: string; qty: number }>,
-): Promise<AddItemsResponse> {
-  return request<AddItemsResponse>(`/v1/carts/${cartId}/items`, {
+): Promise<CartResponse> {
+  return request<CartResponse>(`/v1/carts/${cartId}/items`, {
     method: 'POST',
     body: JSON.stringify({ items }),
   });

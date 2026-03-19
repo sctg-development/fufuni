@@ -27,6 +27,13 @@ import {
   NavbarMenu,
   NavbarMenuItem,
 } from "@heroui/navbar";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@heroui/dropdown";
+import { Button } from "@heroui/button";
 import { link as linkStyles } from "@heroui/theme";
 import { clsx } from "@heroui/shared-utils";
 import { Trans, useTranslation } from "react-i18next";
@@ -48,7 +55,7 @@ import {
 } from "@/components/icons";
 import { Logo } from "@/components/icons";
 import { useCart } from "@/hooks/useCart";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, ChevronDown, ShieldCheck } from "lucide-react";
 import { availableLanguages } from "@/i18n";
 
 export const Navbar = () => {
@@ -107,37 +114,56 @@ export const Navbar = () => {
           </LinkUniversal>
         </NavbarBrand>
         <div className="hidden lg:flex gap-4 justify-start ml-2">
-          {siteConfig().navItems.map((item) => (
+          {siteConfig().navItems.filter(item => !item.permissions || item.permissions.length === 0).map((item) => (
             <NavbarItem key={item.href}>
-              {item.permissions && item.permissions.length > 0 ? (
-                <AuthenticationGuardWithPermission
-                  permission={item.permissions[0]}
-                >
-                  <LinkUniversal
-                    className={clsx(
-                      linkStyles({ color: "foreground" }),
-                      "data-[active=true]:text-primary data-[active=true]:font-medium",
-                    )}
-                    color="foreground"
-                    href={item.href}
-                  >
-                    {item.label}
-                  </LinkUniversal>
-                </AuthenticationGuardWithPermission>
-              ) : (
-                <LinkUniversal
-                  className={clsx(
-                    linkStyles({ color: "foreground" }),
-                    "data-[active=true]:text-primary data-[active=true]:font-medium",
-                  )}
-                  color="foreground"
-                  href={item.href}
-                >
-                  {item.label}
-                </LinkUniversal>
-              )}
+              <LinkUniversal
+                className={clsx(
+                  linkStyles({ color: "foreground" }),
+                  "data-[active=true]:text-primary data-[active=true]:font-medium",
+                )}
+                color="foreground"
+                href={item.href}
+              >
+                {item.label}
+              </LinkUniversal>
             </NavbarItem>
           ))}
+          
+          <AuthenticationGuardWithPermission permission="admin:store">
+            <NavbarItem>
+              <Dropdown>
+                <DropdownTrigger>
+                  <Button
+                    disableRipple
+                    className="p-0 bg-transparent data-[hover=true]:bg-transparent"
+                    endContent={<ChevronDown className="w-4 h-4" />}
+                    radius="sm"
+                    variant="light"
+                  >
+                    {t("nav-admin")}
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  aria-label="Admin actions"
+                  className="w-[340px]"
+                  itemClasses={{
+                    base: "gap-4",
+                  }}
+                >
+                  {siteConfig().navItems.filter(item => item.permissions && item.permissions.includes("admin:store")).map((item) => (
+                    <DropdownItem
+                      key={item.href}
+                      description={item.href}
+                      startContent={<ShieldCheck className="w-4 h-4 text-primary" />}
+                      onPress={() => navigate(item.href)}
+                    >
+                      {item.label}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
+            </NavbarItem>
+          </AuthenticationGuardWithPermission>
         </div>
       </NavbarContent>
 

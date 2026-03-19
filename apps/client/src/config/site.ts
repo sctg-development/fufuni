@@ -88,6 +88,11 @@ export const siteConfig = () => ({
       href: "/admin/shipping-classes",
       permissions: ["admin:store"], // Only visible to users with "admin:store" permission
     },
+    {
+      label: i18next.t("admin-tax-rates-title"),
+      href: "/admin/tax-rates",
+      permissions: ["admin:store"], // Only visible to users with "admin:store" permission
+    },
   ],
   navMenuItems: [
     {
@@ -148,6 +153,11 @@ export const siteConfig = () => ({
     {
       label: i18next.t("admin-shipping-classes-title"),
       href: "/admin/shipping-classes",
+      permissions: ["admin:store"], // Only visible to users with "admin:store" permission
+    },
+    {
+      label: i18next.t("admin-tax-rates-title"),
+      href: "/admin/tax-rates",
       permissions: ["admin:store"], // Only visible to users with "admin:store" permission
     },
   ],

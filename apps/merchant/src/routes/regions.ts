@@ -1496,7 +1496,8 @@ app.openapi(listRegions, async (c) => {
       display_name: item.display_name,
       currency_id: item.currency_id,
       currency_code: item.currency_code,
-      is_default: item.is_default,
+      is_default: item.is_default === 1,
+      tax_inclusive: item.tax_inclusive === 1,
       status: item.status,
       created_at: item.created_at,
       updated_at: item.updated_at,
@@ -1529,7 +1530,7 @@ const createRegion = createRoute({
 });
 
 app.openapi(createRegion, async (c) => {
-  const { display_name, currency_id, is_default, country_ids, warehouse_ids, shipping_rate_ids } = c.req.valid('json');
+  const { display_name, currency_id, is_default, tax_inclusive, country_ids, warehouse_ids, shipping_rate_ids } = c.req.valid('json');
   const db = getDb(c.var.db);
 
   // Verify currency exists
@@ -1545,9 +1546,9 @@ app.openapi(createRegion, async (c) => {
   }
 
   await db.run(
-    `INSERT INTO regions (id, display_name, currency_id, is_default, status, created_at, updated_at)
-     VALUES (?, ?, ?, ?, 'active', ?, ?)`,
-    [id, display_name, currency_id, is_default ? 1 : 0, timestamp, timestamp]
+    `INSERT INTO regions (id, display_name, currency_id, is_default, tax_inclusive, status, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, 'active', ?, ?)`,
+    [id, display_name, currency_id, is_default ? 1 : 0, tax_inclusive ? 1 : 0, timestamp, timestamp]
   );
 
   // Add countries if provided
@@ -1591,7 +1592,8 @@ app.openapi(createRegion, async (c) => {
     display_name: region.display_name,
     currency_id: region.currency_id,
     currency_code: region.currency_code,
-    is_default: region.is_default,
+    is_default: region.is_default === 1,
+    tax_inclusive: region.tax_inclusive === 1,
     status: region.status,
     created_at: region.created_at,
     updated_at: region.updated_at,
@@ -1634,7 +1636,8 @@ app.openapi(getRegion, async (c) => {
     display_name: region.display_name,
     currency_id: region.currency_id,
     currency_code: region.currency_code,
-    is_default: region.is_default,
+    is_default: region.is_default === 1,
+    tax_inclusive: region.tax_inclusive === 1,
     status: region.status,
     created_at: region.created_at,
     updated_at: region.updated_at,
@@ -1666,7 +1669,7 @@ const updateRegion = createRoute({
 
 app.openapi(updateRegion, async (c) => {
   const { id } = c.req.valid('param');
-  const { display_name, currency_id, is_default, status } = c.req.valid('json');
+  const { display_name, currency_id, is_default, tax_inclusive, status } = c.req.valid('json');
   const db = getDb(c.var.db);
 
   const [existing] = await db.query<any>('SELECT * FROM regions WHERE id = ?', [id]);
@@ -1681,6 +1684,7 @@ app.openapi(updateRegion, async (c) => {
   if (display_name) updates.display_name = display_name;
   if (currency_id) updates.currency_id = currency_id;
   if (is_default !== undefined) updates.is_default = is_default ? 1 : 0;
+  if (tax_inclusive !== undefined) updates.tax_inclusive = tax_inclusive ? 1 : 0;
   if (status) updates.status = status;
 
   const setClauses = Object.keys(updates).map((key) => `${key} = ?`).join(', ');
@@ -1699,7 +1703,8 @@ app.openapi(updateRegion, async (c) => {
     display_name: updated.display_name,
     currency_id: updated.currency_id,
     currency_code: updated.currency_code,
-    is_default: updated.is_default,
+    is_default: updated.is_default === 1,
+    tax_inclusive: updated.tax_inclusive === 1,
     status: updated.status,
     created_at: updated.created_at,
     updated_at: updated.updated_at,

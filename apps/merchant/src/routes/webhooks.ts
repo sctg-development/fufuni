@@ -219,8 +219,8 @@ webhooks.post('/stripe', async (c) => {
            shipping_name, shipping_phone, ship_to,
            subtotal_cents, tax_cents, shipping_cents, total_cents, currency,
            discount_code, discount_id, discount_amount_cents,
-           stripe_checkout_session_id, stripe_payment_intent_id)
-           VALUES (?, ?, ?, 'paid', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           stripe_checkout_session_id, stripe_payment_intent_id, taxes_json)
+           VALUES (?, ?, ?, 'paid', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             orderId,
             customerId,
@@ -239,6 +239,7 @@ webhooks.post('/stripe', async (c) => {
             discountAmountCents,
             session.id,
             session.payment_intent,
+            cart.taxes_json,
           ]
         );
 

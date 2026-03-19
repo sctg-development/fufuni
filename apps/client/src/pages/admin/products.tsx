@@ -56,6 +56,7 @@ import {
   mergeTagsLocale,
   getHandleForLocale,
   mergeHandleLocale,
+  getTaxNameForLocale,
 } from "@/utils/description";
 import { availableLanguages } from "@/i18n";
 
@@ -108,6 +109,15 @@ interface ShippingClass {
 }
 
 /**
+ * Tax rate for products.
+ */
+interface TaxRate {
+  id: string;
+  display_name: string;
+  tax_code: string | null;
+}
+
+/**
  * Options for filtering products by status, including an empty value for all.
  */
 const STATUS_OPTIONS = ["", "active", "draft"];
@@ -140,6 +150,7 @@ export default function ProductsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [globalFilter, setGlobalFilter] = useState<string>("");
   const [shippingClasses, setShippingClasses] = useState<ShippingClass[]>([]);
+  const [taxRates, setTaxRates] = useState<TaxRate[]>([]);
 
   // create / edit modal
   const [createModal, setCreateModal] = useState(false);
@@ -211,6 +222,19 @@ export default function ProductsPage() {
       }
     };
     loadShippingClasses();
+  }, []);
+
+  // load tax rates for selector
+  useEffect(() => {
+    const loadTaxRates = async () => {
+      try {
+        const resp = await getJson(`${apiBase}/v1/tax-rates?limit=100`);
+        setTaxRates(resp.items || []);
+      } catch (err) {
+        console.error("Failed to load tax rates", err);
+      }
+    };
+    loadTaxRates();
   }, []);
 
   // sync display values when locale changes
@@ -1018,14 +1042,27 @@ export default function ProductsPage() {
 
                 {/* Tax Code */}
                 <div>
-                  <label className="block text-sm font-medium">
+                  <label className="block text-sm font-medium mb-1">
                     {t("admin-products-field-tax-code")}
                   </label>
-                  <Input
+                  <Select
                     placeholder={t("admin-products-field-tax-code-placeholder")}
-                    value={variantTaxCode}
-                    onChange={(e) => setVariantTaxCode(e.target.value)}
-                  />
+                    selectedKeys={variantTaxCode ? [variantTaxCode] : []}
+                    onSelectionChange={(keys) => setVariantTaxCode(Array.from(keys).join(""))}
+                  >
+                    {[
+                      <SelectItem key="" textValue={t("none") || "None"}>
+                        {t("none") || "None"}
+                      </SelectItem>,
+                      ...Array.from(new Map(taxRates.map(r => [r.tax_code, r])).values())
+                        .filter(r => r.tax_code)
+                        .map((r) => (
+                          <SelectItem key={r.tax_code!} textValue={`${getTaxNameForLocale(r.display_name, i18n.language)} (${r.tax_code})`}>
+                            {getTaxNameForLocale(r.display_name, i18n.language)} ({r.tax_code})
+                          </SelectItem>
+                        ))
+                    ]}
+                  </Select>
                 </div>
               </div>
             </form>

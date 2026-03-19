@@ -463,5 +463,18 @@
   "admin-shipping-classes-delete-success": "配送类别已删除",
   "admin-shipping-classes-save-error": "保存配送类别失败",
   "admin-shipping-classes-delete-error": "删除配送类别失败",
-  "admin-shipping-classes-status-disabled": "仅在创建时可编辑"
+  "admin-shipping-classes-status-disabled": "仅在创建时可编辑",
+  "admin-shipping-rates-price": "价格",
+  "admin-shipping-rates-price-help": "以所选货币计算的运费",
+  "admin-tax-rates-add": "添加税率",
+  "admin-tax-rates-country-code": "国家/地区代码",
+  "admin-tax-rates-country-help": "ISO 国家/地区代码（例如，FR、US）。\n将全局回退率留空。",
+  "admin-tax-rates-create": "创建税率",
+  "admin-tax-rates-edit": "编辑税率",
+  "admin-tax-rates-fallback": "默认/后备",
+  "admin-tax-rates-rate": "速度 （％）",
+  "admin-tax-rates-rate-help": "税率（例如，20.0 表示 20%）",
+  "admin-tax-rates-tax-code": "税码",
+  "admin-tax-rates-tax-code-help": "与 Stripe 兼容的税码（例如 txcd_10000000）。",
+  "admin-tax-rates-title": "税率"
 }

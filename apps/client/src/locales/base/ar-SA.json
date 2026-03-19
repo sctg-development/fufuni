@@ -463,5 +463,18 @@
   "admin-shipping-classes-delete-success": "تم حذف فئة الشحن",
   "admin-shipping-classes-save-error": "خطأ في حفظ فئة الشحن",
   "admin-shipping-classes-delete-error": "خطأ في حذف فئة الشحن",
-  "admin-shipping-classes-status-disabled": "قابل للتحرير فقط عند الإنشاء"
+  "admin-shipping-classes-status-disabled": "قابل للتحرير فقط عند الإنشاء",
+  "admin-shipping-rates-price": "سعر",
+  "admin-shipping-rates-price-help": "تكلفة الشحن بالعملة المختارة",
+  "admin-tax-rates-add": "إضافة معدل الضريبة",
+  "admin-tax-rates-country-code": "رمز البلد",
+  "admin-tax-rates-country-help": "رمز البلد ISO (على سبيل المثال، FR، US). \nاتركه فارغًا للحصول على معدل احتياطي عالمي.",
+  "admin-tax-rates-create": "إنشاء معدل الضريبة",
+  "admin-tax-rates-edit": "تحرير معدل الضريبة",
+  "admin-tax-rates-fallback": "الافتراضي / الاحتياطي",
+  "admin-tax-rates-rate": "معدل (٪)",
+  "admin-tax-rates-rate-help": "نسبة الضريبة (على سبيل المثال، 20.0 مقابل 20%)",
+  "admin-tax-rates-tax-code": "قانون الضرائب",
+  "admin-tax-rates-tax-code-help": "رمز الضريبة متوافق مع Stripe (على سبيل المثال، txcd_10000000).",
+  "admin-tax-rates-title": "معدلات الضرائب"
 }

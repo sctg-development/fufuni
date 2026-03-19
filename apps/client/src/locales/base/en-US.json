@@ -460,5 +460,16 @@
   "admin-shipping-classes-delete-success": "Shipping class deleted successfully",
   "admin-shipping-classes-save-error": "Failed to save shipping class",
   "admin-shipping-classes-delete-error": "Failed to delete shipping class",
-  "admin-shipping-classes-status-disabled": "Only editable on creation"
+  "admin-shipping-classes-status-disabled": "Only editable on creation",
+  "admin-tax-rates-title": "Tax Rates",
+  "admin-tax-rates-add": "Add Tax Rate",
+  "admin-tax-rates-create": "Create Tax Rate",
+  "admin-tax-rates-edit": "Edit Tax Rate",
+  "admin-tax-rates-rate": "Rate (%)",
+  "admin-tax-rates-tax-code": "Tax Code",
+  "admin-tax-rates-country-code": "Country Code",
+  "admin-tax-rates-fallback": "Default / Fallback",
+  "admin-tax-rates-rate-help": "Tax percentage (e.g., 20.0 for 20%)",
+  "admin-tax-rates-country-help": "ISO country code (e.g., FR, US). Leave blank for a global fallback rate.",
+  "admin-tax-rates-tax-code-help": "Tax code compatible with Stripe (e.g., txcd_10000000)."
 }

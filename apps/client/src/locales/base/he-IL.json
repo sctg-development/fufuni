@@ -463,5 +463,18 @@
   "admin-shipping-classes-delete-success": "מחלקת משלוח נמחקה",
   "admin-shipping-classes-save-error": "שגיאה בשמירת מחלקת משלוח",
   "admin-shipping-classes-delete-error": "שגיאה במחיקת מחלקת משלוח",
-  "admin-shipping-classes-status-disabled": "ניתן לעריכה רק בעת היצירה"
+  "admin-shipping-classes-status-disabled": "ניתן לעריכה רק בעת היצירה",
+  "admin-shipping-rates-price": "מְחִיר",
+  "admin-shipping-rates-price-help": "עלות משלוח במטבע הנבחר",
+  "admin-tax-rates-add": "הוסף שיעור מס",
+  "admin-tax-rates-country-code": "קוד מדינה",
+  "admin-tax-rates-country-help": "קוד מדינה ISO (לדוגמה, FR, ארה\"ב). \nהשאר ריק לשיעור חילוץ גלובלי.",
+  "admin-tax-rates-create": "צור שיעור מס",
+  "admin-tax-rates-edit": "ערוך את שיעור המס",
+  "admin-tax-rates-fallback": "ברירת מחדל / Fallback",
+  "admin-tax-rates-rate": "שיעור (%)",
+  "admin-tax-rates-rate-help": "אחוז מס (לדוגמה, 20.0 עבור 20%)",
+  "admin-tax-rates-tax-code": "קוד מס",
+  "admin-tax-rates-tax-code-help": "קוד מס תואם ל-Stripe (למשל, txcd_10000000).",
+  "admin-tax-rates-title": "שיעורי מס"
 }
