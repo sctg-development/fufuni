@@ -22,6 +22,7 @@ on:
       - main
     paths:
       - apps/client/**
+      - package-lock.json
       - .github/workflows/pages.yaml
 
   #   release:
