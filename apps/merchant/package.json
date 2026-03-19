@@ -1,0 +1,37 @@
+{
+  "name": "merchant",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Open-source commerce backend. Bring Stripe key, start selling.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "dev:env": "bash -c 'cp ../../.env .dev.vars && wrangler dev'",
+    "preview:env": "bash -c 'cp ../../.env .dev.vars && wrangler dev' --",
+    "deploy": "wrangler deploy",
+    "db:init": "wrangler d1 execute DB --file=schema-d1.sql --local",
+    "db:seed": "npx tsx scripts/seed.ts",
+    "test": "vitest --config vitest.config.ts --run",
+    "test:regions": "bash tests/run-integration.sh",
+    "test:integration": "vitest run tests/regions.integration.test.ts --reporter=verbose",
+    "test:advanced": "vitest run tests/advanced-routes.test.ts --reporter=verbose",
+    "test:schema": "vitest run tests/schema-validation.test.ts --reporter=verbose",
+    "test:api-helpers": "vitest run tests/api-helpers.test.ts --reporter=verbose",
+    "test:all": "vitest run --reporter=verbose"
+  },
+  "dependencies": {
+    "@hono/swagger-ui": "^0.6.0",
+    "@hono/zod-openapi": "^0.18.3",
+    "hono": "^4.12.5",
+    "jose": "^6.1.3",
+    "stripe": "^17.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241205.0",
+    "ts-jest": "^29.4.6",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "wrangler": "^4.75.0",
+    "supertest": "^6.3.3"
+  }
+}

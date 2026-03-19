@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+admin/node_modules/
+example/node_modules/
+
+# Marketing site (separate repo)
+site/
+
+# Build
+dist/
+admin/dist/
+.wrangler/
+
+# Environment
+.env
+.env.local
+.dev.vars
+wrangler.local.jsonc
+admin/wrangler.local.jsonc
+example/src/api.js
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+scripts/.country-map.json
+package-lock.json.bak
