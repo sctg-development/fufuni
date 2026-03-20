@@ -25,7 +25,7 @@
 
 import { createMiddleware } from 'hono/factory';
 import { getDb } from '../db';
-import { ApiError, now, type HonoEnv } from '../types';
+import { ApiError, now, type AuthRole, type HonoEnv } from '../types';
 
 // ============================================================
 // AUTH MIDDLEWARE
@@ -97,7 +97,7 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
 
     // Build a list of roles based on permissions in the token.
     // This ensures we include all matching permissions (e.g. admin + authadmin + databaseadmin).
-    const roles: string[] = [];
+    const roles: AuthRole[] = [];
 
     // `requiredPerm` is used as an access gate; its presence implies at least `admin`.
     if (perms.includes(requiredPerm)) {
@@ -264,6 +264,41 @@ export const mailAccessOnly = createMiddleware<HonoEnv>(async (c, next) => {
 
   await next();
 });
+
+// This allow access to any valid JWT token with the correct audience, regardless of permissions.  It can be used for routes that need to be accessed by non-admin users with Auth0 tokens, while still blocking non-JWT tokens (like API keys). It uses jose for parsing and validating the JWT, but does not check for any specific permissions since it's meant for more general use cases like the customer-facing /v1/me endpoints.
+export const validJwtAuthOnly = createMiddleware<HonoEnv>(async (c, next) => {
+  const authHeader = c.req.header('Authorization');
+
+  if (!authHeader?.startsWith('Bearer ')) {
+    throw ApiError.unauthorized('Missing or invalid Authorization header');
+  }
+
+  const token = authHeader.slice(7);
+
+  // Only accept JWTs (three-part format), not API keys
+  if (
+    token.split('.').length !== 3 ||
+    token.startsWith('pk_') ||
+    token.startsWith('sk_')
+  ) {
+    throw ApiError.unauthorized('Invalid token for this endpoint');
+  }
+
+  const domain = c.env.AUTH0_DOMAIN;
+  const audience = c.env.AUTH0_AUDIENCE;
+
+  if (!domain || !audience) {
+    throw ApiError.unauthorized('Auth0 not configured');
+  }
+
+  try {
+    const { verifyAuth0Jwt } = await import('../lib/auth0');
+    await verifyAuth0Jwt(token, domain, audience);
+  } catch (err) {
+    throw ApiError.unauthorized('Invalid token for this endpoint');
+  }
+}
+);
 
 export function requireScope(...requiredScopes: string[]) {
   return createMiddleware<HonoEnv>(async (c, next) => {

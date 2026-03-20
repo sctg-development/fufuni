@@ -866,7 +866,112 @@ Configured via `wrangler.jsonc`:
 
 ---
 
+## Customer Portal
+
+Fufuni includes a full customer portal accessible at `/account` once the user is authenticated via Auth0 **Passwordless** (magic links).
+
+### Authentication
+
+Customers log in **without a password** using Auth0's Passwordless Email flow:
+1. Enter email address on the login page
+2. Auth0 sends a magic link to their inbox
+3. Click the link → automatic JWT token acquisition
+4. Redirected to account dashboard
+
+**Configuration required in Auth0 Dashboard:**
+1. Go to **Authentication → Passwordless → Email**, enable it
+2. Customize the email template with your store branding
+3. Ensure your app's Callback URLs include your storefront domain (e.g. `https://store.example.com/`)
+4. Add `openid profile email` to the OAuth scopes
+
+### Customer-Scoped API Routes
+
+All routes require a **valid Auth0 JWT** in the `Authorization: Bearer` header.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET`  | `/v1/me/profile` | Get my profile |
+| `PATCH` | `/v1/me/profile` | Update name, phone, locale, marketing preferences |
+| `GET`  | `/v1/me/orders` | List my orders (paginated) |
+| `GET`  | `/v1/me/addresses` | List saved delivery addresses |
+| `POST` | `/v1/me/addresses` | Add a new address |
+| `DELETE` | `/v1/me/addresses/:id` | Delete a saved address |
+| `GET`  | `/v1/me/preferences` | Read preferences (Auth0 user_metadata) |
+| `PATCH` | `/v1/me/preferences` | Update preferences (Auth0 user_metadata) |
+
+### Frontend Pages
+
+Located under `/account/*`:
+
+| Route | Feature |
+|-------|---------|
+| `/account` | Dashboard (profile summary, quick stats) |
+| `/account/orders` | Order history with pagination |
+| `/account/orders/:number` | Order detail with items and tracking |
+| `/account/addresses` | Saved delivery addresses (CRUD) |
+| `/account/preferences` | Profile & communication preferences |
+
+### Client-Side Invoice PDF Generation
+
+Invoice PDFs are generated **entirely in the browser** using **jsPDF**:
+- No server call required
+- No Worker request consumption
+- All styling and formatting done client-side
+- Download or print directly from the order detail page
+
+The `downloadInvoicePdf()` function in `apps/client/src/utils/invoice-pdf.ts` handles:
+- Order header (store name, invoice number, date)
+- Itemized list with quantities and pricing
+- Totals (subtotal, shipping, tax, discount, final total)
+- Tracking information (if available)
+- Format currency symbols based on order currency
+
+### Preferences Storage
+
+Lightweight preferences (locale, theme, marketing opt-in) are stored in **Auth0 user_metadata**, not in the Durable Object database:
+- Avoids extra Worker request consumption
+- Stays within Auth0's free tier limits
+- Synced automatically across all devices
+- Can be updated via the `/v1/me/preferences` endpoint
+
+### Customer Provisioning
+
+When a customer logs in for the first time:
+1. UUID is generated
+2. Customer record created in the database with:
+   - Auth0 sub claim as `auth_provider_id`
+   - Email from JWT
+   - Default locale (`en-US`)
+3. Indexed for fast lookup by `auth_provider_id` (Migration 025)
+
+On subsequent logins, database is queried by the Auth0 sub claim in O(log n) time.
+
+### Troubleshooting 401 Unauthorized Errors
+
+If you see 401 errors when accessing authenticated routes like `/account/orders`, it's likely an Auth0 JWT configuration issue:
+
+**Problem**: `GET http://localhost:8787/v1/me/orders 401 (Unauthorized)`
+
+**Causes** (in order of likelihood):
+1. **Email claim missing from JWT** - Auth0 isn't including the email in the access token
+   - Solution: Configure Auth0 to include email in the access token claims, OR the token will generate a placeholder email from the user's sub claim automatically
+2. **Callback URL not configured** - Auth0 throws your redirects away
+   - Solution: Add your site URL (e.g., `http://localhost:5173/`) to Auth0 Application Settings → Allowed Callback URLs
+3. **Audience/Scopes mismatch** - The JWT audience doesn't match what the backend expects
+   - Solution: Verify `AUTH0_AUDIENCE` matches your Auth0 API identifier, and OAuth scopes include `openid profile email`
+4. **Token expired or invalid** - The JWT is corrupted or no longer valid
+   - Solution: Clear browser local storage, log out, and try logging in again
+
+**Quick Debug**:
+- Open browser DevTools (F12) → Network tab
+- Try accessing `/account/orders`
+- Click the failed request → Response tab
+- Check the error message from the backend
+
+---
+
 ## Internationalisation
+
 
 Translations live in `apps/client/src/locales/base/`.
 To add a language:

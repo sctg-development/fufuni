@@ -823,6 +823,16 @@ export class MerchantDO extends DurableObject<MerchantEnv> {
           name: '024_shipping_rates_add_tax_inclusive',
           sql: "ALTER TABLE shipping_rates ADD COLUMN tax_inclusive INTEGER NOT NULL DEFAULT 0",
         },
+        // ── Migration 025 ── Customer Auth0 sub lookup indexes ────────────────
+        // Fast lookup for resolving customers from Auth0 JWT 'sub' claim.
+        {
+          name: '025_idx_customers_auth_provider_id',
+          sql: 'CREATE INDEX IF NOT EXISTS idx_customers_auth_provider_id ON customers(auth_provider_id)',
+        },
+        {
+          name: '025_idx_customers_email',
+          sql: 'CREATE INDEX IF NOT EXISTS idx_customers_email ON customers(email)',
+        },
       ];
 
       for (const migration of migrations) {

@@ -46,6 +46,13 @@ import CartPage from "@/pages/cart";
 import ProductPage from "@/pages/product";
 import SuccessPage from "@/pages/success";
 import OrderPage from "@/pages/order";
+import AccountLayout from "@/pages/account/AccountLayout";
+import Dashboard from "@/pages/account/Dashboard";
+import OrderHistory from "@/pages/account/OrderHistory";
+import OrderDetail from "@/pages/account/OrderDetail";
+import Addresses from "@/pages/account/Addresses";
+import Preferences from "@/pages/account/Preferences";
+import LoginPage from "@/pages/Login";
 
 function App() {
   const { isLoading } = useAuth();
@@ -64,10 +71,23 @@ function App() {
     <Suspense fallback={<SiteLoading />}>
       <Routes>
         <Route element={<IndexPage />} path="/" />
+        <Route element={<LoginPage />} path="/login" />
         <Route element={<CartPage />} path="/cart" />
         <Route element={<SuccessPage />} path="/success" />
         <Route element={<OrderPage />} path="/order/:id" />
         <Route element={<ProductPage />} path="/product/:id" />
+        {/* Customer Account Routes */}
+        <Route
+          element={<AuthenticationGuard component={AccountLayout} />}
+          path="/account"
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="orders" element={<OrderHistory />} />
+          <Route path="orders/:number" element={<OrderDetail />} />
+          <Route path="addresses" element={<Addresses />} />
+          <Route path="preferences" element={<Preferences />} />
+        </Route>
+        {/* API and Admin Pages */}
         <Route
           element={<AuthenticationGuard component={ApiPage} />}
           path="/api"

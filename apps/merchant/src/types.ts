@@ -29,7 +29,6 @@ export type Env = {
   MERCHANT: DurableObjectNamespace<MerchantDO>;
   IMAGES?: R2Bucket;
   IMAGES_URL?: string;
-  STORE_NAME?: string;
 
   /**
    * Secret key for Stripe API. Required for processing payments and managing subscriptions.
@@ -170,7 +169,7 @@ export type HonoEnv = {
   Variables: Variables;
 };
 
-export type AuthRole = 'public' | 'admin' | 'oauth' | 'authadmin' | 'databaseadmin' | 'aiadmin' | 'mail';
+export type AuthRole = 'public' | 'admin' | 'oauth' | 'authadmin' | 'databaseadmin' | 'aiadmin' | 'mail' | 'customer';
 
 export type AuthContext = {
   role: AuthRole | AuthRole[];
@@ -178,6 +177,9 @@ export type AuthContext = {
   stripeWebhookSecret: string | null;
   oauthScopes?: string[];
   customerEmail?: string;
+  email?: string;
+  sub?: string;
+  permissions?: string[];
 };
 
 export class ApiError extends Error {

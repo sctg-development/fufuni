@@ -101,8 +101,11 @@ export const getManagementToken = async (env: any): Promise<string> => {
     throw new Error(`Auth0 token request failed: ${await resp.text()}`);
   }
 
-  const data = await resp.json();
-  return data.access_token as string;
+  const data = await resp.json() as { access_token?: unknown };
+  if (typeof data.access_token !== 'string') {
+    throw new Error('Invalid Auth0 token response: missing access_token');
+  }
+  return data.access_token;
 };
 
 /**
