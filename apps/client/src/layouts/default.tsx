@@ -18,7 +18,7 @@
 
 import type React from "react";
 
-import { Link } from "@heroui/link";
+import { Link } from "@heroui/react";
 import { Trans, useTranslation } from "react-i18next";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useState, useRef } from "react";
@@ -86,12 +86,12 @@ export default function DefaultLayout({
   }, [isAuthenticated, getAccessTokenSilently]);
 
   return (
-      <div className="relative flex flex-col h-screen">
-        <Navbar />
-        <main className="container mx-auto max-w-7xl px-6 grow pt-16">
-          {children}
-        </main>
-        <footer className="w-full flex items-center justify-center py-3">
+    <div className="relative flex flex-col h-screen">
+      <Navbar />
+      <main className="container mx-auto max-w-7xl px-6 grow pt-16">
+        {children}
+      </main>
+      <footer className="w-full flex items-center justify-center py-3">
         <Link
           isExternal
           className="flex items-center gap-1 text-current"
@@ -111,7 +111,7 @@ export default function DefaultLayout({
             </span>
           )}
           <span className="text-default-600">
-            <LoginLogoutLink color="foreground" size="md" loginI18nKey="manage-store"/>
+            <LoginLogoutLink color="foreground" size="md" loginI18nKey="manage-store" />
           </span>
         </div>
       </footer>
@@ -126,6 +126,6 @@ export default function DefaultLayout({
       ) : (
         <></>
       )}
-      </div>
+    </div>
   );
 }

@@ -25,8 +25,8 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Card, CardBody } from "@heroui/card";
-import { Spinner } from "@heroui/spinner";
+import { Card, CardBody } from "@heroui/react";
+import { Spinner } from "@heroui/react";
 
 import DefaultLayout from "@/layouts/default";
 import { getProduct, StoreProduct } from "@/lib/store-api";

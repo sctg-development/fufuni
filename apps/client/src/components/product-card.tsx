@@ -18,7 +18,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { button as buttonStyles } from "@heroui/theme";
+import { button as buttonStyles } from "@heroui/react";
 import { StoreProduct } from "@/lib/store-api";
 import { useTranslation } from "react-i18next";
 import { useCart } from "@/hooks/useCart";

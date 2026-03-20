@@ -10,9 +10,9 @@ import type {
 } from "../types/auth0.types";
 
 import { FC, ReactNode, useEffect, useState } from "react";
-import { Button } from "@heroui/button";
-import { Tooltip } from "@heroui/tooltip";
-import { Link } from "@heroui/link";
+import { Button } from "@heroui/react";
+import { Tooltip } from "@heroui/react";
+import { Link } from "@heroui/react";
 import { useTranslation } from "react-i18next";
 
 import { SiteLoading } from "../components/site-loading";
@@ -82,12 +82,12 @@ export const LoginLink: FC<{
   /** i18n key for label; defaults to 'log-in' */
   i18nKey?: string;
   color?:
-    | "primary"
-    | "foreground"
-    | "secondary"
-    | "success"
-    | "warning"
-    | "danger";
+  | "primary"
+  | "foreground"
+  | "secondary"
+  | "success"
+  | "warning"
+  | "danger";
   /** heroui size; defaults to 'lg' */
   size?: "sm" | "md" | "lg";
 }> = ({ text, i18nKey, color, size = "lg" }) => {
@@ -177,12 +177,12 @@ interface LogoutLinkProps extends LogoutButtonProps {
    * Link color
    */
   color?:
-    | "primary"
-    | "foreground"
-    | "secondary"
-    | "success"
-    | "warning"
-    | "danger";
+  | "primary"
+  | "foreground"
+  | "secondary"
+  | "success"
+  | "warning"
+  | "danger";
   /** heroui size; defaults to 'lg' */
   size?: "sm" | "md" | "lg";
   /** optional i18n key for logout text (default 'log-out-someone') */
@@ -273,12 +273,12 @@ export const LoginLogoutLink: FC<{
   loginI18nKey?: string;
   logoutI18nKey?: string;
   color?:
-    | "primary"
-    | "foreground"
-    | "secondary"
-    | "success"
-    | "warning"
-    | "danger";
+  | "primary"
+  | "foreground"
+  | "secondary"
+  | "success"
+  | "warning"
+  | "danger";
   size?: "sm" | "md" | "lg";
 }> = ({
   showButtonIfNotAuthenticated = false,
@@ -288,25 +288,25 @@ export const LoginLogoutLink: FC<{
   color,
   size,
 }) => {
-  const { isAuthenticated } = useAuth();
+    const { isAuthenticated } = useAuth();
 
-  return isAuthenticated ? (
-    <LogoutLink
-      color={color}
-      showButtonIfNotAuthenticated={showButtonIfNotAuthenticated}
-      text={text}
-      i18nKey={logoutI18nKey}
-      size={size}
-    />
-  ) : (
-    <LoginLink
-      color={color}
-      text={text}
-      i18nKey={loginI18nKey}
-      size={size}
-    />
-  );
-};
+    return isAuthenticated ? (
+      <LogoutLink
+        color={color}
+        showButtonIfNotAuthenticated={showButtonIfNotAuthenticated}
+        text={text}
+        i18nKey={logoutI18nKey}
+        size={size}
+      />
+    ) : (
+      <LoginLink
+        color={color}
+        text={text}
+        i18nKey={loginI18nKey}
+        size={size}
+      />
+    );
+  };
 
 
 /**
@@ -412,7 +412,7 @@ export const useSecuredApi = () => {
     async (): Promise<Auth0ManagementTokenApiResponse> => {
       const apiBase =
         typeof import.meta !== "undefined" &&
-        (import.meta as any).env?.API_BASE_URL
+          (import.meta as any).env?.API_BASE_URL
           ? (import.meta as any).env.API_BASE_URL
           : "";
       const result = await postJson(`${apiBase}/v1/__auth0/token`, {});
@@ -422,7 +422,7 @@ export const useSecuredApi = () => {
 
   const auth0Domain =
     typeof import.meta !== "undefined" &&
-    (import.meta as any).env?.AUTH0_DOMAIN
+      (import.meta as any).env?.AUTH0_DOMAIN
       ? (import.meta as any).env.AUTH0_DOMAIN
       : ((import.meta as any)?.env?.VITE_AUTH0_DOMAIN ?? "");
 
@@ -484,7 +484,7 @@ export const useSecuredApi = () => {
   ): Promise<void> => {
     const apiBase =
       typeof import.meta !== "undefined" &&
-      (import.meta as any).env?.API_BASE_URL
+        (import.meta as any).env?.API_BASE_URL
         ? (import.meta as any).env.API_BASE_URL
         : "";
     const audience = (import.meta as any)?.env?.AUTH0_AUDIENCE ?? apiBase;
@@ -524,7 +524,7 @@ export const useSecuredApi = () => {
   ): Promise<void> => {
     const apiBase =
       typeof import.meta !== "undefined" &&
-      (import.meta as any).env?.API_BASE_URL
+        (import.meta as any).env?.API_BASE_URL
         ? (import.meta as any).env.API_BASE_URL
         : "";
     const audience = (import.meta as any)?.env?.AUTH0_AUDIENCE ?? apiBase;

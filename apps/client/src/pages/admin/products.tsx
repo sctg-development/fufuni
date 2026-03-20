@@ -18,9 +18,9 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
+import { Button } from "@heroui/react";
+import { Input } from "@heroui/react";
+import { Select, SelectItem } from "@heroui/react";
 import {
   Table,
   TableHeader,
@@ -28,15 +28,15 @@ import {
   TableBody,
   TableRow,
   TableCell,
-} from "@heroui/table";
+} from "@heroui/react";
 import {
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from "@heroui/modal";
-import { Card, CardBody } from "@heroui/card";
+} from "@heroui/react";
+import { Card, CardBody } from "@heroui/react";
 import { Image as ImageIcon, X, Wand2 } from "lucide-react";
 
 import DefaultLayout from "@/layouts/default";
@@ -132,9 +132,10 @@ export default function ProductsPage() {
   const { getJson, postJson, patchJson } = useSecuredApi();
 
   const defaultLocale =
-    availableLanguages.find((l) => l.isDefault)?.code ?? 'en-US';
+    availableLanguages.find((l) => l.isDefault)?.code ?? "en-US";
   const [selectedLocale, setSelectedLocale] = useState<string>(() => {
     const current = i18n.language;
+
     return availableLanguages.some((l) => l.code === current)
       ? current
       : defaultLocale;
@@ -215,12 +216,16 @@ export default function ProductsPage() {
   useEffect(() => {
     const loadShippingClasses = async () => {
       try {
-        const resp = await getJson(`${apiBase}/v1/regions/shipping-classes?limit=100`);
+        const resp = await getJson(
+          `${apiBase}/v1/regions/shipping-classes?limit=100`,
+        );
+
         setShippingClasses(resp.items || []);
       } catch (err) {
         console.error("Failed to load shipping classes", err);
       }
     };
+
     loadShippingClasses();
   }, []);
 
@@ -229,11 +234,13 @@ export default function ProductsPage() {
     const loadTaxRates = async () => {
       try {
         const resp = await getJson(`${apiBase}/v1/tax-rates?limit=100`);
+
         setTaxRates(resp.items || []);
       } catch (err) {
         console.error("Failed to load tax rates", err);
       }
     };
+
     loadTaxRates();
   }, []);
 
@@ -290,7 +297,13 @@ export default function ProductsPage() {
     setFormStatus(p.status);
     setFormShippingClassId("");
     setFormVendor(p.vendor || "");
-    setFormTags(p.tags ? (typeof p.tags === "string" ? p.tags : (p.tags as string[]).join(", ")) : "");
+    setFormTags(
+      p.tags
+        ? typeof p.tags === "string"
+          ? p.tags
+          : (p.tags as string[]).join(", ")
+        : "",
+    );
     setFormHandle(p.handle || "");
 
     // Open the modal before the network load completes
@@ -306,7 +319,9 @@ export default function ProductsPage() {
       setFormStatus((full as any).status || "active");
       setFormShippingClassId((full as any).shipping_class_id || "");
       setFormVendor((full as any).vendor || "");
-      setFormTags((full as any).tags ? ((full as any).tags as string[]).join(", ") : "");
+      setFormTags(
+        (full as any).tags ? ((full as any).tags as string[]).join(", ") : "",
+      );
       setFormHandle((full as any).handle || "");
     } catch (err) {
       console.error("Error loading product", err);
@@ -324,9 +339,21 @@ export default function ProductsPage() {
     e.preventDefault();
     try {
       // Merge enrichment fields with current locale
-      const mergedVendor = mergeVendorLocale(formVendor, selectedLocale, formVendorValue);
-      const mergedTags = mergeTagsLocale(formTags, selectedLocale, formTagsValue);
-      const mergedHandle = mergeHandleLocale(formHandle, selectedLocale, formHandleValue);
+      const mergedVendor = mergeVendorLocale(
+        formVendor,
+        selectedLocale,
+        formVendorValue,
+      );
+      const mergedTags = mergeTagsLocale(
+        formTags,
+        selectedLocale,
+        formTagsValue,
+      );
+      const mergedHandle = mergeHandleLocale(
+        formHandle,
+        selectedLocale,
+        formHandleValue,
+      );
 
       const productData = {
         title: formTitle,
@@ -338,7 +365,10 @@ export default function ProductsPage() {
       };
 
       if (editingProduct) {
-        await patchJson(`${apiBase}/v1/products/${editingProduct.id}`, productData);
+        await patchJson(
+          `${apiBase}/v1/products/${editingProduct.id}`,
+          productData,
+        );
 
         // Optimistic local update to avoid stale states
         const updatedProduct: Product = {
@@ -352,7 +382,9 @@ export default function ProductsPage() {
         };
 
         setProducts((prev) =>
-          prev.map((prod) => (prod.id === editingProduct.id ? updatedProduct : prod))
+          prev.map((prod) =>
+            prod.id === editingProduct.id ? updatedProduct : prod,
+          ),
         );
         setEditingProduct(updatedProduct);
 
@@ -508,7 +540,9 @@ export default function ProductsPage() {
         weight_g: variantWeightG ? parseFloat(variantWeightG) : undefined,
         requires_shipping: variantRequiresShipping,
         barcode: variantBarcode || undefined,
-        compare_at_price_cents: variantCompareAtPrice ? parseInt(variantCompareAtPrice, 10) : undefined,
+        compare_at_price_cents: variantCompareAtPrice
+          ? parseInt(variantCompareAtPrice, 10)
+          : undefined,
         tax_code: variantTaxCode || undefined,
       };
 
@@ -529,7 +563,10 @@ export default function ProductsPage() {
         );
       } else {
         // Create variant
-        await postJson(`${apiBase}/v1/products/${editingProduct.id}/variants`, variantData);
+        await postJson(
+          `${apiBase}/v1/products/${editingProduct.id}/variants`,
+          variantData,
+        );
       }
 
       setVariantModal(false);
@@ -604,7 +641,9 @@ export default function ProductsPage() {
               {displayed.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell>{resolveTitle(p.title, i18n.language)}</TableCell>
-                  <TableCell>{resolveDescription(p.description, i18n.language) || "-"}</TableCell>
+                  <TableCell>
+                    {resolveDescription(p.description, i18n.language) || "-"}
+                  </TableCell>
                   <TableCell>{p.variants.length}</TableCell>
                   <TableCell>{p.status}</TableCell>
                   <TableCell>
@@ -641,9 +680,9 @@ export default function ProductsPage() {
                   {t("admin-products-title-locale")}
                 </label>
                 <Select
-                  size="sm"
                   className="w-36"
                   selectedKeys={[selectedLocale]}
+                  size="sm"
                   onSelectionChange={(keys) =>
                     setSelectedLocale(Array.from(keys).join(""))
                   }
@@ -659,10 +698,10 @@ export default function ProductsPage() {
                   {t("admin-products-modal-field-title")}
                 </label>
                 <LocalizedTitleInput
-                  value={formTitle}
-                  onChange={setFormTitle}
                   required
                   locale={selectedLocale}
+                  value={formTitle}
+                  onChange={setFormTitle}
                   onLocaleChange={setSelectedLocale}
                 />
               </div>
@@ -671,9 +710,9 @@ export default function ProductsPage() {
                   {t("admin-products-modal-field-description")}
                 </label>
                 <RichDescriptionEditor
+                  locale={selectedLocale}
                   value={formDescription}
                   onChange={setFormDescription}
-                  locale={selectedLocale}
                   onLocaleChange={setSelectedLocale}
                 />
               </div>
@@ -695,21 +734,32 @@ export default function ProductsPage() {
                   {t("admin-products-shipping-class-label")}
                 </label>
                 <Select
+                  description={t(
+                    "admin-products-shipping-class-select-description",
+                  )}
                   label={t("admin-products-shipping-class-select-label")}
-                  description={t("admin-products-shipping-class-select-description")}
-                  selectedKeys={formShippingClassId ? [formShippingClassId] : []}
+                  selectedKeys={
+                    formShippingClassId ? [formShippingClassId] : []
+                  }
                   onSelectionChange={(keys) => {
                     const val = Array.from(keys).join("");
+
                     setFormShippingClassId(val);
                   }}
                 >
-                  <SelectItem key="">{t("admin-products-shipping-class-default")}</SelectItem>
+                  <SelectItem key="">
+                    {t("admin-products-shipping-class-default")}
+                  </SelectItem>
                   <>
                     {shippingClasses.map((cls) => {
                       const resolutionLabel =
                         cls.resolution === "exclusive"
-                          ? t("admin-products-shipping-class-resolution-exclusive")
-                          : t("admin-products-shipping-class-resolution-additive");
+                          ? t(
+                              "admin-products-shipping-class-resolution-exclusive",
+                            )
+                          : t(
+                              "admin-products-shipping-class-resolution-additive",
+                            );
 
                       const displayLabel = `${resolutionLabel} ${cls.display_name}`;
                       const fullLabel = cls.description
@@ -736,7 +786,10 @@ export default function ProductsPage() {
                 <div className="mb-3">
                   <div className="flex items-center justify-between mb-1">
                     <label className="block text-sm font-medium">
-                      {t("admin-products-field-vendor")} <span className="text-xs text-default-500">(optional)</span>
+                      {t("admin-products-field-vendor")}{" "}
+                      <span className="text-xs text-default-500">
+                        (optional)
+                      </span>
                     </label>
                     <div className="flex gap-2">
                       <p className="text-xs text-default-500">
@@ -763,7 +816,10 @@ export default function ProductsPage() {
                 <div className="mb-3">
                   <div className="flex items-center justify-between mb-1">
                     <label className="block text-sm font-medium">
-                      {t("admin-products-field-tags")} <span className="text-xs text-default-500">(comma-separated)</span>
+                      {t("admin-products-field-tags")}{" "}
+                      <span className="text-xs text-default-500">
+                        (comma-separated)
+                      </span>
                     </label>
                     <div className="flex gap-2">
                       <p className="text-xs text-default-500">
@@ -790,7 +846,10 @@ export default function ProductsPage() {
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="block text-sm font-medium">
-                      {t("admin-products-field-handle")} <span className="text-xs text-default-500">(URL slug - optional, auto-generated if empty)</span>
+                      {t("admin-products-field-handle")}{" "}
+                      <span className="text-xs text-default-500">
+                        (URL slug - optional, auto-generated if empty)
+                      </span>
                     </label>
                     <div className="flex gap-2">
                       <p className="text-xs text-default-500">
@@ -906,7 +965,9 @@ export default function ProductsPage() {
                 </label>
                 <Input
                   required
-                  placeholder={t("admin-products-field-variant-title-placeholder")}
+                  placeholder={t(
+                    "admin-products-field-variant-title-placeholder",
+                  )}
                   value={variantTitle}
                   onChange={(e) => setVariantTitle(e.target.value)}
                 />
@@ -981,22 +1042,22 @@ export default function ProductsPage() {
                   <div className="grid grid-cols-3 gap-2">
                     <Input
                       placeholder={t("admin-products-field-dimension-length")}
-                      type="number"
                       size="sm"
+                      type="number"
                       value={variantDimsL}
                       onChange={(e) => setVariantDimsL(e.target.value)}
                     />
                     <Input
                       placeholder={t("admin-products-field-dimension-width")}
-                      type="number"
                       size="sm"
+                      type="number"
                       value={variantDimsW}
                       onChange={(e) => setVariantDimsW(e.target.value)}
                     />
                     <Input
                       placeholder={t("admin-products-field-dimension-height")}
-                      type="number"
                       size="sm"
+                      type="number"
                       value={variantDimsH}
                       onChange={(e) => setVariantDimsH(e.target.value)}
                     />
@@ -1009,9 +1070,11 @@ export default function ProductsPage() {
                     {t("admin-products-field-requires-shipping")}
                   </label>
                   <input
-                    type="checkbox"
                     checked={variantRequiresShipping}
-                    onChange={(e) => setVariantRequiresShipping(e.target.checked)}
+                    type="checkbox"
+                    onChange={(e) =>
+                      setVariantRequiresShipping(e.target.checked)
+                    }
                   />
                 </div>
 
@@ -1033,7 +1096,9 @@ export default function ProductsPage() {
                     {t("admin-products-field-compare-at-price")}
                   </label>
                   <Input
-                    placeholder={t("admin-products-field-compare-at-price-placeholder")}
+                    placeholder={t(
+                      "admin-products-field-compare-at-price-placeholder",
+                    )}
                     type="number"
                     value={variantCompareAtPrice}
                     onChange={(e) => setVariantCompareAtPrice(e.target.value)}
@@ -1048,19 +1113,27 @@ export default function ProductsPage() {
                   <Select
                     placeholder={t("admin-products-field-tax-code-placeholder")}
                     selectedKeys={variantTaxCode ? [variantTaxCode] : []}
-                    onSelectionChange={(keys) => setVariantTaxCode(Array.from(keys).join(""))}
+                    onSelectionChange={(keys) =>
+                      setVariantTaxCode(Array.from(keys).join(""))
+                    }
                   >
                     {[
                       <SelectItem key="" textValue={t("none") || "None"}>
                         {t("none") || "None"}
                       </SelectItem>,
-                      ...Array.from(new Map(taxRates.map(r => [r.tax_code, r])).values())
-                        .filter(r => r.tax_code)
+                      ...Array.from(
+                        new Map(taxRates.map((r) => [r.tax_code, r])).values(),
+                      )
+                        .filter((r) => r.tax_code)
                         .map((r) => (
-                          <SelectItem key={r.tax_code!} textValue={`${getTaxNameForLocale(r.display_name, i18n.language)} (${r.tax_code})`}>
-                            {getTaxNameForLocale(r.display_name, i18n.language)} ({r.tax_code})
+                          <SelectItem
+                            key={r.tax_code!}
+                            textValue={`${getTaxNameForLocale(r.display_name, i18n.language)} (${r.tax_code})`}
+                          >
+                            {getTaxNameForLocale(r.display_name, i18n.language)}{" "}
+                            ({r.tax_code})
                           </SelectItem>
-                        ))
+                        )),
                     ]}
                   </Select>
                 </div>

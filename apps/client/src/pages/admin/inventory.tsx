@@ -20,9 +20,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { RefreshCw, AlertTriangle, Package, Plus, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
+import { Button } from "@heroui/react";
+import { Input } from "@heroui/react";
+import { Select, SelectItem } from "@heroui/react";
 import {
   Table,
   TableHeader,
@@ -30,7 +30,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
-} from "@heroui/table";
+} from "@heroui/react";
 import {
   Modal,
   ModalContent,
@@ -38,10 +38,10 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
-} from "@heroui/modal";
-import { Card, CardBody } from "@heroui/card";
-import { Tooltip } from "@heroui/tooltip";
-import { Chip } from "@heroui/chip";
+} from "@heroui/react";
+import { Card, CardBody } from "@heroui/react";
+import { Tooltip } from "@heroui/react";
+import { Chip } from "@heroui/react";
 import clsx from "clsx";
 
 import { SearchIcon } from "@/components/icons";
@@ -355,9 +355,7 @@ export default function InventoryPage() {
                 emptyContent={<div>{t("admin-inventory-empty")}</div>}
                 isLoading={loading}
                 items={displayed}
-                loadingContent={
-                  <div>{t("admin-common-loading")}</div>
-                }
+                loadingContent={<div>{t("admin-common-loading")}</div>}
               >
                 {(item) => {
                   const isLow = item.available <= 5 && item.available > 0;
@@ -374,7 +372,10 @@ export default function InventoryPage() {
                       </TableCell>
                       <TableCell>
                         <span className="font-mono text-sm">
-                          {resolveTitle(item.product_title || "-", i18n.language)}
+                          {resolveTitle(
+                            item.product_title || "-",
+                            i18n.language,
+                          )}
                         </span>
                       </TableCell>
                       <TableCell>
@@ -457,8 +458,8 @@ export default function InventoryPage() {
                           "text-2xl font-mono font-semibold",
                           selectedItem.available <= 0 && "text-red-500",
                           selectedItem.available > 0 &&
-                          selectedItem.available <= 5 &&
-                          "text-amber-500",
+                            selectedItem.available <= 5 &&
+                            "text-amber-500",
                         )}
                       >
                         {selectedItem.available}

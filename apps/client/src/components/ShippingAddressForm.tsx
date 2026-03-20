@@ -18,10 +18,10 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
-import { Button } from "@heroui/button";
-import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Input } from "@heroui/react";
+import { Select, SelectItem } from "@heroui/react";
+import { Button } from "@heroui/react";
+import { Card, CardBody, CardHeader } from "@heroui/react";
 import { setShippingAddress } from "@/lib/store-api";
 
 const COUNTRIES = [

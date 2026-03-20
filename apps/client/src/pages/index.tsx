@@ -17,7 +17,7 @@
  */
 
 import { LinkUniversal } from "@/components/link-universal";
-import { button as buttonStyles } from "@heroui/theme";
+import { button as buttonStyles } from "@heroui/react";
 import { Trans, useTranslation } from "react-i18next";
 
 import { useAuth } from "@/authentication";
@@ -86,7 +86,7 @@ export default function IndexPage() {
 
         {/* call-to-action buttons */}
         <div className="flex gap-3">
-          <LinkUniversal  
+          <LinkUniversal
             isExternal
             className={buttonStyles({
               color: "primary",

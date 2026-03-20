@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Kbd } from "@heroui/kbd";
-import { Input } from "@heroui/input";
+import { Kbd } from "@heroui/react";
+import { Input } from "@heroui/react";
 import {
   Navbar as HeroUINavbar,
   NavbarBrand,
@@ -26,16 +26,16 @@ import {
   NavbarMenuToggle,
   NavbarMenu,
   NavbarMenuItem,
-} from "@heroui/navbar";
+} from "@heroui/react";
 import {
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-} from "@heroui/dropdown";
-import { Button } from "@heroui/button";
-import { link as linkStyles } from "@heroui/theme";
-import { clsx } from "@heroui/shared-utils";
+} from "@heroui/react";
+import { Button } from "@heroui/react";
+import { link as linkStyles } from "@heroui/react";
+import { clsx } from "clsx";
 import { Trans, useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -128,7 +128,7 @@ export const Navbar = () => {
               </LinkUniversal>
             </NavbarItem>
           ))}
-          
+
           <AuthenticationGuardWithPermission permission="admin:store">
             <NavbarItem>
               <Dropdown>
@@ -278,7 +278,7 @@ export const Navbar = () => {
             </NavbarMenuItem>
           ))}
           <NavbarMenuItem key="login-logout">
-            </NavbarMenuItem>
+          </NavbarMenuItem>
         </div>
       </NavbarMenu>
     </HeroUINavbar>

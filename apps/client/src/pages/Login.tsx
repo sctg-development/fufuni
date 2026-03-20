@@ -7,9 +7,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../authentication/providers/use-auth';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Input } from '@heroui/input';
-import { Card , CardBody, CardHeader} from '@heroui/card';
-import { Button } from '@heroui/button';
+import { Input, Card, CardBody, CardHeader, Button } from '@heroui/react';
 
 /**
  * Customer login page using Auth0 Passwordless (email magic link).

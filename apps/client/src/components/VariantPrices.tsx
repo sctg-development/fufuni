@@ -18,9 +18,9 @@
 
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
+import { Button } from "@heroui/react";
+import { Input } from "@heroui/react";
+import { Select, SelectItem } from "@heroui/react";
 import {
   Table,
   TableHeader,
@@ -28,7 +28,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
-} from "@heroui/table";
+} from "@heroui/react";
 import {
   Modal,
   ModalContent,
@@ -36,8 +36,8 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
-} from "@heroui/modal";
-import { Card, CardBody } from "@heroui/card";
+} from "@heroui/react";
+import { Card, CardBody } from "@heroui/react";
 import { Trash2, Plus, Pencil, Save } from "lucide-react";
 
 import { useSecuredApi } from "@/authentication";

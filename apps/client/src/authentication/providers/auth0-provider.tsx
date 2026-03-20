@@ -44,9 +44,7 @@ export const useAuth0Provider = (): AuthProvider => {
     }
   };
 
-  const resolveAccessTokenString = (
-    tokenOrVerbose: unknown,
-  ): string | null => {
+  const resolveAccessTokenString = (tokenOrVerbose: unknown): string | null => {
     if (!tokenOrVerbose) return null;
 
     if (typeof tokenOrVerbose === "string") {
@@ -77,6 +75,7 @@ export const useAuth0Provider = (): AuthProvider => {
 
     const accessTokenRaw = await getAccessTokenSilently(baseOptions as any);
     const accessToken = resolveAccessTokenString(accessTokenRaw);
+
     if (!accessToken) return null;
 
     const payload = parseJwtPayload(accessToken);
@@ -93,6 +92,7 @@ export const useAuth0Provider = (): AuthProvider => {
     if (secondsLeft < 60) {
       const refreshOptions = { ...baseOptions, ignoreCache: true } as any;
       const refreshedTokenRaw = await getAccessTokenSilently(refreshOptions);
+
       return resolveAccessTokenString(refreshedTokenRaw);
     }
 
@@ -210,8 +210,9 @@ export const useAuth0Provider = (): AuthProvider => {
 
             // Try to refresh the token once on 401
             const refreshedToken =
-              (await getAccessTokenWithAutoRefresh({ ignoreCache: true } as any)) ||
-              token;
+              (await getAccessTokenWithAutoRefresh({
+                ignoreCache: true,
+              } as any)) || token;
 
             return fetch(url, {
               headers: {
@@ -272,8 +273,9 @@ export const useAuth0Provider = (): AuthProvider => {
           }
 
           const refreshedToken =
-            (await getAccessTokenWithAutoRefresh({ ignoreCache: true } as any)) ||
-            token;
+            (await getAccessTokenWithAutoRefresh({
+              ignoreCache: true,
+            } as any)) || token;
 
           return fetch(url, {
             method: "POST",
@@ -286,6 +288,7 @@ export const useAuth0Provider = (): AuthProvider => {
         };
 
         const apiResponse = await makeRequest(accessToken);
+
         return await apiResponse.json();
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -319,8 +322,9 @@ export const useAuth0Provider = (): AuthProvider => {
           }
 
           const refreshedToken =
-            (await getAccessTokenWithAutoRefresh({ ignoreCache: true } as any)) ||
-            token;
+            (await getAccessTokenWithAutoRefresh({
+              ignoreCache: true,
+            } as any)) || token;
 
           return fetch(url, {
             method: "DELETE",
@@ -332,6 +336,7 @@ export const useAuth0Provider = (): AuthProvider => {
         };
 
         const apiResponse = await makeRequest(accessToken);
+
         return await apiResponse.json();
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -366,8 +371,9 @@ export const useAuth0Provider = (): AuthProvider => {
           }
 
           const refreshedToken =
-            (await getAccessTokenWithAutoRefresh({ ignoreCache: true } as any)) ||
-            token;
+            (await getAccessTokenWithAutoRefresh({
+              ignoreCache: true,
+            } as any)) || token;
 
           return fetch(url, {
             method: "PUT",
@@ -380,6 +386,7 @@ export const useAuth0Provider = (): AuthProvider => {
         };
 
         const apiResponse = await makeRequest(accessToken);
+
         return await apiResponse.json();
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -414,8 +421,9 @@ export const useAuth0Provider = (): AuthProvider => {
           }
 
           const refreshedToken =
-            (await getAccessTokenWithAutoRefresh({ ignoreCache: true } as any)) ||
-            token;
+            (await getAccessTokenWithAutoRefresh({
+              ignoreCache: true,
+            } as any)) || token;
 
           return fetch(url, {
             method: "PATCH",
@@ -428,6 +436,7 @@ export const useAuth0Provider = (): AuthProvider => {
         };
 
         const apiResponse = await makeRequest(accessToken);
+
         return await apiResponse.json();
       } catch (error) {
         // eslint-disable-next-line no-console

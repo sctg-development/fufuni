@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
+import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/react";
 
 import { formatMoney } from "@/utils/currency";
 import { useSecuredApi } from "@/authentication";
@@ -159,10 +159,10 @@ export default function OrdersPage() {
     mutationFn: (id: string) =>
       postJson(`${apiBase}/v1/orders/${id}/resend-confirmation`, {}),
     onSuccess: () => {
-      window.alert(t('admin-orders-resend-success'));
+      window.alert(t("admin-orders-resend-success"));
     },
     onError: () => {
-      window.alert(t('admin-orders-resend-error'));
+      window.alert(t("admin-orders-resend-error"));
     },
   });
 
@@ -170,10 +170,10 @@ export default function OrdersPage() {
     mutationFn: (id: string) =>
       postJson(`${apiBase}/v1/orders/${id}/regenerate-tracking-link`, {}),
     onSuccess: () => {
-      window.alert(t('admin-orders-regenerate-success'));
+      window.alert(t("admin-orders-regenerate-success"));
     },
     onError: () => {
-      window.alert(t('admin-orders-regenerate-error'));
+      window.alert(t("admin-orders-regenerate-error"));
     },
   });
 
@@ -351,7 +351,7 @@ export default function OrdersPage() {
                         className={clsx(
                           "px-4 py-3 text-left text-xs font-medium uppercase tracking-wide",
                           header.column.getCanSort() &&
-                          "cursor-pointer select-none hover:bg-[var(--bg-hover)]",
+                            "cursor-pointer select-none hover:bg-[var(--bg-hover)]",
                         )}
                         style={{ color: "var(--text-muted)" }}
                         onClick={header.column.getToggleSortingHandler()}
@@ -413,8 +413,9 @@ export default function OrdersPage() {
           <ModalContent>
             <ModalHeader>
               {selectedOrder
-                ? `${t("admin-orders-order-prefix")} ${selectedOrder.number || selectedOrder.id.slice(0, 8)
-                }`
+                ? `${t("admin-orders-order-prefix")} ${
+                    selectedOrder.number || selectedOrder.id.slice(0, 8)
+                  }`
                 : t("admin-orders-title")}
             </ModalHeader>
             <ModalBody>
@@ -556,8 +557,8 @@ export default function OrdersPage() {
                                 {formatCurrency(
                                   item.unit_price_cents * item.qty,
                                   selectedOrder.amounts.currency ||
-                                  selectedOrder.currency ||
-                                  "USD",
+                                    selectedOrder.currency ||
+                                    "USD",
                                 )}
                               </p>
                             </div>
@@ -579,8 +580,8 @@ export default function OrdersPage() {
                               {formatCurrency(
                                 selectedOrder.amounts.subtotal_cents || 0,
                                 selectedOrder.amounts.currency ||
-                                selectedOrder.currency ||
-                                "USD",
+                                  selectedOrder.currency ||
+                                  "USD",
                               )}
                             </span>
                           </div>
@@ -592,8 +593,8 @@ export default function OrdersPage() {
                               {formatCurrency(
                                 selectedOrder.amounts.tax_cents || 0,
                                 selectedOrder.amounts.currency ||
-                                selectedOrder.currency ||
-                                "USD",
+                                  selectedOrder.currency ||
+                                  "USD",
                               )}
                             </span>
                           </div>
@@ -605,8 +606,8 @@ export default function OrdersPage() {
                               {formatCurrency(
                                 selectedOrder.amounts.shipping_cents || 0,
                                 selectedOrder.amounts.currency ||
-                                selectedOrder.currency ||
-                                "USD",
+                                  selectedOrder.currency ||
+                                  "USD",
                               )}
                             </span>
                           </div>
@@ -619,8 +620,8 @@ export default function OrdersPage() {
                               {formatCurrency(
                                 selectedOrder.amounts.total_cents,
                                 selectedOrder.amounts.currency ||
-                                selectedOrder.currency ||
-                                "USD",
+                                  selectedOrder.currency ||
+                                  "USD",
                               )}
                             </span>
                           </div>

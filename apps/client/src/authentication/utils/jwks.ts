@@ -16,7 +16,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 // JWKS cache utility for template
 import { createLocalJWKSet } from "jose";
 

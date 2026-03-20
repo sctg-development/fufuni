@@ -18,7 +18,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { button as buttonStyles } from "@heroui/theme";
+import { button as buttonStyles } from "@heroui/react";
 import { useTranslation } from "react-i18next";
 
 import DefaultLayout from "@/layouts/default";
@@ -300,7 +300,7 @@ export default function SuccessPage() {
 
         {/* Message */}
         <p className="text-center text-xs text-default-400 mb-8">
-            {t("confirmation-email-sent")}
+          {t("confirmation-email-sent")}
         </p>
 
         {/* Actions */}

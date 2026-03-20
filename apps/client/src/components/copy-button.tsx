@@ -24,8 +24,8 @@ import React, {
   forwardRef,
 } from "react";
 import { useClipboard } from "@heroui/use-clipboard";
-import { Button, type ButtonProps } from "@heroui/button";
-import { clsx } from "@heroui/shared-utils";
+import { Button, type ButtonProps } from "@heroui/react";
+import { clsx } from "clsx";
 
 import { IconSvgProps } from "@/types";
 

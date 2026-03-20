@@ -18,27 +18,27 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
 import {
+  Button,
+  Input,
+  Select,
+  SelectItem,
   Table,
   TableHeader,
   TableColumn,
   TableBody,
   TableRow,
   TableCell,
-} from "@heroui/table";
-import {
   Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
   ModalFooter,
   useDisclosure,
-} from "@heroui/modal";
-import { Card, CardBody } from "@heroui/card";
-import { Tooltip } from "@heroui/tooltip";
+  Card,
+  CardBody,
+  Tooltip,
+} from "@heroui/react";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
 import { SearchIcon } from "@/components/icons";

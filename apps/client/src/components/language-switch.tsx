@@ -22,9 +22,9 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-} from "@heroui/dropdown";
-import { Button } from "@heroui/button";
-import { Tooltip } from "@heroui/tooltip";
+} from "@heroui/react";
+import { Button } from "@heroui/react";
+import { Tooltip } from "@heroui/react";
 
 import { type AvailableLanguage } from "@/i18n";
 import { type IconSvgProps } from "@/types";

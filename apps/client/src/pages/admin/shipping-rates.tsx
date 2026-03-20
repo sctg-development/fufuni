@@ -18,9 +18,9 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
+import { Button } from "@heroui/react";
+import { Input } from "@heroui/react";
+import { Select, SelectItem } from "@heroui/react";
 import {
   Table,
   TableHeader,
@@ -28,7 +28,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
-} from "@heroui/table";
+} from "@heroui/react";
 import {
   Modal,
   ModalContent,
@@ -36,10 +36,10 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
-} from "@heroui/modal";
-import { Card, CardBody } from "@heroui/card";
-import { Tooltip } from "@heroui/tooltip";
-import { Switch } from "@heroui/switch";
+} from "@heroui/react";
+import { Card, CardBody } from "@heroui/react";
+import { Tooltip } from "@heroui/react";
+import { Switch } from "@heroui/react";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
 import { SearchIcon } from "@/components/icons";
@@ -110,13 +110,17 @@ export default function ShippingRatesPage() {
   const [loading, setLoading] = useState(true);
   const [globalFilter, setGlobalFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
-  const [taxRates, setTaxRates] = useState<{ tax_code: string | null; display_name: string }[]>([]);
+  const [taxRates, setTaxRates] = useState<
+    { tax_code: string | null; display_name: string }[]
+  >([]);
 
   // Modal state
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingRate, setEditingRate] = useState<ShippingRate | null>(null);
-  const [pricesByDivisa, setPricesByDivisa] = useState<Record<string, number>>({});
+  const [pricesByDivisa, setPricesByDivisa] = useState<Record<string, number>>(
+    {},
+  );
   const [formData, setFormData] = useState({
     display_name: "",
     description: "",
@@ -135,7 +139,7 @@ export default function ShippingRatesPage() {
   const {
     isOpen: isClassModalOpen,
     onOpen: onClassModalOpen,
-    onOpenChange: onClassModalOpenChange
+    onOpenChange: onClassModalOpenChange,
   } = useDisclosure();
   const [isClassEditMode, setIsClassEditMode] = useState(false);
   const [editingClass, setEditingClass] = useState<ShippingClass | null>(null);
@@ -156,33 +160,42 @@ export default function ShippingRatesPage() {
     setLoading(true);
     try {
       const apiUrl = `${apiBase}/v1/regions/shipping-rates?limit=100`;
-      console.log('📍 Loading shipping rates from:', apiUrl);
+
+      console.log("📍 Loading shipping rates from:", apiUrl);
 
       const ratesResp = await getJson(apiUrl);
-      console.log('📦 Rates Response:', ratesResp);
+
+      console.log("📦 Rates Response:", ratesResp);
 
       if (!ratesResp || !ratesResp.items) {
-        console.warn('⚠️ Rates response invalid:', ratesResp);
+        console.warn("⚠️ Rates response invalid:", ratesResp);
         setShippingRates([]);
         setLoading(false);
+
         return;
       }
 
       // First, set rates without prices to show them immediately
       const rates: ShippingRate[] = ratesResp.items || [];
-      console.log('✅ Found rates:', rates.length);
+
+      console.log("✅ Found rates:", rates.length);
       setShippingRates(rates);
 
       // Then, load currencies and prices asynchronously
       try {
-        const currenciesResp = await getJson(`${apiBase}/v1/regions/currencies?limit=100`);
+        const currenciesResp = await getJson(
+          `${apiBase}/v1/regions/currencies?limit=100`,
+        );
         const currencies: Currency[] = currenciesResp.items || [];
+
         setCurrencies(currencies);
-        console.log('💱 Currencies loaded:', currencies.length);
+        console.log("💱 Currencies loaded:", currencies.length);
 
         const defaultCurrency = currencies[0];
+
         if (!defaultCurrency) {
-          console.warn('⚠️ No default currency found');
+          console.warn("⚠️ No default currency found");
+
           return;
         }
 
@@ -193,7 +206,10 @@ export default function ShippingRatesPage() {
               const priceResp = await getJson(
                 `${apiBase}/v1/regions/shipping-rates/${rate.id}/prices?currency_id=${defaultCurrency.id}`,
               );
-              const priceItem = Array.isArray(priceResp.items) ? priceResp.items[0] : null;
+              const priceItem = Array.isArray(priceResp.items)
+                ? priceResp.items[0]
+                : null;
+
               return {
                 ...rate,
                 price_cents: priceItem?.amount_cents,
@@ -201,19 +217,23 @@ export default function ShippingRatesPage() {
               };
             } catch (err) {
               console.warn(`⚠️ No price for rate ${rate.id}:`, err);
+
               return { ...rate, currency_code: defaultCurrency.code };
             }
-          })
+          }),
         );
 
-        console.log('💰 Rates with prices:', ratesWithPrices.length);
+        console.log("💰 Rates with prices:", ratesWithPrices.length);
         setShippingRates(ratesWithPrices);
       } catch (priceErr) {
-        console.warn('⚠️ Failed to load prices, showing rates without prices:', priceErr);
+        console.warn(
+          "⚠️ Failed to load prices, showing rates without prices:",
+          priceErr,
+        );
         // Keep the rates without prices - they're already set above
       }
     } catch (err) {
-      console.error('❌ Failed to load shipping rates:', err);
+      console.error("❌ Failed to load shipping rates:", err);
       setShippingRates([]);
     } finally {
       setLoading(false);
@@ -228,29 +248,40 @@ export default function ShippingRatesPage() {
   useEffect(() => {
     const loadShippingClasses = async () => {
       try {
-        const resp = await getJson(`${apiBase}/v1/regions/shipping-classes?limit=100`);
+        const resp = await getJson(
+          `${apiBase}/v1/regions/shipping-classes?limit=100`,
+        );
+
         setShippingClasses(resp.items || []);
       } catch (err) {
         console.error("Failed to load shipping classes", err);
       }
     };
+
     loadShippingClasses();
   }, []);
-  
+
   // Load tax rates for dropdown
   useEffect(() => {
     const loadTaxRates = async () => {
       try {
         const resp = await getJson(`${apiBase}/v1/tax-rates?limit=500`);
         const uniqueRates = new Map<string | null, string>();
+
         (resp.items || []).forEach((r: any) => {
           uniqueRates.set(r.tax_code, r.display_name);
         });
-        setTaxRates(Array.from(uniqueRates.entries()).map(([tax_code, display_name]) => ({ tax_code, display_name })));
+        setTaxRates(
+          Array.from(uniqueRates.entries()).map(([tax_code, display_name]) => ({
+            tax_code,
+            display_name,
+          })),
+        );
       } catch (err) {
         console.error("Failed to load tax rates", err);
       }
     };
+
     loadTaxRates();
   }, []);
 
@@ -316,6 +347,7 @@ export default function ShippingRatesPage() {
 
     // Load prices for ALL currencies to cache them
     const priceCache: Record<string, number> = {};
+
     if (currencies.length > 0) {
       await Promise.all(
         currencies.map(async (currency) => {
@@ -323,21 +355,30 @@ export default function ShippingRatesPage() {
             const priceResp = await getJson(
               `${apiBase}/v1/regions/shipping-rates/${rate.id}/prices?currency_id=${currency.id}`,
             );
-            console.log(`💰 Price for currency ${currency.code} (${currency.id}):`, priceResp);
-            const priceItem = Array.isArray(priceResp.items) ? priceResp.items[0] : null;
+
+            console.log(
+              `💰 Price for currency ${currency.code} (${currency.id}):`,
+              priceResp,
+            );
+            const priceItem = Array.isArray(priceResp.items)
+              ? priceResp.items[0]
+              : null;
+
             if (priceItem?.amount_cents != null) {
               priceCache[currency.id] = priceItem.amount_cents;
-              console.log(`✅ Cached ${currency.code}: ${priceItem.amount_cents} cents`);
+              console.log(
+                `✅ Cached ${currency.code}: ${priceItem.amount_cents} cents`,
+              );
             } else {
               console.warn(`⚠️ No price found for ${currency.code}`);
             }
           } catch (err) {
             console.warn(`⚠️ Failed to load price for ${currency.code}:`, err);
           }
-        })
+        }),
       );
     }
-    console.log('📦 Final price cache:', priceCache);
+    console.log("📦 Final price cache:", priceCache);
     setPricesByDivisa(priceCache);
 
     // Use default currency price
@@ -394,8 +435,10 @@ export default function ShippingRatesPage() {
       const upsertPrice = async (rateId: string) => {
         if (!formData.currency_id || !formData.price) return;
         const amount = parseFloat(formData.price);
+
         if (Number.isNaN(amount)) return;
         const amount_cents = Math.round(amount * 100);
+
         await postJson(
           `${apiBase}/v1/regions/shipping-rates/${rateId}/prices`,
           {
@@ -405,8 +448,9 @@ export default function ShippingRatesPage() {
         );
       };
 
-      const currencyCode =
-        currencies.find((c) => c.id === formData.currency_id)?.code;
+      const currencyCode = currencies.find(
+        (c) => c.id === formData.currency_id,
+      )?.code;
 
       if (isEditMode && editingRate) {
         const response = await patchJson(
@@ -422,10 +466,12 @@ export default function ShippingRatesPage() {
             shippingRates.map((r) =>
               r.id === editingRate.id
                 ? {
-                  ...response,
-                  price_cents: formData.price ? Math.round(parseFloat(formData.price) * 100) : r.price_cents,
-                  currency_code: currencyCode ?? r.currency_code,
-                }
+                    ...response,
+                    price_cents: formData.price
+                      ? Math.round(parseFloat(formData.price) * 100)
+                      : r.price_cents,
+                    currency_code: currencyCode ?? r.currency_code,
+                  }
                 : r,
             ),
           );
@@ -445,7 +491,9 @@ export default function ShippingRatesPage() {
             ...shippingRates,
             {
               ...response,
-              price_cents: formData.price ? Math.round(parseFloat(formData.price) * 100) : undefined,
+              price_cents: formData.price
+                ? Math.round(parseFloat(formData.price) * 100)
+                : undefined,
               currency_code: currencyCode,
             },
           ]);
@@ -540,7 +588,10 @@ export default function ShippingRatesPage() {
           );
         } else {
           // Reload if response is null
-          const resp = await getJson(`${apiBase}/v1/regions/shipping-classes?limit=100`);
+          const resp = await getJson(
+            `${apiBase}/v1/regions/shipping-classes?limit=100`,
+          );
+
           setShippingClasses(resp.items || []);
         }
       } else {
@@ -553,7 +604,10 @@ export default function ShippingRatesPage() {
           setShippingClasses([...shippingClasses, response]);
         } else {
           // Reload if response is null
-          const resp = await getJson(`${apiBase}/v1/regions/shipping-classes?limit=100`);
+          const resp = await getJson(
+            `${apiBase}/v1/regions/shipping-classes?limit=100`,
+          );
+
           setShippingClasses(resp.items || []);
         }
       }
@@ -752,7 +806,11 @@ export default function ShippingRatesPage() {
                   </TableColumn>
                 </TableHeader>
                 <TableBody
-                  emptyContent={<div>{t("admin-shipping-classes-empty", "No shipping classes")}</div>}
+                  emptyContent={
+                    <div>
+                      {t("admin-shipping-classes-empty", "No shipping classes")}
+                    </div>
+                  }
                   items={shippingClasses}
                 >
                   {(cls) => (
@@ -766,26 +824,49 @@ export default function ShippingRatesPage() {
                         {cls.display_name}
                       </TableCell>
                       <TableCell>
-                        <span className="text-xs px-2 py-1 rounded" style={{
-                          backgroundColor: cls.resolution === 'exclusive' ? '#fed7aa' : '#dbeafe',
-                          color: cls.resolution === 'exclusive' ? '#92400e' : '#0c2340'
-                        }}>
-                          {cls.resolution === 'exclusive'
+                        <span
+                          className="text-xs px-2 py-1 rounded"
+                          style={{
+                            backgroundColor:
+                              cls.resolution === "exclusive"
+                                ? "#fed7aa"
+                                : "#dbeafe",
+                            color:
+                              cls.resolution === "exclusive"
+                                ? "#92400e"
+                                : "#0c2340",
+                          }}
+                        >
+                          {cls.resolution === "exclusive"
                             ? t("admin-shipping-classes-exclusive", "Exclusive")
                             : t("admin-shipping-classes-additive", "Additive")}
                         </span>
                       </TableCell>
                       <TableCell className="text-default-500 text-sm">
-                        {cls.description ? cls.description.substring(0, 40) + (cls.description.length > 40 ? '...' : '') : '—'}
+                        {cls.description
+                          ? cls.description.substring(0, 40) +
+                            (cls.description.length > 40 ? "..." : "")
+                          : "—"}
                       </TableCell>
                       <TableCell>
-                        <span className={cls.status === 'active' ? 'text-green-600 font-medium' : 'text-gray-400'}>
+                        <span
+                          className={
+                            cls.status === "active"
+                              ? "text-green-600 font-medium"
+                              : "text-gray-400"
+                          }
+                        >
                           {cls.status}
                         </span>
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Tooltip content={t("admin-shipping-classes-btn-edit", "Edit")}>
+                          <Tooltip
+                            content={t(
+                              "admin-shipping-classes-btn-edit",
+                              "Edit",
+                            )}
+                          >
                             <Button
                               isIconOnly
                               size="sm"
@@ -795,7 +876,13 @@ export default function ShippingRatesPage() {
                               <Edit2 className="w-4 h-4" />
                             </Button>
                           </Tooltip>
-                          <Tooltip content={t("admin-shipping-classes-btn-delete", "Delete")} color="danger">
+                          <Tooltip
+                            color="danger"
+                            content={t(
+                              "admin-shipping-classes-btn-delete",
+                              "Delete",
+                            )}
+                          >
                             <Button
                               isIconOnly
                               color="danger"
@@ -879,15 +966,22 @@ export default function ShippingRatesPage() {
                 )}
               >
                 <Select
-                  label="Classe d'expédition (optionnel)"
                   description="Laissez vide pour un tarif universel (tous les produits standards)"
-                  selectedKeys={formData.shipping_class_id ? [formData.shipping_class_id] : []}
+                  label="Classe d'expédition (optionnel)"
+                  selectedKeys={
+                    formData.shipping_class_id
+                      ? [formData.shipping_class_id]
+                      : []
+                  }
                   onSelectionChange={(keys) => {
                     const val = Array.from(keys).join("");
+
                     setFormData({ ...formData, shipping_class_id: val });
                   }}
                 >
-                  <SelectItem key="">Universel — tous produits standards</SelectItem>
+                  <SelectItem key="">
+                    Universel — tous produits standards
+                  </SelectItem>
                   <>
                     {shippingClasses.map((cls) => (
                       <SelectItem
@@ -959,28 +1053,44 @@ export default function ShippingRatesPage() {
               <Tooltip
                 content={t(
                   "admin-shipping-rates-tax-code-help",
-                  "Tax code for this shipping rate (e.g. VAT for Chronopost)"
+                  "Tax code for this shipping rate (e.g. VAT for Chronopost)",
                 )}
               >
                 <Select
-                  label={t("admin-shipping-rates-tax-code", "Code de taxe (optionnel)")}
-                  description={t("admin-shipping-rates-tax-code-desc", "Laissez vide pour aucune taxe spécifique")}
+                  description={t(
+                    "admin-shipping-rates-tax-code-desc",
+                    "Laissez vide pour aucune taxe spécifique",
+                  )}
+                  items={[
+                    { tax_code: "", display_name: "Aucune taxe spécifique" },
+                    ...(taxRates as {
+                      tax_code: string | null;
+                      display_name: string;
+                    }[]),
+                  ]}
+                  label={t(
+                    "admin-shipping-rates-tax-code",
+                    "Code de taxe (optionnel)",
+                  )}
                   selectedKeys={formData.tax_code ? [formData.tax_code] : []}
                   onSelectionChange={(keys) => {
                     const val = Array.from(keys).join("");
+
                     setFormData({ ...formData, tax_code: val });
                   }}
-                  items={[
-                    { tax_code: "", display_name: "Aucune taxe spécifique" },
-                    ...taxRates as { tax_code: string | null; display_name: string }[]
-                  ]}
                 >
                   {(rate: any) => (
                     <SelectItem
                       key={rate.tax_code || "null"}
-                      textValue={rate.tax_code ? `${resolveTaxName(rate.display_name, i18n.language)} (${rate.tax_code})` : rate.display_name}
+                      textValue={
+                        rate.tax_code
+                          ? `${resolveTaxName(rate.display_name, i18n.language)} (${rate.tax_code})`
+                          : rate.display_name
+                      }
                     >
-                      {rate.tax_code ? `${resolveTaxName(rate.display_name, i18n.language)} (${rate.tax_code})` : rate.display_name}
+                      {rate.tax_code
+                        ? `${resolveTaxName(rate.display_name, i18n.language)} (${rate.tax_code})`
+                        : rate.display_name}
                     </SelectItem>
                   )}
                 </Select>
@@ -989,11 +1099,21 @@ export default function ShippingRatesPage() {
               <div className="flex items-center gap-4 mt-2 mb-4">
                 <Switch
                   isSelected={formData.tax_inclusive}
-                  onValueChange={(val) => setFormData({ ...formData, tax_inclusive: val })}
+                  onValueChange={(val) =>
+                    setFormData({ ...formData, tax_inclusive: val })
+                  }
                 >
-                  {t("admin-shipping-rates-tax-inclusive", "Les prix incluent les taxes")}
+                  {t(
+                    "admin-shipping-rates-tax-inclusive",
+                    "Les prix incluent les taxes",
+                  )}
                 </Switch>
-                <Tooltip content={t("admin-shipping-rates-tax-inclusive-help", "Cochez si le tarif de livraison configuré est TTC")}>
+                <Tooltip
+                  content={t(
+                    "admin-shipping-rates-tax-inclusive-help",
+                    "Cochez si le tarif de livraison configuré est TTC",
+                  )}
+                >
                   <div className="text-xs text-default-400 cursor-help underline decoration-dotted">
                     {t("common-help", "Aide")}
                   </div>
@@ -1008,19 +1128,27 @@ export default function ShippingRatesPage() {
               >
                 <div className="flex gap-2">
                   <Select
+                    className="w-32"
                     label={t("admin-common-currency", "Currency")}
-                    selectedKeys={formData.currency_id ? [formData.currency_id] : []}
+                    selectedKeys={
+                      formData.currency_id ? [formData.currency_id] : []
+                    }
                     onSelectionChange={(key) => {
                       const newCurrencyId = Array.from(key).join("");
-                      console.log('💱 Changing currency to:', newCurrencyId);
-                      console.log('📦 pricesByDivisa:', pricesByDivisa);
-                      console.log('💰 Price for this currency:', pricesByDivisa[newCurrencyId]);
 
-                      const newPrice = pricesByDivisa[newCurrencyId] !== undefined
-                        ? (pricesByDivisa[newCurrencyId] / 100).toFixed(2)
-                        : "";
+                      console.log("💱 Changing currency to:", newCurrencyId);
+                      console.log("📦 pricesByDivisa:", pricesByDivisa);
+                      console.log(
+                        "💰 Price for this currency:",
+                        pricesByDivisa[newCurrencyId],
+                      );
 
-                      console.log('✅ Setting price to:', newPrice);
+                      const newPrice =
+                        pricesByDivisa[newCurrencyId] !== undefined
+                          ? (pricesByDivisa[newCurrencyId] / 100).toFixed(2)
+                          : "";
+
+                      console.log("✅ Setting price to:", newPrice);
 
                       setFormData({
                         ...formData,
@@ -1028,7 +1156,6 @@ export default function ShippingRatesPage() {
                         price: newPrice,
                       });
                     }}
-                    className="w-32"
                   >
                     {currencies.map((c) => (
                       <SelectItem key={c.id}>{c.code}</SelectItem>
@@ -1036,10 +1163,10 @@ export default function ShippingRatesPage() {
                   </Select>
                   <Input
                     label={t("admin-shipping-rates-price", "Price")}
-                    placeholder="0.00"
-                    type="number"
                     min={0}
+                    placeholder="0.00"
                     step={0.01}
+                    type="number"
                     value={formData.price}
                     onValueChange={(value) =>
                       setFormData({ ...formData, price: value })
@@ -1068,38 +1195,68 @@ export default function ShippingRatesPage() {
         </Modal>
 
         {/* Create / Edit Shipping Class Modal */}
-        <Modal isOpen={isClassModalOpen} onOpenChange={onClassModalOpenChange} size="lg">
+        <Modal
+          isOpen={isClassModalOpen}
+          size="lg"
+          onOpenChange={onClassModalOpenChange}
+        >
           <ModalContent>
             <ModalHeader className="flex flex-col gap-1">
               {isClassEditMode
-                ? t("admin-shipping-classes-modal-title-edit", "Edit Shipping Class")
-                : t("admin-shipping-classes-modal-title-create", "New Shipping Class")}
+                ? t(
+                    "admin-shipping-classes-modal-title-edit",
+                    "Edit Shipping Class",
+                  )
+                : t(
+                    "admin-shipping-classes-modal-title-create",
+                    "New Shipping Class",
+                  )}
             </ModalHeader>
             <ModalBody className="gap-4">
-              <Tooltip content={t("admin-shipping-classes-code-help", "Unique lowercase identifier")}>
+              <Tooltip
+                content={t(
+                  "admin-shipping-classes-code-help",
+                  "Unique lowercase identifier",
+                )}
+              >
                 <Input
                   isRequired
                   isDisabled={isClassEditMode}
                   label={t("admin-shipping-classes-code", "Code")}
-                  placeholder={t("admin-shipping-classes-code-placeholder", "e.g., oversized")}
+                  placeholder={t(
+                    "admin-shipping-classes-code-placeholder",
+                    "e.g., oversized",
+                  )}
                   value={classFormData.code}
                   onValueChange={(v) =>
-                    setClassFormData({ ...classFormData, code: v.toLowerCase() })
+                    setClassFormData({
+                      ...classFormData,
+                      code: v.toLowerCase(),
+                    })
                   }
                 />
               </Tooltip>
               <Input
                 isRequired
                 label={t("admin-shipping-classes-display-name", "Display Name")}
-                placeholder={t("admin-shipping-classes-display-name-placeholder", "e.g., Oversized Items")}
+                placeholder={t(
+                  "admin-shipping-classes-display-name-placeholder",
+                  "e.g., Oversized Items",
+                )}
                 value={classFormData.display_name}
                 onValueChange={(v) =>
                   setClassFormData({ ...classFormData, display_name: v })
                 }
               />
               <Input
-                label={t("admin-shipping-classes-description", "Description (optional)")}
-                placeholder={t("admin-shipping-classes-description-placeholder", "e.g., For items > 50kg")}
+                label={t(
+                  "admin-shipping-classes-description",
+                  "Description (optional)",
+                )}
+                placeholder={t(
+                  "admin-shipping-classes-description-placeholder",
+                  "e.g., For items > 50kg",
+                )}
                 value={classFormData.description}
                 onValueChange={(v) =>
                   setClassFormData({ ...classFormData, description: v })
@@ -1107,25 +1264,40 @@ export default function ShippingRatesPage() {
               />
               <Select
                 isRequired
-                label={t("admin-shipping-classes-resolution-mode", "Resolution Mode")}
                 description={
-                  classFormData.resolution === 'exclusive'
-                    ? t("admin-shipping-classes-resolution-exclusive-desc", "⚠ Exclusive: hides all other rates")
-                    : t("admin-shipping-classes-resolution-additive-desc", "✓ Additive: adds to other rates")
+                  classFormData.resolution === "exclusive"
+                    ? t(
+                        "admin-shipping-classes-resolution-exclusive-desc",
+                        "⚠ Exclusive: hides all other rates",
+                      )
+                    : t(
+                        "admin-shipping-classes-resolution-additive-desc",
+                        "✓ Additive: adds to other rates",
+                      )
                 }
+                label={t(
+                  "admin-shipping-classes-resolution-mode",
+                  "Resolution Mode",
+                )}
                 selectedKeys={[classFormData.resolution]}
                 onSelectionChange={(key) =>
                   setClassFormData({
                     ...classFormData,
-                    resolution: Array.from(key).join('') as any,
+                    resolution: Array.from(key).join("") as any,
                   })
                 }
               >
                 <SelectItem key="exclusive">
-                  {t("admin-shipping-classes-resolution-exclusive-label", "Exclusive — replaces other rates")}
+                  {t(
+                    "admin-shipping-classes-resolution-exclusive-label",
+                    "Exclusive — replaces other rates",
+                  )}
                 </SelectItem>
                 <SelectItem key="additive">
-                  {t("admin-shipping-classes-resolution-additive-label", "Additive — adds to other rates")}
+                  {t(
+                    "admin-shipping-classes-resolution-additive-label",
+                    "Additive — adds to other rates",
+                  )}
                 </SelectItem>
               </Select>
               {isClassEditMode && (
@@ -1135,12 +1307,16 @@ export default function ShippingRatesPage() {
                   onSelectionChange={(key) =>
                     setClassFormData({
                       ...classFormData,
-                      status: Array.from(key).join('') as any,
+                      status: Array.from(key).join("") as any,
                     })
                   }
                 >
-                  <SelectItem key="active">{t("admin-shipping-classes-active", "Active")}</SelectItem>
-                  <SelectItem key="inactive">{t("admin-shipping-classes-inactive", "Inactive")}</SelectItem>
+                  <SelectItem key="active">
+                    {t("admin-shipping-classes-active", "Active")}
+                  </SelectItem>
+                  <SelectItem key="inactive">
+                    {t("admin-shipping-classes-inactive", "Inactive")}
+                  </SelectItem>
                 </Select>
               )}
             </ModalBody>

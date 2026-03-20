@@ -17,12 +17,12 @@
  */
 
 import type { ReactNode } from "react";
-import type { LinkProps } from "@heroui/link";
+import type { LinkProps } from "@heroui/react";
 
 import { forwardRef } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { link as linkStyles } from "@heroui/theme";
-import { clsx } from "@heroui/shared-utils";
+import { link as linkStyles } from "@heroui/react";
+import { clsx } from "clsx";
 
 type LinkUniversalProps = Omit<LinkProps, "as"> & {
   /**

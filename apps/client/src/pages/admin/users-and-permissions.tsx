@@ -24,8 +24,8 @@ import type {
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@heroui/button";
-import { Checkbox } from "@heroui/checkbox";
+import { Button } from "@heroui/react";
+import { Checkbox } from "@heroui/react";
 import {
   Table,
   TableHeader,
@@ -33,9 +33,9 @@ import {
   TableBody,
   TableRow,
   TableCell,
-} from "@heroui/table";
-import { Chip } from "@heroui/chip";
-import { addToast } from "@heroui/toast";
+} from "@heroui/react";
+import { Chip } from "@heroui/react";
+import { addToast } from "@heroui/react";
 import { useAuth0 } from "@auth0/auth0-react";
 
 import DefaultLayout from "@/layouts/default";

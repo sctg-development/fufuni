@@ -17,10 +17,10 @@
  */
 
 import { memo, useState, useEffect } from "react";
-import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
-import { Chip } from "@heroui/chip";
-import { Divider } from "@heroui/divider";
-import { ScrollShadow } from "@heroui/scroll-shadow";
+import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/react";
+import { Chip } from "@heroui/react";
+import { Divider } from "@heroui/react";
+import { ScrollShadow } from "@heroui/react";
 import { JWTPayload } from "jose";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";

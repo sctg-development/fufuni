@@ -18,8 +18,8 @@
 
 import { FC, useState, useEffect } from "react";
 import { VisuallyHidden } from "@react-aria/visually-hidden";
-import { SwitchProps, useSwitch } from "@heroui/switch";
-import { clsx } from "@heroui/shared-utils";
+import { SwitchProps, useSwitch } from "@heroui/react";
+import { clsx } from "clsx";
 import { useTranslation } from "react-i18next";
 
 import { useTheme } from "@/hooks/use-theme";

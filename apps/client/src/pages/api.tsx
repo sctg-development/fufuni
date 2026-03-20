@@ -18,7 +18,7 @@
 
 import { Trans, useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
-import { Snippet } from "@heroui/snippet";
+import { Snippet } from "@heroui/react";
 
 import { title } from "@/components/primitives";
 import DefaultLayout from "@/layouts/default";

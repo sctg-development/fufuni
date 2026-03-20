@@ -19,8 +19,8 @@
 import type React from "react";
 import type { NavigateOptions } from "react-router-dom";
 
-import { HeroUIProvider } from "@heroui/system";
-import { ToastProvider } from "@heroui/toast";
+import { HeroUIProvider } from "@heroui/react";
+import { ToastProvider } from "@heroui/react";
 import { useHref, useNavigate } from "react-router-dom";
 import { CartProvider } from "@/hooks/useCart";
 
@@ -34,11 +34,11 @@ export function Provider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
 
   return (
-      <HeroUIProvider navigate={navigate} useHref={useHref}>
-        <ToastProvider />
-        <CartProvider>
+    <HeroUIProvider navigate={navigate} useHref={useHref}>
+      <ToastProvider />
+      <CartProvider>
         {children}
-        </CartProvider>
-      </HeroUIProvider>
+      </CartProvider>
+    </HeroUIProvider>
   );
 }

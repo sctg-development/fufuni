@@ -18,7 +18,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
-import { button as buttonStyles } from "@heroui/theme";
+import { button as buttonStyles } from "@heroui/react";
 import { useTranslation } from "react-i18next";
 
 import DefaultLayout from "@/layouts/default";

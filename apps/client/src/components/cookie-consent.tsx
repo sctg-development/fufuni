@@ -16,9 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Button } from "@heroui/button";
+import { Button } from "@heroui/react";
 import React from "react";
-import { Link } from "@heroui/link";
+import { Link } from "@heroui/react";
 import { Trans, useTranslation } from "react-i18next";
 import {
   Modal,
@@ -26,7 +26,7 @@ import {
   ModalBody,
   ModalFooter,
   ModalHeader,
-} from "@heroui/modal";
+} from "@heroui/react";
 
 import { useCookieConsent } from "../contexts/cookie-consent-context";
 

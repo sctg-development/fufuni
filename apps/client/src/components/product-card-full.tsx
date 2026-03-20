@@ -17,13 +17,13 @@
  */
 
 import React, { useState } from "react";
-import { button as buttonStyles } from "@heroui/theme";
+import { button as buttonStyles } from "@heroui/react";
 import { StoreProduct } from "@/lib/store-api";
 import { useTranslation } from "react-i18next";
 import { useCart } from "@/hooks/useCart";
 import { formatMoney } from "@/utils/currency";
 import { resolveDescription, resolveTitle, resolveVendor, resolveTags, resolveHandle, getTaxNameForLocale } from "@/utils/description";
-import { Button } from "@heroui/button";
+import { Button } from "@heroui/react";
 
 interface Props {
   product: StoreProduct;

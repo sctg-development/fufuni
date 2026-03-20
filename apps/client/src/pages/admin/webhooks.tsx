@@ -31,8 +31,8 @@ import {
   RotateCw,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@heroui/button";
-import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
+import { Button } from "@heroui/react";
+import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/react";
 import clsx from "clsx";
 
 import { useSecuredApi } from "@/authentication";

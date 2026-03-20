@@ -5,9 +5,9 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
+import { Button } from "@heroui/react";
+import { Input } from "@heroui/react";
+import { Select, SelectItem } from "@heroui/react";
 import {
   Table,
   TableHeader,
@@ -15,7 +15,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
-} from "@heroui/table";
+} from "@heroui/react";
 import {
   Modal,
   ModalContent,
@@ -23,9 +23,9 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
-} from "@heroui/modal";
-import { Card, CardBody } from "@heroui/card";
-import { Tooltip } from "@heroui/tooltip";
+} from "@heroui/react";
+import { Card, CardBody } from "@heroui/react";
+import { Tooltip } from "@heroui/react";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
 import { SearchIcon } from "@/components/icons";
@@ -69,12 +69,15 @@ export default function TaxRatesPage() {
     rate_percentage: 0,
     status: "active" as "active" | "inactive",
   });
-  const [selectedLocale, setSelectedLocale] = useState(availableLanguages.find(l => l.isDefault)?.code || "en-US");
+  const [selectedLocale, setSelectedLocale] = useState(
+    availableLanguages.find((l) => l.isDefault)?.code || "en-US",
+  );
 
   const loadData = async () => {
     setLoading(true);
     try {
       const resp = await getJson(`${apiBase}/v1/tax-rates?limit=100`);
+
       setTaxRates(resp.items || []);
     } catch (err) {
       console.error("Failed to load tax rates", err);
@@ -98,9 +101,11 @@ export default function TaxRatesPage() {
     if (term) {
       filtered = filtered.filter(
         (r) =>
-          getTaxNameForLocale(r.display_name, i18n.language).toLowerCase().includes(term) ||
+          getTaxNameForLocale(r.display_name, i18n.language)
+            .toLowerCase()
+            .includes(term) ||
           (r.country_code?.toLowerCase() || "").includes(term) ||
-          (r.tax_code?.toLowerCase() || "").includes(term)
+          (r.tax_code?.toLowerCase() || "").includes(term),
       );
     }
 
@@ -117,7 +122,9 @@ export default function TaxRatesPage() {
       rate_percentage: 0,
       status: "active",
     });
-    setSelectedLocale(availableLanguages.find(l => l.isDefault)?.code || "en-US");
+    setSelectedLocale(
+      availableLanguages.find((l) => l.isDefault)?.code || "en-US",
+    );
     onOpen();
   };
 
@@ -146,15 +153,19 @@ export default function TaxRatesPage() {
       if (isEditMode && editingTaxRate) {
         const response = await patchJson(
           `${apiBase}/v1/tax-rates/${editingTaxRate.id}`,
-          payload
+          payload,
         );
+
         if (response) {
-          setTaxRates(taxRates.map((r) => (r.id === editingTaxRate.id ? response : r)));
+          setTaxRates(
+            taxRates.map((r) => (r.id === editingTaxRate.id ? response : r)),
+          );
         } else {
           await loadData();
         }
       } else {
         const response = await postJson(`${apiBase}/v1/tax-rates`, payload);
+
         if (response) {
           setTaxRates([...taxRates, response]);
         } else {
@@ -206,7 +217,9 @@ export default function TaxRatesPage() {
               className="w-48"
               label={t("admin-common-status")}
               selectedKeys={statusFilter ? [statusFilter] : []}
-              onSelectionChange={(key) => setStatusFilter(Array.from(key).join(""))}
+              onSelectionChange={(key) =>
+                setStatusFilter(Array.from(key).join(""))
+              }
             >
               <SelectItem key="">{t("all")}</SelectItem>
               <SelectItem key="active">Active</SelectItem>
@@ -224,7 +237,9 @@ export default function TaxRatesPage() {
                 <TableColumn>{t("admin-tax-rates-tax-code")}</TableColumn>
                 <TableColumn>{t("admin-tax-rates-rate")}</TableColumn>
                 <TableColumn>{t("admin-common-status")}</TableColumn>
-                <TableColumn width={100}>{t("admin-common-actions")}</TableColumn>
+                <TableColumn width={100}>
+                  {t("admin-common-actions")}
+                </TableColumn>
               </TableHeader>
               <TableBody
                 emptyContent={t("admin-common-empty")}
@@ -233,21 +248,46 @@ export default function TaxRatesPage() {
               >
                 {(item) => (
                   <TableRow key={item.id}>
-                    <TableCell>{getTaxNameForLocale(item.display_name, i18n.language)}</TableCell>
-                    <TableCell>{item.country_code || <span className="text-gray-400 italic">{t("admin-tax-rates-fallback")}</span>}</TableCell>
+                    <TableCell>
+                      {getTaxNameForLocale(item.display_name, i18n.language)}
+                    </TableCell>
+                    <TableCell>
+                      {item.country_code || (
+                        <span className="text-gray-400 italic">
+                          {t("admin-tax-rates-fallback")}
+                        </span>
+                      )}
+                    </TableCell>
                     <TableCell>{item.tax_code || "-"}</TableCell>
                     <TableCell>{item.rate_percentage}%</TableCell>
                     <TableCell>
-                      <span className={item.status === "active" ? "text-green-600 font-semibold" : "text-gray-400"}>
+                      <span
+                        className={
+                          item.status === "active"
+                            ? "text-green-600 font-semibold"
+                            : "text-gray-400"
+                        }
+                      >
                         {item.status}
                       </span>
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button isIconOnly size="sm" variant="light" onPress={() => handleOpenEdit(item)}>
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          variant="light"
+                          onPress={() => handleOpenEdit(item)}
+                        >
                           <Edit2 className="w-4 h-4" />
                         </Button>
-                        <Button isIconOnly color="danger" size="sm" variant="light" onPress={() => handleDelete(item.id)}>
+                        <Button
+                          isIconOnly
+                          color="danger"
+                          size="sm"
+                          variant="light"
+                          onPress={() => handleDelete(item.id)}
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -262,7 +302,9 @@ export default function TaxRatesPage() {
         <Modal isOpen={isOpen} size="lg" onOpenChange={onOpenChange}>
           <ModalContent>
             <ModalHeader>
-              {isEditMode ? t("admin-tax-rates-edit") : t("admin-tax-rates-create")}
+              {isEditMode
+                ? t("admin-tax-rates-edit")
+                : t("admin-tax-rates-create")}
             </ModalHeader>
             <ModalBody className="gap-4">
               <div className="flex items-center gap-2">
@@ -270,9 +312,9 @@ export default function TaxRatesPage() {
                   {t("admin-products-title-locale", "Language")}
                 </label>
                 <Select
-                  size="sm"
                   className="w-36"
                   selectedKeys={[selectedLocale]}
+                  size="sm"
                   onSelectionChange={(keys) =>
                     setSelectedLocale(Array.from(keys).join(""))
                   }
@@ -290,44 +332,60 @@ export default function TaxRatesPage() {
                   required
                   locale={selectedLocale}
                   value={formData.display_name}
-                  onChange={(val) => setFormData({ ...formData, display_name: val })}
+                  onChange={(val) =>
+                    setFormData({ ...formData, display_name: val })
+                  }
                   onLocaleChange={setSelectedLocale}
                 />
               </div>
               <div className="flex gap-4">
                 <Tooltip content={t("admin-tax-rates-country-help")}>
-                    <Input
+                  <Input
                     className="flex-1"
                     label={t("admin-tax-rates-country-code")}
+                    maxLength={2}
                     placeholder="FR"
                     value={formData.country_code || ""}
-                    onValueChange={(val) => setFormData({ ...formData, country_code: val.toUpperCase() })}
-                    maxLength={2}
-                    />
+                    onValueChange={(val) =>
+                      setFormData({
+                        ...formData,
+                        country_code: val.toUpperCase(),
+                      })
+                    }
+                  />
                 </Tooltip>
                 <Tooltip content={t("admin-tax-rates-tax-code-help")}>
-                    <Input
+                  <Input
                     className="flex-1"
                     label={t("admin-tax-rates-tax-code")}
                     placeholder="txcd_99999999"
                     value={formData.tax_code || ""}
-                    onValueChange={(val) => setFormData({ ...formData, tax_code: val })}
-                    />
+                    onValueChange={(val) =>
+                      setFormData({ ...formData, tax_code: val })
+                    }
+                  />
                 </Tooltip>
               </div>
               <Tooltip content={t("admin-tax-rates-rate-help")}>
                 <Input
-                  type="number"
                   label={t("admin-tax-rates-rate")}
                   placeholder="20.0"
+                  type="number"
                   value={formData.rate_percentage.toString()}
-                  onValueChange={(val) => setFormData({ ...formData, rate_percentage: Number(val) })}
+                  onValueChange={(val) =>
+                    setFormData({ ...formData, rate_percentage: Number(val) })
+                  }
                 />
               </Tooltip>
               <Select
                 label={t("admin-common-status")}
                 selectedKeys={[formData.status]}
-                onSelectionChange={(key) => setFormData({ ...formData, status: Array.from(key).join("") as any })}
+                onSelectionChange={(key) =>
+                  setFormData({
+                    ...formData,
+                    status: Array.from(key).join("") as any,
+                  })
+                }
               >
                 {STATUS_OPTIONS.map((opt) => (
                   <SelectItem key={opt}>{opt}</SelectItem>
@@ -338,7 +396,11 @@ export default function TaxRatesPage() {
               <Button variant="light" onPress={() => onOpenChange()}>
                 {t("admin-common-cancel")}
               </Button>
-              <Button color="primary" isDisabled={!formData.display_name} onPress={handleSave}>
+              <Button
+                color="primary"
+                isDisabled={!formData.display_name}
+                onPress={handleSave}
+              >
                 {t("admin-common-save")}
               </Button>
             </ModalFooter>

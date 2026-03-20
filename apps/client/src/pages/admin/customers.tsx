@@ -18,16 +18,19 @@
 
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Input } from "@heroui/input";
 import {
+  Input,
   Table,
   TableHeader,
   TableColumn,
   TableBody,
   TableRow,
   TableCell,
-} from "@heroui/table";
-import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+} from "@heroui/react";
 
 import DefaultLayout from "@/layouts/default";
 import { useSecuredApi } from "@/authentication";

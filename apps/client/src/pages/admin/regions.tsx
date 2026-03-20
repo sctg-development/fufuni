@@ -18,9 +18,9 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/input";
-import { Select, SelectItem } from "@heroui/select";
+import { Button } from "@heroui/react";
+import { Input } from "@heroui/react";
+import { Select, SelectItem } from "@heroui/react";
 import {
   Table,
   TableHeader,
@@ -28,8 +28,8 @@ import {
   TableBody,
   TableRow,
   TableCell,
-} from "@heroui/table";
-import { Checkbox } from "@heroui/checkbox";
+} from "@heroui/react";
+import { Checkbox } from "@heroui/react";
 import {
   Modal,
   ModalContent,
@@ -37,9 +37,9 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
-} from "@heroui/modal";
-import { Card, CardBody } from "@heroui/card";
-import { Tooltip } from "@heroui/tooltip";
+} from "@heroui/react";
+import { Card, CardBody } from "@heroui/react";
+import { Tooltip } from "@heroui/react";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
 import { SearchIcon } from "@/components/icons";
@@ -459,10 +459,16 @@ export default function RegionsPage() {
                     setFormData({ ...formData, tax_inclusive: value })
                   }
                 >
-                  {t("admin-regions-tax-inclusive-label", "Prices include taxes (TTC)")}
+                  {t(
+                    "admin-regions-tax-inclusive-label",
+                    "Prices include taxes (TTC)",
+                  )}
                 </Checkbox>
                 <p className="text-small text-default-500 ml-7">
-                  {t("admin-regions-tax-inclusive-help", "If checked, product prices in this region are considered tax-inclusive.")}
+                  {t(
+                    "admin-regions-tax-inclusive-help",
+                    "If checked, product prices in this region are considered tax-inclusive.",
+                  )}
                 </p>
               </div>
             </ModalBody>

@@ -18,9 +18,9 @@
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@heroui/button";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Radio, RadioGroup } from "@heroui/radio";
+import { Button } from "@heroui/react";
+import { Card, CardBody, CardHeader } from "@heroui/react";
+import { Radio, RadioGroup } from "@heroui/react";
 import { formatMoney } from "@/utils/currency";
 import { getAvailableShippingRates, selectShippingRate, type AvailableShippingRateItem } from "@/lib/store-api";
 
@@ -134,8 +134,8 @@ export default function ShippingRateSelector({
             <div
               key={rate.id}
               className={`flex items-center gap-4 p-4 rounded-lg border-2 transition cursor-pointer ${selectedId === rate.id
-                  ? "border-primary bg-primary-50"
-                  : "border-default-200 hover:border-default-300"
+                ? "border-primary bg-primary-50"
+                : "border-default-200 hover:border-default-300"
                 }`}
             >
               <Radio value={rate.id} className="shrink-0" />

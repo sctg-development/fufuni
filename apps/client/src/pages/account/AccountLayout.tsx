@@ -3,11 +3,11 @@
  * License: AGPL-3.0-or-later
  */
 
+import { Outlet, NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { Button } from "@heroui/react";
 
-import { Outlet, NavLink } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../authentication/providers/use-auth';
-import { Button } from '@heroui/react';
+import { useAuth } from "../../authentication/providers/use-auth";
 
 /**
  * Shared layout for all /account/* pages.
@@ -19,10 +19,13 @@ export default function AccountLayout() {
   const { user, logout } = auth as any;
 
   const navLinks = [
-    { to: '/account', label: t('account-dashboard', 'Dashboard'), end: true },
-    { to: '/account/orders', label: t('account-orders', 'My Orders') },
-    { to: '/account/addresses', label: t('account-addresses', 'Addresses') },
-    { to: '/account/preferences', label: t('account-preferences', 'Preferences') },
+    { to: "/account", label: t("account-dashboard", "Dashboard"), end: true },
+    { to: "/account/orders", label: t("account-orders", "My Orders") },
+    { to: "/account/addresses", label: t("account-addresses", "Addresses") },
+    {
+      to: "/account/preferences",
+      label: t("account-preferences", "Preferences"),
+    },
   ];
 
   const handleLogout = async () => {
@@ -34,22 +37,24 @@ export default function AccountLayout() {
       {/* Sidebar Navigation */}
       <nav className="w-full md:w-48 flex flex-col gap-2">
         <div className="mb-4">
-          <h2 className="text-lg font-bold">{user?.name || user?.email || 'Account'}</h2>
+          <h2 className="text-lg font-bold">
+            {user?.name || user?.email || "Account"}
+          </h2>
           <p className="text-sm text-gray-500">{user?.email}</p>
         </div>
 
         {navLinks.map((link) => (
           <NavLink
             key={link.to}
-            to={link.to}
-            end={link.end}
             className={({ isActive }) =>
               `px-3 py-2 rounded-lg transition ${
                 isActive
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-700 hover:bg-gray-100'
+                  ? "bg-blue-600 text-white"
+                  : "text-gray-700 hover:bg-gray-100"
               }`
             }
+            end={link.end}
+            to={link.to}
           >
             {link.label}
           </NavLink>
@@ -58,13 +63,13 @@ export default function AccountLayout() {
         <hr className="my-4" />
 
         <Button
-          color="danger"
-          variant="flat"
-          size="sm"
-          onClick={handleLogout}
           className="w-full"
+          color="danger"
+          size="sm"
+          variant="flat"
+          onClick={handleLogout}
         >
-          {t('account-logout', 'Logout')}
+          {t("account-logout", "Logout")}
         </Button>
       </nav>
 
