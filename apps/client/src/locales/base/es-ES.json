@@ -566,5 +566,7 @@
   "login-signup-auto": "Regístrese automáticamente en su primer inicio de sesión",
   "login-subtitle": "Accede a tu cuenta",
   "login-title": "Iniciar sesión",
-  "login-try-another-email": "Prueba con otro correo electrónico"
+  "login-try-another-email": "Prueba con otro correo electrónico",
+  "admin-products-ai-error": "",
+  "admin-products-ai-no-source": ""
 }

@@ -566,5 +566,7 @@
   "login-signup-auto": "قم بالتسجيل تلقائيًا عند تسجيل الدخول الأول",
   "login-subtitle": "الوصول إلى حسابك",
   "login-title": "تسجيل الدخول",
-  "login-try-another-email": "حاول بريدًا إلكترونيًا آخر"
+  "login-try-another-email": "حاول بريدًا إلكترونيًا آخر",
+  "admin-products-ai-error": "",
+  "admin-products-ai-no-source": ""
 }

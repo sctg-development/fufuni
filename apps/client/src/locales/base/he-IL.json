@@ -566,5 +566,7 @@
   "login-signup-auto": "הירשם אוטומטית בכניסה הראשונה שלך",
   "login-subtitle": "גישה לחשבון שלך",
   "login-title": "היכנס",
-  "login-try-another-email": "נסה אימייל אחר"
+  "login-try-another-email": "נסה אימייל אחר",
+  "admin-products-ai-error": "",
+  "admin-products-ai-no-source": ""
 }

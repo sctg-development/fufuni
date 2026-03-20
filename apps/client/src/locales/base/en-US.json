@@ -146,9 +146,6 @@
   "admin-products-field-barcode-placeholder": "e.g. EAN-13",
   "admin-products-field-compare-at-price-placeholder": "e.g. 3999",
   "admin-products-field-tax-code-placeholder": "e.g. txn_123456",
-  "product-card-tax-default": "VAT",
-  "product-card-tax-included": "Includes {{name}}",
-  "product-card-tax": "{{name}}",
   "admin-products-field-sku-placeholder": "e.g. TEE-BLK-M",
   "admin-products-field-variant-title-placeholder": "e.g. Black / Medium",
   "admin-products-field-price-placeholder": "Price in cents (e.g. 2999 for $29.99)",
@@ -156,7 +153,6 @@
   "admin-products-variant-save-error": "Failed to save variant",
   "edit": "Edit",
   "save": "Save",
-  "add-to-cart": "Add to cart",
   "products-error": "Failed to load products",
   "shop-products-title": "Products",
   "cart": "Shopping Cart",
@@ -565,5 +561,7 @@
   "account-marketing-emails": "Marketing Emails",
   "account-marketing-emails-desc": "Receive updates about new products and special offers",
   "account-save-changes": "Save Changes",
-  "account-saved-successfully": "Saved successfully!"
+  "account-saved-successfully": "Saved successfully!",
+  "admin-products-ai-error": "AI error",
+  "admin-products-ai-no-source": "AI no source texte"
 }

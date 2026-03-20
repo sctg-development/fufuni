@@ -566,5 +566,7 @@
   "login-signup-auto": "Inscrivez-vous automatiquement dès votre première connexion",
   "login-subtitle": "Accédez à votre compte",
   "login-title": "Se connecter",
-  "login-try-another-email": "Essayez un autre e-mail"
+  "login-try-another-email": "Essayez un autre e-mail",
+  "admin-products-ai-no-source": "Pas de texte source",
+  "admin-products-ai-error": "Erreur du modèle d'intélligence artificielle"
 }

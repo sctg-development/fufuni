@@ -566,5 +566,7 @@
   "login-signup-auto": "首次登录时自动注册",
   "login-subtitle": "访问您的帐户",
   "login-title": "登入",
-  "login-try-another-email": "尝试使用其他电子邮件"
+  "login-try-another-email": "尝试使用其他电子邮件",
+  "admin-products-ai-error": "",
+  "admin-products-ai-no-source": ""
 }
