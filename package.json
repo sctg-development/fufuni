@@ -11,7 +11,7 @@
   ],
   "devDependencies": {
     "fast-glob": "^3.3.3",
-    "turbo": "^2.8.14"
+    "turbo": "^2.8.20"
   },
   "scripts": {
     "dev": "turbo run dev --parallel",

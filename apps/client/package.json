@@ -19,8 +19,6 @@
   "dependencies": {
     "@auth0/auth0-react": "^2.15.0",
     "@heroui/react": "^2.8.10",
-    "jspdf": "^4.2.1",
-    "jspdf-autotable": "^5.0.7",
     "@react-aria/visually-hidden": "3.8.30",
     "@react-types/shared": "^3.33.0",
     "@tailwindcss/postcss": "^4.2.1",
@@ -29,10 +27,13 @@
     "@tiptap/extension-placeholder": "^3.20.1",
     "@tiptap/react": "^3.20.1",
     "@tiptap/starter-kit": "^3.20.1",
+    "clsx": "^2.1.1",
     "framer-motion": "12.34.3",
     "i18next": "^25.8.13",
     "i18next-http-backend": "^3.0.2",
     "jose": "^6.2.1",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.577.0",
     "oidc-client-ts": "^3.4.1",
     "react": "19.2.4",
@@ -51,8 +52,8 @@
     "@types/react-dom": "^19.2.3",
     "@types/swagger-jsdoc": "^6",
     "@types/swagger-ui-react": "^5.18.0",
-    "@typescript-eslint/eslint-plugin": "^8.57.0",
-    "@typescript-eslint/parser": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.1",
+    "@typescript-eslint/parser": "^8.57.1",
     "@vitejs/plugin-react": "^6.0.1",
     "autoprefixer": "^10.4.27",
     "dotenv": "^17.3.1",
@@ -67,11 +68,11 @@
     "eslint-plugin-unused-imports": "^4.4.1",
     "globals": "^17.4.0",
     "playwright": "^1.58.2",
-    "postcss": "^8.5.6",
+    "postcss": "^8.5.8",
     "prettier": "^3.8.1",
     "swagger-jsdoc": "^6.2.8",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "vite": "^8.0.0"
+    "vite": "^8.0.1"
   }
 }
