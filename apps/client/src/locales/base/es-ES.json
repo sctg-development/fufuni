@@ -217,6 +217,9 @@
   "admin-products-field-barcode-placeholder": "p.ej. EAN-13",
   "admin-products-field-compare-at-price-placeholder": "p.ej. 3999",
   "admin-products-field-tax-code-placeholder": "p.ej. txn_123456",
+  "product-card-tax-default": "IVA",
+  "product-card-tax-included": "Incluye {{name}}",
+  "product-card-tax": "{{name}}",
   "admin-products-field-sku-placeholder": "p.ej. TEE-BLK-M",
   "admin-products-field-variant-title-placeholder": "p.ej. Negro / Mediano",
   "admin-products-field-price-placeholder": "Precio en centavos (p.ej. 2999 para $29.99)",
@@ -262,7 +265,7 @@
   "save": "Ahorrar",
   "status": "Estado",
   "success": "Éxito",
-  "add-to-cart": "Añadir a la cesta",
+  "add-to-cart": "Agregar al carrito",
   "cart": "Carro de la compra",
   "cart-clear": "Limpiar carrito",
   "cart-empty": "Tu carrito está vacío.",
@@ -476,5 +479,12 @@
   "admin-tax-rates-rate-help": "Porcentaje de impuesto (por ejemplo, 20,0 por 20%)",
   "admin-tax-rates-tax-code": "código fiscal",
   "admin-tax-rates-tax-code-help": "Código fiscal compatible con Stripe (p. ej., txcd_10000000).",
-  "admin-tax-rates-title": "Tasas de impuestos"
+  "admin-tax-rates-title": "Tasas de impuestos",
+  "vendor": "Vendedor",
+  "handle": "Handle",
+  "barcode": "Código de barras",
+  "tax-code": "Código de impuesto",
+  "requires-shipping": "Requiere envío",
+  "yes": "Sí",
+  "no": "No"
 }

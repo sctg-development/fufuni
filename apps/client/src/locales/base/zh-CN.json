@@ -216,6 +216,9 @@
   "admin-products-field-barcode-placeholder": "例如 EAN-13",
   "admin-products-field-compare-at-price-placeholder": "例如 3999",
   "admin-products-field-tax-code-placeholder": "例如 txn_123456",
+  "product-card-tax-default": "增值税",
+  "product-card-tax-included": "含 {{name}}",
+  "product-card-tax": "{{name}}",
   "admin-products-field-sku-placeholder": "例如 TEE-BLK-M",
   "admin-products-field-variant-title-placeholder": "例如 黑色/中号",
   "admin-products-field-price-placeholder": "价格以美分为单位（例如 2999 表示 $29.99）",
@@ -262,7 +265,7 @@
   "save": "节省",
   "status": "地位",
   "success": "成功",
-  "add-to-cart": "添加到购物车",
+  "add-to-cart": "加入购物车",
   "cart": "购物车",
   "cart-clear": "清除购物车",
   "cart-empty": "您的购物车是空的。",
@@ -476,5 +479,12 @@
   "admin-tax-rates-rate-help": "税率（例如，20.0 表示 20%）",
   "admin-tax-rates-tax-code": "税码",
   "admin-tax-rates-tax-code-help": "与 Stripe 兼容的税码（例如 txcd_10000000）。",
-  "admin-tax-rates-title": "税率"
+  "admin-tax-rates-title": "税率",
+  "vendor": "供应商",
+  "handle": "标识",
+  "barcode": "条形码",
+  "tax-code": "税码",
+  "requires-shipping": "需要运输",
+  "yes": "是",
+  "no": "否"
 }

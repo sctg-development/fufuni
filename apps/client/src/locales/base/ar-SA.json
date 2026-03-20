@@ -118,6 +118,9 @@
   "admin-customers-col-email": "بريد إلكتروني",
   "admin-customers-col-first-order": "الطلب الأول",
   "admin-customers-col-name": "اسم",
+  "product-card-tax-default": "الضريبة",
+  "product-card-tax-included": "يشمل {{name}}",
+  "product-card-tax": "{{name}}",
   "admin-customers-col-orders": "طلبات",
   "admin-customers-col-spent": "إجمالي الإنفاق",
   "admin-customers-empty": "لا يوجد عملاء حتى الآن. \nيتم إنشاء العملاء تلقائيًا عند تقديم الطلبات.",
@@ -476,5 +479,12 @@
   "admin-tax-rates-rate-help": "نسبة الضريبة (على سبيل المثال، 20.0 مقابل 20%)",
   "admin-tax-rates-tax-code": "قانون الضرائب",
   "admin-tax-rates-tax-code-help": "رمز الضريبة متوافق مع Stripe (على سبيل المثال، txcd_10000000).",
-  "admin-tax-rates-title": "معدلات الضرائب"
+  "admin-tax-rates-title": "معدلات الضرائب",
+  "vendor": "البائع",
+  "handle": "معرف",
+  "barcode": "الباركود",
+  "tax-code": "رمز الضريبة",
+  "requires-shipping": "يتطلب شحن",
+  "yes": "نعم",
+  "no": "لا"
 }

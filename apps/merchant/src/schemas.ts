@@ -71,6 +71,9 @@ export const VariantResponse = z.object({
   barcode: z.string().nullable().openapi({ example: '3760093570015', description: 'EAN-13, UPC-A or any GTIN barcode' }),
   compare_at_price_cents: z.number().int().nullable().openapi({ example: 4999, description: 'Original price shown crossed-out (must be > price_cents)' }),
   tax_code: z.string().nullable().openapi({ example: 'txcd_99999999', description: 'Stripe Tax product code — see https://stripe.com/docs/tax/tax-categories' }),
+  tax_rate_percentage: z.number().int().default(0).openapi({ example: 20, description: 'Effective tax rate percentage for the variant' }),
+  tax_display_name: z.string().nullable().openapi({ example: 'TVA', description: 'Localized tax name (from tax rate) for display' }),
+  tax_inclusive: z.boolean().default(false).openapi({ example: false, description: 'If true price is tax-included (TTC); false means HT' }),
 }).openapi('Variant');
 
 export const CreateVariantBody = z.object({

@@ -246,7 +246,11 @@ function generateHandle(title: string): string {
  * Maps a raw variant row from SQLite to the API response shape.
  * Call this everywhere you return a variant to avoid repeating the mapping.
  */
-function mapVariant(v: Record<string, unknown>) {
+function mapVariant(
+  v: Record<string, unknown>,
+  taxRate: { rate_percentage?: number; display_name?: string; } | null,
+  defaultTaxInclusive: boolean,
+) {
   return {
     id: v.id as string,
     sku: v.sku as string,
@@ -261,13 +265,22 @@ function mapVariant(v: Record<string, unknown>) {
     barcode: (v.barcode ?? null) as string | null,
     compare_at_price_cents: (v.compare_at_price_cents ?? null) as number | null,
     tax_code: (v.tax_code ?? null) as string | null,
+    tax_rate_percentage: (taxRate?.rate_percentage ?? 0) as number,
+    tax_display_name: (taxRate?.display_name ?? null) as string | null,
+    tax_inclusive: (v.tax_inclusive as boolean | undefined) ?? defaultTaxInclusive,
   }
 }
 
 /**
  * Maps a raw product row (with its variants) to the API response shape.
  */
-function mapProduct(p: Record<string, unknown>, variants: Record<string, unknown>[]) {
+function mapProduct(
+  p: Record<string, unknown>,
+  variants: Record<string, unknown>[],
+  taxRateByCode: Record<string, any>,
+  defaultTaxRate: any | null,
+  defaultTaxInclusive: boolean,
+) {
   return {
     id: p.id as string,
     title: p.title as string,
@@ -278,7 +291,11 @@ function mapProduct(p: Record<string, unknown>, variants: Record<string, unknown
     vendor: (p.vendor ?? null) as string | null,
     tags: (p.tags ?? null) as string | null,
     handle: (p.handle ?? null) as string | null,
-    variants: variants.map(mapVariant),
+    variants: variants.map((v) => {
+      const code = (v.tax_code as string | null) ?? null;
+      const selectedRate = code ? taxRateByCode[code] : null;
+      return mapVariant(v, selectedRate || defaultTaxRate, defaultTaxInclusive);
+    }),
   }
 }
 
@@ -329,7 +346,23 @@ app.openapi(listProducts, async (c) => {
     }
   }
 
-  const items = products.map((p) => mapProduct(p, variantsByProduct[p.id] || []));
+  const activeTaxRates = await db.query<any>(`SELECT * FROM tax_rates WHERE status = 'active'`);
+  const taxRateByCode: Record<string, any> = {};
+  let defaultTaxRate: any | null = null;
+  for (const tr of activeTaxRates) {
+    if (tr.tax_code) {
+      taxRateByCode[tr.tax_code] = tr;
+    } else if (!defaultTaxRate) {
+      defaultTaxRate = tr;
+    }
+  }
+
+  const [defaultRegion] = await db.query<any>(`SELECT tax_inclusive FROM regions WHERE is_default = 1 LIMIT 1`);
+  const defaultTaxInclusive = defaultRegion ? defaultRegion.tax_inclusive === 1 : false;
+
+  const items = products.map((p) =>
+    mapProduct(p, variantsByProduct[p.id] || [], taxRateByCode, defaultTaxRate, defaultTaxInclusive),
+  );
 
   const nextCursor = hasMore && items.length > 0 ? items[items.length - 1].created_at : null;
 
@@ -411,7 +444,21 @@ app.openapi(getProduct, async (c) => {
     [id]
   );
 
-  return c.json(mapProduct(product, variants), 200);
+  const activeTaxRates = await db.query<any>(`SELECT * FROM tax_rates WHERE status = 'active'`);
+  const taxRateByCode: Record<string, any> = {};
+  let defaultTaxRate: any | null = null;
+  for (const tr of activeTaxRates) {
+    if (tr.tax_code) {
+      taxRateByCode[tr.tax_code] = tr;
+    } else if (!defaultTaxRate) {
+      defaultTaxRate = tr;
+    }
+  }
+
+  const [defaultRegion] = await db.query<any>(`SELECT tax_inclusive FROM regions WHERE is_default = 1 LIMIT 1`);
+  const defaultTaxInclusive = defaultRegion ? defaultRegion.tax_inclusive === 1 : false;
+
+  return c.json(mapProduct(product, variants, taxRateByCode, defaultTaxRate, defaultTaxInclusive), 200);
 });
 
 const createProduct = createRoute({

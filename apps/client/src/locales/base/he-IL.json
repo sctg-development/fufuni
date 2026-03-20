@@ -168,6 +168,9 @@
   "admin-orders-track-package": "עקוב אחר חבילת",
   "admin-orders-tracking": "מַעֲקָב",
   "admin-orders-tracking-placeholder": "מספר מעקב",
+  "product-card-tax-default": "מע\"מ",
+  "product-card-tax-included": "כולל {{name}}",
+  "product-card-tax": "{{name}}",
   "admin-products-btn-add": "הוסף מוצר",
   "admin-products-btn-cancel": "לְבַטֵל",
   "admin-products-btn-create": "לִיצוֹר",
@@ -262,7 +265,7 @@
   "save": "לְהַצִיל",
   "status": "סטָטוּס",
   "success": "הַצלָחָה",
-  "add-to-cart": "הוסף לעגלה",
+  "add-to-cart": "הוסף לסל",
   "cart": "סל קניות",
   "cart-clear": "נקה עגלה",
   "cart-empty": "העגלה שלך ריקה.",
@@ -476,5 +479,12 @@
   "admin-tax-rates-rate-help": "אחוז מס (לדוגמה, 20.0 עבור 20%)",
   "admin-tax-rates-tax-code": "קוד מס",
   "admin-tax-rates-tax-code-help": "קוד מס תואם ל-Stripe (למשל, txcd_10000000).",
-  "admin-tax-rates-title": "שיעורי מס"
+  "admin-tax-rates-title": "שיעורי מס",
+  "vendor": "ספק",
+  "handle": "מזהה",
+  "barcode": "ברקוד",
+  "tax-code": "קוד מס",
+  "requires-shipping": "דורש משלוח",
+  "yes": "כן",
+  "no": "לא"
 }

@@ -22,7 +22,7 @@ import { StoreProduct } from "@/lib/store-api";
 import { useTranslation } from "react-i18next";
 import { useCart } from "@/hooks/useCart";
 import { formatMoney } from "@/utils/currency";
-import { resolveDescription, resolveTitle, resolveVendor, resolveTags, resolveHandle } from "@/utils/description";
+import { resolveDescription, resolveTitle, resolveVendor, resolveTags, resolveHandle, getTaxNameForLocale } from "@/utils/description";
 import { Button } from "@heroui/button";
 
 interface Props {
@@ -35,8 +35,7 @@ interface Props {
  * Manages variant selection through local state.
  */
 export const ProductCardFull: React.FC<Props> = ({ product }) => {
-  const { t } = useTranslation();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { addItem } = useCart();
 
   // Local state for managing variant selection
@@ -75,6 +74,29 @@ export const ProductCardFull: React.FC<Props> = ({ product }) => {
   // Resolve title for current locale
   const displayTitle = resolveTitle(product.title, i18n.language);
 
+  const taxRate = variant?.tax_rate_percentage ?? 0;
+  const taxInclusive = !!variant?.tax_inclusive;
+  const taxDisplayName = variant?.tax_display_name
+    ? getTaxNameForLocale(variant.tax_display_name, i18n.language)
+    : "";
+
+  // User request: when tax_inclusive true, treat base price as composable with tax (59.99 * 20% = 12.00)
+  // (Previous behavior computed reverse-inclusive portion as 10.00 for 59.99@20%)
+  const taxAmountCents =
+    variant && taxRate > 0
+      ? Math.round(variant.price_cents * (taxRate / 100))
+      : null;
+
+  const taxAmount =
+    taxAmountCents !== null && taxAmountCents !== undefined
+      ? formatMoney(taxAmountCents, currency)
+      : null;
+
+  const resolvedTaxName = taxDisplayName || t("product-card-tax-default");
+  const taxLabel = taxInclusive
+    ? t("product-card-tax-included", { name: resolvedTaxName })
+    : t("product-card-tax", { name: resolvedTaxName });
+
   /**
    * Handle variant selection and update state
    */
@@ -105,7 +127,7 @@ export const ProductCardFull: React.FC<Props> = ({ product }) => {
 
       {vendor && (
         <p className="text-xs text-default-500 mb-1">
-          {t("vendor", "Vendor")}: {vendor}
+          {t("vendor")}: {vendor}
         </p>
       )}
 
@@ -124,7 +146,7 @@ export const ProductCardFull: React.FC<Props> = ({ product }) => {
 
       {handle && (
         <p className="text-xs text-default-400 mb-2">
-          {t("handle", "Handle")}: {handle}
+          {t("handle")}: {handle}
         </p>
       )}
 
@@ -185,22 +207,28 @@ export const ProductCardFull: React.FC<Props> = ({ product }) => {
       )}
 
       {/* Variant details (optional enrichment fields) */}
-      {(variant?.barcode || variant?.tax_code || variant?.requires_shipping !== undefined) && (
+      {(variant?.barcode || variant?.tax_code || taxAmount || variant?.requires_shipping !== undefined) && (
         <div className="mb-4 text-xs text-default-600">
           {variant?.barcode && (
             <p>
-              <span className="font-semibold">{t("barcode", "Barcode")}:</span> {variant.barcode}
+              <span className="font-semibold">{t("barcode")}:</span> {variant.barcode}
             </p>
           )}
-          {variant?.tax_code && (
+          {taxAmount ? (
             <p>
-              <span className="font-semibold">{t("tax-code", "Tax code")}:</span> {variant.tax_code}
+              <span className="font-semibold">{taxLabel}:</span> {taxAmount}
             </p>
+          ) : (
+            variant?.tax_code && (
+              <p>
+                <span className="font-semibold">{t("tax-code")}:</span> {variant.tax_code}
+              </p>
+            )
           )}
           {variant?.requires_shipping !== undefined && (
             <p>
-              <span className="font-semibold">{t("requires-shipping", "Requires shipping")}:</span>{' '}
-              {variant.requires_shipping ? t("yes", "Yes") : t("no", "No")}
+              <span className="font-semibold">{t("requires-shipping")}:</span>{' '}
+              {variant.requires_shipping ? t("yes") : t("no")}
             </p>
           )}
         </div>

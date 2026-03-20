@@ -68,6 +68,9 @@ export interface StoreVariant {
   barcode?: string | null;
   compare_at_price_cents?: number | null;
   tax_code?: string | null;
+  tax_rate_percentage?: number | null;
+  tax_inclusive?: boolean;
+  tax_display_name?: string | null;
 }
 
 export interface StoreProduct {
