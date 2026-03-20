@@ -103,10 +103,7 @@ export function RichDescriptionEditor({
     extensions: [
       StarterKit,
       Placeholder.configure({
-        placeholder: t(
-          'admin-products-description-placeholder',
-          'Enter product description…'
-        ),
+        placeholder: t('admin-products-description-placeholder'),
       }),
     ],
     // Load initial content for the current locale
@@ -192,7 +189,7 @@ export function RichDescriptionEditor({
       }
 
       if (!sourceHtml) {
-        alert(t('admin-products-ai-no-source', 'No source content to translate from.'));
+        alert(t('admin-products-ai-no-source'));
         return;
       }
 
@@ -239,7 +236,7 @@ export function RichDescriptionEditor({
           <Select
             size="sm"
             className="w-36"
-            aria-label={t('admin-products-description-locale', 'Language')}
+            aria-label={t('admin-products-description-locale')}
             selectedKeys={[selectedLocale]}
             onSelectionChange={(keys) =>
               handleLocaleChange(Array.from(keys).join(''))
@@ -253,21 +250,21 @@ export function RichDescriptionEditor({
 
         <div className="w-px h-6 bg-default-200 mx-1" />
 
-        <Tooltip content={t('admin-products-editor-bold', 'Bold')}>
+        <Tooltip content={t('admin-products-editor-bold')}>
           <Button isIconOnly size="sm" variant={v(editor.isActive('bold'))}
             onPress={() => editor.chain().focus().toggleBold().run()}>
             <Bold size={14} />
           </Button>
         </Tooltip>
 
-        <Tooltip content={t('admin-products-editor-italic', 'Italic')}>
+        <Tooltip content={t('admin-products-editor-italic')}>
           <Button isIconOnly size="sm" variant={v(editor.isActive('italic'))}
             onPress={() => editor.chain().focus().toggleItalic().run()}>
             <Italic size={14} />
           </Button>
         </Tooltip>
 
-        <Tooltip content={t('admin-products-editor-h2', 'Heading 2')}>
+        <Tooltip content={t('admin-products-editor-h2')}>
           <Button isIconOnly size="sm"
             variant={v(editor.isActive('heading', { level: 2 }))}
             onPress={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>
@@ -275,7 +272,7 @@ export function RichDescriptionEditor({
           </Button>
         </Tooltip>
 
-        <Tooltip content={t('admin-products-editor-h3', 'Heading 3')}>
+        <Tooltip content={t('admin-products-editor-h3')}>
           <Button isIconOnly size="sm"
             variant={v(editor.isActive('heading', { level: 3 }))}
             onPress={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}>
@@ -283,14 +280,14 @@ export function RichDescriptionEditor({
           </Button>
         </Tooltip>
 
-        <Tooltip content={t('admin-products-editor-ul', 'Bullet list')}>
+        <Tooltip content={t('admin-products-editor-ul')}>
           <Button isIconOnly size="sm" variant={v(editor.isActive('bulletList'))}
             onPress={() => editor.chain().focus().toggleBulletList().run()}>
             <List size={14} />
           </Button>
         </Tooltip>
 
-        <Tooltip content={t('admin-products-editor-ol', 'Ordered list')}>
+        <Tooltip content={t('admin-products-editor-ol')}>
           <Button isIconOnly size="sm" variant={v(editor.isActive('orderedList'))}
             onPress={() => editor.chain().focus().toggleOrderedList().run()}>
             <ListOrdered size={14} />
@@ -299,7 +296,7 @@ export function RichDescriptionEditor({
 
         <div className="w-px h-6 bg-default-200 mx-1" />
 
-        <Tooltip content={t('admin-products-editor-undo', 'Undo')}>
+        <Tooltip content={t('admin-products-editor-undo')}>
           <Button isIconOnly size="sm" variant="light"
             isDisabled={!editor.can().undo()}
             onPress={() => editor.chain().focus().undo().run()}>
@@ -307,7 +304,7 @@ export function RichDescriptionEditor({
           </Button>
         </Tooltip>
 
-        <Tooltip content={t('admin-products-editor-redo', 'Redo')}>
+        <Tooltip content={t('admin-products-editor-redo')}>
           <Button isIconOnly size="sm" variant="light"
             isDisabled={!editor.can().redo()}
             onPress={() => editor.chain().focus().redo().run()}>
@@ -319,14 +316,14 @@ export function RichDescriptionEditor({
 
         {/* AI translate button - only visible if user has permission */}
         {canUseAi && (
-          <Tooltip content={t('admin-products-editor-ai', 'Translate with AI')}>
+          <Tooltip content={t('admin-products-editor-ai')}>
             <Button
               size="sm" variant="light" color="secondary"
               isLoading={isTranslating}
               onPress={handleAiTranslate}
               startContent={!isTranslating ? <Sparkles size={14} /> : undefined}
             >
-              {t('admin-products-editor-ai-btn', 'AI')}
+              {t('admin-products-editor-ai-btn')}
             </Button>
           </Tooltip>
         )}

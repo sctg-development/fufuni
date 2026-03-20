@@ -268,13 +268,13 @@ export default function RegionsPage() {
             <Input
               isClearable
               className="w-full"
-              placeholder={t("admin-common-search", "Search...")}
+              placeholder={t("admin-common-search")}
               startContent={<SearchIcon className="w-4 h-4" />}
               value={globalFilter}
               onValueChange={setGlobalFilter}
             />
             <Select
-              label={t("admin-common-status", "Status")}
+              label={t("admin-common-status")}
               selectedKeys={statusFilter ? [statusFilter] : []}
               onSelectionChange={(key) =>
                 setStatusFilter(Array.from(key).join(""))
@@ -292,31 +292,29 @@ export default function RegionsPage() {
             <Table isStriped>
               <TableHeader>
                 <TableColumn key="display_name">
-                  {t("admin-common-name", "Name")}
+                  {t("admin-common-name")}
                 </TableColumn>
                 <TableColumn key="currency">
-                  {t("admin-common-currency", "Currency")}
+                  {t("admin-common-currency")}
                 </TableColumn>
                 <TableColumn key="is_default">
-                  {t("admin-common-default", "Default")}
+                  {t("admin-common-default")}
                 </TableColumn>
                 <TableColumn key="tax_inclusive">
-                  {t("admin-regions-tax-inclusive", "Tax Inclusive")}
+                  {t("admin-regions-tax-inclusive")}
                 </TableColumn>
                 <TableColumn key="status">
-                  {t("admin-common-status", "Status")}
+                  {t("admin-common-status")}
                 </TableColumn>
                 <TableColumn key="actions">
-                  {t("admin-common-actions", "Actions")}
+                  {t("admin-common-actions")}
                 </TableColumn>
               </TableHeader>
               <TableBody
-                emptyContent={<div>{t("admin-common-empty", "No data")}</div>}
+                emptyContent={<div>{t("admin-common-empty")}</div>}
                 isLoading={loading}
                 items={displayed}
-                loadingContent={
-                  <div>{t("admin-common-loading", "Loading...")}</div>
-                }
+                loadingContent={<div>{t("admin-common-loading")}</div>}
               >
                 {(region: Region) => (
                   <TableRow key={region.id}>
@@ -397,7 +395,7 @@ export default function RegionsPage() {
                 )}
               >
                 <Input
-                  label={t("admin-common-name", "Name")}
+                  label={t("admin-common-name")}
                   placeholder="Enter region name"
                   value={formData.display_name}
                   onValueChange={(value) =>
@@ -412,7 +410,7 @@ export default function RegionsPage() {
                 )}
               >
                 <Select
-                  label={t("admin-common-currency", "Currency")}
+                  label={t("admin-common-currency")}
                   selectedKeys={
                     formData.currency_id ? [formData.currency_id] : []
                   }
@@ -437,7 +435,7 @@ export default function RegionsPage() {
                 )}
               >
                 <Select
-                  label={t("admin-common-status", "Status")}
+                  label={t("admin-common-status")}
                   selectedKeys={[formData.status]}
                   onSelectionChange={(key) =>
                     setFormData({
@@ -478,14 +476,14 @@ export default function RegionsPage() {
                 variant="light"
                 onPress={() => onOpenChange()}
               >
-                {t("admin-common-cancel", "Cancel")}
+                {t("admin-common-cancel")}
               </Button>
               <Button
                 color="primary"
                 isDisabled={!formData.display_name || !formData.currency_id}
                 onPress={handleSave}
               >
-                {t("admin-common-save", "Save")}
+                {t("admin-common-save")}
               </Button>
             </ModalFooter>
           </ModalContent>

@@ -268,13 +268,13 @@ export default function CountriesPage() {
             <Input
               isClearable
               className="w-full"
-              placeholder={t("admin-common-search", "Search...")}
+              placeholder={t("admin-common-search")}
               startContent={<SearchIcon className="w-4 h-4" />}
               value={globalFilter}
               onValueChange={setGlobalFilter}
             />
             <Select
-              label={t("admin-common-status", "Status")}
+              label={t("admin-common-status")}
               selectedKeys={statusFilter ? [statusFilter] : []}
               onSelectionChange={(key) =>
                 setStatusFilter(Array.from(key).join(""))
@@ -291,32 +291,28 @@ export default function CountriesPage() {
           <CardBody>
             <Table isStriped>
               <TableHeader>
-                <TableColumn key="code">
-                  {t("admin-common-code", "Code")}
-                </TableColumn>
+                <TableColumn key="code">{t("admin-common-code")}</TableColumn>
                 <TableColumn key="display_name">
-                  {t("admin-common-name", "Display Name")}
+                  {t("admin-common-name")}
                 </TableColumn>
                 <TableColumn key="country_name">
-                  {t("admin-countries-fullname", "Full Name")}
+                  {t("admin-countries-fullname")}
                 </TableColumn>
                 <TableColumn key="language_code">
-                  {t("admin-common-language", "Language")}
+                  {t("admin-common-language")}
                 </TableColumn>
                 <TableColumn key="status">
-                  {t("admin-common-status", "Status")}
+                  {t("admin-common-status")}
                 </TableColumn>
                 <TableColumn key="actions">
-                  {t("admin-common-actions", "Actions")}
+                  {t("admin-common-actions")}
                 </TableColumn>
               </TableHeader>
               <TableBody
-                emptyContent={<div>{t("admin-common-empty", "No data")}</div>}
+                emptyContent={<div>{t("admin-common-empty")}</div>}
                 isLoading={loading}
                 items={displayed}
-                loadingContent={
-                  <div>{t("admin-common-loading", "Loading...")}</div>
-                }
+                loadingContent={<div>{t("admin-common-loading")}</div>}
               >
                 {(country) => (
                   <TableRow key={country.id}>
@@ -369,8 +365,8 @@ export default function CountriesPage() {
           <ModalContent>
             <ModalHeader className="flex flex-col gap-1">
               {isEditMode
-                ? t("admin-countries-edit", "Edit Country")
-                : t("admin-countries-create", "Create Country")}
+                ? t("admin-countries-edit")
+                : t("admin-countries-create")}
             </ModalHeader>
             <ModalBody>
               <Tooltip
@@ -381,7 +377,7 @@ export default function CountriesPage() {
               >
                 <Input
                   isDisabled={isEditMode}
-                  label={t("admin-common-code", "Code")}
+                  label={t("admin-common-code")}
                   maxLength={2}
                   placeholder="US"
                   value={formData.code}
@@ -390,9 +386,9 @@ export default function CountriesPage() {
                   }
                 />
               </Tooltip>
-              <Tooltip content={t("admin-common-name", "Display Name")}>
+              <Tooltip content={t("admin-common-name")}>
                 <Input
-                  label={t("admin-common-name", "Display Name")}
+                  label={t("admin-common-name")}
                   placeholder="United States"
                   value={formData.display_name}
                   onValueChange={(value) =>
@@ -400,11 +396,9 @@ export default function CountriesPage() {
                   }
                 />
               </Tooltip>
-              <Tooltip
-                content={t("admin-countries-code-help", "Full country name")}
-              >
+              <Tooltip content={t("admin-countries-code-help")}>
                 <Input
-                  label={t("admin-countries-fullname", "Full Name")}
+                  label={t("admin-countries-fullname")}
                   placeholder="United States of America"
                   value={formData.country_name}
                   onValueChange={(value) =>
@@ -419,7 +413,7 @@ export default function CountriesPage() {
                 )}
               >
                 <Select
-                  label={t("admin-common-language", "Language")}
+                  label={t("admin-common-language")}
                   selectedKeys={[formData.language_code]}
                   onSelectionChange={(key) =>
                     setFormData({
@@ -433,9 +427,9 @@ export default function CountriesPage() {
                   ))}
                 </Select>
               </Tooltip>
-              <Tooltip content={t("admin-common-status", "Status")}>
+              <Tooltip content={t("admin-common-status")}>
                 <Select
-                  label={t("admin-common-status", "Status")}
+                  label={t("admin-common-status")}
                   selectedKeys={[formData.status]}
                   onSelectionChange={(key) =>
                     setFormData({
@@ -456,14 +450,14 @@ export default function CountriesPage() {
                 variant="light"
                 onPress={() => onOpenChange()}
               >
-                {t("admin-common-cancel", "Cancel")}
+                {t("admin-common-cancel")}
               </Button>
               <Button
                 color="primary"
                 isDisabled={!formData.display_name || !formData.country_name}
                 onPress={handleSave}
               >
-                {t("admin-common-save", "Save")}
+                {t("admin-common-save")}
               </Button>
             </ModalFooter>
           </ModalContent>

@@ -309,7 +309,7 @@ export default function TaxRatesPage() {
             <ModalBody className="gap-4">
               <div className="flex items-center gap-2">
                 <label className="block text-sm font-medium">
-                  {t("admin-products-title-locale", "Language")}
+                  {t("admin-products-title-locale")}
                 </label>
                 <Select
                   className="w-36"

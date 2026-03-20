@@ -87,7 +87,7 @@ export default function Preferences() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <Spinner label={t("loading", "Loading...")} />
+        <Spinner label={t("loading")} />
       </div>
     );
   }
@@ -95,23 +95,19 @@ export default function Preferences() {
   if (!profile) {
     return (
       <Card>
-        <CardBody>{t("account-error", "Failed to load profile")}</CardBody>
+        <CardBody>{t("account-error")}</CardBody>
       </Card>
     );
   }
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <h1 className="text-2xl font-bold">
-        {t("account-preferences", "Preferences & Settings")}
-      </h1>
+      <h1 className="text-2xl font-bold">{t("account-preferences")}</h1>
 
       {/* Profile Section */}
       <Card>
         <CardHeader>
-          <h2 className="text-lg font-semibold">
-            {t("account-profile-info", "Profile Information")}
-          </h2>
+          <h2 className="text-lg font-semibold">{t("account-profile-info")}</h2>
         </CardHeader>
         <Divider />
         <CardBody className="gap-4">
@@ -121,20 +117,20 @@ export default function Preferences() {
               "account-email-cannot-change",
               "Email cannot be changed",
             )}
-            label={t("account-email", "Email")}
+            label={t("account-email")}
             value={profile.email}
           />
 
           <Input
-            label={t("account-name", "Name")}
-            placeholder={t("account-enter-name", "Enter your name")}
+            label={t("account-name")}
+            placeholder={t("account-enter-name")}
             value={formData.name || ""}
             onValueChange={(value) => setFormData({ ...formData, name: value })}
           />
 
           <Input
-            label={t("account-phone", "Phone Number")}
-            placeholder={t("account-enter-phone", "Enter your phone number")}
+            label={t("account-phone")}
+            placeholder={t("account-enter-phone")}
             type="tel"
             value={formData.phone || ""}
             onValueChange={(value) =>
@@ -143,7 +139,7 @@ export default function Preferences() {
           />
 
           <Select
-            label={t("account-language", "Language")}
+            label={t("account-language")}
             selectedKeys={formData.locale ? [formData.locale] : ["en-US"]}
             onSelectionChange={(keys) => {
               const selected = Array.from(keys)[0] as string;
@@ -164,16 +160,14 @@ export default function Preferences() {
       <Card>
         <CardHeader>
           <h2 className="text-lg font-semibold">
-            {t("account-communication", "Communication Preferences")}
+            {t("account-communication")}
           </h2>
         </CardHeader>
         <Divider />
         <CardBody className="gap-4">
           <div className="flex justify-between items-center">
             <div>
-              <p className="font-semibold">
-                {t("account-marketing-emails", "Marketing Emails")}
-              </p>
+              <p className="font-semibold">{t("account-marketing-emails")}</p>
               <p className="text-sm text-gray-500">
                 {t(
                   "account-marketing-emails-desc",
@@ -202,11 +196,11 @@ export default function Preferences() {
           isLoading={saving}
           onClick={handleSave}
         >
-          {t("account-save-changes", "Save Changes")}
+          {t("account-save-changes")}
         </Button>
         {saveSuccess && (
           <span className="text-green-600 flex items-center">
-            {t("account-saved-successfully", "Saved successfully!")}
+            {t("account-saved-successfully")}
           </span>
         )}
       </div>

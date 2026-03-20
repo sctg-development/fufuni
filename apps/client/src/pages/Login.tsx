@@ -37,7 +37,7 @@ export default function LoginPage() {
     e.preventDefault();
     
     if (!email) {
-      setError(t('login-email-required', 'Email is required'));
+      setError(t('login-email-required'));
       return;
     }
 
@@ -59,7 +59,7 @@ export default function LoginPage() {
     } catch (err) {
       console.error('Login error:', err);
       setError(
-        t('login-error', 'An error occurred. Please try again.')
+        t('login-error')
       );
       setLoading(false);
     }
@@ -71,25 +71,25 @@ export default function LoginPage() {
         <Card className="w-full max-w-md">
           <CardHeader className="flex gap-3 justify-center">
             <div className="text-center">
-              <h1 className="text-2xl font-bold">{t('login-check-email', 'Check your email')}</h1>
+              <h1 className="text-2xl font-bold">{t('login-check-email')}</h1>
             </div>
           </CardHeader>
           <CardBody className="gap-4">
             <div className="text-center space-y-4">
               <p className="text-gray-600">
-                {t('login-sent-link', 'We sent a magic link to:')}
+                {t('login-sent-link')}
               </p>
               <p className="font-semibold text-lg">{email}</p>
               
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <p className="text-sm text-gray-700">
-                  {t('login-instructions', 'Click the link in the email to log in instantly — no password needed.')}
+                  {t('login-instructions')}
                 </p>
               </div>
 
               <div className="pt-4 border-t">
                 <p className="text-sm text-gray-500 mb-4">
-                  {t('login-didnt-receive', "Didn't receive the email?")}
+                  {t('login-didnt-receive')}
                 </p>
                 <Button
                   variant="light"
@@ -99,7 +99,7 @@ export default function LoginPage() {
                   }}
                   className="w-full"
                 >
-                  {t('login-try-another-email', 'Try another email')}
+                  {t('login-try-another-email')}
                 </Button>
               </div>
             </div>
@@ -114,9 +114,9 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="flex gap-3 flex-col justify-center">
           <div className="text-center">
-            <h1 className="text-3xl font-bold">{t('login-title', 'Sign In')}</h1>
+            <h1 className="text-3xl font-bold">{t('login-title')}</h1>
             <p className="text-gray-500 mt-2">
-              {t('login-subtitle', 'Access your account')}
+              {t('login-subtitle')}
             </p>
           </div>
         </CardHeader>
@@ -126,8 +126,8 @@ export default function LoginPage() {
             <div>
               <Input
                 type="email"
-                label={t('login-email', 'Email Address')}
-                placeholder={t('login-enter-email', 'you@example.com')}
+                label={t('login-email')}
+                placeholder={t('login-enter-email')}
                 value={email}
                 onValueChange={setEmail}
                 disabled={loading}
@@ -152,23 +152,23 @@ export default function LoginPage() {
               isLoading={loading}
             >
               {loading
-                ? t('login-sending', 'Sending...')
-                : t('login-send-link', 'Send Magic Link')}
+                ? t('login-sending')
+                : t('login-send-link')}
             </Button>
           </form>
 
           <div className="text-center text-sm text-gray-600">
             <p>
-              {t('login-passwordless-info', 'A link will be sent to your email. No password needed.')}
+              {t('login-passwordless-info')}
             </p>
           </div>
 
           <div className="pt-4 border-t text-center text-sm">
             <p className="text-gray-600 mb-2">
-              {t('login-new-customer', "Don't have an account?")}
+              {t('login-new-customer')}
             </p>
             <p className="text-gray-500">
-              {t('login-signup-auto', 'Sign up automatically on your first login')}
+              {t('login-signup-auto')}
             </p>
           </div>
         </CardBody>

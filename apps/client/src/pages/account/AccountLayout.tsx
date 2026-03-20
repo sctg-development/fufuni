@@ -19,12 +19,12 @@ export default function AccountLayout() {
   const { user, logout } = auth as any;
 
   const navLinks = [
-    { to: "/account", label: t("account-dashboard", "Dashboard"), end: true },
-    { to: "/account/orders", label: t("account-orders", "My Orders") },
-    { to: "/account/addresses", label: t("account-addresses", "Addresses") },
+    { to: "/account", label: t("account-dashboard"), end: true },
+    { to: "/account/orders", label: t("account-orders") },
+    { to: "/account/addresses", label: t("account-addresses") },
     {
       to: "/account/preferences",
-      label: t("account-preferences", "Preferences"),
+      label: t("account-preferences"),
     },
   ];
 
@@ -69,7 +69,7 @@ export default function AccountLayout() {
           variant="flat"
           onClick={handleLogout}
         >
-          {t("account-logout", "Logout")}
+          {t("account-logout")}
         </Button>
       </nav>
 

@@ -108,28 +108,28 @@ export default function OrderHistory() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <Spinner label={t("loading", "Loading...")} />
+        <Spinner label={t("loading")} />
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">{t("account-orders", "My Orders")}</h1>
+      <h1 className="text-2xl font-bold">{t("account-orders")}</h1>
 
       {orders.length === 0 ? (
         <Card>
-          <CardBody>{t("account-no-orders", "No orders yet")}</CardBody>
+          <CardBody>{t("account-no-orders")}</CardBody>
         </Card>
       ) : (
         <>
           <Table>
             <TableHeader>
-              <TableColumn>{t("account-order-number", "Order #")}</TableColumn>
-              <TableColumn>{t("account-date", "Date")}</TableColumn>
-              <TableColumn>{t("account-status", "Status")}</TableColumn>
-              <TableColumn>{t("account-total", "Total")}</TableColumn>
-              <TableColumn>{t("account-actions", "Actions")}</TableColumn>
+              <TableColumn>{t("account-order-number")}</TableColumn>
+              <TableColumn>{t("account-date")}</TableColumn>
+              <TableColumn>{t("account-status")}</TableColumn>
+              <TableColumn>{t("account-total")}</TableColumn>
+              <TableColumn>{t("account-actions")}</TableColumn>
             </TableHeader>
             <TableBody>
               {orders.map((order) => (
@@ -153,7 +153,7 @@ export default function OrderHistory() {
                   <TableCell>
                     <Link to={`/account/orders/${order.number}`}>
                       <Button size="sm" variant="light">
-                        {t("account-view", "View")}
+                        {t("account-view")}
                       </Button>
                     </Link>
                   </TableCell>
@@ -165,7 +165,7 @@ export default function OrderHistory() {
           {hasMore && (
             <div className="flex justify-center">
               <Button onClick={() => fetchOrders(cursor ?? undefined)}>
-                {t("account-load-more", "Load More")}
+                {t("account-load-more")}
               </Button>
             </div>
           )}

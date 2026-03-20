@@ -101,7 +101,7 @@ export function LocalizedTaxNameInput({
         <Select
           size="sm"
           className="w-36 shrink-0"
-          aria-label={t('admin-common-language', 'Language')}
+          aria-label={t('admin-common-language')}
           selectedKeys={[selectedLocale]}
           onSelectionChange={(keys) =>
             handleLocaleChange(Array.from(keys).join(''))

@@ -57,7 +57,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <Spinner label={t("loading", "Loading...")} />
+        <Spinner label={t("loading")} />
       </div>
     );
   }
@@ -65,7 +65,7 @@ export default function Dashboard() {
   if (!profile) {
     return (
       <Card>
-        <CardBody>{t("account-error", "Failed to load profile")}</CardBody>
+        <CardBody>{t("account-error")}</CardBody>
       </Card>
     );
   }
@@ -76,7 +76,7 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">
-          {t("account-welcome", "Welcome")}, {profile.name || profile.email}
+          {t("account-welcome")}, {profile.name || profile.email}
         </h1>
       </div>
 
@@ -86,9 +86,7 @@ export default function Dashboard() {
           <CardHeader className="flex gap-3">
             <div className="flex flex-col">
               <p className="text-lg font-bold">{profile.order_count}</p>
-              <p className="text-gray-500">
-                {t("account-total-orders", "Total Orders")}
-              </p>
+              <p className="text-gray-500">{t("account-total-orders")}</p>
             </div>
           </CardHeader>
         </Card>
@@ -97,9 +95,7 @@ export default function Dashboard() {
           <CardHeader className="flex gap-3">
             <div className="flex flex-col">
               <p className="text-lg font-bold">${totalSpentUSD}</p>
-              <p className="text-gray-500">
-                {t("account-total-spent", "Total Spent")}
-              </p>
+              <p className="text-gray-500">{t("account-total-spent")}</p>
             </div>
           </CardHeader>
         </Card>
@@ -108,7 +104,7 @@ export default function Dashboard() {
           <CardHeader className="flex gap-3">
             <div className="flex flex-col">
               <p className="text-lg font-bold">{profile.email}</p>
-              <p className="text-gray-500">{t("account-email", "Email")}</p>
+              <p className="text-gray-500">{t("account-email")}</p>
             </div>
           </CardHeader>
         </Card>
@@ -119,22 +115,20 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="flex gap-3 justify-between">
             <h2 className="text-lg font-semibold">
-              {t("account-recent-orders", "Recent Orders")}
+              {t("account-recent-orders")}
             </h2>
             <Link to="/account/orders">
               <Button size="sm" variant="light">
-                {t("account-view-all", "View All")}
+                {t("account-view-all")}
               </Button>
             </Link>
           </CardHeader>
           <CardBody>
             {profile.order_count === 0 ? (
-              <p className="text-gray-500">
-                {t("account-no-orders", "No orders yet")}
-              </p>
+              <p className="text-gray-500">{t("account-no-orders")}</p>
             ) : (
               <p>
-                {t("account-last-order", "Last order")}:{" "}
+                {t("account-last-order")}:{" "}
                 {profile.last_order_at
                   ? new Date(profile.last_order_at).toLocaleDateString()
                   : "N/A"}
@@ -145,23 +139,21 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader className="flex gap-3 justify-between">
-            <h2 className="text-lg font-semibold">
-              {t("account-profile", "Profile")}
-            </h2>
+            <h2 className="text-lg font-semibold">{t("account-profile")}</h2>
             <Link to="/account/preferences">
               <Button size="sm" variant="light">
-                {t("account-edit", "Edit")}
+                {t("account-edit")}
               </Button>
             </Link>
           </CardHeader>
           <CardBody>
             <p>
-              <strong>{t("account-name", "Name")}:</strong>{" "}
-              {profile.name || t("account-not-set", "Not set")}
+              <strong>{t("account-name")}:</strong>{" "}
+              {profile.name || t("account-not-set")}
             </p>
             <p>
-              <strong>{t("account-phone", "Phone")}:</strong>{" "}
-              {profile.phone || t("account-not-set", "Not set")}
+              <strong>{t("account-phone")}:</strong>{" "}
+              {profile.phone || t("account-not-set")}
             </p>
           </CardBody>
         </Card>

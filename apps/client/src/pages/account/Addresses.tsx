@@ -120,7 +120,7 @@ export default function Addresses() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <Spinner label={t("loading", "Loading...")} />
+        <Spinner label={t("loading")} />
       </div>
     );
   }
@@ -128,19 +128,15 @@ export default function Addresses() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">
-          {t("account-addresses", "My Addresses")}
-        </h1>
+        <h1 className="text-2xl font-bold">{t("account-addresses")}</h1>
         <Button color="primary" onClick={() => handleOpenForm()}>
-          {t("account-add-address", "Add Address")}
+          {t("account-add-address")}
         </Button>
       </div>
 
       {addresses.length === 0 ? (
         <Card>
-          <CardBody>
-            {t("account-no-addresses", "No saved addresses yet")}
-          </CardBody>
+          <CardBody>{t("account-no-addresses")}</CardBody>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -153,7 +149,7 @@ export default function Addresses() {
                   </h3>
                   {address.is_default === 1 && (
                     <span className="text-xs text-blue-600">
-                      {t("account-default", "Default")}
+                      {t("account-default")}
                     </span>
                   )}
                 </div>
@@ -168,7 +164,7 @@ export default function Addresses() {
                 <p>{address.country}</p>
                 {address.phone && (
                   <p>
-                    {t("account-phone", "Phone")}: {address.phone}
+                    {t("account-phone")}: {address.phone}
                   </p>
                 )}
               </CardBody>
@@ -179,7 +175,7 @@ export default function Addresses() {
                   variant="light"
                   onClick={() => handleOpenForm(address)}
                 >
-                  {t("account-edit", "Edit")}
+                  {t("account-edit")}
                 </Button>
                 <Button
                   color="danger"
@@ -187,7 +183,7 @@ export default function Addresses() {
                   variant="light"
                   onClick={() => handleDeleteAddress(address.id)}
                 >
-                  {t("account-delete", "Delete")}
+                  {t("account-delete")}
                 </Button>
               </CardBody>
             </Card>
@@ -200,54 +196,54 @@ export default function Addresses() {
         <ModalContent>
           <ModalHeader>
             {editingAddress
-              ? t("account-edit-address", "Edit Address")
-              : t("account-add-address", "Add Address")}
+              ? t("account-edit-address")
+              : t("account-add-address")}
           </ModalHeader>
           <ModalBody className="gap-4">
             <Input
-              label={t("account-name", "Name")}
+              label={t("account-name")}
               value={formData.name || ""}
               onValueChange={(value) =>
                 setFormData({ ...formData, name: value })
               }
             />
             <Input
-              label={t("account-address-line1", "Address Line 1")}
+              label={t("account-address-line1")}
               value={formData.line1 || ""}
               onValueChange={(value) =>
                 setFormData({ ...formData, line1: value })
               }
             />
             <Input
-              label={t("account-address-line2", "Address Line 2")}
+              label={t("account-address-line2")}
               value={formData.line2 || ""}
               onValueChange={(value) =>
                 setFormData({ ...formData, line2: value })
               }
             />
             <Input
-              label={t("account-city", "City")}
+              label={t("account-city")}
               value={formData.city || ""}
               onValueChange={(value) =>
                 setFormData({ ...formData, city: value })
               }
             />
             <Input
-              label={t("account-state", "State")}
+              label={t("account-state")}
               value={formData.state || ""}
               onValueChange={(value) =>
                 setFormData({ ...formData, state: value })
               }
             />
             <Input
-              label={t("account-postal-code", "Postal Code")}
+              label={t("account-postal-code")}
               value={formData.postal_code || ""}
               onValueChange={(value) =>
                 setFormData({ ...formData, postal_code: value })
               }
             />
             <Select
-              label={t("account-country", "Country")}
+              label={t("account-country")}
               selectedKeys={formData.country ? [formData.country] : ["US"]}
               onSelectionChange={(keys) => {
                 const selected = Array.from(keys)[0] as string;
@@ -267,10 +263,10 @@ export default function Addresses() {
               variant="light"
               onPress={() => onOpenChange()}
             >
-              {t("account-cancel", "Cancel")}
+              {t("account-cancel")}
             </Button>
             <Button color="primary" onPress={handleSaveAddress}>
-              {t("account-save", "Save")}
+              {t("account-save")}
             </Button>
           </ModalFooter>
         </ModalContent>

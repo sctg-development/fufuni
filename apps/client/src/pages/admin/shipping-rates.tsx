@@ -654,13 +654,13 @@ export default function ShippingRatesPage() {
             <Input
               isClearable
               className="w-full"
-              placeholder={t("admin-common-search", "Search...")}
+              placeholder={t("admin-common-search")}
               startContent={<SearchIcon className="w-4 h-4" />}
               value={globalFilter}
               onValueChange={setGlobalFilter}
             />
             <Select
-              label={t("admin-common-status", "Status")}
+              label={t("admin-common-status")}
               selectedKeys={statusFilter ? [statusFilter] : []}
               onSelectionChange={(key) =>
                 setStatusFilter(Array.from(key).join(""))
@@ -678,34 +678,32 @@ export default function ShippingRatesPage() {
             <Table isStriped>
               <TableHeader>
                 <TableColumn key="display_name">
-                  {t("admin-common-name", "Name")}
+                  {t("admin-common-name")}
                 </TableColumn>
                 <TableColumn key="description">
-                  {t("admin-common-description", "Description")}
+                  {t("admin-common-description")}
                 </TableColumn>
                 <TableColumn key="max_weight">
-                  {t("admin-shipping-rates-max-weight", "Max Weight (g)")}
+                  {t("admin-shipping-rates-max-weight")}
                 </TableColumn>
                 <TableColumn key="price">
-                  {t("admin-shipping-rates-price", "Price")}
+                  {t("admin-shipping-rates-price")}
                 </TableColumn>
                 <TableColumn key="delivery_days">
-                  {t("admin-shipping-rates-delivery-days", "Delivery Days")}
+                  {t("admin-shipping-rates-delivery-days")}
                 </TableColumn>
                 <TableColumn key="status">
-                  {t("admin-common-status", "Status")}
+                  {t("admin-common-status")}
                 </TableColumn>
                 <TableColumn key="actions">
-                  {t("admin-common-actions", "Actions")}
+                  {t("admin-common-actions")}
                 </TableColumn>
               </TableHeader>
               <TableBody
-                emptyContent={<div>{t("admin-common-empty", "No data")}</div>}
+                emptyContent={<div>{t("admin-common-empty")}</div>}
                 isLoading={loading}
                 items={displayed}
-                loadingContent={
-                  <div>{t("admin-common-loading", "Loading...")}</div>
-                }
+                loadingContent={<div>{t("admin-common-loading")}</div>}
               >
                 {(rate) => (
                   <TableRow key={rate.id}>
@@ -771,14 +769,14 @@ export default function ShippingRatesPage() {
         <div className="mt-12 pt-6 border-t">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">
-              {t("admin-shipping-classes-title", "Shipping Classes")}
+              {t("admin-shipping-classes-title")}
             </h2>
             <Button
               color="primary"
               endContent={<Plus className="w-4 h-4" />}
               onPress={handleOpenCreateClass}
             >
-              {t("admin-shipping-classes-btn-new", "New Class")}
+              {t("admin-shipping-classes-btn-new")}
             </Button>
           </div>
 
@@ -787,30 +785,26 @@ export default function ShippingRatesPage() {
               <Table isStriped>
                 <TableHeader>
                   <TableColumn key="code">
-                    {t("admin-shipping-classes-col-code", "Code")}
+                    {t("admin-shipping-classes-col-code")}
                   </TableColumn>
                   <TableColumn key="display_name">
-                    {t("admin-shipping-classes-col-name", "Name")}
+                    {t("admin-shipping-classes-col-name")}
                   </TableColumn>
                   <TableColumn key="resolution">
-                    {t("admin-shipping-classes-col-resolution", "Mode")}
+                    {t("admin-shipping-classes-col-resolution")}
                   </TableColumn>
                   <TableColumn key="description">
-                    {t("admin-shipping-classes-col-description", "Description")}
+                    {t("admin-shipping-classes-col-description")}
                   </TableColumn>
                   <TableColumn key="status">
-                    {t("admin-shipping-classes-col-status", "Status")}
+                    {t("admin-shipping-classes-col-status")}
                   </TableColumn>
                   <TableColumn key="actions">
-                    {t("admin-shipping-classes-col-actions", "Actions")}
+                    {t("admin-shipping-classes-col-actions")}
                   </TableColumn>
                 </TableHeader>
                 <TableBody
-                  emptyContent={
-                    <div>
-                      {t("admin-shipping-classes-empty", "No shipping classes")}
-                    </div>
-                  }
+                  emptyContent={<div>{t("admin-shipping-classes-empty")}</div>}
                   items={shippingClasses}
                 >
                   {(cls) => (
@@ -838,8 +832,8 @@ export default function ShippingRatesPage() {
                           }}
                         >
                           {cls.resolution === "exclusive"
-                            ? t("admin-shipping-classes-exclusive", "Exclusive")
-                            : t("admin-shipping-classes-additive", "Additive")}
+                            ? t("admin-shipping-classes-exclusive")
+                            : t("admin-shipping-classes-additive")}
                         </span>
                       </TableCell>
                       <TableCell className="text-default-500 text-sm">
@@ -919,7 +913,7 @@ export default function ShippingRatesPage() {
                 )}
               >
                 <Input
-                  label={t("admin-common-name", "Name")}
+                  label={t("admin-common-name")}
                   placeholder="Standard Shipping"
                   value={formData.display_name}
                   onValueChange={(value) =>
@@ -934,7 +928,7 @@ export default function ShippingRatesPage() {
                 )}
               >
                 <Input
-                  label={t("admin-common-description", "Description")}
+                  label={t("admin-common-description")}
                   placeholder="Fast delivery option"
                   value={formData.description}
                   onValueChange={(value) =>
@@ -949,7 +943,7 @@ export default function ShippingRatesPage() {
                 )}
               >
                 <Input
-                  label={t("admin-shipping-rates-max-weight", "Max Weight (g)")}
+                  label={t("admin-shipping-rates-max-weight")}
                   min={0}
                   placeholder="5000"
                   type="number"
@@ -1034,9 +1028,9 @@ export default function ShippingRatesPage() {
                   }
                 />
               </Tooltip>
-              <Tooltip content={t("admin-common-status", "Status")}>
+              <Tooltip content={t("admin-common-status")}>
                 <Select
-                  label={t("admin-common-status", "Status")}
+                  label={t("admin-common-status")}
                   selectedKeys={[formData.status]}
                   onSelectionChange={(key) =>
                     setFormData({
@@ -1115,7 +1109,7 @@ export default function ShippingRatesPage() {
                   )}
                 >
                   <div className="text-xs text-default-400 cursor-help underline decoration-dotted">
-                    {t("common-help", "Aide")}
+                    {t("common-help")}
                   </div>
                 </Tooltip>
               </div>
@@ -1129,7 +1123,7 @@ export default function ShippingRatesPage() {
                 <div className="flex gap-2">
                   <Select
                     className="w-32"
-                    label={t("admin-common-currency", "Currency")}
+                    label={t("admin-common-currency")}
                     selectedKeys={
                       formData.currency_id ? [formData.currency_id] : []
                     }
@@ -1162,7 +1156,7 @@ export default function ShippingRatesPage() {
                     ))}
                   </Select>
                   <Input
-                    label={t("admin-shipping-rates-price", "Price")}
+                    label={t("admin-shipping-rates-price")}
                     min={0}
                     placeholder="0.00"
                     step={0.01}
@@ -1181,14 +1175,14 @@ export default function ShippingRatesPage() {
                 variant="light"
                 onPress={() => onOpenChange()}
               >
-                {t("admin-common-cancel", "Cancel")}
+                {t("admin-common-cancel")}
               </Button>
               <Button
                 color="primary"
                 isDisabled={!formData.display_name}
                 onPress={handleSave}
               >
-                {t("admin-common-save", "Save")}
+                {t("admin-common-save")}
               </Button>
             </ModalFooter>
           </ModalContent>
@@ -1222,7 +1216,7 @@ export default function ShippingRatesPage() {
                 <Input
                   isRequired
                   isDisabled={isClassEditMode}
-                  label={t("admin-shipping-classes-code", "Code")}
+                  label={t("admin-shipping-classes-code")}
                   placeholder={t(
                     "admin-shipping-classes-code-placeholder",
                     "e.g., oversized",
@@ -1238,7 +1232,7 @@ export default function ShippingRatesPage() {
               </Tooltip>
               <Input
                 isRequired
-                label={t("admin-shipping-classes-display-name", "Display Name")}
+                label={t("admin-shipping-classes-display-name")}
                 placeholder={t(
                   "admin-shipping-classes-display-name-placeholder",
                   "e.g., Oversized Items",
@@ -1302,7 +1296,7 @@ export default function ShippingRatesPage() {
               </Select>
               {isClassEditMode && (
                 <Select
-                  label={t("admin-shipping-classes-status", "Status")}
+                  label={t("admin-shipping-classes-status")}
                   selectedKeys={[classFormData.status]}
                   onSelectionChange={(key) =>
                     setClassFormData({
@@ -1312,10 +1306,10 @@ export default function ShippingRatesPage() {
                   }
                 >
                   <SelectItem key="active">
-                    {t("admin-shipping-classes-active", "Active")}
+                    {t("admin-shipping-classes-active")}
                   </SelectItem>
                   <SelectItem key="inactive">
-                    {t("admin-shipping-classes-inactive", "Inactive")}
+                    {t("admin-shipping-classes-inactive")}
                   </SelectItem>
                 </Select>
               )}
@@ -1326,14 +1320,14 @@ export default function ShippingRatesPage() {
                 variant="light"
                 onPress={() => onClassModalOpenChange()}
               >
-                {t("admin-shipping-classes-modal-cancel", "Cancel")}
+                {t("admin-shipping-classes-modal-cancel")}
               </Button>
               <Button
                 color="primary"
                 isDisabled={!classFormData.code || !classFormData.display_name}
                 onPress={handleSaveClass}
               >
-                {t("admin-shipping-classes-modal-save", "Save")}
+                {t("admin-shipping-classes-modal-save")}
               </Button>
             </ModalFooter>
           </ModalContent>

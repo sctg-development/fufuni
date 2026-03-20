@@ -252,13 +252,13 @@ export default function CurrenciesPage() {
             <Input
               isClearable
               className="w-full"
-              placeholder={t("admin-common-search", "Search...")}
+              placeholder={t("admin-common-search")}
               startContent={<SearchIcon className="w-4 h-4" />}
               value={globalFilter}
               onValueChange={setGlobalFilter}
             />
             <Select
-              label={t("admin-common-status", "Status")}
+              label={t("admin-common-status")}
               selectedKeys={statusFilter ? [statusFilter] : []}
               onSelectionChange={(key) =>
                 setStatusFilter(Array.from(key).join(""))
@@ -275,32 +275,28 @@ export default function CurrenciesPage() {
           <CardBody>
             <Table isStriped>
               <TableHeader>
-                <TableColumn key="code">
-                  {t("admin-common-code", "Code")}
-                </TableColumn>
+                <TableColumn key="code">{t("admin-common-code")}</TableColumn>
                 <TableColumn key="display_name">
-                  {t("admin-common-name", "Name")}
+                  {t("admin-common-name")}
                 </TableColumn>
                 <TableColumn key="symbol">
-                  {t("admin-common-symbol", "Symbol")}
+                  {t("admin-common-symbol")}
                 </TableColumn>
                 <TableColumn key="decimal_places">
-                  {t("admin-currencies-decimals", "Decimals")}
+                  {t("admin-currencies-decimals")}
                 </TableColumn>
                 <TableColumn key="status">
-                  {t("admin-common-status", "Status")}
+                  {t("admin-common-status")}
                 </TableColumn>
                 <TableColumn key="actions">
-                  {t("admin-common-actions", "Actions")}
+                  {t("admin-common-actions")}
                 </TableColumn>
               </TableHeader>
               <TableBody
-                emptyContent={<div>{t("admin-common-empty", "No data")}</div>}
+                emptyContent={<div>{t("admin-common-empty")}</div>}
                 isLoading={loading}
                 items={displayed}
-                loadingContent={
-                  <div>{t("admin-common-loading", "Loading...")}</div>
-                }
+                loadingContent={<div>{t("admin-common-loading")}</div>}
               >
                 {(currency) => (
                   <TableRow key={currency.id}>
@@ -353,8 +349,8 @@ export default function CurrenciesPage() {
           <ModalContent>
             <ModalHeader className="flex flex-col gap-1">
               {isEditMode
-                ? t("admin-currencies-edit", "Edit Currency")
-                : t("admin-currencies-create", "Create Currency")}
+                ? t("admin-currencies-edit")
+                : t("admin-currencies-create")}
             </ModalHeader>
             <ModalBody>
               <Tooltip
@@ -365,7 +361,7 @@ export default function CurrenciesPage() {
               >
                 <Input
                   isDisabled={isEditMode}
-                  label={t("admin-common-code", "Code")}
+                  label={t("admin-common-code")}
                   maxLength={3}
                   placeholder="USD"
                   value={formData.code}
@@ -374,9 +370,9 @@ export default function CurrenciesPage() {
                   }
                 />
               </Tooltip>
-              <Tooltip content={t("admin-common-name", "Name")}>
+              <Tooltip content={t("admin-common-name")}>
                 <Input
-                  label={t("admin-common-name", "Name")}
+                  label={t("admin-common-name")}
                   placeholder="US Dollar"
                   value={formData.display_name}
                   onValueChange={(value) =>
@@ -391,7 +387,7 @@ export default function CurrenciesPage() {
                 )}
               >
                 <Input
-                  label={t("admin-common-symbol", "Symbol")}
+                  label={t("admin-common-symbol")}
                   maxLength={5}
                   placeholder="$"
                   value={formData.symbol}
@@ -407,7 +403,7 @@ export default function CurrenciesPage() {
                 )}
               >
                 <Input
-                  label={t("admin-currencies-decimals", "Decimal Places")}
+                  label={t("admin-currencies-decimals")}
                   max={8}
                   min={0}
                   placeholder="2"
@@ -421,9 +417,9 @@ export default function CurrenciesPage() {
                   }
                 />
               </Tooltip>
-              <Tooltip content={t("admin-common-status", "Status")}>
+              <Tooltip content={t("admin-common-status")}>
                 <Select
-                  label={t("admin-common-status", "Status")}
+                  label={t("admin-common-status")}
                   selectedKeys={[formData.status]}
                   onSelectionChange={(key) =>
                     setFormData({
@@ -444,14 +440,14 @@ export default function CurrenciesPage() {
                 variant="light"
                 onPress={() => onOpenChange()}
               >
-                {t("admin-common-cancel", "Cancel")}
+                {t("admin-common-cancel")}
               </Button>
               <Button
                 color="primary"
                 isDisabled={!formData.display_name}
                 onPress={handleSave}
               >
-                {t("admin-common-save", "Save")}
+                {t("admin-common-save")}
               </Button>
             </ModalFooter>
           </ModalContent>

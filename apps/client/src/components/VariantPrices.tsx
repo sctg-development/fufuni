@@ -208,7 +208,7 @@ export function VariantPrices({
    * Delete a price for the variant in a specific currency.
    */
   const handleDeletePrice = async (currencyId: string) => {
-    if (!confirm(t("admin-variant-prices-confirm-delete", "Delete this price?"))) {
+    if (!confirm(t("admin-variant-prices-confirm-delete"))) {
       return;
     }
 
@@ -234,10 +234,10 @@ export function VariantPrices({
       <div className="flex items-center justify-between">
         <div>
           <h3 className="font-semibold text-sm">
-            {t("admin-variant-prices-title", "Multi-Currency Prices")}
+            {t("admin-variant-prices-title")}
           </h3>
           <p className="text-xs text-default-500">
-            {t("admin-variant-prices-subtitle", "Manage prices for")} {variantTitle}
+            {t("admin-variant-prices-subtitle")} {variantTitle}
           </p>
         </div>
         <Button
@@ -247,7 +247,7 @@ export function VariantPrices({
           startContent={<Plus className="w-4 h-4" />}
           onPress={handleOpenModal}
         >
-          {t("admin-variant-prices-add", "Add Price")}
+          {t("admin-variant-prices-add")}
         </Button>
       </div>
 
@@ -257,7 +257,7 @@ export function VariantPrices({
           <div className="flex justify-between items-center">
             <div>
               <p className="font-mono text-xs text-default-500">
-                {t("admin-variant-prices-base", "Base Price")} ({currency})
+                {t("admin-variant-prices-base")} ({currency})
               </p>
               <p className="font-semibold">{variantTitle}</p>
             </div>
@@ -266,10 +266,7 @@ export function VariantPrices({
             </p>
           </div>
           <p className="text-xs text-default-400 mt-2">
-            {t(
-              "admin-variant-prices-base-note",
-              "Used as fallback if no price exists for the customer's currency"
-            )}
+            {t("admin-variant-prices-base-note")}
           </p>
         </CardBody>
       </Card>
@@ -281,15 +278,12 @@ export function VariantPrices({
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="font-semibold text-sm">
-                  {t("admin-variant-prices-editing", "Editing price for")}{" "}
+                  {t("admin-variant-prices-editing")}{" "}
                   {prices.find((p) => p.currency_id === editingCurrencyId)
                     ?.currency_code || editingCurrencyId}
                 </p>
                 <p className="text-xs text-default-500">
-                  {t(
-                    "admin-variant-prices-editing-note",
-                    "Enter a new amount and save. Cancelling will discard changes."
-                  )}
+                  {t("admin-variant-prices-editing-note")}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -307,7 +301,7 @@ export function VariantPrices({
                   size="sm"
                   onPress={() => handleSaveEdit(editingCurrencyId)}
                 >
-                  {t("admin-common-save", "Save")}
+                  {t("admin-common-save")}
                 </Button>
                 <Button
                   color="default"
@@ -317,7 +311,7 @@ export function VariantPrices({
                     setEditValue("");
                   }}
                 >
-                  {t("admin-common-cancel", "Cancel")}
+                  {t("admin-common-cancel")}
                 </Button>
               </div>
             </div>
@@ -329,23 +323,20 @@ export function VariantPrices({
       {prices.length === 0 ? (
         <Card>
           <CardBody className="text-center text-sm text-default-500 py-6">
-            {t(
-              "admin-variant-prices-empty",
-              "No prices configured. Add a price to get started."
-            )}
+            {t("admin-variant-prices-empty")}
           </CardBody>
         </Card>
       ) : (
         <Table isStriped>
           <TableHeader>
             <TableColumn>
-              {t("admin-variant-prices-currency", "Currency")}
+              {t("admin-variant-prices-currency")}
             </TableColumn>
             <TableColumn align="end">
-              {t("admin-variant-prices-price", "Price")}
+              {t("admin-variant-prices-price")}
             </TableColumn>
             <TableColumn align="end" width={60}>
-              {t("admin-common-actions", "Actions")}
+              {t("admin-common-actions")}
             </TableColumn>
           </TableHeader>
           <TableBody items={prices} emptyContent="No prices">
@@ -443,15 +434,15 @@ export function VariantPrices({
       <Modal isOpen={isOpen} size="md" onOpenChange={onOpenChange}>
         <ModalContent>
           <ModalHeader>
-            {t("admin-variant-prices-add-title", "Add Price for Variant")}
+            {t("admin-variant-prices-add-title")}
           </ModalHeader>
           <ModalBody>
             <div className="space-y-4">
               <p className="text-sm text-default-600">{variantTitle}</p>
 
               <Select
-                label={t("admin-variant-prices-select-currency", "Select Currency")}
-                placeholder={t("admin-common-select", "Choose...")}
+                label={t("admin-variant-prices-select-currency")}
+                placeholder={t("admin-common-select")}
                 selectedKeys={selectedCurrency ? [selectedCurrency] : []}
                 onSelectionChange={(key) =>
                   setSelectedCurrency(Array.from(key).join(""))
@@ -465,7 +456,7 @@ export function VariantPrices({
               </Select>
 
               <Input
-                label={t("admin-variant-prices-enter-price", "Price")}
+                label={t("admin-variant-prices-enter-price")}
                 placeholder="29.99"
                 type="number"
                 step="0.01"
@@ -481,7 +472,7 @@ export function VariantPrices({
               variant="light"
               onPress={() => onOpenChange()}
             >
-              {t("admin-common-cancel", "Cancel")}
+              {t("admin-common-cancel")}
             </Button>
             <Button
               color="primary"
@@ -489,7 +480,7 @@ export function VariantPrices({
               isLoading={submitting}
               onPress={handleAddPrice}
             >
-              {t("admin-common-add", "Add")}
+              {t("admin-common-add")}
             </Button>
           </ModalFooter>
         </ModalContent>

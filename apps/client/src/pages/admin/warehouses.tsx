@@ -292,13 +292,13 @@ export default function WarehousesPage() {
             <Input
               isClearable
               className="w-full"
-              placeholder={t("admin-common-search", "Search...")}
+              placeholder={t("admin-common-search")}
               startContent={<SearchIcon className="w-4 h-4" />}
               value={globalFilter}
               onValueChange={setGlobalFilter}
             />
             <Select
-              label={t("admin-common-status", "Status")}
+              label={t("admin-common-status")}
               selectedKeys={statusFilter ? [statusFilter] : []}
               onSelectionChange={(key) =>
                 setStatusFilter(Array.from(key).join(""))
@@ -316,31 +316,29 @@ export default function WarehousesPage() {
             <Table isStriped>
               <TableHeader>
                 <TableColumn key="display_name">
-                  {t("admin-common-name", "Name")}
+                  {t("admin-common-name")}
                 </TableColumn>
                 <TableColumn key="city">
-                  {t("admin-warehouses-city", "City")}
+                  {t("admin-warehouses-city")}
                 </TableColumn>
                 <TableColumn key="country">
-                  {t("admin-common-country", "Country")}
+                  {t("admin-common-country")}
                 </TableColumn>
                 <TableColumn key="priority">
-                  {t("admin-warehouses-priority", "Priority")}
+                  {t("admin-warehouses-priority")}
                 </TableColumn>
                 <TableColumn key="status">
-                  {t("admin-common-status", "Status")}
+                  {t("admin-common-status")}
                 </TableColumn>
                 <TableColumn key="actions">
-                  {t("admin-common-actions", "Actions")}
+                  {t("admin-common-actions")}
                 </TableColumn>
               </TableHeader>
               <TableBody
-                emptyContent={<div>{t("admin-common-empty", "No data")}</div>}
+                emptyContent={<div>{t("admin-common-empty")}</div>}
                 isLoading={loading}
                 items={displayed}
-                loadingContent={
-                  <div>{t("admin-common-loading", "Loading...")}</div>
-                }
+                loadingContent={<div>{t("admin-common-loading")}</div>}
               >
                 {(warehouse) => (
                   <TableRow key={warehouse.id}>
@@ -409,7 +407,7 @@ export default function WarehousesPage() {
                 )}
               >
                 <Input
-                  label={t("admin-common-name", "Name")}
+                  label={t("admin-common-name")}
                   placeholder="Main Warehouse"
                   value={formData.display_name}
                   onValueChange={(value) =>
@@ -424,7 +422,7 @@ export default function WarehousesPage() {
                 )}
               >
                 <Input
-                  label={t("admin-warehouses-address1", "Address Line 1")}
+                  label={t("admin-warehouses-address1")}
                   placeholder="123 Main Street"
                   value={formData.address_line1}
                   onValueChange={(value) =>
@@ -439,7 +437,7 @@ export default function WarehousesPage() {
                 )}
               >
                 <Input
-                  label={t("admin-warehouses-address2", "Address Line 2")}
+                  label={t("admin-warehouses-address2")}
                   placeholder="Suite 100"
                   value={formData.address_line2}
                   onValueChange={(value) =>
@@ -454,7 +452,7 @@ export default function WarehousesPage() {
                 )}
               >
                 <Input
-                  label={t("admin-warehouses-city", "City")}
+                  label={t("admin-warehouses-city")}
                   placeholder="New York"
                   value={formData.city}
                   onValueChange={(value) =>
@@ -469,7 +467,7 @@ export default function WarehousesPage() {
                 )}
               >
                 <Input
-                  label={t("admin-warehouses-state", "State/Province")}
+                  label={t("admin-warehouses-state")}
                   placeholder="NY"
                   value={formData.state}
                   onValueChange={(value) =>
@@ -484,7 +482,7 @@ export default function WarehousesPage() {
                 )}
               >
                 <Input
-                  label={t("admin-warehouses-postal", "Postal Code")}
+                  label={t("admin-warehouses-postal")}
                   placeholder="10001"
                   value={formData.postal_code}
                   onValueChange={(value) =>
@@ -499,7 +497,7 @@ export default function WarehousesPage() {
                 )}
               >
                 <Select
-                  label={t("admin-common-country", "Country")}
+                  label={t("admin-common-country")}
                   selectedKeys={
                     formData.country_code ? [formData.country_code] : []
                   }
@@ -524,7 +522,7 @@ export default function WarehousesPage() {
                 )}
               >
                 <Input
-                  label={t("admin-warehouses-priority", "Priority")}
+                  label={t("admin-warehouses-priority")}
                   min={0}
                   placeholder="1"
                   type="number"
@@ -534,9 +532,9 @@ export default function WarehousesPage() {
                   }
                 />
               </Tooltip>
-              <Tooltip content={t("admin-common-status", "Status")}>
+              <Tooltip content={t("admin-common-status")}>
                 <Select
-                  label={t("admin-common-status", "Status")}
+                  label={t("admin-common-status")}
                   selectedKeys={[formData.status]}
                   onSelectionChange={(key) =>
                     setFormData({
@@ -557,14 +555,14 @@ export default function WarehousesPage() {
                 variant="light"
                 onPress={() => onOpenChange()}
               >
-                {t("admin-common-cancel", "Cancel")}
+                {t("admin-common-cancel")}
               </Button>
               <Button
                 color="primary"
                 isDisabled={!formData.display_name || !formData.country_code}
                 onPress={handleSave}
               >
-                {t("admin-common-save", "Save")}
+                {t("admin-common-save")}
               </Button>
             </ModalFooter>
           </ModalContent>

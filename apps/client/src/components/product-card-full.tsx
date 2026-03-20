@@ -169,7 +169,7 @@ export const ProductCardFull: React.FC<Props> = ({ product }) => {
       {product.variants.length > 1 && (
         <div className="mb-4">
           <label className="block text-sm font-medium text-default-700 mb-2">
-            {t("admin-products-field-variant-title", "Variant")}
+            {t("admin-products-field-variant-title")}
           </label>
           <div className="flex flex-wrap gap-2 mb-3">
             {product.variants.map((v) => {

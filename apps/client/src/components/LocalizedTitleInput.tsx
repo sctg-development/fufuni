@@ -155,7 +155,7 @@ export function LocalizedTitleInput({
       }
 
       if (!sourceText) {
-        alert(t('admin-products-ai-no-source', 'No source content to translate from.'));
+        alert(t('admin-products-ai-no-source'));
         return;
       }
 
@@ -176,7 +176,7 @@ export function LocalizedTitleInput({
       }
     } catch (err) {
       console.error('AI title translation failed', err);
-      alert(t('admin-products-ai-error', 'AI translation failed. Please try again.'));
+      alert(t('admin-products-ai-error'));
     } finally {
       setIsTranslating(false);
     }
@@ -190,7 +190,7 @@ export function LocalizedTitleInput({
         <Select
           size="sm"
           className="w-36 shrink-0"
-          aria-label={t('admin-products-title-locale', 'Language')}
+          aria-label={t('admin-products-title-locale')}
           selectedKeys={[selectedLocale]}
           onSelectionChange={(keys) =>
             handleLocaleChange(Array.from(keys).join(''))
@@ -208,13 +208,13 @@ export function LocalizedTitleInput({
         required={required}
         value={inputValue}
         onValueChange={handleInputChange}
-        placeholder={t('admin-products-title-placeholder', 'Product title…')}
+        placeholder={t('admin-products-title-placeholder')}
         dir={isRTL ? 'rtl' : 'ltr'}
       />
 
       {/* AI translate — only shown if user has the AI permission */}
       {canUseAi && (
-        <Tooltip content={t('admin-products-title-ai', 'Translate title with AI')}>
+        <Tooltip content={t('admin-products-title-ai')}>
           <Button
             isIconOnly
             size="sm"

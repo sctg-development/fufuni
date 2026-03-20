@@ -100,7 +100,7 @@ export default function OrderDetail() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <Spinner label={t("loading", "Loading...")} />
+        <Spinner label={t("loading")} />
       </div>
     );
   }
@@ -108,7 +108,7 @@ export default function OrderDetail() {
   if (!order) {
     return (
       <Card>
-        <CardBody>{t("account-order-not-found", "Order not found")}</CardBody>
+        <CardBody>{t("account-order-not-found")}</CardBody>
       </Card>
     );
   }
@@ -142,14 +142,14 @@ export default function OrderDetail() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">
-          {t("account-order", "Order")} #{order.number}
+          {t("account-order")} #{order.number}
         </h1>
         <div className="flex gap-2">
           <Button variant="light" onClick={() => navigate("/account/orders")}>
-            {t("account-back", "Back")}
+            {t("account-back")}
           </Button>
           <Button color="primary" onClick={handleDownloadPDF}>
-            {t("account-download-invoice", "Download Invoice")}
+            {t("account-download-invoice")}
           </Button>
         </div>
       </div>
@@ -158,7 +158,7 @@ export default function OrderDetail() {
       <Card>
         <CardHeader className="flex gap-3 justify-between">
           <h2 className="text-lg font-semibold">
-            {t("account-order-details", "Order Details")}
+            {t("account-order-details")}
           </h2>
           <Chip color={STATUS_COLORS[order.status] || "default"} variant="flat">
             {order.status}
@@ -168,23 +168,19 @@ export default function OrderDetail() {
         <CardBody className="gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-gray-500">
-                {t("account-date", "Date")}
-              </p>
+              <p className="text-sm text-gray-500">{t("account-date")}</p>
               <p className="font-semibold">
                 {new Date(order.created_at).toLocaleDateString()}
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">
-                {t("account-currency", "Currency")}
-              </p>
+              <p className="text-sm text-gray-500">{t("account-currency")}</p>
               <p className="font-semibold">{order.currency}</p>
             </div>
             {order.shipped_at && (
               <div>
                 <p className="text-sm text-gray-500">
-                  {t("account-shipped-at", "Shipped")}
+                  {t("account-shipped-at")}
                 </p>
                 <p className="font-semibold">
                   {new Date(order.shipped_at).toLocaleDateString()}
@@ -193,9 +189,7 @@ export default function OrderDetail() {
             )}
             {order.tracking_number && (
               <div>
-                <p className="text-sm text-gray-500">
-                  {t("account-tracking", "Tracking")}
-                </p>
+                <p className="text-sm text-gray-500">{t("account-tracking")}</p>
                 <p className="font-semibold">{order.tracking_number}</p>
                 {order.tracking_url && (
                   <a
@@ -204,7 +198,7 @@ export default function OrderDetail() {
                     rel="noopener noreferrer"
                     target="_blank"
                   >
-                    {t("account-track-shipment", "Track Shipment")}
+                    {t("account-track-shipment")}
                   </a>
                 )}
               </div>
@@ -216,18 +210,16 @@ export default function OrderDetail() {
       {/* Order Items */}
       <Card>
         <CardHeader>
-          <h2 className="text-lg font-semibold">
-            {t("account-items", "Items")}
-          </h2>
+          <h2 className="text-lg font-semibold">{t("account-items")}</h2>
         </CardHeader>
         <Divider />
         <CardBody>
           <Table>
             <TableHeader>
-              <TableColumn>{t("account-item", "Item")}</TableColumn>
-              <TableColumn>{t("account-qty", "Qty")}</TableColumn>
-              <TableColumn>{t("account-unit-price", "Unit Price")}</TableColumn>
-              <TableColumn>{t("account-total", "Total")}</TableColumn>
+              <TableColumn>{t("account-item")}</TableColumn>
+              <TableColumn>{t("account-qty")}</TableColumn>
+              <TableColumn>{t("account-unit-price")}</TableColumn>
+              <TableColumn>{t("account-total")}</TableColumn>
             </TableHeader>
             <TableBody>
               {order.items.map((item, idx) => (
@@ -251,20 +243,20 @@ export default function OrderDetail() {
       <Card>
         <CardBody className="gap-3">
           <div className="flex justify-between">
-            <span>{t("account-subtotal", "Subtotal")}</span>
+            <span>{t("account-subtotal")}</span>
             <span>${(order.subtotal_cents / 100).toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
-            <span>{t("account-shipping", "Shipping")}</span>
+            <span>{t("account-shipping")}</span>
             <span>${(order.shipping_cents / 100).toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
-            <span>{t("account-tax", "Tax")}</span>
+            <span>{t("account-tax")}</span>
             <span>${(order.tax_cents / 100).toFixed(2)}</span>
           </div>
           <Divider />
           <div className="flex justify-between font-bold text-lg">
-            <span>{t("account-total", "Total")}</span>
+            <span>{t("account-total")}</span>
             <span>${(order.total_cents / 100).toFixed(2)}</span>
           </div>
         </CardBody>
