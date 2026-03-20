@@ -23,6 +23,8 @@
     "start": "npm run dev",
     "export:llms": "tsx scripts/export-code-for-lllm.ts",
     "clean:seed:start": "bash scripts/clean-seed-start.sh",
-    "stripe:listen": "bash -c 'source .env && stripe --api-key $STRIPE_SECRET_KEY listen --load-from-webhooks-api --forward-to http://localhost:8787'"
+    "stripe:listen": "bash -c 'source .env && stripe --api-key $STRIPE_SECRET_KEY listen --load-from-webhooks-api --forward-to http://localhost:8787'",
+    "sensitive_datas:store": "bash -c 'source .env && export PROJECT_ROOT=$(pwd) && ./_sensitive_datas/store_sensitive_datas'",
+    "sensitive_datas:restore": "bash -c 'source .env && export PROJECT_ROOT=$(pwd) && ./_sensitive_datas/restore_sensitive_datas'"
   }
 }
