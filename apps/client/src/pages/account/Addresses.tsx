@@ -25,6 +25,8 @@ import {
 
 import { useAuth } from "../../authentication/providers/use-auth";
 
+import countries from "@/config/countries.json";
+
 interface Address {
   id: string;
   label: string | null;
@@ -44,8 +46,15 @@ interface Address {
  * Allows customers to view and manage saved delivery addresses.
  */
 export default function Addresses() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const auth = useAuth() as any;
+  const localeKey = i18n.language.replace("-", "_") as
+    | "en_US"
+    | "fr_FR"
+    | "es_ES"
+    | "ar_SA"
+    | "zh_CN"
+    | "he_IL"; // Extend this union type based on the languages you support
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
@@ -251,10 +260,11 @@ export default function Addresses() {
                 setFormData({ ...formData, country: selected });
               }}
             >
-              <SelectItem key="US">United States</SelectItem>
-              <SelectItem key="CA">Canada</SelectItem>
-              <SelectItem key="FR">France</SelectItem>
-              {/* Add more countries as needed */}
+              {countries.map((country) => (
+                <SelectItem key={country.code}>
+                  {country[localeKey] || country.en_US}
+                </SelectItem>
+              ))}
             </Select>
           </ModalBody>
           <ModalFooter>
