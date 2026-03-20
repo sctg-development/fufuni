@@ -762,6 +762,46 @@ The `GET /v1/carts/:cartId/available-shipping-rates` response includes `carttota
 5. Return sorted by amountcents ASC
 ```
 
+## Tax Rates & Pricing
+
+### Database model
+- `tax_rates` table (see `apps/merchant/src/do.ts`):
+  - `id`, `display_name`
+  - `country_code` (ISO-3166-1 alpha-2, nullable fallback)
+  - `tax_code` (optional, nullable fallback)
+  - `rate_percentage` (e.g., 20.0)
+  - `status` (`active`/`inactive`)
+
+### API endpoints
+Protected by `admin:store` (or legacy `sk_`) plus middleware `adminOnly`.
+- `GET   /v1/tax-rates` : list (paginated, limit 500)
+- `POST  /v1/tax-rates` : create
+- `GET   /v1/tax-rates/{id}` : get
+- `PATCH /v1/tax-rates/{id}` : update
+- `DELETE /v1/tax-rates/{id}` : delete
+
+### How it is used in product catalog
+In `apps/merchant/src/routes/catalog.ts`:
+- Active tax rates loaded: `SELECT * FROM tax_rates WHERE status = 'active'`
+- Per-variant lookup: `variant.tax_code` matches `tax_rates.tax_code`
+- Fallback tax rate: first active row with `tax_code IS NULL`
+
+Variant mapping (`mapVariant`):
+- `tax_rate_percentage` set from selected or fallback rate
+- `tax_display_name` set from selected or fallback rate
+- `tax_inclusive` set from variant `tax_inclusive` flag, otherwise default region value from `regions.tax_inclusive` (default region is_default=1)
+
+### Frontend display
+In `apps/client/src/components/product-card-full.tsx`:
+- `taxAmount = price_cents × (tax_rate_percentage / 100)`
+- `taxLabel`:
+  - `Dont {{name}}` when `tax_inclusive=true`
+  - `{{name}}` when `tax_inclusive=false`
+
+This reflects the expected user-visible behaviour:
+- Included tax variant: price is TTC, label `Dont TVA`, tax computed from list price
+- Excluded tax variant: price is HT, label `TVA`, tax computed from list price
+
 ---
 
 ## Multi-Region & Multi-Currency
