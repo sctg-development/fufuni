@@ -72,11 +72,16 @@ export default function Dashboard() {
 
   const totalSpentUSD = (profile.total_spent_cents / 100).toFixed(2);
 
+  const displayName =
+    profile.name && !profile.name.endsWith("@auth0.local")
+      ? profile.name
+      : profile.email;
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">
-          {t("account-welcome")}, {profile.name || profile.email}
+          {t("account-welcome")}, {displayName}
         </h1>
       </div>
 
@@ -149,7 +154,9 @@ export default function Dashboard() {
           <CardBody>
             <p>
               <strong>{t("account-name")}:</strong>{" "}
-              {profile.name || t("account-not-set")}
+              {profile.name && !profile.name.endsWith("@auth0.local")
+                ? profile.name
+                : t("account-not-set")}
             </p>
             <p>
               <strong>{t("account-phone")}:</strong>{" "}

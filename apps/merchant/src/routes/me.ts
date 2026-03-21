@@ -40,7 +40,7 @@ app.use('*', customerAuthMiddleware);
  * @param email - Email extracted from the JWT payload (optional)
  * @returns The customer row or throws a 401 error
  */
-async function resolveCustomer(db: any, jwtSub: string, email?: string) {
+async function resolveCustomer(db: any, jwtSub: string, email?: string, name?: string) {
     // Try to find customer by Auth0 sub first (fastest lookup)
     let customer = await db.query(
         `SELECT * FROM customers WHERE auth_provider_id = ? AND auth_provider = 'auth0' LIMIT 1`,
@@ -48,7 +48,27 @@ async function resolveCustomer(db: any, jwtSub: string, email?: string) {
     );
 
     if (customer.length > 0) {
-        return customer[0];
+        const existingCustomer = customer[0];
+
+        // If Auth0 provided a “real” email (non-placeholder), keep DB in sync
+        if (email && !email.endsWith('@auth0.local') && email.toLowerCase() !== existingCustomer.email.toLowerCase()) {
+            await db.run(
+                `UPDATE customers SET email = ?, updated_at = ? WHERE id = ?`,
+                [email.toLowerCase(), now(), existingCustomer.id]
+            );
+            existingCustomer.email = email.toLowerCase();
+        }
+
+        // Sync display name from auth token when not defined or placeholder
+        if (name && !existingCustomer.name) {
+            await db.run(
+                `UPDATE customers SET name = ?, updated_at = ? WHERE id = ?`,
+                [name, now(), existingCustomer.id]
+            );
+            existingCustomer.name = name;
+        }
+
+        return existingCustomer;
     }
 
     // Fallback: try to find by email (handles accounts created before Auth0 sub linking)
@@ -137,19 +157,20 @@ app.openapi(getMyProfile, async (c) => {
     const auth = c.get('auth') as any;
     const jwtSub = auth?.sub as string;
     const email = auth?.email as string | undefined;
+    const name = auth?.name as string | undefined;
 
     if (!jwtSub) {
         throw ApiError.unauthorized('Invalid token');
     }
 
     const db = getDb(c.var.db);
-    const customer = await resolveCustomer(db, jwtSub, email);
+    const customer = await resolveCustomer(db, jwtSub, email, name);
 
     return c.json(
         {
             id: customer.id,
             email: customer.email,
-            name: customer.name ?? null,
+            name: customer.name ?? name ?? null,
             phone: customer.phone ?? null,
             locale: customer.locale ?? null,
             accepts_marketing: customer.accepts_marketing ?? 0,

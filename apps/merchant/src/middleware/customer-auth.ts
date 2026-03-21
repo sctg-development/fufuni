@@ -76,8 +76,8 @@ export const customerAuthMiddleware = createMiddleware<HonoEnv>(
 
     // Extract claims
     const sub = payload.sub as string | undefined;
-    // Try to get email from standard claim, or fall back to email_verified user info
-    const email = (payload.email || payload['https://yourapp.com/email']) as string | undefined;
+    // Get email from standard Auth0 claim
+    const email = payload.email as string | undefined;
     const perms = Array.isArray(payload.permissions)
       ? (payload.permissions as unknown[]).map(String)
       : [];
@@ -85,6 +85,8 @@ export const customerAuthMiddleware = createMiddleware<HonoEnv>(
     if (!sub) {
       throw ApiError.unauthorized('Invalid token: missing sub claim');
     }
+
+    const name = payload.name as string | undefined;
 
     // Email is optional - if not in JWT, middleware will work but routes may need to handle it
     // The resolveCustomer function will attempt to look up by sub, then by email if available
@@ -94,6 +96,7 @@ export const customerAuthMiddleware = createMiddleware<HonoEnv>(
       role: 'customer',
       sub,
       email: email || undefined,
+      name: name || undefined,
       permissions: perms,
       stripeSecretKey: null,
       stripeWebhookSecret: null,
