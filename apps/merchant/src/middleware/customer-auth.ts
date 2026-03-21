@@ -76,26 +76,24 @@ export const customerAuthMiddleware = createMiddleware<HonoEnv>(
 
     // Extract claims
     const sub = payload.sub as string | undefined;
-    let email = payload.email as string | undefined;
-    let name = payload.name as string | undefined;
+
+    const extraUserInfo = payload['extra_user_info'] as Record<string, any> | undefined;
+    const emailFromExtra = extraUserInfo?.email as string | undefined;
+    const nameFromExtra = extraUserInfo?.name as string | undefined;
+
+    let email =
+      (payload.email as string | undefined) ||
+      emailFromExtra;
+    let name =
+      (payload.name as string | undefined) ||
+      nameFromExtra;
+
     const perms = Array.isArray(payload.permissions)
       ? (payload.permissions as unknown[]).map(String)
       : [];
 
     if (!sub) {
       throw ApiError.unauthorized('Invalid token: missing sub claim');
-    }
-
-    // If email or name are missing, fetch them from Auth0 userinfo endpoint
-    if (!email || !name) {
-      try {
-        const { fetchAuth0UserInfo } = await import('../lib/auth0');
-        const userInfo = await fetchAuth0UserInfo(token, domain);
-        email = email || (userInfo.email as string | undefined);
-        name = name || (userInfo.name as string | undefined);
-      } catch (err) {
-        console.warn('Failed to fetch Auth0 userinfo, continuing without email/name', err);
-      }
     }
 
     // Email is optional - if not in JWT, middleware will work but routes may need to handle it
