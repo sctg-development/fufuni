@@ -94,6 +94,11 @@ jobs:
             exit 1
           fi
 
+      - name: Set Wrangler secrets from updated .env
+        run: |
+          chmod +x ./scripts/set-wrangler-secrets-from-env.sh
+          ./scripts/set-wrangler-secrets-from-env.sh .env
+
       - name: Create an encrypted artifact with .env and wrangler.jsonc with CRYPTOKEN for debugging
         run: |
           tar -czf env_and_wrangler.tar.gz .env apps/merchant/wrangler.jsonc

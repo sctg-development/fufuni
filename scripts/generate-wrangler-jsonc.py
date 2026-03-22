@@ -67,14 +67,14 @@ def main():
     wrangler_config = dict(base_config)
 
     current_vars = dict(wrangler_config.get("vars", {}))
-    current_secrets = dict(wrangler_config.get("secrets", {}))
 
-    # Treat all environment variables as secrets.
+    # Treat all environment variables as secrets into required list for wrangler config.
+    required_secrets = sorted(env_vars.keys())
+    if required_secrets:
+        wrangler_config["secrets"] = {"required": required_secrets}
+
+    # Keep existing vars configuration unchanged in generated file (optional values, not secret references).
     wrangler_config["vars"] = current_vars
-    for key, value in env_vars.items():
-        current_secrets[key] = value
-    if current_secrets:
-        wrangler_config["secrets"] = current_secrets
 
     output_dir = os.path.dirname(output_path)
     if output_dir:
