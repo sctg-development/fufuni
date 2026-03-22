@@ -22,7 +22,13 @@ on:
 jobs:
   create-env:
     runs-on: ubuntu-latest
-    steps:
+    steps:  
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          submodules: "recursive"
+          fetch-depth: 1
+
       - name: Create .env file (shared secrets from deploy-worker.yaml)
         run: |
           echo -n ${{ secrets.AUTH0_AUDIENCE }} | sed -n 's/http.:\/\/\(.*\)/DOMAIN_NAME=\1\n/p' > .env
