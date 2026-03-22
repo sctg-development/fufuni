@@ -1070,7 +1070,7 @@ https://<your-worker>.workers.dev/v1/webhooks/stripe
 ## License
 
 This project is dual-licensed:
-- `apps/merchant/` — **AGPL-3.0** (see [LICENSE](apps/merchant/LICENSE))
-- `apps/client/` — **MIT** (see [LICENSE](apps/client/LICENSE))
+- `apps/client/` — **AGPL-3.0** (see [LICENSE](apps/client/LICENSE))
+- `apps/merchant/` — **MIT** (see [LICENSE](apps/merchant/LICENSE))
 
 © 2024-2026 Ronan LE MEILLAT — SCTG Development
