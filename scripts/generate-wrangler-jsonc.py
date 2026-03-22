@@ -73,6 +73,29 @@ def main():
     if required_secrets:
         wrangler_config["secrets"] = {"required": required_secrets}
 
+    # Ensure kv_namespaces exist and set KV_CACHE id if available.
+    kv_namespaces = wrangler_config.get("kv_namespaces", [])
+    kv_cache_id = env_vars.get("KV_CACHE_ID", "")
+    if kv_cache_id:
+        for ns in kv_namespaces:
+            if ns.get("binding") == "KV_CACHE":
+                ns["id"] = kv_cache_id
+        # if KV_CACHE binding is missing, append it
+        if not any(ns.get("binding") == "KV_CACHE" for ns in kv_namespaces):
+            kv_namespaces.append({"binding": "KV_CACHE", "id": kv_cache_id})
+    wrangler_config["kv_namespaces"] = kv_namespaces
+
+    # Set routes based on page-dev flag and domain name (same logic as jq branch from prior workflow).
+    use_page_dev = env_vars.get("CLOUDFLARE_USE_PAGE_DEV_DOMAIN", "").strip().lower()
+    is_falsey = use_page_dev == "" or use_page_dev == "false" or use_page_dev == "0"
+    if not is_falsey:
+        # page dev active: keep routes untouched
+        pass
+    else:
+        domain_name = env_vars.get("DOMAIN_NAME", "")
+        if domain_name:
+            wrangler_config["routes"] = [{"pattern": domain_name, "custom_domain": True}]
+
     # Keep existing vars configuration unchanged in generated file (optional values, not secret references).
     wrangler_config["vars"] = current_vars
 
