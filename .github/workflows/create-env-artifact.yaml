@@ -19,6 +19,9 @@ name: Create shared encrypted .env artifact
 on:
   workflow_call: {}
 
+permissions:
+  contents: read
+
 jobs:
   create-env:
     runs-on: ubuntu-latest
