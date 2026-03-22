@@ -25,6 +25,7 @@ on:
       - package-lock.json
       - .github/workflows/deploy-cloudflare-worker.yaml
       - .github/workflows/create-env-artifact.yaml
+      - scripts/generate-wrangler-jsonc.py
 
   workflow_dispatch:
 
