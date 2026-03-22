@@ -27,21 +27,72 @@ import path from "path";
 import dotenv from "dotenv";
 import { decodeJwt } from "jose";
 
-dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+export const RETRY_LIMIT = 3;
+export const RETRY_DELAY_MS = 60000;
+export const BUILD_DELAY_MS = 2000;
 
 /**
- * Read environment variable and throw an error if it is missing.
+ * Load environment variables from a .env file and optionally override existing process.env values.
+ *
+ * @param filePath Optional path to the .env file (defaults to ".env" in current working directory).
+ * @param overrideExisting If true, variables from the file will overwrite existing process.env values. Default is false (file vars only set if not already in process.env).
+ * @returns An object with the parsed key-value pairs from the .env file.
+ */
+export function loadEnvFile(filePath?: string, overrideExisting: boolean = false): Record<string, string> {
+  const resolvedPath = path.resolve(process.cwd(), filePath || ".env");
+
+  let parsed: Record<string, string> = {};
+
+  try {
+    const fs = require("fs");
+    if (!fs.existsSync(resolvedPath)) {
+      fs.writeFileSync(resolvedPath, "", { encoding: "utf-8" });
+      console.log(`Created env file at ${resolvedPath}`);
+    }
+
+    const envContent = fs.readFileSync(resolvedPath, "utf-8");
+    parsed = dotenv.parse(envContent);
+
+    if (overrideExisting) {
+      for (const [key, value] of Object.entries(parsed)) {
+        process.env[key] = value;
+      }
+    } else {
+      for (const [key, value] of Object.entries(parsed)) {
+        if (!process.env[key]) {
+          process.env[key] = value;
+        }
+      }
+    }
+
+    dotenv.config({ path: resolvedPath });
+  } catch (err) {
+    console.warn(`Could not load env file: ${resolvedPath}.`, err);
+    dotenv.config({ path: resolvedPath });
+  }
+
+  return parsed;
+}
+
+
+/**
+ * Read environment variable and throw an error if it is missing, or return default.
  *
  * @param key Environment variable name.
- * @returns The environment variable value.
+ * @param fallback Optional fallback value when var is absent.
+ * @returns The environment variable value or fallback.
  */
-export function env(key: string): string {
+export function env(key: string, fallback?: string): string {
   const value = process.env[key];
-  if (!value) {
-    throw new Error(`Missing env var ${key}`);
+  if (value && value.length > 0) {
+    return value;
   }
-  return value;
+  if (fallback && fallback.length > 0) {
+    return fallback;
+  }
+  throw new Error(`Missing env var ${key}`);
 }
+
 
 /**
  * Upsert an environment variable in the .env file and process.env.
@@ -49,8 +100,8 @@ export function env(key: string): string {
  * @param key Environment variable name.
  * @param value Environment variable value.
  */
-export async function upsertEnv(key: string, value: string) {
-  const envPath = path.resolve(process.cwd(), ".env");
+export async function upsertEnv(key: string, value: string, filePath: string = ".env") {
+  const envPath = path.resolve(process.cwd(), filePath);
   let content = "";
 
   try {
@@ -115,7 +166,7 @@ export async function getMgmtToken(domain: string, clientId: string, clientSecre
  * @returns A valid management token.
  * @see https://auth0.com/docs/secure/tokens/access-tokens/management-api-access-tokens
  */
-export async function getValidMgmtToken(domain: string, clientId: string, clientSecret: string) {
+export async function getValidMgmtToken(domain: string, clientId: string, clientSecret: string, envFilePath: string = ".env") {
   const cached = process.env.AUTH0_MANAGEMENT_TOKEN;
 
   if (cached) {
@@ -136,7 +187,7 @@ export async function getValidMgmtToken(domain: string, clientId: string, client
   }
 
   const newToken = await getMgmtToken(domain, clientId, clientSecret);
-  await upsertEnv("AUTH0_MANAGEMENT_TOKEN", newToken);
+  await upsertEnv("AUTH0_MANAGEMENT_TOKEN", newToken, envFilePath);
   return newToken;
 }
 
@@ -160,28 +211,235 @@ export async function auth0Request<T>(
 ): Promise<T> {
   const url = path.startsWith("http") ? path : `https://${domain}/api/v2/${path.replace(/^\/+/, "")}`;
 
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      ...(options.headers ?? {}),
-      Authorization: `Bearer ${token}`,
-      "content-type": "application/json",
-    },
-  });
+  for (let attempt = 0; attempt < RETRY_LIMIT; attempt++) {
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        ...(options.headers ?? {}),
+        Authorization: `Bearer ${token}`,
+        "content-type": "application/json",
+      },
+    });
 
-  const text = await res.text();
+    const text = await res.text();
 
-  // Auth0 typically returns JSON, but some endpoints may return 204 no content.
-  if (!res.ok) {
+    if (res.ok) {
+      if (text.length === 0) {
+        // Return an empty object when body is empty so generic type T is satisfied.
+        return {} as T;
+      }
+      return JSON.parse(text) as T;
+    }
+
+    if (res.status === 429 && attempt < RETRY_LIMIT - 1) {
+      console.warn(`Auth0 429 rate limit hit, retrying in ${RETRY_DELAY_MS}ms (attempt ${attempt + 1}/${RETRY_LIMIT})`);
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+      continue;
+    }
+
     throw new Error(`Auth0 ${options.method ?? "GET"} ${url} failed ${res.status} ${res.statusText} ${text}`);
   }
 
-  if (text.length === 0) {
-    // Return an empty object when body is empty so generic type T is satisfied.
-    return {} as T;
+  throw new Error(`Auth0 ${options.method ?? "GET"} ${url} failed after ${RETRY_LIMIT} retries`);
+}
+
+/**
+ * Find an Auth0 client by name.
+ *
+ * @param domain Auth0 tenant domain.
+ * @param token Management API token.
+ * @param name Client name.
+ * @returns Client object or null.
+ */
+export async function findClientByName(domain: string, token: string, name: string) {
+  const clients = await auth0Request<any[]>(
+    domain,
+    token,
+    `clients?fields=client_id,name&include_fields=true`,
+  );
+  return clients.find((client) => client.name === name) ?? null;
+}
+
+/**
+ * Create or update an Auth0 client (application).
+ *
+ * @param domain Auth0 tenant domain.
+ * @param token Management API token.
+ * @param config Object with client config {name, app_type, grant_types, callbacks, logout_urls, token_endpoint_auth_method}.
+ * @returns The created or updated client.
+ * @see https://auth0.com/docs/api/management/v2#!/Clients/patch_clients_by_id
+ */
+export async function createOrUpdateClient(domain: string, token: string, config: any) {
+  const existing = await findClientByName(domain, token, config.name);
+  if (existing) {
+    const updated = await auth0Request<any>(
+      domain,
+      token,
+      `clients/${encodeURIComponent(existing.client_id)}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(config),
+      },
+    );
+    return updated;
   }
 
-  return JSON.parse(text) as T;
+  const created = await auth0Request<any>(
+    domain,
+    token,
+    "clients",
+    {
+      method: "POST",
+      body: JSON.stringify(config),
+    },
+  );
+  return created;
+}
+
+/**
+ * Find a resource server by audience.
+ *
+ * @param domain Auth0 tenant domain.
+ * @param token Management API token.
+ * @param audience Api audience string.
+ * @returns Resource server object or null.
+ */
+export async function findResourceServerByAudience(domain: string, token: string, audience: string) {
+  const servers = await auth0Request<any[]>(domain, token, "resource-servers");
+  return servers.find((s) => s.identifier === audience) ?? null;
+}
+
+/**
+ * Create or update a resource server (API).
+ *
+ * @param domain Auth0 tenant domain.
+ * @param token Management API token.
+ * @param config Object {name, identifier, scopes, signing_alg, token_lifetime, allow_offline_access}.
+ * @returns The created or updated resource server.
+ * @see https://auth0.com/docs/api/management/v2#!/Resource_Servers/patch_resource_servers_by_id
+ */
+export async function createOrUpdateResourceServer(domain: string, token: string, config: any) {
+  const existing = await findResourceServerByAudience(domain, token, config.identifier);
+  if (existing) {
+    const updated = await auth0Request<any>(
+      domain,
+      token,
+      `resource-servers/${encodeURIComponent(existing.id)}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(config),
+      },
+    );
+    return updated;
+  }
+
+  const created = await auth0Request<any>(
+    domain,
+    token,
+    "resource-servers",
+    {
+      method: "POST",
+      body: JSON.stringify(config),
+    },
+  );
+  return created;
+}
+
+/**
+ * Get a connection by strategy name.
+ *
+ * @param domain Auth0 tenant domain.
+ * @param token Management API token.
+ * @param name Connection name (e.g. github, google-oauth2, windowslive, apple).
+ * @returns Connection object or null.
+ */
+export async function findConnectionByName(domain: string, token: string, name: string) {
+  // Query with allowed fields set. Note: `clients` is correct property for enabled clients.
+  const connections = await auth0Request<any[]>(
+    domain,
+    token,
+    `connections?strategy=${encodeURIComponent(name)}&fields=id,name,clients&include_fields=true`,
+  );
+  if (!Array.isArray(connections)) {
+    return null;
+  }
+  return connections.find((c) => c.name === name || c.strategy === name) ?? null;
+}
+
+/**
+ * Ensure a connection is enabled for a client by adding client_id to enabled_clients.
+ *
+ * @param domain Auth0 tenant domain.
+ * @param token Management API token.
+ * @param connectionName Connection name (e.g. github).
+ * @param clientId Client ID to enable.
+ * @returns Updated connection object or null if connection does not exist.
+ * @see https://auth0.com/docs/api/management/v2#!/Connections/patch_connections_by_id
+ */
+export async function createConnectionIfMissing(domain: string, token: string, strategy: string) {
+  const existing = await findConnectionByName(domain, token, strategy);
+  if (existing) {
+    return existing;
+  }
+
+  console.log(`Creating connection for strategy '${strategy}'...`);
+  // For built-in social providers in Auth0, creating may require minimal payload.
+  // If not supported by API, this may fail; user can create manually via dashboard.
+  const created = await auth0Request<any>(
+    domain,
+    token,
+    "connections",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        name: strategy,
+        strategy,
+      }),
+    },
+  );
+
+  return created;
+}
+
+export async function enableConnectionForClient(domain: string, token: string, connectionName: string, clientId: string) {
+  let connection = await findConnectionByName(domain, token, connectionName);
+
+  if (!connection) {
+    console.warn(`Connection '${connectionName}' not found, attempting to create`);
+    try {
+      connection = await createConnectionIfMissing(domain, token, connectionName);
+    } catch (err) {
+      console.warn(`Could not create connection '${connectionName}':`, err);
+      return null;
+    }
+  }
+
+  if (!connection || !connection.id) {
+    console.warn(`Connection '${connectionName}' still missing after create attempt`);
+    return null;
+  }
+
+  const clientsForConnection = Array.isArray(connection.clients) ? connection.clients : [];
+  if (!clientsForConnection.includes(clientId)) {
+    const payload = [
+      {
+        client_id: clientId,
+        status: true,
+      },
+    ];
+    const updatedConnection = await auth0Request<any>(
+      domain,
+      token,
+      `connections/${encodeURIComponent(connection.id)}/clients`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      },
+    );
+    return updatedConnection;
+  }
+
+  return connection;
 }
 
 /**
@@ -241,7 +499,49 @@ export async function createAndInsert(
     actionId = newAction.id;
   }
 
-  // 3) Deploy the action
+  // 3) Build the action first (required before deploy)
+  console.log(`Building action...`);
+  await auth0Request<void>(auth0Domain, token, `actions/actions/${actionId}/build`, {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+
+  let built = false;
+  for (let attempt = 0; attempt < RETRY_LIMIT; attempt++) {
+    if (attempt > 0) {
+      console.log(`Waiting ${BUILD_DELAY_MS}ms for action build state (attempt ${attempt + 1}/${RETRY_LIMIT})`);
+    } else {
+      console.log(`Sleeping ${BUILD_DELAY_MS}ms before checking build state`);
+    }
+    await new Promise((resolve) => setTimeout(resolve, BUILD_DELAY_MS));
+
+    const actionStatus = await auth0Request<any>(auth0Domain, token, `actions/actions/${actionId}`);
+    const status = actionStatus?.status ?? "unknown";
+    console.log(`Action status: ${status}`);
+
+    if (status === "built" || status === "published") {
+      built = true;
+      break;
+    }
+
+    if (attempt < RETRY_LIMIT - 1) {
+      console.log(`Action not ready yet; retrying build.`);
+      try {
+        await auth0Request<void>(auth0Domain, token, `actions/actions/${actionId}/build`, {
+          method: "POST",
+          body: JSON.stringify({}),
+        });
+      } catch (err) {
+        console.warn(`⚠️  Failed to trigger rebuild on attempt ${attempt + 1}: ${err}`);
+      }
+    }
+  }
+
+  if (!built) {
+    throw new Error(`Action ${actionId} is not in built state after ${RETRY_LIMIT} attempts`);
+  }
+
+  // 4) Deploy the action
   console.log(`Deploying action...`);
   try {
     await auth0Request<void>(auth0Domain, token, `actions/actions/${actionId}/deploy`, {
