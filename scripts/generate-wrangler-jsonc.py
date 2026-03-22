@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+# Copyright (c) 2024-2026 Ronan LE MEILLAT
+# License: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+"""Generate apps/merchant/wrangler.jsonc from .env and existing base wrangler.jsonc.
+
+Usage:
+  python3 scripts/generate-wrangler-jsonc.py <env-file> <base-wrangler.jsonc> <output-wrangler.jsonc>
+"""
+
+import json
+import os
+import re
+import sys
+
+# All .env variables will be treated as secrets in generated wrangler.jsonc.
+
+def load_env(env_path):
+    if not os.path.exists(env_path):
+        raise FileNotFoundError(f"Env file not found: {env_path}")
+
+    env = {}
+    with open(env_path, "r", encoding="utf-8") as f:
+        for raw in f:
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            key_value = re.split(r"=(.*)", line, maxsplit=1)
+            if len(key_value) < 3:
+                continue
+            key, value = key_value[0].strip(), key_value[1].strip()
+            # preserve quotes inside value and remove surrounding quotes for readability
+            if len(value) >= 2 and ((value[0] == '"' and value[-1] == '"') or (value[0] == "'" and value[-1] == "'")):
+                value = value[1:-1]
+            env[key] = value
+    return env
+
+
+def main():
+    if len(sys.argv) != 4:
+        print("Usage: python3 scripts/generate-wrangler-jsonc.py <env-file> <base-wrangler.jsonc> <output-wrangler.jsonc>")
+        sys.exit(1)
+
+    env_path = sys.argv[1]
+    base_wrangler_path = sys.argv[2]
+    output_path = sys.argv[3]
+
+    env_vars = load_env(env_path)
+
+    with open(base_wrangler_path, "r", encoding="utf-8") as f:
+        base_config = json.load(f)
+
+    # Preserve existing config and avoid overriding unrelated keys.
+    wrangler_config = dict(base_config)
+
+    current_vars = dict(wrangler_config.get("vars", {}))
+    current_secrets = dict(wrangler_config.get("secrets", {}))
+
+    # Treat all environment variables as secrets.
+    wrangler_config["vars"] = current_vars
+    for key, value in env_vars.items():
+        current_secrets[key] = value
+    if current_secrets:
+        wrangler_config["secrets"] = current_secrets
+
+    output_dir = os.path.dirname(output_path)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(wrangler_config, f, indent=2, ensure_ascii=False)
+
+    print(f"Generated wrangler config at: {output_path}")
+
+
+if __name__ == "__main__":
+    main()

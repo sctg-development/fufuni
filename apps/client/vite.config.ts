@@ -92,9 +92,14 @@ export function extractPerVendorDependencies(
  * Vite configuration
  * @see https://vitejs.dev/config/
  */
-console.warn(
-  `Launching Vite with\nAUTH0_DOMAIN: ${process.env.AUTH0_DOMAIN}\nSTORE_URL: ${process.env.STORE_URL}\nAUTH0_CLIENT_ID: ${process.env.AUTH0_CLIENT_ID}\nAUTH0_AUDIENCE: ${process.env.AUTH0_AUDIENCE}\nAUTH0_SCOPE: ${process.env.AUTH0_SCOPE}\nAPI_BASE_URL: ${process.env.API_BASE_URL}\nAUTH0_ADMIN_PERMISSION: ${process.env.ADMIN_AUTH0_PERMISSION}\nAUTH0_AUTOMATIC_PERMISSIONS: ${process.env.AUTH0_AUTOMATIC_PERMISSIONS}\nPERMISSIONS: ${JSON.stringify(scopesArray)}\nMERCHANT_PK: ${process.env.MERCHANT_PK}`,
-);
+if (process.env.NODE_ENV === "development") {
+  console.warn("Launching Vite in development mode, environment variables loaded (sensitive values hidden)", {
+    AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
+    STORE_URL: process.env.STORE_URL,
+    API_BASE_URL: process.env.API_BASE_URL,
+    PERMISSIONS: scopesArray,
+  });
+}
 export default defineConfig({
   base: process.env.VITE_BASE_PATH || "/",
   define: {
