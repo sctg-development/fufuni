@@ -28,7 +28,7 @@ import dotenv from "dotenv";
 import { decodeJwt } from "jose";
 
 export const RETRY_LIMIT = 3;
-export const RETRY_DELAY_MS = 60000;
+export const RETRY_DELAY_MS = 10000;
 export const BUILD_DELAY_MS = 2000;
 
 /**
@@ -150,7 +150,7 @@ export async function getMgmtToken(domain: string, clientId: string, clientSecre
     throw new Error(`Auth0 token request failed ${res.status} ${res.statusText}: ${await res.text()}`);
   }
 
-  const json = await res.json();
+  const json = (await res.json()) as { access_token?: string; [key: string]: unknown };
   if (!json.access_token) {
     throw new Error(`No access_token in Auth0 response: ${JSON.stringify(json)}`);
   }
@@ -297,6 +297,20 @@ export async function createOrUpdateClient(domain: string, token: string, config
 }
 
 /**
+ * Get client by its client_id
+ */
+export async function getClientById(domain: string, token: string, clientId: string) {
+  try {
+    return await auth0Request<any>(domain, token, `clients/${encodeURIComponent(clientId)}`);
+  } catch (err) {
+    if (err instanceof Error && err.message.includes("404")) {
+      return null;
+    }
+    throw err;
+  }
+}
+
+/**
  * Find a resource server by audience.
  *
  * @param domain Auth0 tenant domain.
@@ -321,13 +335,17 @@ export async function findResourceServerByAudience(domain: string, token: string
 export async function createOrUpdateResourceServer(domain: string, token: string, config: any) {
   const existing = await findResourceServerByAudience(domain, token, config.identifier);
   if (existing) {
+    // identifier is immutable, so we cannot send it in PATCH payload.
+    const patchPayload = { ...config };
+    delete patchPayload.identifier;
+
     const updated = await auth0Request<any>(
       domain,
       token,
       `resource-servers/${encodeURIComponent(existing.id)}`,
       {
         method: "PATCH",
-        body: JSON.stringify(config),
+        body: JSON.stringify(patchPayload),
       },
     );
     return updated;
@@ -458,7 +476,7 @@ export async function createAndInsert(
   name: string,
   code: string,
   trigger: string = "post-login",
-) {
+): Promise<string> {
   let actionId: string;
 
   // 1) List existing actions to check if this action already exists
@@ -499,21 +517,16 @@ export async function createAndInsert(
     actionId = newAction.id;
   }
 
-  // 3) Build the action first (required before deploy)
-  console.log(`Building action...`);
-  await auth0Request<void>(auth0Domain, token, `actions/actions/${actionId}/build`, {
-    method: "POST",
-    body: JSON.stringify({}),
-  });
-
+  // 3) Wait for the action to reach built state before deploy (Auth0 does not expose /build endpoint reliably for this flow)
   let built = false;
   for (let attempt = 0; attempt < RETRY_LIMIT; attempt++) {
     if (attempt > 0) {
-      console.log(`Waiting ${BUILD_DELAY_MS}ms for action build state (attempt ${attempt + 1}/${RETRY_LIMIT})`);
+      console.log(`Waiting ${BUILD_DELAY_MS}ms before rechecking action state (attempt ${attempt + 1}/${RETRY_LIMIT})`);
+      await new Promise((resolve) => setTimeout(resolve, BUILD_DELAY_MS));
     } else {
-      console.log(`Sleeping ${BUILD_DELAY_MS}ms before checking build state`);
+      console.log(`Waiting ${BUILD_DELAY_MS}ms for initial action readiness check`);
+      await new Promise((resolve) => setTimeout(resolve, BUILD_DELAY_MS));
     }
-    await new Promise((resolve) => setTimeout(resolve, BUILD_DELAY_MS));
 
     const actionStatus = await auth0Request<any>(auth0Domain, token, `actions/actions/${actionId}`);
     const status = actionStatus?.status ?? "unknown";
@@ -522,18 +535,6 @@ export async function createAndInsert(
     if (status === "built" || status === "published") {
       built = true;
       break;
-    }
-
-    if (attempt < RETRY_LIMIT - 1) {
-      console.log(`Action not ready yet; retrying build.`);
-      try {
-        await auth0Request<void>(auth0Domain, token, `actions/actions/${actionId}/build`, {
-          method: "POST",
-          body: JSON.stringify({}),
-        });
-      } catch (err) {
-        console.warn(`⚠️  Failed to trigger rebuild on attempt ${attempt + 1}: ${err}`);
-      }
     }
   }
 
@@ -644,4 +645,6 @@ export async function createAndInsert(
     console.log(`4. Click "Save"`);
     console.log(`\n`);
   }
+
+  return actionId;
 }

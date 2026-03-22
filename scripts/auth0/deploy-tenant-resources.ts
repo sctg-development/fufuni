@@ -6,11 +6,41 @@ import {
   loadEnvFile,
   upsertEnv,
   getValidMgmtToken,
+  getClientById,
   createOrUpdateClient,
   createOrUpdateResourceServer,
   enableConnectionForClient,
   createAndInsert,
+  auth0Request,
 } from "./auth0-helper";
+
+function printHelp() {
+  console.log(`Usage: npx tsx scripts/auth0/deploy-tenant-resources.ts -- --env-file=<path> [--help] [--detailed-help]`);
+  console.log(`
+  --env-file=<path>    Required. Path to a dotenv file containing Auth0 settings.
+  --help               Display this basic help and exit.
+  --detailed-help      Display detailed setup instructions and exit.
+  `);
+}
+
+function printDetailedHelp() {
+  console.log(`Auth0 Management Environment Variables Setup (step-by-step):\n`);
+  console.log(`1. In the Auth0 Dashboard, open APIs and locate the Auth0 Management API.\n`);
+  console.log(`2. Click on "Test" or "Settings" and then "Create and Authorize Test Application".\n`);
+  console.log(`3. Open the created app (Auth0 Management API test application).\n`);
+  console.log(`4. In the app settings, copy Client ID and Client Secret.\n`);
+  console.log(`5. Find your tenant domain in the dashboard header (e.g. my-tenant.eu.auth0.com).\n`);
+  console.log(`\nRequired .env variables:\n`);
+  console.log(`AUTH0_DOMAIN=<your-tenant>.eu.auth0.com`);
+  console.log(`AUTH0_TENANT=<your-tenant> (used for prefixes and naming)`);
+  console.log(`AUTH0_MANAGEMENT_API_CLIENT_ID=<your-management-client-id>`);
+  console.log(`AUTH0_MANAGEMENT_API_CLIENT_SECRET=<your-management-client-secret>`);
+  console.log(`AUTH0_AUDIENCE=https://api.<your-domain>/`);
+  console.log(`STORE_URL=http://localhost:5173`);
+  console.log(`\n6. Save these values into the file passed to --env-file via npx tsx scripts/auth0/deploy-tenant-resources.ts -- --env-file=.env.test\n`);
+  console.log(`7. Run the script and verify the output.\n`);
+  console.log(`Tip: keep this file out of source control. Use secret management for production values.\n`);
+}
 
 async function ask(question: string): Promise<string> {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -75,11 +105,28 @@ async function getCallbacks() {
 }
 
 async function deployResources() {
-  const envFileArg = process.argv.find((arg) => arg.startsWith("--env-file="));
+  const args = process.argv.slice(2);
+  const envFileArg = args.find((arg) => arg.startsWith("--env-file="));
   const envFilePath = envFileArg ? envFileArg.split("=")[1] : undefined;
 
+  if (args.includes("--help")) {
+    printHelp();
+    process.exit(0);
+  }
+
+  if (args.includes("--detailed-help")) {
+    printDetailedHelp();
+    process.exit(0);
+  }
+
+  if (!envFilePath) {
+    console.error("Error: --env-file is required. Use --help for usage details.");
+    printHelp();
+    process.exit(1);
+  }
+
   let fileVars: Record<string, string> = {};
-  const strictFileMode = Boolean(envFilePath);
+  const strictFileMode = true; // With --env-file mandatory, strict mode is always true
 
   if (envFilePath) {
     // Strict file environment mode: use values in file, ignore terminal ENV for required keys
@@ -126,8 +173,8 @@ async function deployResources() {
 
   const token = await getValidMgmtToken(auth0Domain, managementClientId, managementClientSecret, envFilePath || ".env");
 
-  console.log(`Creating or updating application '${appName}'`);
-  const client = await createOrUpdateClient(auth0Domain, token, {
+  const targetEnvFile = envFilePath || ".env";
+  const clientConfig = {
     name: appName,
     app_type: "spa",
     grant_types: ["authorization_code", "refresh_token"],
@@ -137,12 +184,30 @@ async function deployResources() {
     token_endpoint_auth_method: "none",
     oidc_conformant: true,
     is_first_party: true,
-  });
+  };
+
+  let client;
+  const existingClientId = process.env.AUTH0_CLIENT_ID;
+
+  if (existingClientId) {
+    console.log(`Found AUTH0_CLIENT_ID in env file: ${existingClientId}, validating client configuration...`);
+    const existingClient = await getClientById(auth0Domain, token, existingClientId);
+    if (existingClient) {
+      client = await auth0Request<any>(auth0Domain, token, `clients/${encodeURIComponent(existingClientId)}`, {
+        method: "PATCH",
+        body: JSON.stringify(clientConfig),
+      });
+    } else {
+      console.log(`Client ID ${existingClientId} not found in Auth0, creating/updating by name (${appName})`);
+      client = await createOrUpdateClient(auth0Domain, token, clientConfig);
+    }
+  } else {
+    console.log(`No existing AUTH0_CLIENT_ID found, creating/updating application '${appName}'`);
+    client = await createOrUpdateClient(auth0Domain, token, clientConfig);
+  }
 
   console.log(`Client id: ${client.client_id}`);
 
-  // Persist client credentials in env file for future runs
-  const targetEnvFile = envFilePath || ".env";
   await upsertEnv("AUTH0_CLIENT_ID", client.client_id, targetEnvFile);
   if (client.client_secret) {
     await upsertEnv("AUTH0_CLIENT_SECRET", client.client_secret, targetEnvFile);
@@ -181,7 +246,8 @@ async function deployResources() {
   const scriptDir = new URL("./", import.meta.url);
   const actionCode = await readFile(new URL("./auth0-code/add-userinfo-to-access-jwt.js", scriptDir), "utf-8");
 
-  await createAndInsert(auth0Domain, token, postLoginActionName, actionCode, "post-login");
+  const actionId = await createAndInsert(auth0Domain, token, postLoginActionName, actionCode, "post-login");
+  await upsertEnv("AUTH0_ACTION_USERINFO", actionId, targetEnvFile);
 
   console.log(`\nDeployment complete.`);
   console.log(`App: ${client.name} (${client.client_id})`);

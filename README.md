@@ -221,6 +221,24 @@ curl -X POST http://localhost:8787/v1/setup/stripe \
   -d '{"stripesecretkey":"sk_test_..."}'
 ```
 
+### Auth0 setup (minimal, automated)
+The project includes scripts that automate Auth0 tenant setup and post-login action configuration.
+
+1. Create Auth0 tenant (e.g. `mystore.us.auth0.com`).
+2. In Auth0 dashboard:
+   - Go to **APIs** > **Auth0 Management API** > **Test**.
+   - Click **Create and Authorize Test Application**.
+   - In **Application Access**, choose the test app and select **All** permissions.
+3. Copy values into your env file:
+   - `AUTH0_DOMAIN=<tenant>.us.auth0.com`
+   - `AUTH0_TENANT=<tenant>`
+   - `AUTH0_MANAGEMENT_API_CLIENT_ID=<client_id>`
+   - `AUTH0_MANAGEMENT_API_CLIENT_SECRET=<client_secret>`
+   - `AUTH0_AUDIENCE=https://api.<your-domain>/`
+   - `STORE_URL=http://localhost:5173`
+4. Run the script:
+   `npx tsx scripts/auth0/deploy-tenant-resources.ts -- --env-file=.env`
+
 ### Frontend (Admin + Storefront)
 
 ```bash
