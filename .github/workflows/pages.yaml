@@ -24,6 +24,7 @@ on:
       - apps/client/**
       - package-lock.json
       - .github/workflows/pages.yaml
+      - .github/workflows/create-env-artifact.yaml
 
   #   release:
   #     types: [published]
