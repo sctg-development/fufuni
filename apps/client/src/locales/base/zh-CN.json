@@ -567,6 +567,21 @@
   "login-subtitle": "访问您的帐户",
   "login-title": "登入",
   "login-try-another-email": "尝试使用其他电子邮件",
-  "admin-products-ai-error": "",
-  "admin-products-ai-no-source": ""
+  "admin-products-ai-error": "人工智能模型错误",
+  "admin-products-ai-no-source": "无源文本",
+  "login-modal-title": "欢迎回来",
+  "login-with": "使用 {{provider}} 登录",
+  "login-with-email": "使用电子邮件登录",
+  "send-magic-link": "发送魔法链接",
+  "back": "返回",
+  "close": "关闭",
+  "cancel": "取消",
+  "add-to-wishlist": "添加到收藏夹",
+  "remove-from-wishlist": "从收藏夹中删除",
+  "save-cart": "保存购物车",
+  "email": "电子邮件",
+  "login-modal-subtitle": "登录 {{storeName}} 以继续访问 {{storeName}} 电子平台。",
+  "login-continue": "继续",
+  "login-signup": "注册",
+  "or": "或"
 }

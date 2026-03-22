@@ -833,6 +833,37 @@ export class MerchantDO extends DurableObject<MerchantEnv> {
           name: '025_idx_customers_email',
           sql: 'CREATE INDEX IF NOT EXISTS idx_customers_email ON customers(email)',
         },
+        // ── Migration 026 ── Saved carts table for Auth0 users ──────────────────
+        // Links Auth0 users to their saved carts via auth0_user_id (JWT 'sub' claim).
+        {
+          name: '026_saved_carts_table',
+          sql: `
+            CREATE TABLE IF NOT EXISTS saved_carts (
+              id            INTEGER PRIMARY KEY AUTOINCREMENT,
+              auth0_user_id TEXT NOT NULL,
+              cart_id       INTEGER NOT NULL,
+              created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+              updated_at    TEXT NOT NULL DEFAULT (datetime('now')),
+              UNIQUE(auth0_user_id, cart_id),
+              FOREIGN KEY (cart_id) REFERENCES carts(id) ON DELETE CASCADE
+            )
+          `,
+        },
+        {
+          name: '026_idx_saved_carts_user',
+          sql: 'CREATE INDEX IF NOT EXISTS idx_saved_carts_user ON saved_carts(auth0_user_id)',
+        },
+        {
+          name: '026_trg_saved_carts_updated_at',
+          sql: `
+            CREATE TRIGGER IF NOT EXISTS trg_saved_carts_updated_at
+            AFTER UPDATE ON saved_carts
+            FOR EACH ROW
+            BEGIN
+              UPDATE saved_carts SET updated_at = datetime('now') WHERE id = NEW.id;
+            END
+          `,
+        },
       ];
 
       for (const migration of migrations) {

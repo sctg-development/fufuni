@@ -567,6 +567,21 @@
   "login-subtitle": "Accede a tu cuenta",
   "login-title": "Iniciar sesión",
   "login-try-another-email": "Prueba con otro correo electrónico",
-  "admin-products-ai-error": "",
-  "admin-products-ai-no-source": ""
+  "admin-products-ai-error": "Error del modelo de IA",
+  "admin-products-ai-no-source": "Sin texto fuente",
+  "login-modal-title": "Bienvenida",
+  "login-with": "Iniciar sesión con {{provider}}",
+  "login-with-email": "Iniciar sesión con correo",
+  "send-magic-link": "Enviar enlace mágico",
+  "back": "Atrás",
+  "close": "Cerrar",
+  "cancel": "Cancelar",
+  "add-to-wishlist": "Agregar a favoritos",
+  "remove-from-wishlist": "Quitar de favoritos",
+  "save-cart": "Guardar carrito",
+  "email": "Correo Electrónico",
+  "login-modal-subtitle": "Inicia sesión en {{storeName}} para continuar en {{storeName}} e-platform.",
+  "login-continue": "Continuar",
+  "login-signup": "Registrarse",
+  "or": "o"
 }

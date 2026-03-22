@@ -18,3 +18,5 @@ openapi.json
 .DS_Store
 _sensitive_datas/gpg_key_id.txt
 .env.test
+IMPLEMENTATION_GUIDE.md
+IMPLEMENTATION_SUMMARY.md

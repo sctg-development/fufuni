@@ -43,7 +43,7 @@ import { useState } from "react";
 import { LinkUniversal } from "./link-universal";
 import { I18nIcon, LanguageSwitch } from "./language-switch";
 
-import { AuthenticationGuardWithPermission } from "@/authentication";
+import { AuthenticationGuardWithPermission, useAuth } from "@/authentication";
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import {
@@ -57,12 +57,16 @@ import { Logo } from "@/components/icons";
 import { useCart } from "@/hooks/useCart";
 import { ShoppingCart, ChevronDown, ShieldCheck } from "lucide-react";
 import { availableLanguages } from "@/i18n";
+import { LoginModal } from './LoginModal';
+import { useDisclosure } from '@heroui/react';
 
 export const Navbar = () => {
   const { t } = useTranslation();
   const { count: cartCount } = useCart();
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
+  const { isAuthenticated } = useAuth();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const submitSearch = () => {
     const q = searchValue.trim();
@@ -128,7 +132,12 @@ export const Navbar = () => {
               </LinkUniversal>
             </NavbarItem>
           ))}
-
+          {!isAuthenticated && (
+            <Button onPress={onOpen}>
+              {t('log-in')}
+            </Button>
+          )}
+          <LoginModal isOpen={isOpen} onClose={onOpenChange} />
           <AuthenticationGuardWithPermission permission="admin:store">
             <NavbarItem>
               <Dropdown>

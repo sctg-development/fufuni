@@ -562,6 +562,21 @@
   "account-marketing-emails-desc": "Receive updates about new products and special offers",
   "account-save-changes": "Save Changes",
   "account-saved-successfully": "Saved successfully!",
-  "admin-products-ai-error": "AI error",
-  "admin-products-ai-no-source": "AI no source texte"
+  "admin-products-ai-error": "AI model error",
+  "admin-products-ai-no-source": "No source text",
+  "login-modal-title": "Welcome back",
+  "login-with": "Sign in with {{provider}}",
+  "login-with-email": "Sign in with email",
+  "send-magic-link": "Send magic link",
+  "back": "Back",
+  "close": "Close",
+  "cancel": "Cancel",
+  "add-to-wishlist": "Add to favorites",
+  "remove-from-wishlist": "Remove from favorites",
+  "save-cart": "Save cart",
+  "email": "Email",
+  "login-modal-subtitle": "Sign in to {{storeName}} to continue to {{storeName}} e-platform.",
+  "login-continue": "Continue",
+  "login-signup": "Sign up",
+  "or": "or"
 }

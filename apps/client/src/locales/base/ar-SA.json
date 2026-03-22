@@ -567,6 +567,21 @@
   "login-subtitle": "الوصول إلى حسابك",
   "login-title": "تسجيل الدخول",
   "login-try-another-email": "حاول بريدًا إلكترونيًا آخر",
-  "admin-products-ai-error": "",
-  "admin-products-ai-no-source": ""
+  "admin-products-ai-error": "خطأ في نموذج الذكاء الاصطناعي",
+  "admin-products-ai-no-source": "لا يوجد نص مصدر",
+  "login-modal-title": "أهلا وسهلا",
+  "login-with": "تسجيل الدخول باستخدام {{provider}}",
+  "login-with-email": "تسجيل الدخول عبر البريد الإلكتروني",
+  "send-magic-link": "إرسال رابط سحري",
+  "back": "رجوع",
+  "close": "إغلاق",
+  "cancel": "إلغاء",
+  "add-to-wishlist": "إضافة إلى المفضلة",
+  "remove-from-wishlist": "إزالة من المفضلة",
+  "save-cart": "حفظ السلة",
+  "email": "البريد الإلكتروني",
+  "login-modal-subtitle": "سجّل الدخول إلى {{storeName}} للمتابعة إلى منصة {{storeName}} الإلكترونية.",
+  "login-continue": "متابعة",
+  "login-signup": "التسجيل",
+  "or": "أو"
 }

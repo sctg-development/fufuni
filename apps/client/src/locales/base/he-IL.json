@@ -567,6 +567,21 @@
   "login-subtitle": "גישה לחשבון שלך",
   "login-title": "היכנס",
   "login-try-another-email": "נסה אימייל אחר",
-  "admin-products-ai-error": "",
-  "admin-products-ai-no-source": ""
+  "admin-products-ai-error": "שגיאה במודל בינה מלאכותית",
+  "admin-products-ai-no-source": "אין טקסט מקור",
+  "login-modal-title": "ברוכים הבאים",
+  "login-with": "התחברות עם {{provider}}",
+  "login-with-email": "התחברות בדואל",
+  "send-magic-link": "שלח קישור קסום",
+  "back": "חזור",
+  "close": "סגור",
+  "cancel": "ביטול",
+  "add-to-wishlist": "הוספה למועדפים",
+  "remove-from-wishlist": "הסרה מהמועדפים",
+  "save-cart": "שמור סל קניות",
+  "email": "דוא\"ל",
+  "login-modal-subtitle": "התחבר ל-{{storeName}} כדי להמשיך אל {{storeName}} e-platform.",
+  "login-continue": "המשך",
+  "login-signup": "הרשמה",
+  "or": "או"
 }

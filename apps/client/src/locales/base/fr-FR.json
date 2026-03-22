@@ -568,5 +568,20 @@
   "login-title": "Se connecter",
   "login-try-another-email": "Essayez un autre e-mail",
   "admin-products-ai-no-source": "Pas de texte source",
-  "admin-products-ai-error": "Erreur du modèle d'intélligence artificielle"
+  "admin-products-ai-error": "Erreur du modèle d'intélligence artificielle",
+  "login-modal-title": "Bienvenue",
+  "login-with": "Se connecter avec {{provider}}",
+  "login-with-email": "Se connecter par email",
+  "send-magic-link": "Envoyer un lien magique",
+  "back": "Retour",
+  "close": "Fermer",
+  "cancel": "Annuler",
+  "add-to-wishlist": "Ajouter aux favoris",
+  "remove-from-wishlist": "Retirer des favoris",
+  "save-cart": "Enregistrer le panier",
+  "email": "Email",
+  "login-modal-subtitle": "Connectez-vous à {{storeName}} pour continuer vers {{storeName}} e-platform.",
+  "login-continue": "Continuer",
+  "login-signup": "Inscription",
+  "or": "ou"
 }
