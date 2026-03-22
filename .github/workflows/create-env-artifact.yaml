@@ -82,9 +82,9 @@ jobs:
         run: |
           python3 scripts/generate-wrangler-jsonc.py .env apps/merchant/wrangler.jsonc apps/merchant/wrangler.jsonc
 
-      - name: Create encrypted artifact with .env and wrangler.jsonc
+      - name: Create encrypted artifact with .env, wrangler.jsonc and secrets.json
         run: |
-          tar -czf env_and_wrangler.tar.gz .env apps/merchant/wrangler.jsonc
+          tar -czf env_and_wrangler.tar.gz .env apps/merchant/wrangler.jsonc apps/merchant/secrets.json
           openssl enc -aes-256-cbc -salt -in env_and_wrangler.tar.gz -out .env.enc -iter 10000 -pass pass:"${{ secrets.CRYPTOKEN }}"
           rm .env env_and_wrangler.tar.gz
 

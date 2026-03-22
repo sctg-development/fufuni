@@ -83,7 +83,13 @@ def main():
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(wrangler_config, f, indent=2, ensure_ascii=False)
 
+    # Create secrets.json file for wrangler secret bulk command.
+    secrets_json_path = os.path.join(os.path.dirname(output_path), "secrets.json")
+    with open(secrets_json_path, "w", encoding="utf-8") as f:
+        json.dump(env_vars, f, indent=2, ensure_ascii=False)
+
     print(f"Generated wrangler config at: {output_path}")
+    print(f"Generated secrets bulk file at: {secrets_json_path}")
 
 
 if __name__ == "__main__":

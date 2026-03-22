@@ -94,10 +94,10 @@ jobs:
             exit 1
           fi
 
-      - name: Set Wrangler secrets from updated .env
+      - name: Set Wrangler secrets in bulk from secrets.json
         run: |
-          chmod +x ./scripts/set-wrangler-secrets-from-env.sh
-          ./scripts/set-wrangler-secrets-from-env.sh .env
+          cd apps/merchant
+          npx wrangler secret bulk < secrets.json
 
       - name: Create an encrypted artifact with .env and wrangler.jsonc with CRYPTOKEN for debugging
         run: |
