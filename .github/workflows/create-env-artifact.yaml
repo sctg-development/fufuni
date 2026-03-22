@@ -1,0 +1,85 @@
+# Copyright (c) 2024-2026 Ronan LE MEILLAT
+# License: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+name: Create shared encrypted .env artifact
+
+on:
+  workflow_call: {}
+
+jobs:
+  create-env:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create .env file (shared secrets from deploy-worker.yaml)
+        run: |
+          echo -n ${{ secrets.AUTH0_AUDIENCE }} | sed -n 's/http.:\/\/\(.*\)/DOMAIN_NAME=\1\n/p' > .env
+          echo "CRYPTOKEN=${{ secrets.CRYPTOKEN }}" >> .env
+          echo "STORE_URL=${{ secrets.STORE_URL }}" >> .env
+          echo "STORE_NAME=${{ secrets.STORE_NAME }}" >> .env
+          echo "API_BASE_URL=${{ secrets.API_BASE_URL }}" >> .env
+          echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" >> .env
+
+          echo "AUTHENTICATION_PROVIDER_TYPE=${{ secrets.AUTHENTICATION_PROVIDER_TYPE }}" >> .env
+          echo "AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }}" >> .env
+          echo "AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }}" >> .env
+          echo "AUTH0_CLIENT_SECRET=${{ secrets.AUTH0_CLIENT_SECRET }}" >> .env
+          echo "AUTH0_MANAGEMENT_API_CLIENT_ID=${{ secrets.AUTH0_MANAGEMENT_API_CLIENT_ID }}" >> .env
+          echo "AUTH0_MANAGEMENT_API_CLIENT_SECRET=${{ secrets.AUTH0_MANAGEMENT_API_CLIENT_SECRET }}" >> .env
+          echo "AUTH0_SCOPE=\"${{ secrets.AUTH0_SCOPE }}\"" >> .env
+          echo "AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }}" >> .env
+
+          echo "ADMIN_AUTH0_PERMISSION=${{ secrets.ADMIN_AUTH0_PERMISSION }}" >> .env
+          echo "ADMIN_STORE_PERMISSION=${{ secrets.ADMIN_STORE_PERMISSION }}" >> .env
+          echo "AUTH0_AUTOMATIC_PERMISSIONS=${{ secrets.AUTH0_AUTOMATIC_PERMISSIONS }}" >> .env
+          echo "WANT_PERMISSION"=${{ secrets.WANT_PERMISSION }} >> .env
+          echo "DATABASE_PERMISSION=${{ secrets.DATABASE_PERMISSION }}" >> .env
+          echo "AI_PERMISSION=${{ secrets.AI_PERMISSION }}" >> .env
+          echo "MAIL_PERMISSION=${{ secrets.MAIL_PERMISSION }}" >> .env
+
+          echo "MERCHANT_PK=${{ secrets.MERCHANT_PK }}" >> .env
+          echo "MERCHANT_SK=${{ secrets.MERCHANT_SK }}" >> .env
+          echo "BACKUP_GPG=${{ secrets.BACKUP_GPG }}" >> .env
+          echo "BACKUP_SSH=${{ secrets.BACKUP_SSH }}" >> .env
+          echo "AUTH0_TEST_TOKEN=${{ secrets.AUTH0_TEST_TOKEN }}" >> .env
+          echo "CLOUDFLARE_USE_PAGE_DEV_DOMAIN=${{ secrets.CLOUDFLARE_USE_PAGE_DEV_DOMAIN }}" >> .env
+          echo "KV_CACHE_ID=${{ secrets.KV_CACHE_ID }}" >> .env
+          
+          echo "AI_API_KEY=${{ secrets.AI_API_KEY }}" >> .env
+          echo "AI_MODEL=${{ secrets.AI_MODEL }}" >> .env
+          echo "AI_API_URL=${{ secrets.AI_API_URL }}" >> .env
+          
+          echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
+          echo "STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}" >> .env
+          echo "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" >> .env
+
+          echo "MAILGUN_USER=${{ secrets.MAILGUN_USER }}" >> .env
+          echo "MAILGUN_API_KEY=${{ secrets.MAILGUN_API_KEY }}" >> .env
+          echo "MAILGUN_DOMAIN=${{ secrets.MAILGUN_DOMAIN }}" >> .env
+          echo "MAILGUN_BASE_URL=${{ secrets.MAILGUN_BASE_URL }}" >> .env
+          
+          echo "ORDER_TOKEN_SECRET=${{ secrets.ORDER_TOKEN_SECRET }}" >> .env
+
+      - name: Encrypt .env file
+        run: |
+          openssl enc -aes-256-cbc -salt -in .env -out .env.enc -iter 10000  -pass pass:"${{ secrets.CRYPTOKEN }}"
+          rm .env
+
+      - name: Upload shared .env artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: shared-env
+          include-hidden-files: true
+          path: .env.enc

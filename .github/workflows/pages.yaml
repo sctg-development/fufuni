@@ -39,6 +39,10 @@ permissions:
   attestations: write
 
 jobs:
+  create-env:
+    uses: ./.github/workflows/create-env-artifact.yaml
+    secrets: inherit
+
   build:
     runs-on: ubuntu-latest
 
@@ -66,33 +70,23 @@ jobs:
         run: |
           npm i
 
-      - name: Create .env file
+      - name: Download shared .env artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: shared-env
+          path: .
+
+      # .env.enc was encrypted with openssl enc -aes-256-cbc -salt -in .env -out .env.enc -iter 10000  -pass pass:"${{ secrets.CRYPTOKEN }}"
+      # Decrypt it using the same key and parameters
+      - name: Decrypt .env file
         run: |
-          echo -n ${{ secrets.AUTH0_AUDIENCE }} | sed -n 's/http.:\/\/\(.*\)/DOMAIN_NAME=\1\n/p' > .env
-          echo "CRYPTOKEN=${{ secrets.CRYPTOKEN }}" >> .env
-          echo "AUTHENTICATION_PROVIDER_TYPE=${{ secrets.AUTHENTICATION_PROVIDER_TYPE }}" >> .env
-          echo "AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }}" >> .env
-          echo "AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }}" >> .env
-          echo "AUTH0_SCOPE=\"${{ secrets.AUTH0_SCOPE }}\"" >> .env
-          echo "AUTH0_AUDIENCE=${{ secrets.AUTH0_AUDIENCE }}" >> .env
-          echo "AUTH0_MANAGEMENT_API_CLIENT_ID=${{ secrets.AUTH0_MANAGEMENT_API_CLIENT_ID }}" >> .env
-          echo "AUTH0_MANAGEMENT_API_CLIENT_SECRET=${{ secrets.AUTH0_MANAGEMENT_API_CLIENT_SECRET }}" >> .env
-          echo "ADMIN_AUTH0_PERMISSION=${{ secrets.ADMIN_AUTH0_PERMISSION }}" >> .env
-          echo "ADMIN_STORE_PERMISSION=${{ secrets.ADMIN_STORE_PERMISSION }}" >> .env
-          echo "API_BASE_URL=${{ secrets.API_BASE_URL }}" >> .env
-          echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" >> .env
-          echo "MERCHANT_PK=${{ secrets.MERCHANT_PK }}" >> .env
-          echo "MERCHANT_SK=${{ secrets.MERCHANT_SK }}" >> .env
-          echo "BACKUP_GPG=${{ secrets.BACKUP_GPG }}" >> .env
-          echo "BACKUP_SSH=${{ secrets.BACKUP_SSH }}" >> .env
-          echo "AUTH0_TEST_TOKEN=${{ secrets.AUTH0_TEST_TOKEN }}" >> .env
-          echo "CLOUDFLARE_USE_PAGE_DEV_DOMAIN=${{ secrets.CLOUDFLARE_USE_PAGE_DEV_DOMAIN }}" >> .env
-          echo "DATABASE_PERMISSION=${{ secrets.DATABASE_PERMISSION }}" >> .env
-          echo "STORE_URL=${{ secrets.STORE_URL }}" >> .env
-          echo "STORE_NAME=${{ secrets.STORE_NAME }}" >> .env
-          echo "TURBO_TEAM=${{ vars.TURBO_TEAM }}" >> .env
-          echo "TURBO_TOKEN=${{ secrets.TURBO_TOKEN }}" >> .env
-          echo "VITE_BASE_PATH=${{ github.event.repository.name }}" >> .env
+          openssl enc -aes-256-cbc -d -salt -in .env.enc -out .env -iter 10000 -pass pass:"${{ secrets.CRYPTOKEN }}"
+          rm .env.enc
+          # validate .env content by simply checking the presence of CRYPTOKEN=${{ secrets.CRYPTOKEN }} with or without quotes, to avoid issues with decryption producing an invalid .env file
+          if ! grep -q "CRYPTOKEN=${{ secrets.CRYPTOKEN }}" .env && ! grep -q "CRYPTOKEN=\"${{ secrets.CRYPTOKEN }}\"" .env; then
+            echo "Decrypted .env file does not contain expected CRYPTOKEN value"
+            exit 1
+          fi
       
       - name: Build project
         # You can change the base path to your repository name
