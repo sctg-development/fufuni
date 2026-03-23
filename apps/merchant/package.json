@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "dev:env": "bash -c 'cp ../../.env .dev.vars && wrangler dev'",
-    "preview:env": "bash -c 'cp ../../.env .dev.vars && wrangler dev' --",
+    "dev:env": "bash ./dev-env.sh \"$@\"",
+    "preview:env": "bash ./dev-env.sh \"$@\"",
     "deploy": "wrangler deploy",
     "db:init": "wrangler d1 execute DB --file=schema-d1.sql --local",
     "db:seed": "npx tsx scripts/seed.ts",

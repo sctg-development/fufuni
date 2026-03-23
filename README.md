@@ -248,6 +248,11 @@ cp apps/client/.env.example apps/client/.env
 
 npm run dev   # from monorepo root
 # → http://localhost:5173
+
+# Optionnal : mount the store at a subpath (e.g. for testing CORS_ORIGIN adjustments)
+npm run dev:env -- --base=/fufuni
+# → client Vite: http://localhost:5173/fufuni
+# → merchant and .dev.vars : STORE_URL/CORS_ORIGIN adjusted
 ```
 
 ### Deploy to Production

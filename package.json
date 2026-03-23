@@ -17,7 +17,7 @@
   },
   "scripts": {
     "dev": "turbo run dev --parallel",
-    "dev:env": "turbo run dev:env --parallel",
+    "dev:env": "bash -c 'turbo run dev:env --parallel -- \"$@\"' --",
     "build": "turbo run build",
     "build:env": "bash -c 'turbo run build:env -- \"$@\"' --",
     "build:client:env": "bash -c 'npm --workspace=apps/client run build:env \"$@\"' --",

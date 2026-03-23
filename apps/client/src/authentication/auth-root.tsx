@@ -60,9 +60,12 @@ export const AuthenticationProvider: React.FC<AuthenticationProviderProps> = ({
       if (appState?.pendingWishlistProduct) {
         sessionStorage.setItem('pendingWishlistProduct', appState.pendingWishlistProduct);
       }
-      
-      const target = appState?.returnTo || window.location.pathname;
-      navigate(target, { replace: true });
+
+      if (appState?.returnTo) {
+        console.log("Redirecting to:", appState.returnTo);
+        const target = appState?.returnTo || window.location.pathname;
+        navigate(target, { replace: true });
+      }
     };
 
     return (
