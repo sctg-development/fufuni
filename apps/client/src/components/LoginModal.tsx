@@ -32,6 +32,8 @@ import FufuniLogo from '../assets/fufuni_logo_02.svg';
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
+  returnTo?: string;
+  pendingWishlistProduct?: string;
 }
 
 /** Trusted hardcoded SVG icons for social auth providers */
@@ -73,7 +75,7 @@ function SvgIcon({ svg }: { svg: string }) {
  * <LoginModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
  * ```
  */
-export function LoginModal({ isOpen, onClose }: LoginModalProps) {
+export function LoginModal({ isOpen, onClose, returnTo, pendingWishlistProduct }: LoginModalProps) {
   const { isAuthenticated, login, getJson, deleteJson, postJson } = useAuth();
   const apiHelpers = { getJson, deleteJson, postJson };
   void apiHelpers;
@@ -102,6 +104,10 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           login_hint: email,
           redirect_uri: redirectUri,
         },
+        appState: {
+          returnTo: returnTo || window.location.pathname,
+          pendingWishlistProduct,
+        },
       });
     } catch (error) {
       console.error('Error with passwordless login:', error);
@@ -117,6 +123,10 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           connection: provider,
           redirect_uri: redirectUri,
         },
+        appState: {
+          returnTo: returnTo || window.location.pathname,
+          pendingWishlistProduct,
+        },
       });
     } catch (error) {
       console.error(`Error logging in with ${provider}:`, error);
@@ -130,6 +140,10 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         screen_hint: 'signup',
         redirect_uri: redirectUri,
       } as any,
+      appState: {
+        pendingWishlistProduct,
+        returnTo: returnTo || window.location.pathname,
+      },
     }).catch(console.error);
   };
 

@@ -104,6 +104,8 @@
   "nav-user-dropdown-no-expiry": "No se encontró expiración",
   "nav-user-dropdown-access-token": "Token de Acceso (Bearer)",
   "nav-user-dropdown-loading": "Cargando...",
+  "nav-user-dropdown-refresh-token": "Refrescar Token",
+  "nav-user-dropdown-refreshing": "Refrescando...",
   "duration-day_one": "{{count}} día",
   "duration-day_other": "{{count}} días",
   "template_login_prompt": "Haga clic en el botón abajo para probar la demo.",

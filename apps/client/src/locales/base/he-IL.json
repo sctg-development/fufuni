@@ -104,6 +104,8 @@
   "nav-user-dropdown-no-expiry": "לא נמצא מועד תפוגה",
   "nav-user-dropdown-access-token": "טוקן גישה (Bearer)",
   "nav-user-dropdown-loading": "טוען...",
+  "nav-user-dropdown-refresh-token": "רענן טוקן",
+  "nav-user-dropdown-refreshing": "מרענן...",
   "duration-day_one": "יום אחד",
   "duration-day_two": "יומיים",
   "duration-day_other": "{{count}} ימים",

@@ -56,6 +56,7 @@ export interface AuthProvider {
   login(options?: LoginOptions): Promise<void>;
   logout(options?: LogoutOptions): Promise<void>;
   getAccessToken(options?: TokenOptions): Promise<string | null>;
+  refreshAccessToken(options?: TokenOptions): Promise<string | null>;
 
   // Permission handling
   hasPermission(permission: string): Promise<boolean>;

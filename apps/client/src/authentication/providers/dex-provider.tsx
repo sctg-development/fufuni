@@ -300,6 +300,25 @@ export const useDexProvider = (
     }
   };
 
+  const refreshAccessToken = async (
+    _options?: TokenOptions,
+  ): Promise<string | null> => {
+    try {
+      console.log("Refreshing access token via Dex");
+
+      // Force a silent refresh
+      const newUser = await userManager.signinSilent();
+
+      console.log("Token refresh successful");
+
+      return newUser?.access_token || null;
+    } catch (error) {
+      console.error("Error refreshing access token:", error);
+
+      return null;
+    }
+  };
+
   const hasPermission = async (permission: string): Promise<boolean> => {
     try {
       const accessToken = await getAccessToken({ redirect: false });
@@ -504,6 +523,7 @@ export const useDexProvider = (
     login,
     logout,
     getAccessToken,
+    refreshAccessToken,
     hasPermission,
     getJson,
     postJson,

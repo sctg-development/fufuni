@@ -184,6 +184,8 @@
   "nav-user-dropdown-no-expiry": "Aucune expiration trouvée",
   "nav-user-dropdown-access-token": "Jeton d'accès (Bearer)",
   "nav-user-dropdown-loading": "Chargement...",
+  "nav-user-dropdown-refresh-token": "Rafraîchir le jeton",
+  "nav-user-dropdown-refreshing": "Rafraîchissement...",
   "duration-day_one": "{{count}} jour",
   "duration-day_other": "{{count}} jours",
   "template_login_prompt": "Cliquez sur le bouton ci-dessous pour essayer la démo.",

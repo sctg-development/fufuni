@@ -21,7 +21,7 @@ import type React from "react";
 import { Link } from "@heroui/react";
 import { Trans, useTranslation } from "react-i18next";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { JWTPayload, jwtVerify } from "jose";
 
 import { getLocalJwkSet } from "@/authentication/utils/jwks";
@@ -40,26 +40,18 @@ export default function DefaultLayout({
   const [decodedToken, setDecodedToken] = useState<JWTPayload | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const decodedTokenCacheRef = useRef<Map<string, JWTPayload>>(new Map());
+  const accessTokenRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    let isMounted = true;
-
-    const loadToken = async () => {
+  const decodeAndStoreToken = useCallback(
+    async (token: string) => {
       try {
-        const token = await getAccessTokenSilently();
-
-        if (!isMounted) return;
-
-        setAccessToken(token);
-
         if (decodedTokenCacheRef.current.has(token)) {
+          console.log("[Token] Using cached decoded token");
           setDecodedToken(decodedTokenCacheRef.current.get(token) || null);
-
           return;
         }
 
+        console.log("[Token] Decoding new token, starting with 'ey...':", token.substring(0, 20));
         const JWKS = await getLocalJwkSet(import.meta.env.AUTH0_DOMAIN);
 
         const verified = await jwtVerify(token, JWKS, {
@@ -70,20 +62,157 @@ export default function DefaultLayout({
         const payload = verified.payload as JWTPayload;
 
         decodedTokenCacheRef.current.set(token, payload);
-
-        if (isMounted) setDecodedToken(payload);
+        setDecodedToken(payload);
+        console.log("[Token] Token decoded and stored successfully, exp:", new Date(payload.exp! * 1000).toISOString());
       } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error("Failed to decode access token:", err);
+        console.error("[Token] Failed to decode access token:", err);
       }
-    };
+    },
+    [],
+  );
 
-    loadToken();
+  const loadToken = useCallback(
+    async (ignoreCache = false) => {
+      try {
+        console.log("[Token] Loading token with ignoreCache =", ignoreCache);
+        
+        // If forcing a refresh, clear the local cache first
+        if (ignoreCache) {
+          console.log("[Token] Clearing local token cache");
+          decodedTokenCacheRef.current.clear();
+        }
+
+        const options = ignoreCache
+          ? {
+              ignoreCache: true,
+              audience: import.meta.env.AUTH0_AUDIENCE,
+              scope: import.meta.env.AUTH0_SCOPE,
+              // Force a refresh if token has less than 0 seconds TTL (always refresh)
+              minTtl: 0,
+            }
+          : undefined;
+
+        console.log("[Token] Calling getAccessTokenSilently with options:", options);
+        const response = await getAccessTokenSilently(options as any);
+
+        // Extract token string from response (handles both string and verbose response)
+        const token =
+          typeof response === "string" ? response : response?.access_token;
+
+        if (!token) {
+          throw new Error("Failed to get access token");
+        }
+
+        console.log("[Token] Got token from Auth0, comparing...");
+        if (accessTokenRef.current && accessTokenRef.current === token) {
+          console.warn("[Token] WARNING: Got same token! Auth0 returned cached token despite ignoreCache");
+        }
+        
+        accessTokenRef.current = token;
+        setAccessToken(token);
+        await decodeAndStoreToken(token);
+      } catch (err) {
+        console.error("[Token] Failed to load access token:", err);
+      }
+    },
+    [getAccessTokenSilently, decodeAndStoreToken],
+  );
+
+  const handleRefreshToken = useCallback(async () => {
+    console.log("[Token] handleRefreshToken called");
+    
+    try {
+      // Search for refresh token in localStorage (Auth0 SDK cache)
+      let refreshToken: string | null = null;
+      let cacheKey: string | null = null;
+      
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.includes("@@auth0spajs@@") || key?.includes("auth0")) {
+          try {
+            const item = localStorage.getItem(key!);
+            if (item) {
+              const data = JSON.parse(item);
+              if (data?.body?.refresh_token) {
+                refreshToken = data.body.refresh_token;
+                cacheKey = key;
+                console.log("[Token] Found refresh_token in cache key:", key);
+                break;
+              }
+            }
+          } catch (e) {
+            // Skip parsing errors
+          }
+        }
+      }
+
+      if (refreshToken) {
+        console.log("[Token] Attempting token refresh via Auth0 oauth/token endpoint");
+        
+        const response = await fetch(`https://${import.meta.env.AUTH0_DOMAIN}/oauth/token`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            client_id: import.meta.env.AUTH0_CLIENT_ID,
+            refresh_token: refreshToken,
+            grant_type: "refresh_token",
+            audience: import.meta.env.AUTH0_AUDIENCE,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          console.error("[Token] Token refresh failed:", error);
+          throw new Error(error.error_description || "Token refresh failed");
+        }
+
+        const data = await response.json();
+        console.log("[Token] Successfully got new token from Auth0 token endpoint");
+        console.log("[Token] New token exp:", new Date(data.expires_in * 1000 + Date.now()).toISOString());
+        
+        // Update the refresh token in localStorage if a new one was provided
+        if (data.refresh_token && cacheKey) {
+          console.log("[Token] Updating cached refresh_token in localStorage");
+          try {
+            const cacheStr = localStorage.getItem(cacheKey);
+            if (cacheStr) {
+              const cache = JSON.parse(cacheStr);
+              cache.body.refresh_token = data.refresh_token;
+              localStorage.setItem(cacheKey, JSON.stringify(cache));
+              console.log("[Token] Refresh token updated in cache");
+            }
+          } catch (e) {
+            console.warn("[Token] Failed to update cached refresh_token:", e);
+          }
+        }
+        
+        // Update our state and ref
+        accessTokenRef.current = data.access_token;
+        setAccessToken(data.access_token);
+        await decodeAndStoreToken(data.access_token);
+        return;
+      }
+      
+      console.warn("[Token] No refresh_token found, falling back to getAccessTokenSilently");
+      await loadToken(true);
+    } catch (error) {
+      console.error("[Token] handleRefreshToken error:", error);
+    }
+  }, [loadToken, decodeAndStoreToken]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    let isMounted = true;
+
+    loadToken().then(() => {
+      if (!isMounted) return;
+    });
 
     return () => {
       isMounted = false;
     };
-  }, [isAuthenticated, getAccessTokenSilently]);
+  }, [isAuthenticated, loadToken]);
 
   return (
     <div className="relative flex flex-col h-screen">
@@ -122,6 +251,7 @@ export default function DefaultLayout({
           tokenPayload={decodedToken}
           user={user}
           onClose={() => setIsModalOpen(false)}
+          onTokenRefresh={handleRefreshToken}
         />
       ) : (
         <></>

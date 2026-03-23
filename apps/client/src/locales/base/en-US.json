@@ -197,6 +197,8 @@
   "nav-user-dropdown-no-expiry": "No expiry found",
   "nav-user-dropdown-access-token": "Access Token (Bearer)",
   "nav-user-dropdown-loading": "Loading...",
+  "nav-user-dropdown-refresh-token": "Refresh Token",
+  "nav-user-dropdown-refreshing": "Refreshing...",
   "duration-day_one": "{{count}} day",
   "duration-day_other": "{{count}} days",
   "api-server": "API server",

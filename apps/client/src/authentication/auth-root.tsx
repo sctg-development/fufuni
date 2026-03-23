@@ -18,6 +18,7 @@
 
 import React from "react";
 import { Auth0Provider } from "@auth0/auth0-react";
+import { useNavigate } from "react-router-dom";
 
 import { AuthProviderWrapper } from "./providers/use-auth";
 import { AutoPermissionProvisioner } from "./auth-components";
@@ -40,6 +41,8 @@ export const AuthenticationProvider: React.FC<AuthenticationProviderProps> = ({
   providerType = "auth0",
 }) => {
   // Set up Auth0 provider
+  const navigate = useNavigate();
+
   if (providerType === "auth0") {
     // Auth0 uses the following environment variables:
     // AUTH0_DOMAIN
@@ -50,6 +53,17 @@ export const AuthenticationProvider: React.FC<AuthenticationProviderProps> = ({
       import.meta.env.BASE_URL || "/",
       window.location.origin,
     ).toString();
+
+    const handleRedirectCallback = (appState: any) => {
+      // Store pendingWishlistProduct in sessionStorage if present
+      // This allows the WishlistButton to detect and execute the pending action
+      if (appState?.pendingWishlistProduct) {
+        sessionStorage.setItem('pendingWishlistProduct', appState.pendingWishlistProduct);
+      }
+      
+      const target = appState?.returnTo || window.location.pathname;
+      navigate(target, { replace: true });
+    };
 
     return (
       <Auth0Provider
@@ -63,6 +77,7 @@ export const AuthenticationProvider: React.FC<AuthenticationProviderProps> = ({
         domain={import.meta.env.AUTH0_DOMAIN}
         useCookiesForTransactions={true}
         useRefreshTokens={true}
+        onRedirectCallback={handleRedirectCallback}
       >
         <AuthProviderWrapper providerType={providerType}>
           <AutoPermissionProvisioner>{children}</AutoPermissionProvisioner>

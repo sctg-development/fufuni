@@ -112,6 +112,85 @@ export const useAuth0Provider = (): AuthProvider => {
     }
   };
 
+  const refreshAccessToken = async (
+    options?: TokenOptions,
+  ): Promise<string | null> => {
+    try {
+      console.log("[Auth0] Forcing token refresh via refresh_token");
+      
+      // Search for refresh token in localStorage (Auth0 SDK cache)
+      let refreshToken: string | null = null;
+      
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.includes("@@auth0spajs@@") || key?.includes("auth0")) {
+          try {
+            const item = localStorage.getItem(key!);
+            if (item) {
+              const data = JSON.parse(item);
+              if (data?.body?.refresh_token) {
+                refreshToken = data.body.refresh_token;
+                console.log("[Auth0] Found refresh_token in localStorage");
+                break;
+              }
+            }
+          } catch (e) {
+            // Skip parsing errors
+          }
+        }
+      }
+
+      if (!refreshToken) {
+        console.warn("[Auth0] No refresh_token found in localStorage, falling back to getAccessTokenSilently");
+        const baseOptions = {
+          authorizationParams: {
+            audience: options?.audience || import.meta.env.AUTH0_AUDIENCE,
+            scope: options?.scope || import.meta.env.AUTH0_SCOPE,
+          },
+          ...options,
+        };
+
+        const refreshedTokenRaw = await getAccessTokenSilently({
+          ...baseOptions,
+          ignoreCache: true,
+        } as any);
+
+        const token = resolveAccessTokenString(refreshedTokenRaw);
+        console.log("[Auth0] Got token via getAccessTokenSilently, token present:", !!token);
+        return token;
+      }
+
+      // Make direct call to Auth0 /oauth/token endpoint with refresh_token
+      console.log("[Auth0] Making direct refresh_token request to Auth0");
+      const response = await fetch(`https://${import.meta.env.AUTH0_DOMAIN}/oauth/token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          client_id: import.meta.env.AUTH0_CLIENT_ID,
+          refresh_token: refreshToken,
+          grant_type: "refresh_token",
+          audience: options?.audience || import.meta.env.AUTH0_AUDIENCE,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error("[Auth0] Token refresh failed:", error);
+        throw new Error(error.error_description || "Token refresh failed");
+      }
+
+      const data = await response.json();
+      console.log("[Auth0] Successfully refreshed token via oauth/token endpoint");
+      
+      return data.access_token || null;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("[Auth0] Error refreshing access token:", error);
+
+      return null;
+    }
+  };
+
   const login = async (options?: LoginOptions): Promise<void> => {
     return loginWithRedirect(options as RedirectLoginOptions);
   };
@@ -456,6 +535,7 @@ export const useAuth0Provider = (): AuthProvider => {
       login,
       logout,
       getAccessToken,
+      refreshAccessToken,
       hasPermission,
       getJson,
       postJson,
@@ -470,6 +550,7 @@ export const useAuth0Provider = (): AuthProvider => {
       login,
       logout,
       getAccessToken,
+      refreshAccessToken,
       hasPermission,
       getJson,
       postJson,

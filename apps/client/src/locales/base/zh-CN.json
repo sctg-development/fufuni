@@ -104,6 +104,8 @@
   "nav-user-dropdown-no-expiry": "未找到过期信息",
   "nav-user-dropdown-access-token": "访问令牌 (Bearer)",
   "nav-user-dropdown-loading": "正在加载...",
+  "nav-user-dropdown-refresh-token": "刷新令牌",
+  "nav-user-dropdown-refreshing": "正在刷新...",
   "duration-day": "{{count}} 天",
   "template_login_prompt": "点击下面的按钮以试用演示。",
   "template_welcome_back": "欢迎 {{name}}，请浏览下面的示例页面或注销以重新开始。",

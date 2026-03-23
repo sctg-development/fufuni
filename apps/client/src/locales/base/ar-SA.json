@@ -104,6 +104,8 @@
   "nav-user-dropdown-no-expiry": "لم يتم العثور على انتهاء صلاحية",
   "nav-user-dropdown-access-token": "رمز الوصول (Bearer)",
   "nav-user-dropdown-loading": "جاري التحميل...",
+  "nav-user-dropdown-refresh-token": "تحديث الرمز",
+  "nav-user-dropdown-refreshing": "جاري التحديث...",
   "duration-day_zero": "{{count}} يوم",
   "duration-day_one": "يوم واحد",
   "duration-day_two": "يومان",

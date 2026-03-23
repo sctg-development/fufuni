@@ -21,10 +21,12 @@ import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/react";
 import { Chip } from "@heroui/react";
 import { Divider } from "@heroui/react";
 import { ScrollShadow } from "@heroui/react";
+import { Button } from "@heroui/react";
+import { Tooltip } from "@heroui/react";
 import { JWTPayload } from "jose";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { User } from "@auth0/auth0-react";
+import type { User } from "@auth0/auth0-react";
 
 import { CopyButton } from "@/components/copy-button";
 import { AuthenticationGuardWithPermission } from "@/authentication";
@@ -35,6 +37,7 @@ interface UserTechnicalInfoModalProps {
   user: User;
   accessToken: string | null;
   tokenPayload: JWTPayload | null;
+  onTokenRefresh?: () => Promise<void>;
 }
 
 function formatExpiry(exp: number): string {
@@ -69,10 +72,11 @@ function formatDuration(seconds: number, t: any): string {
 }
 
 export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
-  ({ isOpen, onClose, user, accessToken, tokenPayload }) => {
+  ({ isOpen, onClose, user, accessToken, tokenPayload, onTokenRefresh }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [secondsLeft, setSecondsLeft] = useState<number>(0);
+    const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
     useEffect(() => {
       if (!tokenPayload?.exp) return;
@@ -83,6 +87,25 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
 
       return () => clearInterval(interval);
     }, [tokenPayload?.exp]);
+
+    const handleRefreshToken = async () => {
+      console.log("[Modal] handleRefreshToken called, onTokenRefresh defined?", !!onTokenRefresh);
+      if (!onTokenRefresh) {
+        console.warn("[Modal] onTokenRefresh callback not provided");
+        return;
+      }
+      
+      setIsRefreshing(true);
+      console.log("[Modal] Starting token refresh...");
+      try {
+        await onTokenRefresh();
+        console.log("[Modal] Token refresh completed");
+      } catch (error) {
+        console.error("[Modal] Error refreshing token:", error);
+      } finally {
+        setIsRefreshing(false);
+      }
+    };
 
     const permissions =
       (tokenPayload?.permissions as string[] | undefined) ?? [];
@@ -136,9 +159,44 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
 
             {/* Token Status */}
             <div className="space-y-2">
-              <p className="text-xs text-default-400 uppercase tracking-wider font-bold">
-                {t("nav-user-dropdown-token-status")}
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-default-400 uppercase tracking-wider font-bold">
+                  {t("nav-user-dropdown-token-status")}
+                </p>
+                <Tooltip
+                  color="default"
+                  content={t("nav-user-dropdown-refresh-token")}
+                  size="sm"
+                >
+                  <Button
+                    isIconOnly
+                    className="h-7 w-7 min-w-7"
+                    color="default"
+                    disabled={isRefreshing}
+                    isLoading={isRefreshing}
+                    size="sm"
+                    variant="flat"
+                    onPress={() => {
+                      console.log("[Modal] Button pressed");
+                      handleRefreshToken();
+                    }}
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                      />
+                    </svg>
+                  </Button>
+                </Tooltip>
+              </div>
               {tokenPayload?.exp ? (
                 <div className="space-y-2">
                   <div className="flex justify-between items-center text-sm">
