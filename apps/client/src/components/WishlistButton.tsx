@@ -6,7 +6,10 @@
 import { Button, Tooltip } from '@heroui/react';
 import { Heart } from 'lucide-react';
 import { useWishlist } from '@/hooks/useWishlist';
+import { useAuth } from '@/authentication/providers/use-auth';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { LoginModal } from './LoginModal';
 
 interface WishlistButtonProps {
   productId: string;
@@ -32,6 +35,8 @@ export function WishlistButton({
 }: WishlistButtonProps) {
   const { t } = useTranslation();
   const { isFavorite, toggle, isLoading } = useWishlist();
+  const { isAuthenticated } = useAuth();
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   const isFav = isFavorite(productId);
 
@@ -39,24 +44,37 @@ export function WishlistButton({
     ? t('remove-from-wishlist')
     : t('add-to-wishlist');
 
+  const onWishlistToggle = () => {
+    if (!isAuthenticated) {
+      setLoginModalOpen(true);
+      return;
+    }
+
+    toggle(productId);
+  };
+
   return (
-    <Tooltip content={tooltipContent} delay={500}>
-      <Button
-        isIconOnly={isIconOnly}
-        className={`${
-          isFav ? 'text-red-500' : 'text-default-400'
-        } hover:text-red-500 transition-colors`}
-        variant="light"
-        size={size}
-        isLoading={isLoading}
-        onPress={() => toggle(productId)}
-      >
-        <Heart
-          className="w-5 h-5"
-          fill={isFav ? 'currentColor' : 'none'}
-          strokeWidth={2}
-        />
-      </Button>
-    </Tooltip>
+    <>
+      <Tooltip content={tooltipContent} delay={500}>
+        <Button
+          isIconOnly={isIconOnly}
+          className={`${
+            isFav ? 'text-red-500' : 'text-default-400'
+          } hover:text-red-500 transition-colors`}
+          variant="light"
+          size={size}
+          isLoading={isLoading}
+          onPress={onWishlistToggle}
+        >
+          <Heart
+            className="w-5 h-5"
+            fill={isFav ? 'currentColor' : 'none'}
+            strokeWidth={2}
+          />
+        </Button>
+      </Tooltip>
+
+      <LoginModal isOpen={loginModalOpen} onClose={() => setLoginModalOpen(false)} />
+    </>
   );
 }
