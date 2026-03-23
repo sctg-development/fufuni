@@ -157,7 +157,6 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <p className="text-sm text-default-500 leading-snug max-w-67.5">
               {t('login-modal-subtitle', {
                 storeName: import.meta.env.STORE_NAME || 'Fufuni',
-                defaultValue: 'Connectez-vous à {{storeName}} pour continuer vers {{storeName}} e-platform.',
               })}
             </p>
           </div>
@@ -221,7 +220,6 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
               >
                 {t('login-with', {
                   provider: label,
-                  defaultValue: `Continuer avec ${label}`,
                 })}
               </Button>
             ))}

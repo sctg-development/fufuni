@@ -89,7 +89,7 @@ export function SaveCartButton({
       startContent={<Bookmark className="w-4 h-4" />}
       onPress={handleSaveCart}
     >
-      {t('save-cart', { defaultValue: 'Save cart' })}
+      {t('save-cart')}
     </Button>
   );
 }

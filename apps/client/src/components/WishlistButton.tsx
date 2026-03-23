@@ -36,8 +36,8 @@ export function WishlistButton({
   const isFav = isFavorite(productId);
 
   const tooltipContent = isFav
-    ? t('remove-from-wishlist', { defaultValue: 'Remove from favorites' })
-    : t('add-to-wishlist', { defaultValue: 'Add to favorites' });
+    ? t('remove-from-wishlist')
+    : t('add-to-wishlist');
 
   return (
     <Tooltip content={tooltipContent} delay={500}>
