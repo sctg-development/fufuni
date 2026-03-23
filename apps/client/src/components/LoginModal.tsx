@@ -27,6 +27,7 @@ import {
 } from '@heroui/react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import FufuniLogo from '../assets/fufuni_logo_02.svg';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -138,7 +139,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           <div className="flex flex-col items-center gap-1.5 mb-1">
             <div className="w-12 h-12 rounded-xl overflow-hidden bg-white shadow-sm">
               <img
-                src="/img/fufuni_logo_02.svg"
+                src={FufuniLogo}
                 alt="Fufuni"
                 className="w-full h-full object-cover"
               />
@@ -151,7 +152,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           {/* Title & subtitle */}
           <div className="flex flex-col items-center gap-1.5 text-center">
             <h2 className="text-2xl font-bold text-foreground">
-              {t('login-modal-title', { defaultValue: 'Bienvenue' })}
+              {t('login-modal-title')}
             </h2>
             <p className="text-sm text-default-500 leading-snug max-w-67.5">
               {t('login-modal-subtitle', {
@@ -164,7 +165,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           {/* Email input */}
           <Input
             type="email"
-            label={`${t('email', { defaultValue: 'Adresse e-mail' })} *`}
+            label={`${t('email')} *`}
             placeholder=" "
             value={email}
             onValueChange={setEmail}
@@ -182,19 +183,19 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             onPress={handlePasswordlessLogin}
             isDisabled={!email}
           >
-            {t('login-continue', { defaultValue: 'Continuer' })}
+            {t('login-continue')}
           </Button>
 
           {/* Sign-up link */}
           <p className="text-sm text-default-500">
-            {t('login-new-customer', { defaultValue: "Vous n'avez pas de compte ?" })}{' '}
+            {t('login-new-customer')}{' '}
             <button
               type="button"
               className="text-primary font-semibold hover:underline cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
               onClick={handleSignUp}
               disabled={isLoading}
             >
-              {t('login-signup', { defaultValue: 'Inscription' })}
+              {t('login-signup')}
             </button>
           </p>
 
@@ -202,7 +203,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           <div className="flex w-full items-center gap-3">
             <Divider className="flex-1" />
             <span className="text-xs text-default-400 shrink-0">
-              {t('or', { defaultValue: 'ou' })}
+              {t('or')}
             </span>
             <Divider className="flex-1" />
           </div>
