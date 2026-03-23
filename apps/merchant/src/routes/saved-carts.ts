@@ -59,8 +59,8 @@ const getSavedCartsRoute = createRoute({
 
 app.openapi(getSavedCartsRoute, async (c) => {
   try {
-    const jwtPayload = c.get('jwtPayload') as any;
-    const userId = jwtPayload?.sub;
+    const auth = c.get('auth') as any;
+    const userId = auth?.sub;
 
     if (!userId) {
       throw ApiError.unauthorized('No Auth0 user ID in token');
@@ -118,8 +118,8 @@ const savecartRoute = createRoute({
 
 app.openapi(savecartRoute, async (c) => {
   try {
-    const jwtPayload = c.get('jwtPayload') as any;
-    const userId = jwtPayload?.sub;
+    const auth = c.get('auth') as any;
+    const userId = auth?.sub;
 
     if (!userId) {
       throw ApiError.unauthorized('No Auth0 user ID in token');
@@ -189,8 +189,8 @@ const deleteSavedCartRoute = createRoute({
 
 app.openapi(deleteSavedCartRoute, async (c) => {
   try {
-    const jwtPayload = c.get('jwtPayload') as any;
-    const userId = jwtPayload?.sub;
+    const auth = c.get('auth') as any;
+    const userId = auth?.sub;
     const savedCartId = c.req.param('id');
 
     if (!userId) {

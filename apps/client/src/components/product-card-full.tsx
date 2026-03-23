@@ -24,6 +24,7 @@ import { useCart } from "@/hooks/useCart";
 import { formatMoney } from "@/utils/currency";
 import { resolveDescription, resolveTitle, resolveVendor, resolveTags, resolveHandle, getTaxNameForLocale } from "@/utils/description";
 import { Button } from "@heroui/react";
+import { WishlistButton } from "./WishlistButton";
 
 interface Props {
   product: StoreProduct;
@@ -253,6 +254,7 @@ export const ProductCardFull: React.FC<Props> = ({ product }) => {
       >
         {t("add-to-cart")}
       </button>
+      <WishlistButton productId={product.id} />
     </div>
   );
 };

@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from '@/authentication/providers/use-auth';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface UseWishlistReturn {
@@ -38,7 +38,7 @@ interface UseWishlistReturn {
  * ```
  */
 export function useWishlist(): UseWishlistReturn {
-  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
+  const { isAuthenticated, getJson, deleteJson, postJson} = useAuth();
   const queryClient = useQueryClient();
 
   /**
@@ -56,28 +56,11 @@ export function useWishlist(): UseWishlistReturn {
       }
 
       try {
-        const token = await getAccessTokenSilently({
-          authorizationParams: {
-            audience: import.meta.env.AUTH0_AUDIENCE || '',
-          },
-        });
-
-        const response = await fetch(
-          `${import.meta.env.API_BASE_URL}/v1/me/wishlist`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          }
+        const result = await getJson(
+          `${import.meta.env.API_BASE_URL}/v1/me/wishlist`
         );
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch wishlist');
-        }
-
-        const data = (await response.json()) as { wishlist: string[] };
-        return data.wishlist;
+        return (result?.wishlist || []) as string[];
       } catch (error) {
         console.error('Error fetching wishlist:', error);
         throw error;
@@ -91,29 +74,12 @@ export function useWishlist(): UseWishlistReturn {
    */
   const addMutation = useMutation({
     mutationFn: async (productId: string) => {
-      const token = await getAccessTokenSilently({
-        authorizationParams: {
-          audience: import.meta.env.AUTH0_AUDIENCE || '',
-        },
-      });
-
-      const response = await fetch(
+      const result = await postJson(
         `${import.meta.env.API_BASE_URL}/v1/me/wishlist`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ productId }),
-        }
+        { productId }
       );
 
-      if (!response.ok) {
-        throw new Error('Failed to add product to wishlist');
-      }
-
-      return response.json();
+      return result;
     },
     onSuccess: (data) => {
       queryClient.setQueryData(['wishlist'], data.wishlist);
@@ -125,28 +91,11 @@ export function useWishlist(): UseWishlistReturn {
    */
   const removeMutation = useMutation({
     mutationFn: async (productId: string) => {
-      const token = await getAccessTokenSilently({
-        authorizationParams: {
-          audience: import.meta.env.AUTH0_AUDIENCE || '',
-        },
-      });
-
-      const response = await fetch(
-        `${import.meta.env.API_BASE_URL}/v1/me/wishlist/${productId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
+      const result = await deleteJson(
+        `${import.meta.env.API_BASE_URL}/v1/me/wishlist/${productId}`
       );
 
-      if (!response.ok) {
-        throw new Error('Failed to remove product from wishlist');
-      }
-
-      return response.json();
+      return result;
     },
     onSuccess: (data) => {
       queryClient.setQueryData(['wishlist'], data.wishlist);

@@ -17,19 +17,10 @@ import { OpenAPIHono, createRoute } from '@hono/zod-openapi';
 import { z } from 'zod';
 import { customerAuthMiddleware } from '../middleware/customer-auth';
 import { ApiError, type HonoEnv } from '../types';
+import { getUserMetadata, updateUserMetadata } from '../lib/auth0';
 
 const app = new OpenAPIHono<HonoEnv>();
 app.use('*', customerAuthMiddleware);
-
-/**
- * Helper: Get Auth0 Management API token for user_metadata updates.
- * This would need to be imported from your existing lib/auth0.ts
- */
-async function getManagementToken(env: HonoEnv['Bindings']): Promise<string> {
-  // NOTE: This should be implemented in your existing lib/auth0.ts
-  // For now, assume it's imported
-  throw new ApiError(501, 'getManagementToken not yet imported');
-}
 
 /**
  * Wishlist schema for validation
@@ -65,15 +56,14 @@ const getWishlistRoute = createRoute({
 
 app.openapi(getWishlistRoute, async (c) => {
   try {
-    const jwtPayload = c.get('jwtPayload') as any;
-    const userId = jwtPayload?.sub;
+    const auth = c.get('auth') as any;
+    const userId = auth?.sub;
 
     if (!userId) {
       throw ApiError.unauthorized('No Auth0 user ID in token');
     }
 
-    // If the "add-userinfo-to-access-jwt" Action is in place, wishlist might be in the token already
-    const wishlist = jwtPayload?.user_metadata?.wishlist ?? [];
+    const wishlist = auth?.user_metadata?.wishlist ?? [];
 
     return c.json({ wishlist }, 200);
   } catch (error) {
@@ -116,8 +106,8 @@ const addWishlistProductRoute = createRoute({
 
 app.openapi(addWishlistProductRoute, async (c) => {
   try {
-    const jwtPayload = c.get('jwtPayload') as any;
-    const userId = jwtPayload?.sub;
+    const auth = c.get('auth') as any;
+    const userId = auth?.sub;
 
     if (!userId) {
       throw ApiError.unauthorized('No Auth0 user ID in token');
@@ -126,15 +116,18 @@ app.openapi(addWishlistProductRoute, async (c) => {
     const { productId } = (await c.req.json()) as { productId: string };
 
     if (!productId) {
-      throw ApiError.badRequest('productId is required');
+      throw ApiError.invalidRequest('productId is required');
     }
 
-    // NOTE: This would call Auth0 Management API to update user_metadata
-    // For now, return a stub response
-    const currentWishlist = jwtPayload?.user_metadata?.wishlist ?? [];
+    // Read existing wishlist from Auth0 user_metadata
+    const userMetadata = await getUserMetadata(userId, c.env);
+    const currentWishlist = Array.isArray(userMetadata.wishlist) ? userMetadata.wishlist : [];
+
     if (!currentWishlist.includes(productId)) {
       currentWishlist.push(productId);
     }
+
+    await updateUserMetadata(userId, { ...userMetadata, wishlist: currentWishlist }, c.env);
 
     return c.json({ wishlist: currentWishlist }, 200);
   } catch (error) {
@@ -168,8 +161,8 @@ const removeWishlistProductRoute = createRoute({
 
 app.openapi(removeWishlistProductRoute, async (c) => {
   try {
-    const jwtPayload = c.get('jwtPayload') as any;
-    const userId = jwtPayload?.sub;
+    const auth = c.get('auth') as any;
+    const userId = auth?.sub;
     const productId = c.req.param('productId');
 
     if (!userId) {
@@ -177,13 +170,15 @@ app.openapi(removeWishlistProductRoute, async (c) => {
     }
 
     if (!productId) {
-      throw ApiError.badRequest('productId is required');
+      throw ApiError.invalidRequest('productId is required');
     }
 
-    // NOTE: This would call Auth0 Management API to update user_metadata
-    // For now, return a stub response
-    let newWishlist = jwtPayload?.user_metadata?.wishlist ?? [];
+    // Read existing wishlist from Auth0 user_metadata
+    const userMetadata = await getUserMetadata(userId, c.env);
+    let newWishlist = Array.isArray(userMetadata.wishlist) ? userMetadata.wishlist : [];
     newWishlist = newWishlist.filter((id: string) => id !== productId);
+
+    await updateUserMetadata(userId, { ...userMetadata, wishlist: newWishlist }, c.env);
 
     return c.json({ wishlist: newWishlist }, 200);
   } catch (error) {

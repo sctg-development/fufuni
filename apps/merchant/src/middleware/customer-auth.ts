@@ -92,6 +92,8 @@ export const customerAuthMiddleware = createMiddleware<HonoEnv>(
       ? (payload.permissions as unknown[]).map(String)
       : [];
 
+    const userMetadata = (payload.user_metadata as Record<string, any> | undefined) || {};
+
     if (!sub) {
       throw ApiError.unauthorized('Invalid token: missing sub claim');
     }
@@ -104,8 +106,8 @@ export const customerAuthMiddleware = createMiddleware<HonoEnv>(
       role: 'customer',
       sub,
       email: email || undefined,
-      name: name || undefined,
       permissions: perms,
+      user_metadata: userMetadata,
       stripeSecretKey: null,
       stripeWebhookSecret: null,
     });

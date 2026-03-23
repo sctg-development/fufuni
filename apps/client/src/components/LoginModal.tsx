@@ -16,7 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from '@/authentication/providers/use-auth';
 import {
   Modal,
   ModalContent,
@@ -74,8 +74,16 @@ function SvgIcon({ svg }: { svg: string }) {
  * ```
  */
 export function LoginModal({ isOpen, onClose }: LoginModalProps) {
-  const { loginWithRedirect } = useAuth0();
+  const { isAuthenticated, login, getJson, deleteJson, postJson } = useAuth();
+  const apiHelpers = { getJson, deleteJson, postJson };
+  void apiHelpers;
+
   const { t } = useTranslation();
+
+  if (isAuthenticated) {
+    // Already logged in: no need to show login modal
+    return null;
+  }
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -83,7 +91,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     if (!email) return;
     try {
       setIsLoading(true);
-      await loginWithRedirect({
+      await login({
         authorizationParams: {
           connection: 'email',
           login_hint: email,
@@ -99,7 +107,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const handleSocialLogin = async (provider: string) => {
     try {
       setIsLoading(true);
-      await loginWithRedirect({
+      await login({
         authorizationParams: {
           connection: provider,
           redirect_uri: window.location.origin,
@@ -112,11 +120,11 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   };
 
   const handleSignUp = () => {
-    loginWithRedirect({
+    login({
       authorizationParams: {
         screen_hint: 'signup',
         redirect_uri: window.location.origin,
-      } as NonNullable<Parameters<typeof loginWithRedirect>[0]>['authorizationParams'] & { screen_hint: string },
+      } as any,
     }).catch(console.error);
   };
 

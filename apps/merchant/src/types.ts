@@ -179,7 +179,9 @@ export type AuthContext = {
   customerEmail?: string;
   email?: string;
   sub?: string;
+  name?: string;
   permissions?: string[];
+  user_metadata?: Record<string, any>;
 };
 
 export class ApiError extends Error {

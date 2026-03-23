@@ -111,6 +111,53 @@ export const getManagementToken = async (env: any): Promise<string> => {
 /**
  * Add permissions to an Auth0 user using the Management API.
  */
+export const getUserMetadata = async (
+  userId: string,
+  env: any,
+): Promise<Record<string, any>> => {
+  const mgmtToken = await getManagementToken(env);
+  const encodedId = encodeURIComponent(userId);
+  const url = `https://${env.AUTH0_DOMAIN}/api/v2/users/${encodedId}`;
+
+  const resp = await fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${mgmtToken}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!resp.ok) {
+    throw new Error(`Failed to fetch user metadata: ${await resp.text()}`);
+  }
+
+  const data = await resp.json();
+  return data.user_metadata ?? {};
+};
+
+export const updateUserMetadata = async (
+  userId: string,
+  userMetadata: Record<string, any>,
+  env: any,
+): Promise<void> => {
+  const mgmtToken = await getManagementToken(env);
+  const encodedId = encodeURIComponent(userId);
+  const url = `https://${env.AUTH0_DOMAIN}/api/v2/users/${encodedId}`;
+
+  const resp = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${mgmtToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ user_metadata: userMetadata }),
+  });
+
+  if (!resp.ok) {
+    throw new Error(`Failed to update user metadata: ${await resp.text()}`);
+  }
+};
+
 export const addPermissionsToUser = async (
   userId: string,
   permissions: string[],
