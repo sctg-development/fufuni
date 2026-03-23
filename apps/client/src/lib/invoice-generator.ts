@@ -90,11 +90,11 @@ export function generateInvoice(data: InvoiceData): void {
 
   // ─── Header / Store Info ───────────────────────────────────
   doc.setFontSize(16);
-  doc.setFont(undefined, 'bold');
+  doc.setFont('helvetica', 'bold');
   doc.text('INVOICE', margin, yPosition);
 
   doc.setFontSize(10);
-  doc.setFont(undefined, 'normal');
+  doc.setFont('helvetica', 'normal');
   yPosition += 10;
 
   if (data.storeAddress) {
@@ -105,21 +105,21 @@ export function generateInvoice(data: InvoiceData): void {
   // ─── Invoice Details (Order Number, Date) ──────────────────
   yPosition += 2;
   doc.setFontSize(10);
-  doc.setFont(undefined, 'bold');
+  doc.setFont('helvetica', 'bold');
   doc.text(`Order: ${data.orderNumber}`, margin, yPosition);
   yPosition += 6;
 
-  doc.setFont(undefined, 'normal');
+  doc.setFont('helvetica', 'normal');
   doc.text(`Date: ${new Date(data.orderDate).toLocaleDateString()}`, margin, yPosition);
   yPosition += 8;
 
   // ─── Customer Info ─────────────────────────────────────────
   yPosition += 2;
-  doc.setFont(undefined, 'bold');
+  doc.setFont('helvetica', 'bold');
   doc.text('Bill To:', margin, yPosition);
   yPosition += 6;
 
-  doc.setFont(undefined, 'normal');
+  doc.setFont('helvetica', 'normal');
   doc.text(data.customerName, margin, yPosition);
   yPosition += 5;
   doc.text(data.customerEmail, margin, yPosition);
@@ -136,10 +136,10 @@ export function generateInvoice(data: InvoiceData): void {
 
   // ─── Shipping Address ──────────────────────────────────────
   if (data.shippingAddress) {
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('Ship To:', pageWidth / 2 + 5, yPosition - 8);
 
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     const shippingLines = doc.splitTextToSize(
       data.shippingAddress,
       contentWidth / 2 - 10
@@ -156,7 +156,7 @@ export function generateInvoice(data: InvoiceData): void {
   const colX = [margin, margin + 80, margin + 105, margin + 135];
 
   // Table header
-  doc.setFont(undefined, 'bold');
+  doc.setFont('helvetica', 'normal');
   doc.setFillColor(240, 240, 240);
   doc.rect(margin - 2, tableTop - 5, contentWidth + 4, 8, 'F');
   doc.text('Product', colX[0], tableTop);
@@ -165,7 +165,7 @@ export function generateInvoice(data: InvoiceData): void {
   doc.text('Total', colX[3], tableTop);
 
   // Table rows
-  doc.setFont(undefined, 'normal');
+  doc.setFont('helvetica', 'normal');
   yPosition = tableTop + 8;
 
   data.items.forEach((item) => {
@@ -193,7 +193,7 @@ export function generateInvoice(data: InvoiceData): void {
   // ─── Totals Section ────────────────────────────────────────
   const totalsX = margin + 110;
 
-  doc.setFont(undefined, 'normal');
+  doc.setFont('helvetica', 'normal');
   doc.text('Subtotal:', totalsX, yPosition);
   doc.text(formatPrice(data.subtotal_cents, data.currency), pageWidth - margin - 10, yPosition, { align: 'right' });
 
@@ -206,7 +206,7 @@ export function generateInvoice(data: InvoiceData): void {
   doc.text(formatPrice(data.shipping_cents, data.currency), pageWidth - margin - 10, yPosition, { align: 'right' });
 
   yPosition += 8;
-  doc.setFont(undefined, 'bold');
+  doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
   doc.text('TOTAL:', totalsX, yPosition);
   doc.text(formatPrice(data.total_cents, data.currency), pageWidth - margin - 10, yPosition, { align: 'right' });
@@ -216,7 +216,7 @@ export function generateInvoice(data: InvoiceData): void {
   // ─── Footer ────────────────────────────────────────────────
   yPosition += 5;
   doc.setFontSize(8);
-  doc.setFont(undefined, 'normal');
+  doc.setFont('helvetica', 'normal');
   doc.setDrawColor(180, 180, 180);
   doc.line(margin, yPosition, pageWidth - margin, yPosition);
   yPosition += 5;
