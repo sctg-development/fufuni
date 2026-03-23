@@ -646,6 +646,15 @@ All outbound webhooks are signed with `X-Merchant-Signature` (HMAC-SHA256).
 | `POST` | `/v1/__auth0/token` | `auth0:admin:api` | Get Auth0 Management API access token (cached) |
 | `POST` | `/v1/__auth0/autopermissions` | `auth0:admin:api` | Auto-assign configured permissions to current user |
 
+#### Wishlist in Auth0 user_metadata
+
+`/v1/me/wishlist` operations persist the wishlist as JSON in Auth0 `user_metadata` under `wishlist`.
+- `GET /v1/me/wishlist`: returns the array from `auth.user_metadata.wishlist` set by `customer-auth`.
+- `POST /v1/me/wishlist`: calls `getUserMetadata(userId)` and `updateUserMetadata(userId, {wishlist})` to add a product without Durable Object write.
+- `DELETE /v1/me/wishlist/:productId`: calls `getUserMetadata(userId)` and `updateUserMetadata(userId, {wishlist})` to remove a product.
+
+This avoids storing wishlist in the Durable Object / worker state, and reuses the Auth0 profile data as a customer preference store.
+
 ---
 
 ### AI parameters
