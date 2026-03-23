@@ -57,7 +57,7 @@ import { Logo } from "@/components/icons";
 import { useCart } from "@/hooks/useCart";
 import { ShoppingCart, ChevronDown, ShieldCheck } from "lucide-react";
 import { availableLanguages } from "@/i18n";
-import { LoginModal } from './LoginModal';
+import { LoginModal } from '../modals/LoginModal';
 import { useDisclosure } from '@heroui/react';
 
 export const Navbar = () => {

@@ -10,7 +10,7 @@ import { useAuth } from '@/authentication/providers/use-auth';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { LoginModal } from './LoginModal';
+import { LoginModal } from '../modals/LoginModal';
 
 interface WishlistButtonProps {
   productId: string;
