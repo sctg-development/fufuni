@@ -80,6 +80,11 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   const { t } = useTranslation();
 
+  const redirectUri = new URL(
+      import.meta.env.BASE_URL || "/",
+      window.location.origin,
+    ).toString();
+
   if (isAuthenticated) {
     // Already logged in: no need to show login modal
     return null;
@@ -95,7 +100,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         authorizationParams: {
           connection: 'email',
           login_hint: email,
-          redirect_uri: window.location.origin,
+          redirect_uri: redirectUri,
         },
       });
     } catch (error) {
@@ -110,7 +115,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       await login({
         authorizationParams: {
           connection: provider,
-          redirect_uri: window.location.origin,
+          redirect_uri: redirectUri,
         },
       });
     } catch (error) {
@@ -123,7 +128,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     login({
       authorizationParams: {
         screen_hint: 'signup',
-        redirect_uri: window.location.origin,
+        redirect_uri: redirectUri,
       } as any,
     }).catch(console.error);
   };
