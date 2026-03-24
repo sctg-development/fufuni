@@ -23,21 +23,55 @@ import { IconSvgProps } from "@/types";
 export const Logo: React.FC<IconSvgProps> = ({
   size = 36,
   height,
+  width,
   ...props
 }) => (
   <svg
-    fill="none"
+    viewBox="0 0 1024 1024"
     height={size || height}
-    viewBox="0 0 32 32"
-    width={size || height}
+    width={size || width || height}
     {...props}
   >
-    <path
-      clipRule="evenodd"
-      d="M17.6482 10.1305L15.8785 7.02583L7.02979 22.5499H10.5278L17.6482 10.1305ZM19.8798 14.0457L18.11 17.1983L19.394 19.4511H16.8453L15.1056 22.5499H24.7272L19.8798 14.0457Z"
-      fill="currentColor"
-      fillRule="evenodd"
-    />
+    <defs>
+      <style>{`
+        .logo-st0{fill:#DCDCDC;enable-background:new;}
+        .logo-st1{fill:url(#SVGID_1_);}
+        .logo-st2{fill:url(#SVGID_2_);}
+        .logo-st3{fill:url(#SVGID_3_);}
+        .logo-st4{fill:url(#SVGID_4_);}
+        .logo-st5{fill:#E11D2F;}
+        .logo-st9{fill:#258035;}
+        .logo-st10{fill:#D54A15;}
+        .logo-st11{fill:#C51262;}
+        .logo-st12{fill:#53266B;}
+        .logo-st13{fill:#9A2A7C;}
+        .logo-st14{fill:#98B91F;}
+        .logo-st15{fill:#EEAD00;}
+        .logo-st16{fill:#298F85;}
+      `}</style>
+      <linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="595.6584" y1="-248.4599" x2="597.2776" y2="-246.8407" gradientTransform="matrix(227.3079 0 0 216.4182 -135288.75 53838.5664)">
+        <stop offset="0" stopColor="#F58220"/>
+        <stop offset="1" stopColor="#F6C026"/>
+      </linearGradient>
+      <linearGradient id="SVGID_2_" gradientUnits="userSpaceOnUse" x1="596.6025" y1="-248.7029" x2="598.2217" y2="-247.0837" gradientTransform="matrix(227.3079 0 0 216.4182 -135031.4375 53838.5664)">
+        <stop offset="0" stopColor="#D81B8A"/>
+        <stop offset="1" stopColor="#17B7C7"/>
+      </linearGradient>
+      <linearGradient id="SVGID_3_" gradientUnits="userSpaceOnUse" x1="595.7703" y1="-249.1149" x2="597.1862" y2="-247.6989" gradientTransform="matrix(227.3079 0 0 151.7836 -135288.75 38222.7227)">
+        <stop offset="0" stopColor="#6F2DA8"/>
+        <stop offset="1" stopColor="#9C27B0"/>
+      </linearGradient>
+      <linearGradient id="SVGID_4_" gradientUnits="userSpaceOnUse" x1="596.4193" y1="-249.4077" x2="598.0186" y2="-247.8085" gradientTransform="matrix(227.3079 0 0 151.7836 -135031.4375 38222.7227)">
+        <stop offset="0" stopColor="#16A34A"/>
+        <stop offset="1" stopColor="#84CC16"/>
+      </linearGradient>
+    </defs>
+    <path className="logo-st0" d="M91,270.1C91,67.7,333.9-13.2,512,116.3C690.1-13.2,933,67.7,933,270.1c0,178.1-194.3,239.6-356.2,315.8v150.55c0,6.27-5.08,11.35-11.35,11.35H458.63c-6.31,0-11.43-5.12-11.43-11.43V585.9C285.3,509.8,91,448.3,91,270.1z"/>
+    <path className="logo-st1" d="M139.6,229.7C155.8,59.6,333.9,3,487.7,116.3C358.2,237.8,269.1,302.5,139.6,407.8C99.1,334.9,131.5,302.5,139.6,229.7z"/>
+    <path className="logo-st2" d="M884.4,229.7C868.2,59.6,690.1,3,536.3,116.3c129.5,121.4,218.6,186.2,348.1,291.5C924.9,334.9,892.5,302.5,884.4,229.7z"/>
+    <path className="logo-st3" d="M139.6,407.8c129.5-40.5,218.6,24.3,348.1,145.7c-153.8,113.3-331.9,56.7-348.1-113.3C138.7,418.42,139.6,407.8,139.6,407.8z"/>
+    <path className="logo-st4" d="M884.4,407.8c-129.5-40.5-218.6,24.3-348.1,145.7C690.1,666.9,860,609.2,884.4,440.2C887.1,421.9,884.4,407.8,884.4,407.8z"/>
+    <path className="logo-st5" d="M534.6,188.1l124.2,124.2c12.5,12.5,12.5,32.8,0,45.3L534.6,481.7c-12.5,12.5-32.8,12.5-45.3,0L365.2,357.5c-12.5-12.5-12.5-32.8,0-45.3L489.4,188C501.9,175.6,522.1,175.6,534.6,188.1z"/>
   </svg>
 );
 
