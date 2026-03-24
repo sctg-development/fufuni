@@ -118,88 +118,6 @@ export default function DefaultLayout({
     [getAccessTokenSilently, decodeAndStoreToken],
   );
 
-  const handleRefreshToken = useCallback(async () => {
-    console.log("[Token] handleRefreshToken called");
-    
-    try {
-      // Search for refresh token in localStorage (Auth0 SDK cache)
-      let refreshToken: string | null = null;
-      let cacheKey: string | null = null;
-      
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key?.includes("@@auth0spajs@@") || key?.includes("auth0")) {
-          try {
-            const item = localStorage.getItem(key!);
-            if (item) {
-              const data = JSON.parse(item);
-              if (data?.body?.refresh_token) {
-                refreshToken = data.body.refresh_token;
-                cacheKey = key;
-                console.log("[Token] Found refresh_token in cache key:", key);
-                break;
-              }
-            }
-          } catch (e) {
-            // Skip parsing errors
-          }
-        }
-      }
-
-      if (refreshToken) {
-        console.log("[Token] Attempting token refresh via Auth0 oauth/token endpoint");
-        
-        const response = await fetch(`https://${import.meta.env.AUTH0_DOMAIN}/oauth/token`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            client_id: import.meta.env.AUTH0_CLIENT_ID,
-            refresh_token: refreshToken,
-            grant_type: "refresh_token",
-            audience: import.meta.env.AUTH0_AUDIENCE,
-          }),
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          console.error("[Token] Token refresh failed:", error);
-          throw new Error(error.error_description || "Token refresh failed");
-        }
-
-        const data = await response.json();
-        console.log("[Token] Successfully got new token from Auth0 token endpoint");
-        console.log("[Token] New token exp:", new Date(data.expires_in * 1000 + Date.now()).toISOString());
-        
-        // Update the refresh token in localStorage if a new one was provided
-        if (data.refresh_token && cacheKey) {
-          console.log("[Token] Updating cached refresh_token in localStorage");
-          try {
-            const cacheStr = localStorage.getItem(cacheKey);
-            if (cacheStr) {
-              const cache = JSON.parse(cacheStr);
-              cache.body.refresh_token = data.refresh_token;
-              localStorage.setItem(cacheKey, JSON.stringify(cache));
-              console.log("[Token] Refresh token updated in cache");
-            }
-          } catch (e) {
-            console.warn("[Token] Failed to update cached refresh_token:", e);
-          }
-        }
-        
-        // Update our state and ref
-        accessTokenRef.current = data.access_token;
-        setAccessToken(data.access_token);
-        await decodeAndStoreToken(data.access_token);
-        return;
-      }
-      
-      console.warn("[Token] No refresh_token found, falling back to getAccessTokenSilently");
-      await loadToken(true);
-    } catch (error) {
-      console.error("[Token] handleRefreshToken error:", error);
-    }
-  }, [loadToken, decodeAndStoreToken]);
-
   useEffect(() => {
     if (!isAuthenticated) return;
 
@@ -250,9 +168,10 @@ export default function DefaultLayout({
           isOpen={isModalOpen}
           tokenPayload={decodedToken}
           user={user}
-          onClose={() => setIsModalOpen(false)}
-          onTokenRefresh={handleRefreshToken}
-        />
+          onClose={() => setIsModalOpen(false)}          onTokenRefreshed={async (newToken) => {
+            setAccessToken(newToken);
+            await decodeAndStoreToken(newToken);
+          }}        />
       ) : (
         <></>
       )}

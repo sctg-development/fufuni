@@ -120,6 +120,7 @@ export const useAuth0Provider = (): AuthProvider => {
       
       // Search for refresh token in localStorage (Auth0 SDK cache)
       let refreshToken: string | null = null;
+      let cacheKey: string | null = null;
       
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -130,6 +131,7 @@ export const useAuth0Provider = (): AuthProvider => {
               const data = JSON.parse(item);
               if (data?.body?.refresh_token) {
                 refreshToken = data.body.refresh_token;
+                cacheKey = key;
                 console.log("[Auth0] Found refresh_token in localStorage");
                 break;
               }
@@ -181,6 +183,22 @@ export const useAuth0Provider = (): AuthProvider => {
 
       const data = await response.json();
       console.log("[Auth0] Successfully refreshed token via oauth/token endpoint");
+      
+      // Update the refresh token in localStorage if a new one was provided
+      if (data.refresh_token && cacheKey) {
+        console.log("[Auth0] Updating cached refresh_token in localStorage");
+        try {
+          const cacheStr = localStorage.getItem(cacheKey);
+          if (cacheStr) {
+            const cache = JSON.parse(cacheStr);
+            cache.body.refresh_token = data.refresh_token;
+            localStorage.setItem(cacheKey, JSON.stringify(cache));
+            console.log("[Auth0] Refresh token updated in cache");
+          }
+        } catch (e) {
+          console.warn("[Auth0] Failed to update cached refresh_token:", e);
+        }
+      }
       
       return data.access_token || null;
     } catch (error) {

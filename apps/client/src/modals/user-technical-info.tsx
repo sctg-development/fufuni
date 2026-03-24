@@ -30,6 +30,7 @@ import type { User } from "@auth0/auth0-react";
 
 import { CopyButton } from "@/components/copy-button";
 import { AuthenticationGuardWithPermission } from "@/authentication";
+import { useTokenRefresh } from "@/hooks/useTokenRefresh";
 
 interface UserTechnicalInfoModalProps {
   isOpen: boolean;
@@ -37,7 +38,7 @@ interface UserTechnicalInfoModalProps {
   user: User;
   accessToken: string | null;
   tokenPayload: JWTPayload | null;
-  onTokenRefresh?: () => Promise<void>;
+  onTokenRefreshed?: (newToken: string) => Promise<void>;
 }
 
 function formatExpiry(exp: number): string {
@@ -72,9 +73,10 @@ function formatDuration(seconds: number, t: any): string {
 }
 
 export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
-  ({ isOpen, onClose, user, accessToken, tokenPayload, onTokenRefresh }) => {
+  ({ isOpen, onClose, user, accessToken, tokenPayload, onTokenRefreshed }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const { refreshToken } = useTokenRefresh({ onTokenRefreshed });
     const [secondsLeft, setSecondsLeft] = useState<number>(0);
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
@@ -89,19 +91,11 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
     }, [tokenPayload?.exp]);
 
     const handleRefreshToken = async () => {
-      console.log("[Modal] handleRefreshToken called, onTokenRefresh defined?", !!onTokenRefresh);
-      if (!onTokenRefresh) {
-        console.warn("[Modal] onTokenRefresh callback not provided");
-        return;
-      }
-      
       setIsRefreshing(true);
-      console.log("[Modal] Starting token refresh...");
       try {
-        await onTokenRefresh();
-        console.log("[Modal] Token refresh completed");
+        await refreshToken();
       } catch (error) {
-        console.error("[Modal] Error refreshing token:", error);
+        console.error("[Modal] Token refresh error:", error);
       } finally {
         setIsRefreshing(false);
       }
@@ -135,7 +129,7 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
               <span className="font-black text-foreground text-base leading-tight">
                 {t("nav-user-dropdown-connected-as")}
               </span>
-              <span className="text-sm font-semibold text-primary truncate max-w-[300px]">
+              <span className="text-sm font-semibold text-primary truncate max-w-75">
                 {user.email}
               </span>
             </div>
@@ -298,7 +292,7 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
                 />
               </div>
               <ScrollShadow
-                className="h-[80px] w-full"
+                className="h-20 w-full"
                 orientation="horizontal"
               >
                 <p className="text-[10px] text-default-500 font-mono break-all leading-relaxed select-all">
