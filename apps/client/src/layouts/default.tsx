@@ -28,6 +28,7 @@ import { getLocalJwkSet } from "@/authentication/utils/jwks";
 import { Navbar } from "@/components/navbar";
 import { UserTechnicalInfoModal } from "@/modals/user-technical-info";
 import { LoginLogoutLink } from "@/authentication";
+import { TOKEN_REFRESHED_EVENT } from "@/hooks/useTokenRefresh";
 
 export default function DefaultLayout({
   children,
@@ -131,6 +132,23 @@ export default function DefaultLayout({
       isMounted = false;
     };
   }, [isAuthenticated, loadToken]);
+
+  // Listen for global token refreshed events (e.g., from WishlistButton)
+  useEffect(() => {
+    const handleTokenRefreshed = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      const newToken = customEvent.detail;
+      console.log("[Token] Global token refreshed event received in default layout");
+      accessTokenRef.current = newToken;
+      setAccessToken(newToken);
+      decodeAndStoreToken(newToken);
+    };
+
+    window.addEventListener(TOKEN_REFRESHED_EVENT, handleTokenRefreshed);
+    return () => {
+      window.removeEventListener(TOKEN_REFRESHED_EVENT, handleTokenRefreshed);
+    };
+  }, [decodeAndStoreToken]);
 
   return (
     <div className="relative flex flex-col h-screen">

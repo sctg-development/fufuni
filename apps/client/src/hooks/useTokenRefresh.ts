@@ -6,6 +6,8 @@
 import { useCallback } from "react";
 import { useAuth } from "@/authentication/providers/use-auth";
 
+export const TOKEN_REFRESHED_EVENT = "fufuni:token-refreshed";
+
 interface UseTokenRefreshOptions {
   onTokenRefreshed?: (newToken: string) => Promise<void>;
 }
@@ -13,6 +15,7 @@ interface UseTokenRefreshOptions {
 /**
  * Hook to refresh the access token and optionally trigger a callback
  * Handles token refresh via the authentication provider
+ * Dispatches a global event so other components can sync the token
  */
 export const useTokenRefresh = (options?: UseTokenRefreshOptions) => {
   const auth = useAuth();
@@ -21,8 +24,13 @@ export const useTokenRefresh = (options?: UseTokenRefreshOptions) => {
     try {
       const newToken = await auth.refreshAccessToken();
       
-      if (newToken && options?.onTokenRefreshed) {
-        await options.onTokenRefreshed(newToken);
+      if (newToken) {
+        if (options?.onTokenRefreshed) {
+          await options.onTokenRefreshed(newToken);
+        }
+        window.dispatchEvent(
+          new CustomEvent(TOKEN_REFRESHED_EVENT, { detail: newToken })
+        );
       }
       
       return newToken;
