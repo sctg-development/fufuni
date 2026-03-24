@@ -3,12 +3,12 @@
  * License: AGPL-3.0-or-later
  */
 
-import { useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { decodeJwt } from 'jose';
 import { useAuth } from '@/authentication/providers/use-auth';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTokenRefresh } from '@/hooks/useTokenRefresh';
 
-interface UseWishlistReturn {
+export interface UseWishlistReturn {
   wishlist: string[];
   isLoading: boolean;
   isError: boolean;
@@ -16,195 +16,135 @@ interface UseWishlistReturn {
   isFavorite: (productId: string) => boolean;
 }
 
+const WISHLIST_UPDATED_EVENT = 'fufuni:wishlist-updated';
+
+/**
+ * Lightweight token parser function.
+ * Extracts wishlist from the user_metadata of the JWT access_token.
+ */
+export function getWishlistFromToken(token: string | null): string[] {
+  if (!token) return [];
+  try {
+    const payload = decodeJwt(token) as any;
+    const userMetadata = payload['extra_user_info/user_metadata'];
+    return Array.isArray(userMetadata?.wishlist) ? userMetadata.wishlist : [];
+  } catch (error) {
+    console.error('[useWishlist] Error decoding token for wishlist:', error);
+    return [];
+  }
+}
+
 /**
  * Custom React hook to manage the user's wishlist (favorites).
  * 
  * Features:
- * - Fetches wishlist from Auth0 user_metadata stored in the JWT token
- * - Caches results with React Query (source of truth: JWT token)
- * - Provides toggle, add, and remove functionality
- * - Refreshes JWT token after mutations to ensure wishlist is up to date
- * - Handles loading and error states
- * 
- * Workflow:
- * 1. Get access token and decode JWT
- * 2. Extract wishlist from token['extra_user_info/user_metadata']
- * 3. After POST/DELETE, refresh token and update cache from new JWT
- * 
- * Usage:
- * ```tsx
- * function ProductCard({ productId }) {
- *   const { wishlist, toggle, isFavorite } = useWishlist();
- *   
- *   return (
- *     <button onClick={() => toggle(productId)}>
- *       {isFavorite(productId) ? '❤️' : '🤍'}
- *     </button>
- *   );
- * }
- * ```
+ * - Extremely lightweight: 100% derived from the JWT user_metadata
+ * - Uses `useTokenRefresh` to keep JWT synced after mutations
+ * - Uses a CustomEvent for fast cross-component reactivity without heavy contexts/query caches
  */
 export function useWishlist(): UseWishlistReturn {
   const auth = useAuth();
-  const queryClient = useQueryClient();
+  const { refreshToken } = useTokenRefresh();
+  
+  const [wishlist, setWishlist] = useState<string[]>([]);
+  // We're loading initially if we are authenticated
+  const [isLoading, setIsLoading] = useState<boolean>(auth.isAuthenticated);
+  const [isError, setIsError] = useState<boolean>(false);
 
-  /**
-   * Extract wishlist from JWT token
-   * Token structure: payload['extra_user_info/user_metadata'].wishlist
-   */
-  const extractWishlistFromToken = useCallback((token: string): string[] => {
-    try {
-      const payload = decodeJwt(token) as any;
-      const userMetadata = payload['extra_user_info/user_metadata'];
-      return Array.isArray(userMetadata?.wishlist) ? userMetadata.wishlist : [];
-    } catch (error) {
-      console.error('Error decoding token for wishlist:', error);
-      return [];
-    }
-  }, []);
-
-  /**
-   * Fetch the user's wishlist from the JWT token
-   * Source of truth: JWT stored in Auth0
-   */
-  const {
-    data = [],
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ['wishlist'],
-    queryFn: async () => {
+  // Load wishlist from token initially
+  useEffect(() => {
+    let isMounted = true;
+    
+    const loadWishlist = async () => {
       if (!auth.isAuthenticated) {
-        return [];
+        if (isMounted) {
+          setWishlist([]);
+          setIsLoading(false);
+        }
+        return;
       }
-
+      
       try {
         const token = await auth.getAccessToken();
-        if (!token) {
-          return [];
+        if (isMounted) {
+          setWishlist(getWishlistFromToken(token));
+          setIsLoading(false);
         }
-
-        return extractWishlistFromToken(token);
-      } catch (error) {
-        console.error('Error fetching wishlist from token:', error);
-        throw error;
+      } catch (err) {
+        console.error('[useWishlist] Error fetching token:', err);
+        if (isMounted) {
+          setIsError(true);
+          setIsLoading(false);
+        }
       }
-    },
-    enabled: auth.isAuthenticated,
-  });
+    };
+    
+    loadWishlist();
+    
+    return () => { isMounted = false; };
+  }, [auth.isAuthenticated, auth.getAccessToken]);
 
-  /**
-   * Mutation: Add a product to the wishlist
-   * After POST, refresh token and extract updated wishlist from JWT
-   */
-  const addMutation = useMutation({
-    mutationFn: async (productId: string) => {
-      console.log('[Wishlist] Adding product to wishlist:', productId);
-      
-      // POST to backend - server updates Auth0 user_metadata
-      const response = await auth.postJson(
-        `${import.meta.env.API_BASE_URL}/v1/me/wishlist`,
-        { productId }
-      );
-      console.log('[Wishlist] POST response:', response);
+  // Synchronize state across multiple `useWishlist` instances instantly
+  useEffect(() => {
+    const handleSync = (e: Event) => {
+      const customEvent = e as CustomEvent<string[]>;
+      setWishlist(customEvent.detail);
+    };
+    window.addEventListener(WISHLIST_UPDATED_EVENT, handleSync);
+    return () => window.removeEventListener(WISHLIST_UPDATED_EVENT, handleSync);
+  }, []);
 
-      // Refresh access token to get updated wishlist in JWT
-      console.log('[Wishlist] Refreshing token after adding to wishlist...');
-      const refreshedToken = await auth.refreshAccessToken();
-      console.log('[Wishlist] Token refreshed:', refreshedToken ? 'yes' : 'no');
-      
-      if (!refreshedToken) {
-        throw new Error('Failed to refresh token after adding to wishlist');
-      }
-
-      const wishlist = extractWishlistFromToken(refreshedToken);
-      console.log('[Wishlist] Extracted wishlist from token:', wishlist);
-      
-      return {
-        wishlist,
-      };
-    },
-    onSuccess: (data) => {
-      console.log('[Wishlist] Mutation success, updating cache:', data.wishlist);
-      queryClient.setQueryData(['wishlist'], data.wishlist);
-    },
-    onError: (error) => {
-      console.error('[Wishlist] Mutation error:', error);
-    },
-  });
-
-  /**
-   * Mutation: Remove a product from the wishlist
-   * After DELETE, refresh token and extract updated wishlist from JWT
-   */
-  const removeMutation = useMutation({
-    mutationFn: async (productId: string) => {
-      console.log('[Wishlist] Removing product from wishlist:', productId);
-      
-      // DELETE from backend - server updates Auth0 user_metadata
-      const response = await auth.deleteJson(
-        `${import.meta.env.API_BASE_URL}/v1/me/wishlist/${productId}`
-      );
-      console.log('[Wishlist] DELETE response:', response);
-
-      // Refresh access token to get updated wishlist in JWT
-      console.log('[Wishlist] Refreshing token after removing from wishlist...');
-      const refreshedToken = await auth.refreshAccessToken();
-      console.log('[Wishlist] Token refreshed:', refreshedToken ? 'yes' : 'no');
-      
-      if (!refreshedToken) {
-        throw new Error('Failed to refresh token after removing from wishlist');
-      }
-
-      const wishlist = extractWishlistFromToken(refreshedToken);
-      console.log('[Wishlist] Extracted wishlist from token:', wishlist);
-      
-      return {
-        wishlist,
-      };
-    },
-    onSuccess: (data) => {
-      console.log('[Wishlist] Mutation success, updating cache:', data.wishlist);
-      queryClient.setQueryData(['wishlist'], data.wishlist);
-    },
-    onError: (error) => {
-      console.error('[Wishlist] Mutation error:', error);
-    },
-  });
-
-  /**
-   * Toggle a product in/out of the wishlist
-   */
   const toggle = useCallback(
     async (productId: string) => {
       if (!auth.isAuthenticated) {
-        // TODO: Open login modal
-        console.warn('User not authenticated');
+        console.warn('[useWishlist] Attempted to toggle without authentication');
         return;
       }
 
-      const isFav = data.includes(productId);
+      const isFav = wishlist.includes(productId);
 
-      if (isFav) {
-        await removeMutation.mutateAsync(productId);
-      } else {
-        await addMutation.mutateAsync(productId);
+      // Optimistic loading state
+      setIsLoading(true);
+      setIsError(false);
+
+      try {
+        // Toggle in backend
+        if (isFav) {
+          await auth.deleteJson(`${import.meta.env.API_BASE_URL}/v1/me/wishlist/${productId}`);
+        } else {
+          await auth.postJson(`${import.meta.env.API_BASE_URL}/v1/me/wishlist`, { productId });
+        }
+
+        // Backend mutated effectively. Ask for a new JWT token to update local single truth!
+        const newToken = await refreshToken();
+        
+        // Parse directly from the freshly refreshed token payload
+        const newWishlist = getWishlistFromToken(newToken || null);
+        
+        // Update this instance
+        setWishlist(newWishlist);
+        
+        // Notify any other instances across the app (product lists, badges, etc.)
+        window.dispatchEvent(new CustomEvent(WISHLIST_UPDATED_EVENT, { detail: newWishlist }));
+        
+      } catch (error) {
+        console.error('[useWishlist] Mutation error:', error);
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
       }
     },
-    [auth.isAuthenticated, data, addMutation, removeMutation]
+    [auth, refreshToken, wishlist]
   );
 
-  /**
-   * Check if a product is in the wishlist
-   */
   const isFavorite = useCallback(
-    (productId: string) => data.includes(productId),
-    [data]
+    (productId: string) => wishlist.includes(productId),
+    [wishlist]
   );
 
   return {
-    wishlist: data,
-    isLoading: isLoading || addMutation.isPending || removeMutation.isPending,
+    wishlist,
+    isLoading,
     isError,
     toggle,
     isFavorite,
