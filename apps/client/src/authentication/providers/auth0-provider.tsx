@@ -90,7 +90,7 @@ export const useAuth0Provider = (): AuthProvider => {
     // If the token is about to expire, force a refresh.
     // This avoids using a token that will expire mid-request.
     if (secondsLeft < 60) {
-      const refreshOptions = { ...baseOptions, ignoreCache: true } as any;
+      const refreshOptions = { ...baseOptions, cacheMode: "off" } as any;
       const refreshedTokenRaw = await getAccessTokenSilently(refreshOptions);
 
       return resolveAccessTokenString(refreshedTokenRaw);
@@ -116,91 +116,25 @@ export const useAuth0Provider = (): AuthProvider => {
     options?: TokenOptions,
   ): Promise<string | null> => {
     try {
-      console.log("[Auth0] Forcing token refresh via refresh_token");
+      console.log("[Auth0] Forcing token refresh via getAccessTokenSilently");
       
-      // Search for refresh token in localStorage (Auth0 SDK cache)
-      let refreshToken: string | null = null;
-      let cacheKey: string | null = null;
-      
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key?.includes("@@auth0spajs@@") || key?.includes("auth0")) {
-          try {
-            const item = localStorage.getItem(key!);
-            if (item) {
-              const data = JSON.parse(item);
-              if (data?.body?.refresh_token) {
-                refreshToken = data.body.refresh_token;
-                cacheKey = key;
-                console.log("[Auth0] Found refresh_token in localStorage");
-                break;
-              }
-            }
-          } catch (e) {
-            // Skip parsing errors
-          }
-        }
-      }
-
-      if (!refreshToken) {
-        console.warn("[Auth0] No refresh_token found in localStorage, falling back to getAccessTokenSilently");
-        const baseOptions = {
-          authorizationParams: {
-            audience: options?.audience || import.meta.env.AUTH0_AUDIENCE,
-            scope: options?.scope || import.meta.env.AUTH0_SCOPE,
-          },
-          ...options,
-        };
-
-        const refreshedTokenRaw = await getAccessTokenSilently({
-          ...baseOptions,
-          ignoreCache: true,
-        } as any);
-
-        const token = resolveAccessTokenString(refreshedTokenRaw);
-        console.log("[Auth0] Got token via getAccessTokenSilently, token present:", !!token);
-        return token;
-      }
-
-      // Make direct call to Auth0 /oauth/token endpoint with refresh_token
-      console.log("[Auth0] Making direct refresh_token request to Auth0");
-      const response = await fetch(`https://${import.meta.env.AUTH0_DOMAIN}/oauth/token`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          client_id: import.meta.env.AUTH0_CLIENT_ID,
-          refresh_token: refreshToken,
-          grant_type: "refresh_token",
+      const baseOptions = {
+        authorizationParams: {
           audience: options?.audience || import.meta.env.AUTH0_AUDIENCE,
-        }),
-      });
+          scope: options?.scope || import.meta.env.AUTH0_SCOPE,
+        },
+        ...options,
+      };
 
-      if (!response.ok) {
-        const error = await response.json();
-        console.error("[Auth0] Token refresh failed:", error);
-        throw new Error(error.error_description || "Token refresh failed");
-      }
+      const refreshedTokenRaw = await getAccessTokenSilently({
+        ...baseOptions,
+        cacheMode: "off",
+      } as any);
 
-      const data = await response.json();
-      console.log("[Auth0] Successfully refreshed token via oauth/token endpoint");
+      const token = resolveAccessTokenString(refreshedTokenRaw);
+      console.log("[Auth0] Successfully refreshed token via getAccessTokenSilently, token present:", !!token);
       
-      // Update the refresh token in localStorage if a new one was provided
-      if (data.refresh_token && cacheKey) {
-        console.log("[Auth0] Updating cached refresh_token in localStorage");
-        try {
-          const cacheStr = localStorage.getItem(cacheKey);
-          if (cacheStr) {
-            const cache = JSON.parse(cacheStr);
-            cache.body.refresh_token = data.refresh_token;
-            localStorage.setItem(cacheKey, JSON.stringify(cache));
-            console.log("[Auth0] Refresh token updated in cache");
-          }
-        } catch (e) {
-          console.warn("[Auth0] Failed to update cached refresh_token:", e);
-        }
-      }
-      
-      return data.access_token || null;
+      return token;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("[Auth0] Error refreshing access token:", error);
@@ -308,7 +242,7 @@ export const useAuth0Provider = (): AuthProvider => {
             // Try to refresh the token once on 401
             const refreshedToken =
               (await getAccessTokenWithAutoRefresh({
-                ignoreCache: true,
+                cacheMode: "off",
               } as any)) || token;
 
             return fetch(url, {
@@ -371,7 +305,7 @@ export const useAuth0Provider = (): AuthProvider => {
 
           const refreshedToken =
             (await getAccessTokenWithAutoRefresh({
-              ignoreCache: true,
+              cacheMode: "off",
             } as any)) || token;
 
           return fetch(url, {
@@ -420,7 +354,7 @@ export const useAuth0Provider = (): AuthProvider => {
 
           const refreshedToken =
             (await getAccessTokenWithAutoRefresh({
-              ignoreCache: true,
+              cacheMode: "off",
             } as any)) || token;
 
           return fetch(url, {
@@ -469,7 +403,7 @@ export const useAuth0Provider = (): AuthProvider => {
 
           const refreshedToken =
             (await getAccessTokenWithAutoRefresh({
-              ignoreCache: true,
+              cacheMode: "off",
             } as any)) || token;
 
           return fetch(url, {
@@ -519,7 +453,7 @@ export const useAuth0Provider = (): AuthProvider => {
 
           const refreshedToken =
             (await getAccessTokenWithAutoRefresh({
-              ignoreCache: true,
+              cacheMode: "off",
             } as any)) || token;
 
           return fetch(url, {
