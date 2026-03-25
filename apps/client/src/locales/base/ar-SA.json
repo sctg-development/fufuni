@@ -585,5 +585,13 @@
   "login-modal-subtitle": "سجّل الدخول إلى {{storeName}} للمتابعة إلى منصة {{storeName}} الإلكترونية.",
   "login-continue": "متابعة",
   "login-signup": "التسجيل",
-  "or": "أو"
+  "or": "أو",
+  "unsave-cart": "إزالة السلة",
+  "my-wishlist": "قائمة رغباتي",
+  "my-saved-carts": "سلاتي المحفوظة",
+  "saved-cart-id": "المعرّف: {{id}}",
+  "cart-number": "السلة #{{num}}",
+  "wishlist-empty": "قائمة رغباتك فارغة",
+  "saved-carts-empty": "لا توجد سلال محفوظة",
+  "view-product": "عرض المنتج"
 }

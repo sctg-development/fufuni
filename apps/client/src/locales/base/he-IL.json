@@ -585,5 +585,13 @@
   "login-modal-subtitle": "התחבר ל-{{storeName}} כדי להמשיך אל {{storeName}} e-platform.",
   "login-continue": "המשך",
   "login-signup": "הרשמה",
-  "or": "או"
+  "or": "או",
+  "unsave-cart": "הסר סל קניות",
+  "my-wishlist": "הרשימה שלי",
+  "my-saved-carts": "הסלים השמורים שלי",
+  "saved-cart-id": "ID: {{id}}",
+  "cart-number": "סל #{{num}}",
+  "wishlist-empty": "הרשימה שלך ריקה",
+  "saved-carts-empty": "אין סלים שמורים",
+  "view-product": "צפה במוצר"
 }

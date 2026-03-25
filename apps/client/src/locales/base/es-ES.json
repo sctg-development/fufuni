@@ -585,5 +585,13 @@
   "login-modal-subtitle": "Inicia sesión en {{storeName}} para continuar en {{storeName}} e-platform.",
   "login-continue": "Continuar",
   "login-signup": "Registrarse",
-  "or": "o"
+  "or": "o",
+  "unsave-cart": "Desguardar carrito",
+  "my-wishlist": "Mi Lista de Deseos",
+  "my-saved-carts": "Mis Carritos Guardados",
+  "saved-cart-id": "ID: {{id}}",
+  "cart-number": "Carrito #{{num}}",
+  "wishlist-empty": "Tu lista de deseos está vacía",
+  "saved-carts-empty": "Sin carritos guardados",
+  "view-product": "Ver producto"
 }

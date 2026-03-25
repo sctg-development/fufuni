@@ -111,6 +111,8 @@ Visitors see an attractive landing page with a Log in button and direct links to
 - **Auth0-based authentication** for admin (JWT, RBAC, configurable permissions)
 - **Customer accounts** with address book
 - **OAuth 2.0 / UCP** (Universal Commerce Protocol) for customer-facing flows
+- **Wishlist** (favorites) — products stored in Auth0 user_metadata
+- **Saved carts** — full cart snapshots stored in Auth0 user_metadata for quick retrieval
 - Magic-link checkout
 
 ### 🌍 Internationalisation
@@ -659,6 +661,52 @@ All outbound webhooks are signed with `X-Merchant-Signature` (HMAC-SHA256).
 - `DELETE /v1/me/wishlist/:productId`: calls `getUserMetadata(userId)` and `updateUserMetadata(userId, {wishlist})` to remove a product.
 
 This avoids storing wishlist in the Durable Object / worker state, and reuses the Auth0 profile data as a customer preference store.
+
+#### Saved Carts in Auth0 user_metadata
+
+`/v1/me/saved-carts` operations persist saved cart IDs as JSON in Auth0 `user_metadata` under `saved_carts`.
+Additionally, cart snapshots are stored in a relational `saved_carts` table in the Durable Object for full audit and recovery purposes.
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `GET` | `/v1/me/saved-carts` | Auth0 JWT | List all saved cart IDs for the authenticated user |
+| `POST` | `/v1/me/saved-carts` | Auth0 JWT | Save a new cart (`{cartId: string}`) and add to `user_metadata.saved_carts` |
+| `DELETE` | `/v1/me/saved-carts/:cartId` | Auth0 JWT | Remove a saved cart and update `user_metadata.saved_carts` |
+
+**How it works:**
+
+1. **Frontend** → User clicks "Save Cart" button with active cart ID (UUID)
+2. **POST /v1/me/saved-carts** with `{cartId: "uuid-string"}`
+3. **Backend:**
+   - Inserts row into `saved_carts` table (for audit)
+   - Calls `updateUserMetadata(userId, {saved_carts: [..., cartId]})` to persist in Auth0
+4. **Frontend** → `useTokenRefresh()` refreshes JWT to pull updated `user_metadata.saved_carts`
+5. **Cross-component sync** → CustomEvent `fufuni:saved-carts-updated` notifies all `useSavedCarts` hooks
+6. **UI Update** → UserListsMenu dropdown immediately shows the saved cart
+
+**Database table:**
+
+```sql
+CREATE TABLE saved_carts (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  auth0_user_id TEXT NOT NULL,
+  cart_id     TEXT NOT NULL,  -- UUID, foreign key to carts(id)
+  created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(auth0_user_id, cart_id),
+  FOREIGN KEY (cart_id) REFERENCES carts(id) ON DELETE CASCADE
+);
+```
+
+**Frontend hooks:**
+
+- `useSavedCarts()` → Returns `{savedCarts: string[], toggleSavedCart, isSaved, isLoading, isError}`
+- `useTokenRefresh()` → Force JWT token refresh after mutations
+
+**Frontend components:**
+
+- `<SaveCartButton cartId={string} onBeforeSave={async () => string} />` — Button to toggle cart save state
+- `<UserListsMenu />` — Dropdown menu showing both wishlists and saved carts
 
 ---
 

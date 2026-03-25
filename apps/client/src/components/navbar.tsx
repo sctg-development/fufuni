@@ -59,6 +59,7 @@ import { ShoppingCart, ChevronDown, ShieldCheck } from "lucide-react";
 import { availableLanguages } from "@/i18n";
 import { LoginModal } from '../modals/LoginModal';
 import { useDisclosure } from '@heroui/react';
+import { UserListsMenu } from "./user-lists-menu";
 
 export const Navbar = () => {
   const { t } = useTranslation();
@@ -181,6 +182,7 @@ export const Navbar = () => {
         justify="end"
       >
         <NavbarItem className="hidden sm:flex gap-2 items-center">
+          <UserListsMenu />
           <LinkUniversal href="/cart" className="relative">
             <ShoppingCart size={20} />
             {cartCount > 0 && (

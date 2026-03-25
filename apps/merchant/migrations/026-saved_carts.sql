@@ -11,7 +11,7 @@
 CREATE TABLE IF NOT EXISTS saved_carts (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   auth0_user_id TEXT NOT NULL,
-  cart_id     INTEGER NOT NULL,
+  cart_id     TEXT NOT NULL,
   created_at  TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE(auth0_user_id, cart_id),

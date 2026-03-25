@@ -585,5 +585,13 @@
   "login-modal-subtitle": "登录 {{storeName}} 以继续访问 {{storeName}} 电子平台。",
   "login-continue": "继续",
   "login-signup": "注册",
-  "or": "或"
+  "or": "或",
+  "unsave-cart": "取消保存购物车",
+  "my-wishlist": "我的愿望清单",
+  "my-saved-carts": "我保存的购物车",
+  "saved-cart-id": "ID: {{id}}",
+  "cart-number": "购物车 #{{num}}",
+  "wishlist-empty": "您的愿望清单为空",
+  "saved-carts-empty": "没有保存的购物车",
+  "view-product": "查看产品"
 }

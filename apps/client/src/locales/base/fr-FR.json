@@ -585,5 +585,13 @@
   "login-modal-subtitle": "Connectez-vous à {{storeName}} pour continuer vers {{storeName}} e-platform.",
   "login-continue": "Continuer",
   "login-signup": "Inscription",
-  "or": "ou"
+  "or": "ou",
+  "unsave-cart": "Retirer le panier",
+  "my-wishlist": "Mes Favoris",
+  "my-saved-carts": "Mes Paniers Sauvegardés",
+  "saved-cart-id": "ID : {{id}}",
+  "cart-number": "Panier #{{num}}",
+  "wishlist-empty": "Vos favoris sont vides",
+  "saved-carts-empty": "Aucun panier sauvegardé",
+  "view-product": "Voir le produit"
 }

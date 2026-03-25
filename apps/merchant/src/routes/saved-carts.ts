@@ -18,6 +18,7 @@ import { z } from 'zod';
 import { customerAuthMiddleware } from '../middleware/customer-auth';
 import { getDb } from '../db';
 import { ApiError, type HonoEnv } from '../types';
+import { getUserMetadata, updateUserMetadata } from '../lib/auth0';
 
 const app = new OpenAPIHono<HonoEnv>();
 app.use('*', customerAuthMiddleware);
@@ -28,7 +29,7 @@ app.use('*', customerAuthMiddleware);
 const savedCartSchema = z.object({
   id: z.number(),
   auth0_user_id: z.string(),
-  cart_id: z.number(),
+  cart_id: z.string(),
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -43,6 +44,7 @@ const getSavedCartsRoute = createRoute({
   path: '/me/saved-carts',
   tags: ['Saved Carts'],
   summary: 'List saved carts',
+  security: [{ bearerAuth: ["valid jwt"] }],
   description: 'Returns all saved carts associated with the authenticated user.',
   responses: {
     200: {
@@ -91,12 +93,13 @@ const savecartRoute = createRoute({
   path: '/me/saved-carts',
   tags: ['Saved Carts'],
   summary: 'Save a cart',
+  security: [{ bearerAuth: ["valid jwt"] }],
   description: 'Associates the current cart with the authenticated user account.',
   request: {
     body: {
       content: {
         'application/json': {
-          schema: z.object({ cartId: z.number() }),
+          schema: z.object({ cartId: z.string() }),
         },
       },
     },
@@ -125,7 +128,7 @@ app.openapi(savecartRoute, async (c) => {
       throw ApiError.unauthorized('No Auth0 user ID in token');
     }
 
-    const { cartId } = (await c.req.json()) as { cartId: number };
+    const { cartId } = (await c.req.json()) as { cartId: string };
 
     if (!cartId) {
       throw ApiError.badRequest('cartId is required');
@@ -162,6 +165,16 @@ app.openapi(savecartRoute, async (c) => {
       throw ApiError.internalError('Failed to retrieve saved cart');
     }
 
+    // Update Auth0 user_metadata
+    const userMetadata = await getUserMetadata(userId, c.env);
+    const savedCartsMetadata = Array.isArray(userMetadata.saved_carts) ? userMetadata.saved_carts : [];
+
+    // Store cartId as string in metadata (it's a UUID)
+    if (!savedCartsMetadata.includes(cartId)) {
+      savedCartsMetadata.push(cartId);
+      await updateUserMetadata(userId, { ...userMetadata, saved_carts: savedCartsMetadata }, c.env);
+    }
+
     return c.json(savedCart[0], 201);
   } catch (error) {
     if (error instanceof ApiError) throw error;
@@ -171,14 +184,15 @@ app.openapi(savecartRoute, async (c) => {
 });
 
 /**
- * DELETE /v1/me/saved-carts/:id — remove a saved cart entry
+ * DELETE /v1/me/saved-carts/:cartId — remove a saved cart entry
  */
 const deleteSavedCartRoute = createRoute({
   method: 'delete',
-  path: '/me/saved-carts/:id',
+  path: '/me/saved-carts/:cartId',
   tags: ['Saved Carts'],
   summary: 'Delete a saved cart',
-  description: 'Removes the association between the user and a saved cart.',
+  description: 'Removes the association between the user and a saved cart (by cartId).',
+  security: [{ bearerAuth: ["valid jwt"] }],
   responses: {
     204: { description: 'Saved cart deleted' },
     401: { description: 'Unauthorized' },
@@ -191,22 +205,23 @@ app.openapi(deleteSavedCartRoute, async (c) => {
   try {
     const auth = c.get('auth') as any;
     const userId = auth?.sub;
-    const savedCartId = c.req.param('id');
+    const cartIdParam = c.req.param('cartId');
 
     if (!userId) {
       throw ApiError.unauthorized('No Auth0 user ID in token');
     }
 
-    if (!savedCartId) {
-      throw ApiError.badRequest('id is required');
+    if (!cartIdParam) {
+      throw ApiError.badRequest('cartId is required');
     }
 
+    const cartId = cartIdParam;
     const db = getDb(c.var.db);
 
     // Verify the saved cart belongs to the user
     const savedCart = await db.query(
-      `SELECT id FROM saved_carts WHERE id = ? AND auth0_user_id = ? LIMIT 1`,
-      [parseInt(savedCartId, 10), userId]
+      `SELECT id FROM saved_carts WHERE cart_id = ? AND auth0_user_id = ? LIMIT 1`,
+      [cartId, userId]
     );
 
     if (savedCart.length === 0) {
@@ -215,9 +230,17 @@ app.openapi(deleteSavedCartRoute, async (c) => {
 
     // Delete the saved cart entry
     await db.run(
-      `DELETE FROM saved_carts WHERE id = ? AND auth0_user_id = ?`,
-      [parseInt(savedCartId, 10), userId]
+      `DELETE FROM saved_carts WHERE cart_id = ? AND auth0_user_id = ?`,
+      [cartId, userId]
     );
+
+    // Update Auth0 user_metadata
+    const userMetadata = await getUserMetadata(userId, c.env);
+    let savedCartsMetadata = Array.isArray(userMetadata.saved_carts) ? userMetadata.saved_carts : [];
+    
+    // Remove the cartId from the metadata
+    savedCartsMetadata = savedCartsMetadata.filter((id: string) => id !== cartId);
+    await updateUserMetadata(userId, { ...userMetadata, saved_carts: savedCartsMetadata }, c.env);
 
     return c.text('', 204);
   } catch (error) {

@@ -580,5 +580,13 @@
   "login-modal-subtitle": "Sign in to {{storeName}} to continue to {{storeName}} e-platform.",
   "login-continue": "Continue",
   "login-signup": "Sign up",
-  "or": "or"
+  "or": "or",
+  "unsave-cart": "Unsave Cart",
+  "my-wishlist": "My Wishlist",
+  "my-saved-carts": "My Saved Carts",
+  "saved-cart-id": "ID: {{id}}",
+  "cart-number": "Cart #{{num}}",
+  "wishlist-empty": "Your wishlist is empty",
+  "saved-carts-empty": "No saved carts",
+  "view-product": "View Product"
 }
