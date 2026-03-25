@@ -46,7 +46,7 @@ export const ProductCard: React.FC<Props> = ({
     product.variants.find((v) => v.sku === selectedSku) ||
     product.variants[0];
 
-  const currency = variant?.currency ?? "USD";
+  const currency = variant?.currency ?? "";
   const price = variant ? formatMoney(variant.price_cents, currency) : formatMoney(0, currency);
 
   const image =
@@ -90,7 +90,7 @@ export const ProductCard: React.FC<Props> = ({
           className="w-full bg-default-100 border border-default-300 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none"
         >
           {product.variants.map((v) => {
-            const variantCurrency = v.currency ?? "USD";
+            const variantCurrency = v.currency ?? "";
             return (
               <option key={v.sku} value={v.sku}>
                 {v.title} - {formatMoney(v.price_cents || 0, variantCurrency)}

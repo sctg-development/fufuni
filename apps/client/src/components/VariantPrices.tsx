@@ -77,7 +77,7 @@ export function VariantPrices({
   variantId,
   variantTitle,
   basePriceCents,
-  currency = "USD",
+  currency = "",
 }: Props) {
   const { t } = useTranslation();
   const { getJson, postJson, deleteJson } = useSecuredApi();

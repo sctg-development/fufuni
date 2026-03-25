@@ -165,7 +165,7 @@ export default function ShippingRatesPage() {
 
       const ratesResp = await getJson(apiUrl);
 
-      console.log("📦 Rates Response:", ratesResp);
+      console.log("Rates Response:", ratesResp);
 
       if (!ratesResp || !ratesResp.items) {
         console.warn("⚠️ Rates response invalid:", ratesResp);
@@ -378,7 +378,7 @@ export default function ShippingRatesPage() {
         }),
       );
     }
-    console.log("📦 Final price cache:", priceCache);
+    console.log("Final price cache:", priceCache);
     setPricesByDivisa(priceCache);
 
     // Use default currency price
@@ -1131,7 +1131,7 @@ export default function ShippingRatesPage() {
                       const newCurrencyId = Array.from(key).join("");
 
                       console.log("💱 Changing currency to:", newCurrencyId);
-                      console.log("📦 pricesByDivisa:", pricesByDivisa);
+                      console.log("pricesByDivisa:", pricesByDivisa);
                       console.log(
                         "💰 Price for this currency:",
                         pricesByDivisa[newCurrencyId],

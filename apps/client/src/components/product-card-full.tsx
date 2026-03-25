@@ -48,7 +48,7 @@ export const ProductCardFull: React.FC<Props> = ({ product }) => {
     product.variants.find((v) => v.sku === selectedSku) ||
     product.variants[0];
 
-  const currency = variant?.currency ?? "USD";
+  const currency = variant?.currency ?? "";
   const price = variant ? formatMoney(variant.price_cents, currency) : formatMoney(0, currency);
   const comparePrice = variant?.compare_at_price_cents
     ? formatMoney(variant.compare_at_price_cents, currency)
@@ -196,7 +196,7 @@ export const ProductCardFull: React.FC<Props> = ({ product }) => {
             className="hidden md:block w-full bg-default-100 border border-default-300 rounded-lg px-3 py-2 text-sm focus:outline-none"
           >
             {product.variants.map((v) => {
-              const variantCurrency = v.currency ?? "USD";
+              const variantCurrency = v.currency ?? "";
               return (
                 <option key={v.sku} value={v.sku}>
                   {v.title} - {formatMoney(v.price_cents || 0, variantCurrency)}

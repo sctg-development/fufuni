@@ -26,20 +26,29 @@
  * Utilise l'API standard Intl.NumberFormat — aucun symbole codé en dur.
  *
  * @param cents     - montant en centimes (ex: 2999 → 29,99)
- * @param currency  - code ISO 4217 (ex: "EUR", "USD", "JPY", "GBP")
+ * @param currency  - code ISO 4217 (ex: "EUR", "USD", "JPY", "GBP") ou "" pour pas de devise
  * @param locale    - locale optionnelle (ex: "fr-FR", "en-US") — défaut: navigateur
- * @returns string formatée (ex: "29,99 €" ou "$29.99")
+ * @returns string formatée (ex: "29,99 €" ou "$29.99" ou "29,99" sans symbole)
  *
  * @example
  * formatMoney(2999, "EUR", "fr-FR") // "29,99 €"
  * formatMoney(2999, "USD", "en-US") // "$29.99"
+ * formatMoney(2999, "", "fr-FR")    // "29,99" (pas de symbole)
  * formatMoney(9800, "JPY", "ja-JP") // "¥9,800" (pas de décimales pour le JPY)
  */
 export function formatMoney(
   cents: number,
-  currency: string,
+  currency: string = "",
   locale?: string
 ): string {
+  // Si pas de devise, utilise le format nombre simple
+  if (!currency) {
+    return new Intl.NumberFormat(locale ?? navigator.language, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(cents / 100);
+  }
+
   // Récupère le nombre de décimales standard pour cette devise
   // Intl gère nativement JPY (0 décimales), KWD (3 décimales), etc.
   return new Intl.NumberFormat(locale ?? navigator.language, {
