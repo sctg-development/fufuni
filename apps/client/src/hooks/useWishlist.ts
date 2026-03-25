@@ -7,6 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { decodeJwt } from 'jose';
 import { useAuth } from '@/authentication/providers/use-auth';
 import { useTokenRefresh } from '@/hooks/useTokenRefresh';
+import { getStoreMetadata, normalizeStoreUrl } from '@/lib/store-metadata';
 
 export interface UseWishlistReturn {
   wishlist: string[];
@@ -22,22 +23,14 @@ const WISHLIST_UPDATED_EVENT = 'fufuni:wishlist-updated';
  * Lightweight token parser function.
  * Extracts wishlist from the user_metadata of the JWT access_token.
  */
-const STORE_URL = (import.meta.env.STORE_URL || '').replace(/\/$/, '');
-
-function getStoreMetadata(userMetadata: any): any {
-  if (!userMetadata || typeof userMetadata !== 'object') return undefined;
-  if (STORE_URL && userMetadata[STORE_URL] && typeof userMetadata[STORE_URL] === 'object') {
-    return userMetadata[STORE_URL];
-  }
-  return userMetadata;
-}
+const STORE_URL = import.meta.env.STORE_URL;
 
 export function getWishlistFromToken(token: string | null): string[] {
   if (!token) return [];
   try {
     const payload = decodeJwt(token) as any;
     const userMetadata = payload['extra_user_info/user_metadata'];
-    const storeMetadata = getStoreMetadata(userMetadata);
+    const storeMetadata = getStoreMetadata(userMetadata, STORE_URL);
 
     if (Array.isArray(storeMetadata?.wishlist)) {
       return storeMetadata.wishlist;
