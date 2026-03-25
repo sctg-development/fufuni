@@ -19,6 +19,7 @@ import {
 } from "@heroui/react";
 
 import { useAuth } from "../../authentication/providers/use-auth";
+import { availableLanguages } from "@/i18n";
 
 interface Profile {
   id: string;
@@ -38,7 +39,9 @@ export default function Preferences() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState<Partial<Profile>>({});
+  const [formData, setFormData] = useState<Partial<Profile>>({
+    accepts_marketing: 0,
+  });
   const [saveSuccess, setSaveSuccess] = useState(false);
   const apiBase =
     import.meta.env.VITE_API_BASE_URL || import.meta.env.API_BASE_URL;
@@ -67,14 +70,26 @@ export default function Preferences() {
     setSaving(true);
     setSaveSuccess(false);
     try {
-      const updates = {
+      // Save profile fields (name, phone, locale) to /profile
+      const profileUpdates = {
         name: formData.name,
         phone: formData.phone,
         locale: formData.locale,
+      };
+      await auth.patchJson(`${apiBase}/v1/me/profile`, profileUpdates);
+
+      // Save preferences (accepts_marketing) to /preferences
+      const preferencesUpdates = {
+        locale: formData.locale,
         accepts_marketing: formData.accepts_marketing === 1,
       };
+      await auth.patchJson(`${apiBase}/v1/me/preferences`, preferencesUpdates);
 
-      await auth.patchJson(`${apiBase}/v1/me/profile`, updates);
+      // Refetch profile to ensure UI has latest data
+      const result: Profile = await auth.getJson(`${apiBase}/v1/me/profile`);
+      setProfile(result);
+      setFormData(result);
+
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (error) {
@@ -147,11 +162,9 @@ export default function Preferences() {
               setFormData({ ...formData, locale: selected });
             }}
           >
-            <SelectItem key="en-US">English (US)</SelectItem>
-            <SelectItem key="fr-FR">Français</SelectItem>
-            <SelectItem key="de-DE">Deutsch</SelectItem>
-            <SelectItem key="es-ES">Español</SelectItem>
-            {/* Add more locales as needed */}
+            {availableLanguages.map((locale) => (
+              <SelectItem key={locale.code}>{locale.nativeName}</SelectItem>
+            ))}
           </Select>
         </CardBody>
       </Card>
@@ -176,11 +189,11 @@ export default function Preferences() {
               </p>
             </div>
             <Switch
-              checked={formData.accepts_marketing === 1}
+              isSelected={formData.accepts_marketing === 1}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  accepts_marketing: e.target.checked ? 1 : 0,
+                  accepts_marketing: e ? 1 : 0,
                 })
               }
             />

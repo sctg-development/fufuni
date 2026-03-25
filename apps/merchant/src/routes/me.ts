@@ -743,13 +743,27 @@ const getMyPreferences = createRoute({
 
 app.openapi(getMyPreferences, async (c) => {
     const auth = c.get('auth') as any;
+    const jwtSub = auth?.sub as string;
+    const email = auth?.email as string | undefined;
 
-    // Note: Preferences are stored in Auth0 user_metadata
-    // The JWT may contain a custom claim if configured in Auth0 Actions
-    // For now, return an empty object or data from the JWT if available
-    // In a real implementation, you'd fetch from Auth0 Management API
+    if (!jwtSub) {
+        throw ApiError.unauthorized('Invalid token');
+    }
 
-    return c.json({}, 200);
+    const db = getDb(c.var.db);
+    const customer = await resolveCustomer(db, jwtSub, email);
+
+    const metadata = customer.metadata ? JSON.parse(customer.metadata) : {};
+
+    return c.json(
+        {
+            locale: customer.locale ?? 'en-US',
+            accepts_marketing: Boolean(customer.accepts_marketing),
+            theme: metadata.theme ?? null,
+            currency: metadata.currency ?? null,
+        },
+        200
+    );
 });
 
 // ============================================================
@@ -791,10 +805,36 @@ const updateMyPreferences = createRoute({
 
 app.openapi(updateMyPreferences, async (c) => {
     const auth = c.get('auth') as any;
+    const jwtSub = auth?.sub as string;
+    const email = auth?.email as string | undefined;
+    const body = await c.req.json();
 
-    // Note: In a full implementation, this would call the Auth0 Management API
-    // to update user_metadata. For now, just acknowledge the request.
-    // The frontend will handle storing preferences locally or via Auth0.
+    if (!jwtSub) {
+        throw ApiError.unauthorized('Invalid token');
+    }
+
+    const db = getDb(c.var.db);
+    const customer = await resolveCustomer(db, jwtSub, email);
+
+    const updates: Record<string, any> = {
+        updated_at: now(),
+    };
+
+    if (body.locale !== undefined) updates.locale = body.locale;
+    if (body.accepts_marketing !== undefined)
+        updates.accepts_marketing = body.accepts_marketing ? 1 : 0;
+
+    // Persist theme/currency into metadata JSON field if customer table has metadata
+    const metadata = customer.metadata ? JSON.parse(customer.metadata) : {};
+    if (body.theme !== undefined) metadata.theme = body.theme;
+    if (body.currency !== undefined) metadata.currency = body.currency;
+    updates.metadata = JSON.stringify(metadata);
+
+    const setClauses = Object.keys(updates).map((k) => `${k} = ?`).join(', ');
+    await db.run(`UPDATE customers SET ${setClauses} WHERE id = ?`, [
+        ...Object.values(updates),
+        customer.id,
+    ]);
 
     return c.json({ ok: true }, 200);
 });
