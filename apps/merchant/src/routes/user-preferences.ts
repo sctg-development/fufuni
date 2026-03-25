@@ -31,7 +31,11 @@ const wishlistSchema = z.object({
 
 const normalizeStoreUrl = (storeUrl?: string): string | undefined => {
   if (!storeUrl) return undefined;
-  const normalized = storeUrl.replace(/\/$/, '');
+  // Remove trailing slash and normalize URL format for use as a metadata key
+  // Auth0 does not allow dots (.) in user_metadata field names, so we replace them with underscores
+  const normalized = storeUrl
+    .replace(/\/$/, '') // Remove trailing slash
+    .replace(/[:.\/]/g, '_'); // Replace dots, colons, and slashes with underscores
   return normalized || undefined;
 };
 
