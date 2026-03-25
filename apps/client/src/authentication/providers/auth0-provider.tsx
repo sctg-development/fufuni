@@ -117,7 +117,7 @@ export const useAuth0Provider = (): AuthProvider => {
   ): Promise<string | null> => {
     try {
       console.log("[Auth0] Forcing token refresh via getAccessTokenSilently");
-      
+
       const baseOptions = {
         authorizationParams: {
           audience: options?.audience || import.meta.env.AUTH0_AUDIENCE,
@@ -132,8 +132,12 @@ export const useAuth0Provider = (): AuthProvider => {
       } as any);
 
       const token = resolveAccessTokenString(refreshedTokenRaw);
-      console.log("[Auth0] Successfully refreshed token via getAccessTokenSilently, token present:", !!token);
-      
+
+      console.log(
+        "[Auth0] Successfully refreshed token via getAccessTokenSilently, token present:",
+        !!token,
+      );
+
       return token;
     } catch (error) {
       // eslint-disable-next-line no-console

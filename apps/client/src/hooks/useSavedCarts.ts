@@ -22,12 +22,33 @@ const SAVED_CARTS_UPDATED_EVENT = 'fufuni:saved-carts-updated';
  * Lightweight token parser function.
  * Extracts saved carts from the user_metadata of the JWT access_token.
  */
+const STORE_URL = (import.meta.env.STORE_URL || '').replace(/\/$/, '');
+
+function getStoreMetadata(userMetadata: any): any {
+  if (!userMetadata || typeof userMetadata !== 'object') return undefined;
+  if (STORE_URL && userMetadata[STORE_URL] && typeof userMetadata[STORE_URL] === 'object') {
+    return userMetadata[STORE_URL];
+  }
+  return userMetadata;
+}
+
 export function getSavedCartsFromToken(token: string | null): string[] {
   if (!token) return [];
   try {
     const payload = decodeJwt(token) as any;
     const userMetadata = payload['extra_user_info/user_metadata'];
-    return Array.isArray(userMetadata?.saved_carts) ? userMetadata.saved_carts : [];
+    const storeMetadata = getStoreMetadata(userMetadata);
+
+    if (Array.isArray(storeMetadata?.saved_carts)) {
+      return storeMetadata.saved_carts;
+    }
+
+    // fallback to legacy root key for backward compatibility
+    if (Array.isArray(userMetadata?.saved_carts)) {
+      return userMetadata.saved_carts;
+    }
+
+    return [];
   } catch (error) {
     console.error('[useSavedCarts] Error decoding token for saved carts:', error);
     return [];

@@ -29,6 +29,44 @@ const wishlistSchema = z.object({
   wishlist: z.array(z.string()).default([]),
 });
 
+const normalizeStoreUrl = (storeUrl?: string): string | undefined => {
+  if (!storeUrl) return undefined;
+  const normalized = storeUrl.replace(/\/$/, '');
+  return normalized || undefined;
+};
+
+const readWishlistFromMetadata = (userMetadata: Record<string, any> = {}, storeUrl?: string): string[] => {
+  const key = normalizeStoreUrl(storeUrl);
+  const storeMetadata = key && userMetadata[key] && typeof userMetadata[key] === 'object' ? userMetadata[key] : undefined;
+
+  if (Array.isArray(storeMetadata?.wishlist)) {
+    return storeMetadata.wishlist;
+  }
+
+  if (Array.isArray(userMetadata.wishlist)) {
+    return userMetadata.wishlist;
+  }
+
+  return [];
+};
+
+const writeWishlistToMetadata = (userMetadata: Record<string, any> = {}, storeUrl: string | undefined, wishlist: string[]): Record<string, any> => {
+  const key = normalizeStoreUrl(storeUrl);
+
+  if (!key) {
+    return { ...userMetadata, wishlist };
+  }
+
+  const existingStoreMetadata = userMetadata[key] && typeof userMetadata[key] === 'object' ? { ...userMetadata[key] } : {};
+  return {
+    ...userMetadata,
+    [key]: {
+      ...existingStoreMetadata,
+      wishlist,
+    },
+  };
+};
+
 /**
  * GET /v1/me/wishlist — retrieve the user's wishlist product IDs
  * 
@@ -63,7 +101,7 @@ app.openapi(getWishlistRoute, async (c) => {
       throw ApiError.unauthorized('No Auth0 user ID in token');
     }
 
-    const wishlist = auth?.user_metadata?.wishlist ?? [];
+    const wishlist = readWishlistFromMetadata(auth?.user_metadata ?? {}, c.env.STORE_URL);
 
     return c.json({ wishlist }, 200);
   } catch (error) {
@@ -121,13 +159,14 @@ app.openapi(addWishlistProductRoute, async (c) => {
 
     // Read existing wishlist from Auth0 user_metadata
     const userMetadata = await getUserMetadata(userId, c.env);
-    const currentWishlist = Array.isArray(userMetadata.wishlist) ? userMetadata.wishlist : [];
+    const currentWishlist = readWishlistFromMetadata(userMetadata, c.env.STORE_URL);
 
     if (!currentWishlist.includes(productId)) {
       currentWishlist.push(productId);
     }
 
-    await updateUserMetadata(userId, { ...userMetadata, wishlist: currentWishlist }, c.env);
+    const newMetadata = writeWishlistToMetadata(userMetadata, c.env.STORE_URL, currentWishlist);
+    await updateUserMetadata(userId, newMetadata, c.env);
 
     return c.json({ wishlist: currentWishlist }, 200);
   } catch (error) {
@@ -175,10 +214,11 @@ app.openapi(removeWishlistProductRoute, async (c) => {
 
     // Read existing wishlist from Auth0 user_metadata
     const userMetadata = await getUserMetadata(userId, c.env);
-    let newWishlist = Array.isArray(userMetadata.wishlist) ? userMetadata.wishlist : [];
+    let newWishlist = readWishlistFromMetadata(userMetadata, c.env.STORE_URL);
     newWishlist = newWishlist.filter((id: string) => id !== productId);
 
-    await updateUserMetadata(userId, { ...userMetadata, wishlist: newWishlist }, c.env);
+    const newMetadata = writeWishlistToMetadata(userMetadata, c.env.STORE_URL, newWishlist);
+    await updateUserMetadata(userId, newMetadata, c.env);
 
     return c.json({ wishlist: newWishlist }, 200);
   } catch (error) {

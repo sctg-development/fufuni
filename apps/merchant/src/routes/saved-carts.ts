@@ -36,6 +36,44 @@ const savedCartSchema = z.object({
 
 const savedCartsListSchema = z.array(savedCartSchema);
 
+const normalizeStoreUrl = (storeUrl?: string): string | undefined => {
+  if (!storeUrl) return undefined;
+  const normalized = storeUrl.replace(/\/$/, '');
+  return normalized || undefined;
+};
+
+const readSavedCartsFromMetadata = (userMetadata: Record<string, any> = {}, storeUrl?: string): string[] => {
+  const key = normalizeStoreUrl(storeUrl);
+  const storeMetadata = key && userMetadata[key] && typeof userMetadata[key] === 'object' ? userMetadata[key] : undefined;
+
+  if (Array.isArray(storeMetadata?.saved_carts)) {
+    return storeMetadata.saved_carts;
+  }
+
+  if (Array.isArray(userMetadata.saved_carts)) {
+    return userMetadata.saved_carts;
+  }
+
+  return [];
+};
+
+const writeSavedCartsToMetadata = (userMetadata: Record<string, any> = {}, storeUrl: string | undefined, savedCarts: string[]): Record<string, any> => {
+  const key = normalizeStoreUrl(storeUrl);
+
+  if (!key) {
+    return { ...userMetadata, saved_carts: savedCarts };
+  }
+
+  const existingStoreMetadata = userMetadata[key] && typeof userMetadata[key] === 'object' ? { ...userMetadata[key] } : {};
+  return {
+    ...userMetadata,
+    [key]: {
+      ...existingStoreMetadata,
+      saved_carts: savedCarts,
+    },
+  };
+};
+
 /**
  * GET /v1/me/saved-carts — list all saved carts for the authenticated user
  */
@@ -167,12 +205,13 @@ app.openapi(savecartRoute, async (c) => {
 
     // Update Auth0 user_metadata
     const userMetadata = await getUserMetadata(userId, c.env);
-    const savedCartsMetadata = Array.isArray(userMetadata.saved_carts) ? userMetadata.saved_carts : [];
+    const savedCartsMetadata = readSavedCartsFromMetadata(userMetadata, c.env.STORE_URL);
 
     // Store cartId as string in metadata (it's a UUID)
     if (!savedCartsMetadata.includes(cartId)) {
-      savedCartsMetadata.push(cartId);
-      await updateUserMetadata(userId, { ...userMetadata, saved_carts: savedCartsMetadata }, c.env);
+      const updatedSavedCarts = [...savedCartsMetadata, cartId];
+      const newMetadata = writeSavedCartsToMetadata(userMetadata, c.env.STORE_URL, updatedSavedCarts);
+      await updateUserMetadata(userId, newMetadata, c.env);
     }
 
     return c.json(savedCart[0], 201);
@@ -236,11 +275,11 @@ app.openapi(deleteSavedCartRoute, async (c) => {
 
     // Update Auth0 user_metadata
     const userMetadata = await getUserMetadata(userId, c.env);
-    let savedCartsMetadata = Array.isArray(userMetadata.saved_carts) ? userMetadata.saved_carts : [];
-    
-    // Remove the cartId from the metadata
-    savedCartsMetadata = savedCartsMetadata.filter((id: string) => id !== cartId);
-    await updateUserMetadata(userId, { ...userMetadata, saved_carts: savedCartsMetadata }, c.env);
+    const savedCartsMetadata = readSavedCartsFromMetadata(userMetadata, c.env.STORE_URL);
+    const updatedSavedCarts = savedCartsMetadata.filter((id: string) => id !== cartId);
+
+    const newMetadata = writeSavedCartsToMetadata(userMetadata, c.env.STORE_URL, updatedSavedCarts);
+    await updateUserMetadata(userId, newMetadata, c.env);
 
     return c.text('', 204);
   } catch (error) {

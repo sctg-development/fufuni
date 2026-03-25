@@ -22,12 +22,33 @@ const WISHLIST_UPDATED_EVENT = 'fufuni:wishlist-updated';
  * Lightweight token parser function.
  * Extracts wishlist from the user_metadata of the JWT access_token.
  */
+const STORE_URL = (import.meta.env.STORE_URL || '').replace(/\/$/, '');
+
+function getStoreMetadata(userMetadata: any): any {
+  if (!userMetadata || typeof userMetadata !== 'object') return undefined;
+  if (STORE_URL && userMetadata[STORE_URL] && typeof userMetadata[STORE_URL] === 'object') {
+    return userMetadata[STORE_URL];
+  }
+  return userMetadata;
+}
+
 export function getWishlistFromToken(token: string | null): string[] {
   if (!token) return [];
   try {
     const payload = decodeJwt(token) as any;
     const userMetadata = payload['extra_user_info/user_metadata'];
-    return Array.isArray(userMetadata?.wishlist) ? userMetadata.wishlist : [];
+    const storeMetadata = getStoreMetadata(userMetadata);
+
+    if (Array.isArray(storeMetadata?.wishlist)) {
+      return storeMetadata.wishlist;
+    }
+
+    // fallback to legacy root key for backward compatibility
+    if (Array.isArray(userMetadata?.wishlist)) {
+      return userMetadata.wishlist;
+    }
+
+    return [];
   } catch (error) {
     console.error('[useWishlist] Error decoding token for wishlist:', error);
     return [];
