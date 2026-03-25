@@ -593,5 +593,18 @@
   "cart-number": "Panier #{{num}}",
   "wishlist-empty": "Vos favoris sont vides",
   "saved-carts-empty": "Aucun panier sauvegardé",
-  "view-product": "Voir le produit"
+  "view-product": "Voir le produit",
+  "item": "article",
+  "items": "articles",
+  "load-saved-cart": "Charger le panier sauvegardé",
+  "saved-on": "Sauvegardé le",
+  "sku": "SKU",
+  "discount": "Réduction",
+  "load-cart": "Charger le panier",
+  "load-cart-warning": "Cela remplacera votre panier actuel par tous les articles de ce panier sauvegardé.",
+  "legacy": "ancien format",
+  "subtotal": "Sous-total",
+  "shipping": "Livraison",
+  "tax": "Taxe",
+  "total": "Total"
 }

@@ -19,9 +19,25 @@ import { customerAuthMiddleware } from '../middleware/customer-auth';
 import { getDb } from '../db';
 import { ApiError, type HonoEnv } from '../types';
 import { getUserMetadata, updateUserMetadata } from '../lib/auth0';
+import { CartItem, CartTotals, CartResponse } from '../schemas';
 
 const app = new OpenAPIHono<HonoEnv>();
 app.use('*', customerAuthMiddleware);
+
+/**
+ * SavedCartSnapshot — Complete cart snapshot stored in Auth0 user_metadata
+ * Allows reconstruction of cart without database fetch
+ */
+export interface SavedCartSnapshot {
+  id: string;
+  items: z.infer<typeof CartItem>[];
+  totals: z.infer<typeof CartTotals>;
+  currency: string;
+  customer_email: string;
+  status: 'open' | 'checked_out' | 'expired';
+  expires_at: string;
+  saved_at: string;
+}
 
 /**
  * Saved cart schema for responses
@@ -42,7 +58,23 @@ const normalizeStoreUrl = (storeUrl?: string): string | undefined => {
   return normalized || undefined;
 };
 
-const readSavedCartsFromMetadata = (userMetadata: Record<string, any> = {}, storeUrl?: string): string[] => {
+/**
+ * Create a SavedCartSnapshot from a full CartResponse
+ */
+function createCartSnapshot(cart: any): SavedCartSnapshot {
+  return {
+    id: cart.id,
+    items: cart.items,
+    totals: cart.totals,
+    currency: cart.currency,
+    customer_email: cart.customer_email,
+    status: cart.status,
+    expires_at: cart.expires_at,
+    saved_at: new Date().toISOString(),
+  };
+}
+
+const readSavedCartsFromMetadata = (userMetadata: Record<string, any> = {}, storeUrl?: string): SavedCartSnapshot[] => {
   const key = normalizeStoreUrl(storeUrl);
   const storeMetadata = key && userMetadata[key] && typeof userMetadata[key] === 'object' ? userMetadata[key] : undefined;
 
@@ -57,7 +89,11 @@ const readSavedCartsFromMetadata = (userMetadata: Record<string, any> = {}, stor
   return [];
 };
 
-const writeSavedCartsToMetadata = (userMetadata: Record<string, any> = {}, storeUrl: string | undefined, savedCarts: string[]): Record<string, any> => {
+const writeSavedCartsToMetadata = (
+  userMetadata: Record<string, any> = {},
+  storeUrl: string | undefined,
+  savedCarts: SavedCartSnapshot[]
+): Record<string, any> => {
   const key = normalizeStoreUrl(storeUrl);
 
   if (!key) {
@@ -169,28 +205,89 @@ app.openapi(savecartRoute, async (c) => {
     const { cartId } = (await c.req.json()) as { cartId: string };
 
     if (!cartId) {
-      throw ApiError.badRequest('cartId is required');
+      throw ApiError.invalidRequest('cartId is required');
     }
 
     const db = getDb(c.var.db);
 
-    // Check if cart exists
-    const cartExists = await db.query(
-      `SELECT id FROM carts WHERE id = ? LIMIT 1`,
-      [cartId]
-    );
+    // Fetch full cart data
+    const [cart] = await db.query<any>(`SELECT * FROM carts WHERE id = ?`, [cartId]);
 
-    if (cartExists.length === 0) {
+    if (!cart) {
       throw ApiError.notFound('Cart not found');
     }
 
-    // Insert or ignore (unique constraint on auth0_user_id + cart_id)
-    const result = await db.run(
+    // Fetch cart items
+    const items = await db.query<any>(`SELECT * FROM cart_items WHERE cart_id = ?`, [cartId]);
+
+    // Get shipping info
+    let shippingInfo = { rate_id: null as string | null, rate_name: null as string | null, amount_cents: 0 };
+    if (cart.shipping_rate_id) {
+      const [rate] = await db.query<any>(`SELECT * FROM shipping_rates WHERE id = ?`, [cart.shipping_rate_id]);
+      if (rate) {
+        shippingInfo.rate_id = rate.id;
+        shippingInfo.rate_name = rate.display_name;
+        shippingInfo.amount_cents = cart.shipping_cents || 0;
+      }
+    }
+
+    // Build cart items for snapshot
+    const cartItems = items.map((i) => ({
+      sku: i.sku,
+      title: i.title,
+      qty: i.qty,
+      unit_price_cents: i.unit_price_cents,
+    }));
+
+    // Calculate totals
+    const subtotalCents = cartItems.reduce((sum, item) => sum + item.unit_price_cents * item.qty, 0);
+    const discountCents = cart.discount_amount_cents || 0;
+    const shippingCents = cart.shipping_cents || 0;
+    const taxCents = 0; // TODO: calculate if needed
+    const totalCents = subtotalCents - discountCents + shippingCents + taxCents;
+
+    // Create snapshot
+    const snapshot = createCartSnapshot({
+      id: cart.id,
+      status: cart.status,
+      currency: cart.currency,
+      customer_email: cart.customer_email,
+      items: cartItems,
+      totals: {
+        subtotal_cents: subtotalCents,
+        discount_cents: discountCents,
+        shipping_cents: shippingCents,
+        tax_cents: taxCents,
+        total_cents: totalCents,
+      },
+      expires_at: cart.expires_at,
+    });
+
+    // Insert or ignore in saved_carts table
+    await db.run(
       `INSERT OR IGNORE INTO saved_carts (auth0_user_id, cart_id) VALUES (?, ?)`,
       [userId, cartId]
     );
 
-    // Return the saved cart record
+    // Update Auth0 user_metadata with full snapshot
+    const userMetadata = await getUserMetadata(userId, c.env);
+    const savedCartsMetadata = readSavedCartsFromMetadata(userMetadata, c.env.STORE_URL);
+
+    // Check if cart already saved
+    const cartExists = savedCartsMetadata.findIndex(sc => sc.id === cartId);
+    let updatedSavedCarts: SavedCartSnapshot[];
+    if (cartExists >= 0) {
+      // Replace existing snapshot with updated one
+      updatedSavedCarts = savedCartsMetadata.map((sc, idx) => idx === cartExists ? snapshot : sc);
+    } else {
+      // Add new snapshot
+      updatedSavedCarts = [...savedCartsMetadata, snapshot];
+    }
+
+    const newMetadata = writeSavedCartsToMetadata(userMetadata, c.env.STORE_URL, updatedSavedCarts);
+    await updateUserMetadata(userId, newMetadata, c.env);
+
+    // Return DB record
     const savedCart = await db.query(
       `SELECT id, auth0_user_id, cart_id, created_at, updated_at 
        FROM saved_carts 
@@ -200,18 +297,7 @@ app.openapi(savecartRoute, async (c) => {
     );
 
     if (savedCart.length === 0) {
-      throw ApiError.internalError('Failed to retrieve saved cart');
-    }
-
-    // Update Auth0 user_metadata
-    const userMetadata = await getUserMetadata(userId, c.env);
-    const savedCartsMetadata = readSavedCartsFromMetadata(userMetadata, c.env.STORE_URL);
-
-    // Store cartId as string in metadata (it's a UUID)
-    if (!savedCartsMetadata.includes(cartId)) {
-      const updatedSavedCarts = [...savedCartsMetadata, cartId];
-      const newMetadata = writeSavedCartsToMetadata(userMetadata, c.env.STORE_URL, updatedSavedCarts);
-      await updateUserMetadata(userId, newMetadata, c.env);
+      throw new ApiError('internal_error', 500, 'Failed to retrieve saved cart');
     }
 
     return c.json(savedCart[0], 201);
@@ -251,7 +337,7 @@ app.openapi(deleteSavedCartRoute, async (c) => {
     }
 
     if (!cartIdParam) {
-      throw ApiError.badRequest('cartId is required');
+      throw ApiError.invalidRequest('cartId is required');
     }
 
     const cartId = cartIdParam;
@@ -276,12 +362,12 @@ app.openapi(deleteSavedCartRoute, async (c) => {
     // Update Auth0 user_metadata
     const userMetadata = await getUserMetadata(userId, c.env);
     const savedCartsMetadata = readSavedCartsFromMetadata(userMetadata, c.env.STORE_URL);
-    const updatedSavedCarts = savedCartsMetadata.filter((id: string) => id !== cartId);
+    const updatedSavedCarts = savedCartsMetadata.filter((snapshot: SavedCartSnapshot) => snapshot.id !== cartId);
 
     const newMetadata = writeSavedCartsToMetadata(userMetadata, c.env.STORE_URL, updatedSavedCarts);
     await updateUserMetadata(userId, newMetadata, c.env);
 
-    return c.text('', 204);
+    return c.json({ ok: true }, 200);
   } catch (error) {
     if (error instanceof ApiError) throw error;
     console.error('Error deleting saved cart:', error);

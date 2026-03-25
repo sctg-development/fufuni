@@ -593,5 +593,18 @@
   "cart-number": "السلة #{{num}}",
   "wishlist-empty": "قائمة رغباتك فارغة",
   "saved-carts-empty": "لا توجد سلال محفوظة",
-  "view-product": "عرض المنتج"
+  "view-product": "عرض المنتج",
+  "item": "عنصر",
+  "items": "عناصر",
+  "load-saved-cart": "تحميل السلة المحفوظة",
+  "saved-on": "تم الحفظ في",
+  "sku": "SKU",
+  "discount": "الخصم",
+  "load-cart": "تحميل السلة",
+  "load-cart-warning": "سيؤدي هذا إلى استبدال سلتك الحالية بجميع العناصر من هذه السلة المحفوظة.",
+  "legacy": "صيغة قديمة",
+  "subtotal": "المجموع الجزئي",
+  "shipping": "الشحن",
+  "tax": "الضريبة",
+  "total": "الإجمالي"
 }

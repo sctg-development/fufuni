@@ -593,5 +593,18 @@
   "cart-number": "Carrito #{{num}}",
   "wishlist-empty": "Tu lista de deseos está vacía",
   "saved-carts-empty": "Sin carritos guardados",
-  "view-product": "Ver producto"
+  "view-product": "Ver producto",
+  "item": "artículo",
+  "items": "artículos",
+  "load-saved-cart": "Cargar carrito guardado",
+  "saved-on": "Guardado el",
+  "sku": "SKU",
+  "discount": "Descuento",
+  "load-cart": "Cargar carrito",
+  "load-cart-warning": "Esto reemplazará tu carrito actual con todos los artículos de este carrito guardado.",
+  "legacy": "formato antiguo",
+  "subtotal": "Subtotal",
+  "shipping": "Envío",
+  "tax": "Impuesto",
+  "total": "Total"
 }

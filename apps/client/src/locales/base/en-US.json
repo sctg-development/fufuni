@@ -588,5 +588,18 @@
   "cart-number": "Cart #{{num}}",
   "wishlist-empty": "Your wishlist is empty",
   "saved-carts-empty": "No saved carts",
-  "view-product": "View Product"
+  "view-product": "View Product",
+  "item": "item",
+  "items": "items",
+  "load-saved-cart": "Load Saved Cart",
+  "saved-on": "Saved on",
+  "sku": "SKU",
+  "discount": "Discount",
+  "load-cart": "Load Cart",
+  "load-cart-warning": "This will replace your current cart with all items from this saved cart.",
+  "legacy": "legacy",
+  "subtotal": "Subtotal",
+  "shipping": "Shipping",
+  "tax": "Tax",
+  "total": "Total"
 }

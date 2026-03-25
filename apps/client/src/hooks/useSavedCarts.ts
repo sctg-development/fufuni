@@ -8,12 +8,39 @@ import { decodeJwt } from 'jose';
 import { useAuth } from '@/authentication/providers/use-auth';
 import { useTokenRefresh } from '@/hooks/useTokenRefresh';
 
+/**
+ * SavedCartSnapshot — Complete cart snapshot stored in Auth0 user_metadata
+ * Allows reconstruction of cart without database fetch
+ */
+export interface SavedCartSnapshot {
+  id: string;
+  items: Array<{
+    sku: string;
+    title: string;
+    qty: number;
+    unit_price_cents: number;
+  }>;
+  totals: {
+    subtotal_cents: number;
+    discount_cents: number;
+    shipping_cents: number;
+    tax_cents: number;
+    total_cents: number;
+  };
+  currency: string;
+  customer_email: string;
+  status: 'open' | 'checked_out' | 'expired';
+  expires_at: string;
+  saved_at: string;
+}
+
 export interface UseSavedCartsReturn {
-  savedCarts: string[];
+  savedCarts: (SavedCartSnapshot | string)[]; // Support both new snapshots and legacy IDs
   isLoading: boolean;
   isError: boolean;
   toggleSavedCart: (cartId: string) => Promise<void>;
   isSaved: (cartId: string) => boolean;
+  getSavedCart: (cartId: string) => SavedCartSnapshot | undefined;
 }
 
 const SAVED_CARTS_UPDATED_EVENT = 'fufuni:saved-carts-updated';
@@ -32,13 +59,14 @@ function getStoreMetadata(userMetadata: any): any {
   return userMetadata;
 }
 
-export function getSavedCartsFromToken(token: string | null): string[] {
+export function getSavedCartsFromToken(token: string | null): (SavedCartSnapshot | string)[] {
   if (!token) return [];
   try {
     const payload = decodeJwt(token) as any;
     const userMetadata = payload['extra_user_info/user_metadata'];
     const storeMetadata = getStoreMetadata(userMetadata);
 
+    // Support both new snapshot format and legacy string ID format
     if (Array.isArray(storeMetadata?.saved_carts)) {
       return storeMetadata.saved_carts;
     }
@@ -60,6 +88,7 @@ export function getSavedCartsFromToken(token: string | null): string[] {
  * 
  * Features:
  * - Extremely lightweight: 100% derived from the JWT user_metadata
+ * - Stores complete cart snapshots (items, totals) for offline reconstruction
  * - Uses `useTokenRefresh` to keep JWT synced after mutations
  * - Uses a CustomEvent for fast cross-component reactivity without heavy contexts/query caches
  */
@@ -67,7 +96,7 @@ export function useSavedCarts(): UseSavedCartsReturn {
   const auth = useAuth();
   const { refreshToken } = useTokenRefresh();
   
-  const [savedCarts, setSavedCarts] = useState<string[]>([]);
+  const [savedCarts, setSavedCarts] = useState<(SavedCartSnapshot | string)[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(auth.isAuthenticated);
   const [isError, setIsError] = useState<boolean>(false);
 
@@ -107,7 +136,7 @@ export function useSavedCarts(): UseSavedCartsReturn {
   // Synchronize state across multiple instances instantly
   useEffect(() => {
     const handleSync = (e: Event) => {
-      const customEvent = e as CustomEvent<string[]>;
+      const customEvent = e as CustomEvent<(SavedCartSnapshot | string)[]>;
       setSavedCarts(customEvent.detail);
     };
     window.addEventListener(SAVED_CARTS_UPDATED_EVENT, handleSync);
@@ -121,7 +150,10 @@ export function useSavedCarts(): UseSavedCartsReturn {
         return;
       }
 
-      const saved = savedCarts.includes(cartId);
+      const saved = savedCarts.some(sc => {
+        if (typeof sc === 'string') return sc === cartId;
+        return (sc as SavedCartSnapshot).id === cartId;
+      });
 
       setIsLoading(true);
       setIsError(false);
@@ -150,7 +182,18 @@ export function useSavedCarts(): UseSavedCartsReturn {
   );
 
   const isSaved = useCallback(
-    (cartId: string) => savedCarts.includes(cartId),
+    (cartId: string) => savedCarts.some(sc => {
+      if (typeof sc === 'string') return sc === cartId;
+      return (sc as SavedCartSnapshot).id === cartId;
+    }),
+    [savedCarts]
+  );
+
+  const getSavedCart = useCallback(
+    (cartId: string) => savedCarts.find(sc => {
+      if (typeof sc === 'string') return false;
+      return (sc as SavedCartSnapshot).id === cartId;
+    }) as SavedCartSnapshot | undefined,
     [savedCarts]
   );
 
@@ -160,5 +203,6 @@ export function useSavedCarts(): UseSavedCartsReturn {
     isError,
     toggleSavedCart,
     isSaved,
+    getSavedCart,
   };
 }
