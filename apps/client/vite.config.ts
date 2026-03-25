@@ -138,6 +138,7 @@ export default defineConfig({
     "import.meta.env.MERCHANT_PK": JSON.stringify(process.env.MERCHANT_PK || "merchant_pk_placeholder"),
     "import.meta.env.STORE_URL": JSON.stringify(process.env.STORE_URL || "https://github.com/sctg-development/fufuni"),
     "import.meta.env.STORE_NAME": JSON.stringify(process.env.STORE_NAME || "Fufuni Store"),
+    "import.meta.env.FUFUNI_THEME": JSON.stringify(process.env.FUFUNI_THEME ?? "heroui_standard"),
     // Permissions
     "import.meta.env.PERMISSIONS": JSON.stringify(scopesArray),
     "import.meta.env.AUTH0_AUTOMATIC_PERMISSIONS": JSON.stringify(process.env.AUTH0_AUTOMATIC_PERMISSIONS?.split(",") || []),
