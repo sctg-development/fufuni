@@ -19,6 +19,7 @@ import { customerAuthMiddleware } from '../middleware/customer-auth';
 import { getDb } from '../db';
 import { ApiError, type HonoEnv } from '../types';
 import { getUserMetadata, updateUserMetadata } from '../lib/auth0';
+import { normalizeStoreUrl } from '../lib/store-metadata';
 import { CartItem, CartTotals, CartResponse } from '../schemas';
 
 const app = new OpenAPIHono<HonoEnv>();
@@ -51,12 +52,6 @@ const savedCartSchema = z.object({
 });
 
 const savedCartsListSchema = z.array(savedCartSchema);
-
-const normalizeStoreUrl = (storeUrl?: string): string | undefined => {
-  if (!storeUrl) return undefined;
-  const normalized = storeUrl.replace(/\/$/, '');
-  return normalized || undefined;
-};
 
 /**
  * Create a SavedCartSnapshot from a full CartResponse

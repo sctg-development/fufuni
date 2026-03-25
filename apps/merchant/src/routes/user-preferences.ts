@@ -18,6 +18,7 @@ import { z } from 'zod';
 import { customerAuthMiddleware } from '../middleware/customer-auth';
 import { ApiError, type HonoEnv } from '../types';
 import { getUserMetadata, updateUserMetadata } from '../lib/auth0';
+import { normalizeStoreUrl } from '../lib/store-metadata';
 
 const app = new OpenAPIHono<HonoEnv>();
 app.use('*', customerAuthMiddleware);
@@ -29,15 +30,6 @@ const wishlistSchema = z.object({
   wishlist: z.array(z.string()).default([]),
 });
 
-const normalizeStoreUrl = (storeUrl?: string): string | undefined => {
-  if (!storeUrl) return undefined;
-  // Remove trailing slash and normalize URL format for use as a metadata key
-  // Auth0 does not allow dots (.) in user_metadata field names, so we replace them with underscores
-  const normalized = storeUrl
-    .replace(/\/$/, '') // Remove trailing slash
-    .replace(/[:.\/]/g, '_'); // Replace dots, colons, and slashes with underscores
-  return normalized || undefined;
-};
 
 const readWishlistFromMetadata = (userMetadata: Record<string, any> = {}, storeUrl?: string): string[] => {
   const key = normalizeStoreUrl(storeUrl);
