@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { decodeJwt } from 'jose';
 import { useAuth } from '@/authentication/providers/use-auth';
 import { useTokenRefresh } from '@/hooks/useTokenRefresh';
-import { getStoreMetadata, normalizeStoreUrl } from '@/lib/store-metadata';
+import { getStoreMetadata } from '@/lib/store-metadata';
 
 /**
  * SavedCartSnapshot — Complete cart snapshot stored in Auth0 user_metadata

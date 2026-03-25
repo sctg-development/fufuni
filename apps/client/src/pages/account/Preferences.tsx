@@ -19,6 +19,7 @@ import {
 } from "@heroui/react";
 
 import { useAuth } from "../../authentication/providers/use-auth";
+
 import { availableLanguages } from "@/i18n";
 
 interface Profile {
@@ -76,6 +77,7 @@ export default function Preferences() {
         phone: formData.phone,
         locale: formData.locale,
       };
+
       await auth.patchJson(`${apiBase}/v1/me/profile`, profileUpdates);
 
       // Save preferences (accepts_marketing) to /preferences
@@ -83,10 +85,12 @@ export default function Preferences() {
         locale: formData.locale,
         accepts_marketing: formData.accepts_marketing === 1,
       };
+
       await auth.patchJson(`${apiBase}/v1/me/preferences`, preferencesUpdates);
 
       // Refetch profile to ensure UI has latest data
       const result: Profile = await auth.getJson(`${apiBase}/v1/me/profile`);
+
       setProfile(result);
       setFormData(result);
 
