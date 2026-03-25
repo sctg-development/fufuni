@@ -655,16 +655,28 @@ All outbound webhooks are signed with `X-Merchant-Signature` (HMAC-SHA256).
 
 #### Wishlist in Auth0 user_metadata
 
-`/v1/me/wishlist` operations persist the wishlist as JSON in Auth0 `user_metadata` under `wishlist`.
-- `GET /v1/me/wishlist`: returns the array from `auth.user_metadata.wishlist` set by `customer-auth`.
-- `POST /v1/me/wishlist`: calls `getUserMetadata(userId)` and `updateUserMetadata(userId, {wishlist})` to add a product without Durable Object write.
-- `DELETE /v1/me/wishlist/:productId`: calls `getUserMetadata(userId)` and `updateUserMetadata(userId, {wishlist})` to remove a product.
+`/v1/me/wishlist` operations persist the wishlist as JSON in Auth0 `user_metadata` under the storefront namespace key.
 
-This avoids storing wishlist in the Durable Object / worker state, and reuses the Auth0 profile data as a customer preference store.
+- `STORE_URL` is available in backend as `env.STORE_URL` and in the frontend as `import.meta.env.STORE_URL`.
+- The value is normalized by removing a trailing slash.
+- Data is stored in `auth.user_metadata[STORE_URL].wishlist` when `STORE_URL` is defined.
+- For backward compatibility, the endpoints still read from and write to legacy `auth.user_metadata.wishlist` when no store namespace is set.
+
+Behaviour of endpoints:
+- `GET /v1/me/wishlist`: reads first from `auth0.user_metadata[STORE_URL]?.wishlist`, then falls back to `auth.user_metadata.wishlist`.
+- `POST /v1/me/wishlist`: updates `auth0.user_metadata[STORE_URL]` with the new array.
+- `DELETE /v1/me/wishlist/:productId`: updates `auth0.user_metadata[STORE_URL]` without the deleted item.
+
+This avoids storing wishlist in the Durable Object / worker state, and reuses Auth0 profile data as a customer preference store while supporting multi-store isolation.
 
 #### Saved Carts in Auth0 user_metadata
 
-`/v1/me/saved-carts` operations persist saved cart IDs as JSON in Auth0 `user_metadata` under `saved_carts`.
+`/v1/me/saved-carts` operations persist saved cart IDs as JSON in Auth0 `user_metadata` under the storefront namespace key.
+
+- Saves into `auth.user_metadata[STORE_URL].saved_carts` when `STORE_URL` is available.
+- Falls back to legacy `auth.user_metadata.saved_carts` for backwards compatibility.
+- Cart metadata is still mirrored in the Durable Object `saved_carts` table for audit/recovery.
+
 Additionally, cart snapshots are stored in a relational `saved_carts` table in the Durable Object for full audit and recovery purposes.
 
 | Method | Path | Auth | Description |
