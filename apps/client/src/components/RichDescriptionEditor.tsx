@@ -21,9 +21,9 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Button } from '@heroui/button';
-import { Select, SelectItem } from '@heroui/select';
-import { Tooltip } from '@heroui/tooltip';
+import { Button } from '@heroui/react';
+import { Select, Label, ListBox } from '@heroui/react';
+import { Tooltip } from '@heroui/react';
 import {
   Bold, Italic, Heading2, Heading3,
   List, ListOrdered, Undo, Redo, Sparkles,
@@ -222,8 +222,8 @@ export function RichDescriptionEditor({
 
   if (!editor) return null;
 
-  // Helper: returns "solid" if the format is active, "light" otherwise
-  const v = (active: boolean) => (active ? ('solid' as const) : ('light' as const));
+  // Helper: returns "primary" if the format is active, "tertiary" otherwise
+  const v = (active: boolean) => (active ? ('primary' as const) : ('tertiary' as const));
 
   return (
     <div className="border rounded-lg overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -234,97 +234,150 @@ export function RichDescriptionEditor({
         {/* Language selector (hidden when controlled by parent) */}
         {!locale && (
           <Select
-            size="sm"
             className="w-36"
             aria-label={t('admin-products-description-locale')}
-            selectedKeys={[selectedLocale]}
-            onSelectionChange={(keys) =>
-              handleLocaleChange(Array.from(keys).join(''))
-            }
+            value={selectedLocale}
+            onChange={(value) => handleLocaleChange((value as string) || "")}
           >
-            {availableLanguages.map((lang) => (
-              <SelectItem key={lang.code}>{lang.nativeName}</SelectItem>
-            ))}
+            <Label>{t('admin-products-description-locale')}</Label>
+            <Select.Trigger>
+              <Select.Value />
+              <Select.Indicator />
+            </Select.Trigger>
+            <Select.Popover>
+              <ListBox>
+                {availableLanguages.map((lang) => (
+                  <ListBox.Item key={lang.code} id={lang.code} textValue={lang.nativeName}>
+                    {lang.nativeName}
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                ))}
+              </ListBox>
+            </Select.Popover>
           </Select>
         )}
 
         <div className="w-px h-6 bg-default-200 mx-1" />
 
-        <Tooltip content={t('admin-products-editor-bold')}>
-          <Button isIconOnly size="sm" variant={v(editor.isActive('bold'))}
-            onPress={() => editor.chain().focus().toggleBold().run()}>
-            <Bold size={14} />
-          </Button>
+        <Tooltip>
+          <Tooltip.Trigger>
+            <Button isIconOnly size="sm" variant={v(editor.isActive('bold'))}
+              onPress={() => editor.chain().focus().toggleBold().run()}>
+              <Bold size={14} />
+            </Button>
+          </Tooltip.Trigger>
+          <Tooltip.Content>
+            {t('admin-products-editor-bold')}
+          </Tooltip.Content>
         </Tooltip>
 
-        <Tooltip content={t('admin-products-editor-italic')}>
-          <Button isIconOnly size="sm" variant={v(editor.isActive('italic'))}
-            onPress={() => editor.chain().focus().toggleItalic().run()}>
-            <Italic size={14} />
-          </Button>
+        <Tooltip>
+          <Tooltip.Trigger>
+            <Button isIconOnly size="sm" variant={v(editor.isActive('italic'))}
+              onPress={() => editor.chain().focus().toggleItalic().run()}>
+              <Italic size={14} />
+            </Button>
+          </Tooltip.Trigger>
+          <Tooltip.Content>
+            {t('admin-products-editor-italic')}
+          </Tooltip.Content>
         </Tooltip>
 
-        <Tooltip content={t('admin-products-editor-h2')}>
-          <Button isIconOnly size="sm"
-            variant={v(editor.isActive('heading', { level: 2 }))}
-            onPress={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>
-            <Heading2 size={14} />
-          </Button>
+        <Tooltip>
+          <Tooltip.Trigger>
+            <Button isIconOnly size="sm"
+              variant={v(editor.isActive('heading', { level: 2 }))}
+              onPress={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>
+              <Heading2 size={14} />
+            </Button>
+          </Tooltip.Trigger>
+          <Tooltip.Content>
+            {t('admin-products-editor-h2')}
+          </Tooltip.Content>
         </Tooltip>
 
-        <Tooltip content={t('admin-products-editor-h3')}>
-          <Button isIconOnly size="sm"
-            variant={v(editor.isActive('heading', { level: 3 }))}
-            onPress={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}>
-            <Heading3 size={14} />
-          </Button>
+        <Tooltip>
+          <Tooltip.Trigger>
+            <Button isIconOnly size="sm"
+              variant={v(editor.isActive('heading', { level: 3 }))}
+              onPress={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}>
+              <Heading3 size={14} />
+            </Button>
+          </Tooltip.Trigger>
+          <Tooltip.Content>
+            {t('admin-products-editor-h3')}
+          </Tooltip.Content>
         </Tooltip>
 
-        <Tooltip content={t('admin-products-editor-ul')}>
-          <Button isIconOnly size="sm" variant={v(editor.isActive('bulletList'))}
-            onPress={() => editor.chain().focus().toggleBulletList().run()}>
-            <List size={14} />
-          </Button>
+        <Tooltip>
+          <Tooltip.Trigger>
+            <Button isIconOnly size="sm" variant={v(editor.isActive('bulletList'))}
+              onPress={() => editor.chain().focus().toggleBulletList().run()}>
+              <List size={14} />
+            </Button>
+          </Tooltip.Trigger>
+          <Tooltip.Content>
+            {t('admin-products-editor-ul')}
+          </Tooltip.Content>
         </Tooltip>
 
-        <Tooltip content={t('admin-products-editor-ol')}>
-          <Button isIconOnly size="sm" variant={v(editor.isActive('orderedList'))}
-            onPress={() => editor.chain().focus().toggleOrderedList().run()}>
-            <ListOrdered size={14} />
-          </Button>
+        <Tooltip>
+          <Tooltip.Trigger>
+            <Button isIconOnly size="sm" variant={v(editor.isActive('orderedList'))}
+              onPress={() => editor.chain().focus().toggleOrderedList().run()}>
+              <ListOrdered size={14} />
+            </Button>
+          </Tooltip.Trigger>
+          <Tooltip.Content>
+            {t('admin-products-editor-ol')}
+          </Tooltip.Content>
         </Tooltip>
 
         <div className="w-px h-6 bg-default-200 mx-1" />
 
-        <Tooltip content={t('admin-products-editor-undo')}>
-          <Button isIconOnly size="sm" variant="light"
-            isDisabled={!editor.can().undo()}
-            onPress={() => editor.chain().focus().undo().run()}>
-            <Undo size={14} />
-          </Button>
+        <Tooltip>
+          <Tooltip.Trigger>
+            <Button isIconOnly size="sm" variant="tertiary"
+              isDisabled={!editor.can().undo()}
+              onPress={() => editor.chain().focus().undo().run()}>
+              <Undo size={14} />
+            </Button>
+          </Tooltip.Trigger>
+          <Tooltip.Content>
+            {t('admin-products-editor-undo')}
+          </Tooltip.Content>
         </Tooltip>
 
-        <Tooltip content={t('admin-products-editor-redo')}>
-          <Button isIconOnly size="sm" variant="light"
-            isDisabled={!editor.can().redo()}
-            onPress={() => editor.chain().focus().redo().run()}>
-            <Redo size={14} />
-          </Button>
+        <Tooltip>
+          <Tooltip.Trigger>
+            <Button isIconOnly size="sm" variant="tertiary"
+              isDisabled={!editor.can().redo()}
+              onPress={() => editor.chain().focus().redo().run()}>
+              <Redo size={14} />
+            </Button>
+          </Tooltip.Trigger>
+          <Tooltip.Content>
+            {t('admin-products-editor-redo')}
+          </Tooltip.Content>
         </Tooltip>
 
         <div className="w-px h-6 bg-default-200 mx-1" />
 
         {/* AI translate button - only visible if user has permission */}
         {canUseAi && (
-          <Tooltip content={t('admin-products-editor-ai')}>
-            <Button
-              size="sm" variant="light" color="secondary"
-              isLoading={isTranslating}
-              onPress={handleAiTranslate}
-              startContent={!isTranslating ? <Sparkles size={14} /> : undefined}
-            >
-              {t('admin-products-editor-ai-btn')}
-            </Button>
+          <Tooltip>
+            <Tooltip.Trigger>
+              <Button
+                size="sm" variant="tertiary"
+                onPress={handleAiTranslate}
+              >
+                {!isTranslating && <Sparkles size={14} />}
+                {t('admin-products-editor-ai-btn')}
+              </Button>
+            </Tooltip.Trigger>
+            <Tooltip.Content>
+              {t('admin-products-editor-ai')}
+            </Tooltip.Content>
           </Tooltip>
         )}
       </div>

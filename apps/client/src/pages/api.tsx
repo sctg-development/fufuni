@@ -18,7 +18,7 @@
 
 import { Trans, useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
-import { Snippet } from "@heroui/react";
+import { Button, Tooltip } from "@heroui/react";
 
 import { title } from "@/components/primitives";
 import DefaultLayout from "@/layouts/default";
@@ -29,6 +29,7 @@ export default function ApiPage() {
   const { getJson } = useSecuredApi();
   const { user, isAuthenticated } = useAuth();
   const [apiResponse, setApiResponse] = useState("");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,6 +49,12 @@ export default function ApiPage() {
     fetchData();
   }, [isAuthenticated]);
 
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(JSON.stringify(apiResponse, null, 2));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <DefaultLayout>
       <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
@@ -56,11 +63,25 @@ export default function ApiPage() {
             <Trans t={t}>api-answer</Trans>
           </h1>
         </div>
-        <Snippet className="max-w-11/12" symbol="" title="api-response">
-          <div className="max-w-2xs sm:max-w-sm md:max-w-md lg:max-w-5xl  whitespace-break-spaces  text-wrap wrap-break-word">
-            {JSON.stringify(apiResponse, null, 2)}
+        <div className="rounded-lg bg-default-100 px-3 py-2 max-w-2xl">
+          <div className="flex items-start justify-between gap-2">
+            <pre className="text-sm font-mono overflow-auto max-h-96">
+              <code>{JSON.stringify(apiResponse, null, 2)}</code>
+            </pre>
+            <Tooltip>
+              <Button
+                isIconOnly
+                aria-label="Copy"
+                size="sm"
+                variant="ghost"
+                onPress={handleCopy}
+              >
+                {copied ? "✓" : "📋"}
+              </Button>
+              <Tooltip.Content>{copied ? "Copied!" : "Copy to clipboard"}</Tooltip.Content>
+            </Tooltip>
           </div>
-        </Snippet>
+        </div>
       </section>
     </DefaultLayout>
   );

@@ -12,6 +12,11 @@
       "env": {
         "DEBUG": "auth0-mcp"
       }
+    },
+    "heroui-migration": {
+      "type": "http",
+      "url": "https://migration-mcp.heroui.com"
     }
-  }
+  },
+  
 }

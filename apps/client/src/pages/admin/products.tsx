@@ -20,23 +20,12 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@heroui/react";
 import { Input } from "@heroui/react";
-import { Select, SelectItem } from "@heroui/react";
+import { Select, Label, ListBox } from "@heroui/react";
+import { Table } from "@heroui/react";
 import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
+  Modal
 } from "@heroui/react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@heroui/react";
-import { Card, CardBody } from "@heroui/react";
+import { Card } from "@heroui/react";
 import { Image as ImageIcon, X, Wand2 } from "lucide-react";
 
 import DefaultLayout from "@/layouts/default";
@@ -596,13 +585,15 @@ export default function ProductsPage() {
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-semibold">{t("admin-products-title")}</h1>
           <div className="flex items-center gap-2">
-            <Input
-              placeholder={t("search") + "..."}
-              size="sm"
-              startContent={<SearchIcon className="text-default-400" />}
-              value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-            />
+            <div className="relative flex flex-1">
+              <Input
+                placeholder={t("search") + "..."}
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                className="pl-8"
+              />
+              <SearchIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 pointer-events-none text-default-400 w-4 h-4" />
+            </div>
             <select
               className="w-32 border rounded px-2 py-1 text-sm"
               value={statusFilter}
@@ -616,7 +607,7 @@ export default function ProductsPage() {
             </select>
             <Button
               className="min-w-40 whitespace-nowrap"
-              color="primary"
+              variant="primary"
               size="md"
               onPress={openCreate}
             >
@@ -629,31 +620,33 @@ export default function ProductsPage() {
         {loading ? (
           <p className="text-default-500">{t("admin-products-loading")}</p>
         ) : (
-          <Table aria-label="Products" selectionMode="none">
-            <TableHeader>
-              <TableColumn>{t("admin-products-col-title")}</TableColumn>
-              <TableColumn>{t("admin-products-col-description")}</TableColumn>
-              <TableColumn>{t("admin-products-col-variants")}</TableColumn>
-              <TableColumn>{t("admin-products-col-status")}</TableColumn>
-              <TableColumn>{t("actions")}</TableColumn>
-            </TableHeader>
-            <TableBody emptyContent={t("admin-products-empty")}>
+          <Table aria-label="Products">
+            <Table.Content selectionMode="none">
+              <Table.Header>
+                <Table.Column>{t("admin-products-col-title")}</Table.Column>
+                <Table.Column>{t("admin-products-col-description")}</Table.Column>
+                <Table.Column>{t("admin-products-col-variants")}</Table.Column>
+                <Table.Column>{t("admin-products-col-status")}</Table.Column>
+                <Table.Column>{t("actions")}</Table.Column>
+              </Table.Header>
+              <Table.Body renderEmptyState={() => t("admin-products-empty")}>
               {displayed.map((p) => (
-                <TableRow key={p.id}>
-                  <TableCell>{resolveTitle(p.title, i18n.language)}</TableCell>
-                  <TableCell>
+                <Table.Row key={p.id}>
+                  <Table.Cell>{resolveTitle(p.title, i18n.language)}</Table.Cell>
+                  <Table.Cell>
                     {resolveDescription(p.description, i18n.language) || "-"}
-                  </TableCell>
-                  <TableCell>{p.variants.length}</TableCell>
-                  <TableCell>{p.status}</TableCell>
-                  <TableCell>
+                  </Table.Cell>
+                  <Table.Cell>{p.variants.length}</Table.Cell>
+                  <Table.Cell>{p.status}</Table.Cell>
+                  <Table.Cell>
                     <Button size="sm" onPress={() => openEdit(p)}>
                       {t("admin-products-btn-edit")}
                     </Button>
-                  </TableCell>
-                </TableRow>
+                  </Table.Cell>
+                </Table.Row>
               ))}
-            </TableBody>
+            </Table.Body>
+            </Table.Content>
           </Table>
         )}
       </div>
@@ -661,19 +654,22 @@ export default function ProductsPage() {
       {/* create/edit modal */}
       <Modal
         isOpen={createModal}
-        size={editingProduct ? "lg" : "md"}
-        onClose={() => {
-          setCreateModal(false);
-          setEditingProduct(null);
+        // In v3, use onOpenChange callback instead of onClose/onOpen
+        onOpenChange={(open) => {
+          setCreateModal(open);
+          if (!open) {
+            setEditingProduct(null);
+          }
         }}
       >
-        <ModalContent>
-          <ModalHeader>
+        <Modal.Backdrop>
+          <Modal.Container>
+          <Modal.Header>
             {editingProduct
               ? resolveTitle(editingProduct.title, i18n.language)
               : t("admin-products-modal-title")}
-          </ModalHeader>
-          <ModalBody className="space-y-4">
+          </Modal.Header>
+          <Modal.Body className="space-y-4">
             <form className="space-y-4" id="product-form" onSubmit={submitForm}>
               <div className="flex items-center gap-2">
                 <label className="block text-sm font-medium">
@@ -681,15 +677,24 @@ export default function ProductsPage() {
                 </label>
                 <Select
                   className="w-36"
-                  selectedKeys={[selectedLocale]}
-                  size="sm"
-                  onSelectionChange={(keys) =>
-                    setSelectedLocale(Array.from(keys).join(""))
-                  }
+                  value={selectedLocale}
+                  onChange={(value) => setSelectedLocale((value as string) || "")}
                 >
-                  {availableLanguages.map((lang) => (
-                    <SelectItem key={lang.code}>{lang.nativeName}</SelectItem>
-                  ))}
+                  <Label>{t("admin-products-title-locale")}</Label>
+                  <Select.Trigger>
+                    <Select.Value />
+                    <Select.Indicator />
+                  </Select.Trigger>
+                  <Select.Popover>
+                    <ListBox>
+                      {availableLanguages.map((lang) => (
+                        <ListBox.Item key={lang.code} id={lang.code} textValue={lang.nativeName}>
+                          {lang.nativeName}
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                      ))}
+                    </ListBox>
+                  </Select.Popover>
                 </Select>
               </div>
 
@@ -734,45 +739,44 @@ export default function ProductsPage() {
                   {t("admin-products-shipping-class-label")}
                 </label>
                 <Select
-                  description={t(
-                    "admin-products-shipping-class-select-description",
-                  )}
-                  label={t("admin-products-shipping-class-select-label")}
-                  selectedKeys={
-                    formShippingClassId ? [formShippingClassId] : []
-                  }
-                  onSelectionChange={(keys) => {
-                    const val = Array.from(keys).join("");
-
-                    setFormShippingClassId(val);
-                  }}
+                  value={formShippingClassId || ""}
+                  onChange={(value) => setFormShippingClassId((value as string) || "")}
                 >
-                  <SelectItem key="">
-                    {t("admin-products-shipping-class-default")}
-                  </SelectItem>
-                  <>
-                    {shippingClasses.map((cls) => {
-                      const resolutionLabel =
-                        cls.resolution === "exclusive"
-                          ? t(
-                              "admin-products-shipping-class-resolution-exclusive",
-                            )
-                          : t(
-                              "admin-products-shipping-class-resolution-additive",
-                            );
+                  <Label>{t("admin-products-shipping-class-select-label")}</Label>
+                  <Select.Trigger>
+                    <Select.Value />
+                    <Select.Indicator />
+                  </Select.Trigger>
+                  <Select.Popover>
+                    <ListBox>
+                      <ListBox.Item id="" textValue={t("admin-products-shipping-class-default")}>
+                        {t("admin-products-shipping-class-default")}
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                      {shippingClasses.map((cls) => {
+                        const resolutionLabel =
+                          cls.resolution === "exclusive"
+                            ? t(
+                                "admin-products-shipping-class-resolution-exclusive",
+                              )
+                            : t(
+                                "admin-products-shipping-class-resolution-additive",
+                              );
 
-                      const displayLabel = `${resolutionLabel} ${cls.display_name}`;
-                      const fullLabel = cls.description
-                        ? `${displayLabel} — ${cls.description}`
-                        : displayLabel;
+                        const displayLabel = `${resolutionLabel} ${cls.display_name}`;
+                        const fullLabel = cls.description
+                          ? `${displayLabel} — ${cls.description}`
+                          : displayLabel;
 
-                      return (
-                        <SelectItem key={cls.id} textValue={displayLabel}>
-                          {fullLabel}
-                        </SelectItem>
-                      );
-                    })}
-                  </>
+                        return (
+                          <ListBox.Item key={cls.id} id={cls.id} textValue={displayLabel}>
+                            {fullLabel}
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                        );
+                      })}
+                    </ListBox>
+                  </Select.Popover>
                 </Select>
               </div>
 
@@ -798,7 +802,7 @@ export default function ProductsPage() {
                       <Button
                         isIconOnly
                         size="sm"
-                        variant="light"
+                        variant="tertiary"
                         onPress={handleTranslateVendor}
                       >
                         <Wand2 className="w-4 h-4" />
@@ -828,7 +832,7 @@ export default function ProductsPage() {
                       <Button
                         isIconOnly
                         size="sm"
-                        variant="light"
+                        variant="tertiary"
                         onPress={handleTranslateTags}
                       >
                         <Wand2 className="w-4 h-4" />
@@ -858,7 +862,7 @@ export default function ProductsPage() {
                       <Button
                         isIconOnly
                         size="sm"
-                        variant="light"
+                        variant="tertiary"
                         onPress={handleTranslateHandle}
                       >
                         <Wand2 className="w-4 h-4" />
@@ -877,14 +881,14 @@ export default function ProductsPage() {
             {/* Variants section */}
             {editingProduct && (
               <Card>
-                <CardBody className="space-y-3">
+                <Card.Content className="space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold">
                       {t("admin-products-variants")} (
                       {editingProduct.variants.length})
                     </h3>
                     <Button
-                      color="primary"
+                      variant="primary"
                       size="sm"
                       onPress={openCreateVariant}
                     >
@@ -907,11 +911,11 @@ export default function ProductsPage() {
                       ))}
                     </div>
                   )}
-                </CardBody>
+                </Card.Content>
               </Card>
             )}
-          </ModalBody>
-          <ModalFooter>
+          </Modal.Body>
+          <Modal.Footer>
             <Button
               onPress={() => {
                 setCreateModal(false);
@@ -920,29 +924,32 @@ export default function ProductsPage() {
             >
               {t("admin-products-btn-cancel")}
             </Button>
-            <Button color="primary" form="product-form" type="submit">
+            <Button variant="primary" form="product-form" type="submit">
               {editingProduct ? t("save") : t("admin-products-btn-create")}
             </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+          </Modal.Footer>
+        </Modal.Container>
+      </Modal.Backdrop>
+    </Modal>
 
-      {/* Variant modal */}
-      <Modal
+    {/* Variant modal */}
+    <Modal
         isOpen={variantModal}
-        size="xl"
-        onClose={() => {
-          setVariantModal(false);
-          resetVariantForm();
+        onOpenChange={(open) => {
+          setVariantModal(open);
+          if (!open) {
+            resetVariantForm();
+          }
         }}
       >
-        <ModalContent>
-          <ModalHeader>
+        <Modal.Backdrop>
+          <Modal.Container>
+          <Modal.Header>
             {editingVariant
               ? t("admin-products-edit-variant")
               : t("admin-products-add-variant")}
-          </ModalHeader>
-          <ModalBody>
+          </Modal.Header>
+          <Modal.Body>
             <form
               className="space-y-4"
               id="variant-form"
@@ -1042,21 +1049,18 @@ export default function ProductsPage() {
                   <div className="grid grid-cols-3 gap-2">
                     <Input
                       placeholder={t("admin-products-field-dimension-length")}
-                      size="sm"
                       type="number"
                       value={variantDimsL}
                       onChange={(e) => setVariantDimsL(e.target.value)}
                     />
                     <Input
                       placeholder={t("admin-products-field-dimension-width")}
-                      size="sm"
                       type="number"
                       value={variantDimsW}
                       onChange={(e) => setVariantDimsW(e.target.value)}
                     />
                     <Input
                       placeholder={t("admin-products-field-dimension-height")}
-                      size="sm"
                       type="number"
                       value={variantDimsH}
                       onChange={(e) => setVariantDimsH(e.target.value)}
@@ -1112,29 +1116,37 @@ export default function ProductsPage() {
                   </label>
                   <Select
                     placeholder={t("admin-products-field-tax-code-placeholder")}
-                    selectedKeys={variantTaxCode ? [variantTaxCode] : []}
-                    onSelectionChange={(keys) =>
-                      setVariantTaxCode(Array.from(keys).join(""))
-                    }
+                    value={variantTaxCode || ""}
+                    onChange={(value) => setVariantTaxCode((value as string) || "")}
                   >
-                    {[
-                      <SelectItem key="" textValue={t("none") || "None"}>
-                        {t("none") || "None"}
-                      </SelectItem>,
-                      ...Array.from(
-                        new Map(taxRates.map((r) => [r.tax_code, r])).values(),
-                      )
-                        .filter((r) => r.tax_code)
-                        .map((r) => (
-                          <SelectItem
-                            key={r.tax_code!}
-                            textValue={`${getTaxNameForLocale(r.display_name, i18n.language)} (${r.tax_code})`}
-                          >
-                            {getTaxNameForLocale(r.display_name, i18n.language)}{" "}
-                            ({r.tax_code})
-                          </SelectItem>
-                        )),
-                    ]}
+                    <Label>{t("admin-products-field-tax-code")}</Label>
+                    <Select.Trigger>
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        <ListBox.Item key="" id="" textValue={t("none") || "None"}>
+                          {t("none") || "None"}
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                        {Array.from(
+                          new Map(taxRates.map((r) => [r.tax_code, r])).values(),
+                        )
+                          .filter((r) => r.tax_code)
+                          .map((r) => (
+                            <ListBox.Item
+                              key={r.tax_code!}
+                              id={r.tax_code!}
+                              textValue={`${getTaxNameForLocale(r.display_name, i18n.language)} (${r.tax_code})`}
+                            >
+                              {getTaxNameForLocale(r.display_name, i18n.language)}{" "}
+                              ({r.tax_code})
+                              <ListBox.ItemIndicator />
+                            </ListBox.Item>
+                          ))}
+                      </ListBox>
+                    </Select.Popover>
                   </Select>
                 </div>
               </div>
@@ -1152,8 +1164,8 @@ export default function ProductsPage() {
                 />
               </div>
             )}
-          </ModalBody>
-          <ModalFooter>
+          </Modal.Body>
+          <Modal.Footer>
             <Button
               onPress={() => {
                 setVariantModal(false);
@@ -1163,18 +1175,19 @@ export default function ProductsPage() {
               {t("admin-products-btn-cancel")}
             </Button>
             <Button
-              color="primary"
-              disabled={uploadingImage}
+              variant="primary"
+              isDisabled={uploadingImage}
               form="variant-form"
-              isLoading={submittingVariant}
+              isPending={submittingVariant}
               type="submit"
             >
               {editingVariant ? t("save") : t("admin-products-btn-add-variant")}
             </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </DefaultLayout>
+          </Modal.Footer>
+        </Modal.Container>
+      </Modal.Backdrop>
+    </Modal>
+  </DefaultLayout>
   );
 }
 

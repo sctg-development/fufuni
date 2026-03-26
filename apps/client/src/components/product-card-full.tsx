@@ -17,7 +17,6 @@
  */
 
 import React, { useState } from "react";
-import { button as buttonStyles } from "@heroui/react";
 import { StoreProduct } from "@/lib/store-api";
 import { useTranslation } from "react-i18next";
 import { useCart } from "@/hooks/useCart";
@@ -179,8 +178,7 @@ export const ProductCardFull: React.FC<Props> = ({ product }) => {
                 <Button
                   key={v.sku}
                   size="sm"
-                  variant={isSelected ? "solid" : "bordered"}
-                  color={isSelected ? "primary" : "default"}
+                  variant={isSelected ? "primary" : "outline"}
                   onPress={() => handleVariantChange(v.sku)}
                   className="text-xs"
                 >
@@ -236,8 +234,8 @@ export const ProductCardFull: React.FC<Props> = ({ product }) => {
       )}
 
       {/* Add to cart button */}
-      <button
-        onClick={() => {
+      <Button
+        onPress={() => {
           addItem({
             sku: selectedSku,
             title: `${product.title}${variant.title ? ` - ${variant.title}` : ""}`,
@@ -247,13 +245,11 @@ export const ProductCardFull: React.FC<Props> = ({ product }) => {
             qty: 1,
           });
         }}
-        className={buttonStyles({
-          color: "primary",
-          radius: "md",
-        }) + " w-full"}
+        variant="primary"
+        className="rounded-md w-full"
       >
         {t("add-to-cart")}
-      </button>
+      </Button>
       <WishlistButton productId={product.id} />
     </div>
   );

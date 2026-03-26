@@ -3,7 +3,7 @@ import DefaultLayout from "@/layouts/default";
 import { useCart } from "@/hooks/useCart";
 import { createCart, addItemsToCart, checkoutCart } from "@/lib/store-api";
 import { Input } from "@heroui/react";
-import { Card, CardBody, CardHeader } from "@heroui/react";
+import { Card} from "@heroui/react";
 import { Button } from "@heroui/react";
 import { useState } from "react";
 import { formatMoney } from "@/utils/currency";
@@ -158,7 +158,7 @@ export default function CartPage() {
                 ))}
 
                 <Card className="border-default-200">
-                  <CardBody className="space-y-2">
+                  <Card.Content className="space-y-2">
                     <div className="flex justify-between text-sm text-default-600">
                       <span>{t("admin-orders-subtotal") || "Subtotal"}</span>
                       <span>{formatMoney(currentCart?.totals?.subtotal_cents ?? totalCents, items[0]?.currency || "USD")}</span>
@@ -185,7 +185,7 @@ export default function CartPage() {
                       <span>{t("total")}</span>
                       <span>{formatMoney(currentCart?.totals?.total_cents ?? totalCents, items[0]?.currency || "USD")}</span>
                     </div>
-                  </CardBody>
+                  </Card.Content>
                 </Card>
               </div>
             )}
@@ -193,10 +193,10 @@ export default function CartPage() {
             {/* Step 1: Email input */}
             {step === "initial" && (
               <Card className="border-primary">
-                <CardHeader>
+                <Card.Header>
                   <h2 className="text-lg font-semibold">{t("checkout")}</h2>
-                </CardHeader>
-                <CardBody className="space-y-4">
+                </Card.Header>
+                <Card.Content className="space-y-4">
                   <div>
                     <label htmlFor="email" className="block text-sm text-default-500 mb-2">
                       {t("email-label")}
@@ -224,8 +224,7 @@ export default function CartPage() {
                   <div className="flex flex-wrap justify-between gap-3">
                     <div className="flex gap-2">
                       <Button
-                        color="danger"
-                        variant="flat"
+                        variant="danger"
                         onClick={() => clear()}
                       >
                         {t("cart-clear")}
@@ -245,14 +244,14 @@ export default function CartPage() {
                       />
                     </div>
                     <Button
-                      color="primary"
+                      variant="primary"
                       onClick={handleInitialCheckout}
-                      disabled={!email}
+                      isDisabled={!email}
                     >
                       {t("continue-to-address") || "Continue to Address"}
                     </Button>
                   </div>
-                </CardBody>
+                </Card.Content>
               </Card>
             )}
 
@@ -276,19 +275,19 @@ export default function CartPage() {
             {/* Processing step */}
             {step === "processing" && (
               <Card className="border-default-200">
-                <CardBody className="text-center py-8">
+                <Card.Content className="text-center py-8">
                   <p className="text-default-500 mb-4">{t("processing") || "Processing your order..."}</p>
                   <p className="text-sm text-default-400">
                     {t("redirecting-to-payment") || "You will be redirected to payment shortly."}
                   </p>
-                </CardBody>
+                </Card.Content>
               </Card>
             )}
 
             {/* Back to cart button (shown during address/shipping steps) */}
             {(step === "shipping-address" || step === "shipping-rate") && (
               <Button
-                variant="flat"
+                variant="primary"
                 onClick={handleBackToCart}
                 size="sm"
               >

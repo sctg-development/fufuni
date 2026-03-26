@@ -19,30 +19,21 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@heroui/react";
-import { Input } from "@heroui/react";
-import { Select, SelectItem } from "@heroui/react";
+import { Input, TextField, Label } from "@heroui/react";
+import { Select,  ListBox } from "@heroui/react";
 import {
   Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
 } from "@heroui/react";
 import { Checkbox } from "@heroui/react";
 import {
   Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
+  useOverlayState,
 } from "@heroui/react";
-import { Card, CardBody } from "@heroui/react";
+import { Card} from "@heroui/react";
 import { Tooltip } from "@heroui/react";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
-import { SearchIcon } from "@/components/icons";
+
 import DefaultLayout from "@/layouts/default";
 import { useSecuredApi } from "@/authentication";
 
@@ -86,12 +77,11 @@ export default function RegionsPage() {
   // List state
   const [regions, setRegions] = useState<Region[]>([]);
   const [currencies, setCurrencies] = useState<Currency[]>([]);
-  const [loading, setLoading] = useState(true);
   const [globalFilter, setGlobalFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
 
   // Modal state
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const modalState = useOverlayState();
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingRegion, setEditingRegion] = useState<Region | null>(null);
   const [formData, setFormData] = useState({
@@ -108,7 +98,6 @@ export default function RegionsPage() {
    * and update component state. Used on mount and after data-changing actions.
    */
   const loadData = async () => {
-    setLoading(true);
     try {
       const [regionsResp, currenciesResp] = await Promise.all([
         getJson(`${apiBase}/v1/regions?limit=100`),
@@ -119,8 +108,6 @@ export default function RegionsPage() {
       setCurrencies(currenciesResp.items || []);
     } catch (err) {
       console.error("Failed to load data", err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -161,7 +148,7 @@ export default function RegionsPage() {
       tax_inclusive: false,
       status: "active",
     });
-    onOpen();
+    modalState.open();
   };
 
   /**
@@ -179,7 +166,7 @@ export default function RegionsPage() {
       tax_inclusive: region.tax_inclusive,
       status: region.status,
     });
-    onOpen();
+    modalState.open();
   };
 
   /**
@@ -213,7 +200,7 @@ export default function RegionsPage() {
           await loadData();
         }
       }
-      onOpenChange();
+      modalState.close();
     } catch (err) {
       console.error("Failed to save region", err);
     }
@@ -255,95 +242,107 @@ export default function RegionsPage() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">{t("admin-regions-title")}</h1>
           <Button
-            color="primary"
-            endContent={<Plus className="w-4 h-4" />}
+            variant="primary"
             onPress={handleOpenCreate}
           >
+            <Plus className="w-4 h-4" />
             {t("admin-regions-add")}
           </Button>
         </div>
 
         <Card className="mb-6">
-          <CardBody className="flex gap-4">
-            <Input
-              isClearable
-              className="w-full"
-              placeholder={t("admin-common-search")}
-              startContent={<SearchIcon className="w-4 h-4" />}
-              value={globalFilter}
-              onValueChange={setGlobalFilter}
-            />
+          <Card.Content className="flex gap-4">
+            <TextField className="w-full">
+              <Input
+                placeholder={t("admin-regions-filter-placeholder")}
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+              />
+            </TextField>
             <Select
-              label={t("admin-common-status")}
-              selectedKeys={statusFilter ? [statusFilter] : []}
-              onSelectionChange={(key) =>
-                setStatusFilter(Array.from(key).join(""))
-              }
+              value={statusFilter || ""}
+              onChange={(value) => setStatusFilter((value as string) || "")}
             >
-              <SelectItem key="">All</SelectItem>
-              <SelectItem key="active">Active</SelectItem>
-              <SelectItem key="inactive">Inactive</SelectItem>
+              <Label>{t("admin-common-status")}</Label>
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  <ListBox.Item id="" textValue="All">
+                    All
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                  <ListBox.Item id="active" textValue="Active">
+                    Active
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                  <ListBox.Item id="inactive" textValue="Inactive">
+                    Inactive
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                </ListBox>
+              </Select.Popover>
             </Select>
-          </CardBody>
+          </Card.Content>
         </Card>
 
         <Card>
-          <CardBody>
-            <Table isStriped>
-              <TableHeader>
-                <TableColumn key="display_name">
+          <Card.Content>
+            <Table>
+              <Table.Header>
+                <Table.Column key="display_name">
                   {t("admin-common-name")}
-                </TableColumn>
-                <TableColumn key="currency">
+                </Table.Column>
+                <Table.Column key="currency">
                   {t("admin-common-currency")}
-                </TableColumn>
-                <TableColumn key="is_default">
+                </Table.Column>
+                <Table.Column key="is_default">
                   {t("admin-common-default")}
-                </TableColumn>
-                <TableColumn key="tax_inclusive">
+                </Table.Column>
+                <Table.Column key="tax_inclusive">
                   {t("admin-regions-tax-inclusive")}
-                </TableColumn>
-                <TableColumn key="status">
+                </Table.Column>
+                <Table.Column key="status">
                   {t("admin-common-status")}
-                </TableColumn>
-                <TableColumn key="actions">
+                </Table.Column>
+                <Table.Column key="actions">
                   {t("admin-common-actions")}
-                </TableColumn>
-              </TableHeader>
-              <TableBody
-                emptyContent={<div>{t("admin-common-empty")}</div>}
-                isLoading={loading}
+                </Table.Column>
+              </Table.Header>
+              <Table.Body
+                renderEmptyState={() => <div>{t("admin-common-empty")}</div>}
                 items={displayed}
-                loadingContent={<div>{t("admin-common-loading")}</div>}
               >
                 {(region: Region) => (
-                  <TableRow key={region.id}>
-                    <TableCell>{region.display_name}</TableCell>
-                    <TableCell>
+                  <Table.Row key={region.id} className="odd:bg-default-50">
+                    <Table.Cell>{region.display_name}</Table.Cell>
+                    <Table.Cell>
                       {region.currency_code || region.currency_id}
-                    </TableCell>
-                    <TableCell>
+                    </Table.Cell>
+                    <Table.Cell>
                       {region.is_default ? (
                         <span className="text-green-600">✓ Default</span>
                       ) : (
                         <Button
                           isIconOnly
                           size="sm"
-                          variant="light"
+                          variant="tertiary"
                           onPress={() => handleSetDefault(region.id)}
                         >
                           Set Default
                         </Button>
                       )}
-                    </TableCell>
-                    <TableCell>
+                    </Table.Cell>
+                    <Table.Cell>
                       {region.tax_inclusive ? (
                         <span className="text-blue-600">TTC</span>
                       ) : (
                         <span className="text-gray-500">HT</span>
                       )}
-                    </TableCell>
-                    <TableCell>
+                    </Table.Cell>
+                    <Table.Cell>
                       <span
                         className={
                           region.status === "active"
@@ -353,114 +352,156 @@ export default function RegionsPage() {
                       >
                         {region.status}
                       </span>
-                    </TableCell>
-                    <TableCell>
+                    </Table.Cell>
+                    <Table.Cell>
                       <div className="flex gap-2">
                         <Button
                           isIconOnly
                           size="sm"
-                          variant="light"
+                          variant="tertiary"
                           onPress={() => handleOpenEdit(region)}
                         >
                           <Edit2 className="w-4 h-4" />
                         </Button>
                         <Button
                           isIconOnly
-                          color="danger"
                           size="sm"
-                          variant="light"
+                          variant="tertiary"
                           onPress={() => handleDelete(region.id)}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                    </Table.Cell>
+                  </Table.Row>
                 )}
-              </TableBody>
+              </Table.Body>
             </Table>
-          </CardBody>
+          </Card.Content>
         </Card>
 
-        <Modal isOpen={isOpen} size="lg" onOpenChange={onOpenChange}>
-          <ModalContent>
-            <ModalHeader className="flex flex-col gap-1">
-              {isEditMode ? t("admin-regions-edit") : t("admin-regions-create")}
-            </ModalHeader>
-            <ModalBody>
-              <Tooltip
-                content={t(
-                  "admin-regions-code-help",
-                  "Unique identifier for this region",
-                )}
-              >
-                <Input
-                  label={t("admin-common-name")}
-                  placeholder="Enter region name"
-                  value={formData.display_name}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, display_name: value })
-                  }
-                />
+        <Modal state={modalState}>
+          <Modal.Backdrop />
+          <Modal.Container size="lg">
+            <Modal.Dialog>
+              {({ close }) => (
+                <>
+                  <Modal.Header className="flex flex-col gap-1">
+                    <Modal.Heading>
+                      {isEditMode ? t("admin-regions-edit") : t("admin-regions-create")}
+                    </Modal.Heading>
+                  </Modal.Header>
+                  <Modal.Body>
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <TextField>
+                    <Label>{t("admin-common-name")}</Label>
+                    <Input
+                      placeholder="Enter region name"
+                      value={formData.display_name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, display_name: e.target.value })
+                      }
+                    />
+                  </TextField>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t(
+                    "admin-regions-code-help",
+                    "Unique identifier for this region",
+                  )}
+                </Tooltip.Content>
               </Tooltip>
-              <Tooltip
-                content={t(
-                  "admin-regions-currency-help",
-                  "Primary currency for products in this region",
-                )}
-              >
-                <Select
-                  label={t("admin-common-currency")}
-                  selectedKeys={
-                    formData.currency_id ? [formData.currency_id] : []
-                  }
-                  onSelectionChange={(key) =>
-                    setFormData({
-                      ...formData,
-                      currency_id: Array.from(key).join(""),
-                    })
-                  }
-                >
-                  {currencies.map((curr) => (
-                    <SelectItem key={curr.id} textValue={curr.code}>
-                      {curr.code} - {curr.display_name}
-                    </SelectItem>
-                  ))}
-                </Select>
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <Select
+                    value={formData.currency_id || ""}
+                    onChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        currency_id: (value as string) || "",
+                      })
+                    }
+                  >
+                    <Label>{t("admin-common-currency")}</Label>
+                    <Select.Trigger>
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        {currencies.map((curr) => (
+                          <ListBox.Item key={curr.id} id={curr.id} textValue={curr.code}>
+                            {curr.code} - {curr.display_name}
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                        ))}
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t(
+                    "admin-regions-currency-help",
+                    "Primary currency for products in this region",
+                  )}
+                </Tooltip.Content>
               </Tooltip>
-              <Tooltip
-                content={t(
-                  "admin-regions-default-help",
-                  "Mark as default region for unrecognized customers",
-                )}
-              >
-                <Select
-                  label={t("admin-common-status")}
-                  selectedKeys={[formData.status]}
-                  onSelectionChange={(key) =>
-                    setFormData({
-                      ...formData,
-                      status: Array.from(key).join("") as "active" | "inactive",
-                    })
-                  }
-                >
-                  {STATUS_OPTIONS.map((opt) => (
-                    <SelectItem key={opt}>{opt}</SelectItem>
-                  ))}
-                </Select>
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <Select
+                    value={formData.status}
+                    onChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        status: value as "active" | "inactive",
+                      })
+                    }
+                  >
+                    <Label>{t("admin-common-status")}</Label>
+                    <Select.Trigger>
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        {STATUS_OPTIONS.map((opt) => (
+                          <ListBox.Item key={opt} id={opt} textValue={opt}>
+                            {opt}
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                        ))}
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t(
+                    "admin-regions-default-help",
+                    "Mark as default region for unrecognized customers",
+                  )}
+                </Tooltip.Content>
               </Tooltip>
 
               <div className="flex flex-col gap-2 mt-2">
                 <Checkbox
+                  id="region-tax-inclusive"
                   isSelected={formData.tax_inclusive}
-                  onValueChange={(value) =>
+                  onChange={(value) =>
                     setFormData({ ...formData, tax_inclusive: value })
                   }
                 >
-                  {t(
-                    "admin-regions-tax-inclusive-label",
-                    "Prices include taxes (TTC)",
-                  )}
+                  <Checkbox.Control>
+                    <Checkbox.Indicator />
+                  </Checkbox.Control>
+                  <Checkbox.Content>
+                    <Label htmlFor="region-tax-inclusive">
+                      {t(
+                        "admin-regions-tax-inclusive-label",
+                        "Prices include taxes (TTC)",
+                      )}
+                    </Label>
+                  </Checkbox.Content>
                 </Checkbox>
                 <p className="text-small text-default-500 ml-7">
                   {t(
@@ -469,25 +510,27 @@ export default function RegionsPage() {
                   )}
                 </p>
               </div>
-            </ModalBody>
-            <ModalFooter>
-              <Button
-                color="default"
-                variant="light"
-                onPress={() => onOpenChange()}
-              >
-                {t("admin-common-cancel")}
-              </Button>
-              <Button
-                color="primary"
-                isDisabled={!formData.display_name || !formData.currency_id}
-                onPress={handleSave}
-              >
-                {t("admin-common-save")}
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button
+                  variant="tertiary"
+                  onPress={close}
+                >
+                  {t("admin-common-cancel")}
+                </Button>
+                <Button
+                  variant="primary"
+                  isDisabled={!formData.display_name || !formData.currency_id}
+                  onPress={handleSave}
+                >
+                  {t("admin-common-save")}
+                </Button>
+              </Modal.Footer>
+              </>
+            )}
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal>
       </div>
     </DefaultLayout>
   );

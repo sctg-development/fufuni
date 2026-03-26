@@ -18,7 +18,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { button as buttonStyles } from "@heroui/react";
+import { Button } from "@heroui/react";
 import { StoreProduct } from "@/lib/store-api";
 import { useTranslation } from "react-i18next";
 import { useCart } from "@/hooks/useCart";
@@ -99,8 +99,8 @@ export const ProductCard: React.FC<Props> = ({
           })}
         </select>
       )}
-      <button
-        onClick={() => {
+      <Button
+        onPress={() => {
           const sku = selectedSku || variant.sku;
           addItem({
             sku,
@@ -111,13 +111,11 @@ export const ProductCard: React.FC<Props> = ({
             qty: 1,
           });
         }}
-        className={buttonStyles({
-          color: "primary",
-          radius: "md",
-        }) + " w-full"}
+        variant="primary"
+        className="rounded-md w-full"
       >
         {t("add-to-cart")}
-      </button>
+      </Button>
     </div>
   );
 };

@@ -23,13 +23,14 @@ import React, {
   useCallback,
   forwardRef,
 } from "react";
-import { useClipboard } from "@heroui/use-clipboard";
 import { Button, type ButtonProps } from "@heroui/react";
 import { clsx } from "clsx";
 
 import { IconSvgProps } from "@/types";
+import { useClipboard } from "@/hooks/use-clipboard";
 
-export interface PreviewButtonProps extends ButtonProps {
+export interface PreviewButtonProps
+  extends Omit<ButtonProps, "value" | "title"> {
   icon: React.ReactNode;
 }
 
@@ -45,7 +46,7 @@ export const PreviewButton = forwardRef<
       isIconOnly
       className={clsx("relative z-50 text-zinc-300", className)}
       size="sm"
-      variant={props.variant ?? "light"}
+      variant={props.variant ?? "secondary"}
       {...buttonProps}
     >
       {icon}
@@ -127,7 +128,6 @@ export const CopyButton = memo<CopyButtonProps>(
         aria-label={isCopied ? "Copié" : "Copier dans le presse-papier"}
         className={className ?? "bottom-0 left-0.5"}
         icon={icon}
-        title={isCopied ? "Copié" : "Copier dans le presse-papier"}
         onPress={handleCopy}
         {...buttonProps}
       />

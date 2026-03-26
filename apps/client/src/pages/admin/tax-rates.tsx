@@ -6,29 +6,20 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@heroui/react";
-import { Input } from "@heroui/react";
-import { Select, SelectItem } from "@heroui/react";
+import { Input, TextField, Label } from "@heroui/react";
+import { Select,  ListBox } from "@heroui/react";
 import {
   Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
 } from "@heroui/react";
 import {
   Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
+  useOverlayState,
 } from "@heroui/react";
-import { Card, CardBody } from "@heroui/react";
+import { Card } from "@heroui/react";
 import { Tooltip } from "@heroui/react";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
-import { SearchIcon } from "@/components/icons";
+
 import DefaultLayout from "@/layouts/default";
 import { useSecuredApi } from "@/authentication";
 import { LocalizedTaxNameInput } from "@/components/LocalizedTaxNameInput";
@@ -55,11 +46,10 @@ export default function TaxRatesPage() {
   const apiBase = (import.meta as any).env?.API_BASE_URL || "";
 
   const [taxRates, setTaxRates] = useState<TaxRate[]>([]);
-  const [loading, setLoading] = useState(true);
   const [globalFilter, setGlobalFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
 
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const modalState = useOverlayState();
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingTaxRate, setEditingTaxRate] = useState<TaxRate | null>(null);
   const [formData, setFormData] = useState({
@@ -74,15 +64,12 @@ export default function TaxRatesPage() {
   );
 
   const loadData = async () => {
-    setLoading(true);
     try {
       const resp = await getJson(`${apiBase}/v1/tax-rates?limit=100`);
 
       setTaxRates(resp.items || []);
     } catch (err) {
       console.error("Failed to load tax rates", err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -125,7 +112,7 @@ export default function TaxRatesPage() {
     setSelectedLocale(
       availableLanguages.find((l) => l.isDefault)?.code || "en-US",
     );
-    onOpen();
+    modalState.open();
   };
 
   const handleOpenEdit = (taxRate: TaxRate) => {
@@ -138,7 +125,7 @@ export default function TaxRatesPage() {
       rate_percentage: taxRate.rate_percentage,
       status: taxRate.status,
     });
-    onOpen();
+    modalState.open();
   };
 
   const handleSave = async () => {
@@ -172,7 +159,7 @@ export default function TaxRatesPage() {
           await loadData();
         }
       }
-      onOpenChange();
+      modalState.close();
     } catch (err) {
       console.error("Failed to save tax rate", err);
     }
@@ -195,72 +182,85 @@ export default function TaxRatesPage() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">{t("admin-tax-rates-title")}</h1>
           <Button
-            color="primary"
-            endContent={<Plus className="w-4 h-4" />}
+            variant="primary"
             onPress={handleOpenCreate}
           >
+            <Plus className="w-4 h-4" />
             {t("admin-tax-rates-add")}
           </Button>
         </div>
 
         <Card className="mb-6">
-          <CardBody className="flex flex-row gap-4">
-            <Input
-              isClearable
-              className="w-full"
-              placeholder={t("admin-common-search")}
-              startContent={<SearchIcon className="w-4 h-4" />}
-              value={globalFilter}
-              onValueChange={setGlobalFilter}
-            />
+          <Card.Content className="flex flex-row gap-4">
+            <TextField className="w-full">
+              <Input
+                placeholder={t("admin-tax-rates-filter-placeholder")}
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+              />
+            </TextField>
             <Select
               className="w-48"
-              label={t("admin-common-status")}
-              selectedKeys={statusFilter ? [statusFilter] : []}
-              onSelectionChange={(key) =>
-                setStatusFilter(Array.from(key).join(""))
-              }
+              value={statusFilter || ""}
+              onChange={(value) => setStatusFilter((value as string) || "")}
             >
-              <SelectItem key="">{t("all")}</SelectItem>
-              <SelectItem key="active">Active</SelectItem>
-              <SelectItem key="inactive">Inactive</SelectItem>
+              <Label>{t("admin-common-status")}</Label>
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  <ListBox.Item id="" textValue={t("all")}>
+                    {t("all")}
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                  <ListBox.Item id="active" textValue="Active">
+                    Active
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                  <ListBox.Item id="inactive" textValue="Inactive">
+                    Inactive
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                </ListBox>
+              </Select.Popover>
             </Select>
-          </CardBody>
+          </Card.Content>
         </Card>
 
         <Card>
-          <CardBody>
-            <Table isStriped aria-label="Tax Rates Table">
-              <TableHeader>
-                <TableColumn>{t("admin-common-name")}</TableColumn>
-                <TableColumn>{t("admin-tax-rates-country-code")}</TableColumn>
-                <TableColumn>{t("admin-tax-rates-tax-code")}</TableColumn>
-                <TableColumn>{t("admin-tax-rates-rate")}</TableColumn>
-                <TableColumn>{t("admin-common-status")}</TableColumn>
-                <TableColumn width={100}>
+          <Card.Content>
+            <Table aria-label="Tax Rates Table">
+              <Table.Header>
+                <Table.Column>{t("admin-common-name")}</Table.Column>
+                <Table.Column>{t("admin-tax-rates-country-code")}</Table.Column>
+                <Table.Column>{t("admin-tax-rates-tax-code")}</Table.Column>
+                <Table.Column>{t("admin-tax-rates-rate")}</Table.Column>
+                <Table.Column>{t("admin-common-status")}</Table.Column>
+                <Table.Column width={100}>
                   {t("admin-common-actions")}
-                </TableColumn>
-              </TableHeader>
-              <TableBody
-                emptyContent={t("admin-common-empty")}
-                isLoading={loading}
+                </Table.Column>
+              </Table.Header>
+              <Table.Body
+                renderEmptyState={() => t("admin-common-empty")}
                 items={displayed}
               >
                 {(item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>
+                  <Table.Row key={item.id} className="odd:bg-default-50">
+                    <Table.Cell>
                       {getTaxNameForLocale(item.display_name, i18n.language)}
-                    </TableCell>
-                    <TableCell>
+                    </Table.Cell>
+                    <Table.Cell>
                       {item.country_code || (
                         <span className="text-gray-400 italic">
                           {t("admin-tax-rates-fallback")}
                         </span>
                       )}
-                    </TableCell>
-                    <TableCell>{item.tax_code || "-"}</TableCell>
-                    <TableCell>{item.rate_percentage}%</TableCell>
-                    <TableCell>
+                    </Table.Cell>
+                    <Table.Cell>{item.tax_code || "-"}</Table.Cell>
+                    <Table.Cell>{item.rate_percentage}%</Table.Cell>
+                    <Table.Cell>
                       <span
                         className={
                           item.status === "active"
@@ -270,58 +270,72 @@ export default function TaxRatesPage() {
                       >
                         {item.status}
                       </span>
-                    </TableCell>
-                    <TableCell>
+                    </Table.Cell>
+                    <Table.Cell>
                       <div className="flex gap-2">
                         <Button
                           isIconOnly
                           size="sm"
-                          variant="light"
+                          variant="tertiary"
                           onPress={() => handleOpenEdit(item)}
                         >
                           <Edit2 className="w-4 h-4" />
                         </Button>
                         <Button
                           isIconOnly
-                          color="danger"
                           size="sm"
-                          variant="light"
+                          variant="danger"
                           onPress={() => handleDelete(item.id)}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                    </Table.Cell>
+                  </Table.Row>
                 )}
-              </TableBody>
+              </Table.Body>
             </Table>
-          </CardBody>
+          </Card.Content>
         </Card>
 
-        <Modal isOpen={isOpen} size="lg" onOpenChange={onOpenChange}>
-          <ModalContent>
-            <ModalHeader>
-              {isEditMode
-                ? t("admin-tax-rates-edit")
-                : t("admin-tax-rates-create")}
-            </ModalHeader>
-            <ModalBody className="gap-4">
+        <Modal state={modalState}>
+          <Modal.Backdrop>
+            <Modal.Container size="lg">
+            <Modal.Dialog>
+              {({ close }) => (
+                <>
+                  <Modal.Header>
+                    <Modal.Heading>
+                      {isEditMode
+                        ? t("admin-tax-rates-edit")
+                        : t("admin-tax-rates-create")}
+                    </Modal.Heading>
+                  </Modal.Header>
+                  <Modal.Body className="gap-4">
               <div className="flex items-center gap-2">
                 <label className="block text-sm font-medium">
                   {t("admin-products-title-locale")}
                 </label>
                 <Select
                   className="w-36"
-                  selectedKeys={[selectedLocale]}
-                  size="sm"
-                  onSelectionChange={(keys) =>
-                    setSelectedLocale(Array.from(keys).join(""))
-                  }
+                  value={selectedLocale}
+                  onChange={(value) => setSelectedLocale((value as string) || "en-US")}
                 >
-                  {availableLanguages.map((lang) => (
-                    <SelectItem key={lang.code}>{lang.nativeName}</SelectItem>
-                  ))}
+                  <Label>{t("admin-products-title-locale")}</Label>
+                  <Select.Trigger>
+                    <Select.Value />
+                    <Select.Indicator />
+                  </Select.Trigger>
+                  <Select.Popover>
+                    <ListBox>
+                      {availableLanguages.map((lang) => (
+                        <ListBox.Item key={lang.code} id={lang.code} textValue={lang.nativeName}>
+                          {lang.nativeName}
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                      ))}
+                    </ListBox>
+                  </Select.Popover>
                 </Select>
               </div>
               <div>
@@ -339,72 +353,106 @@ export default function TaxRatesPage() {
                 />
               </div>
               <div className="flex gap-4">
-                <Tooltip content={t("admin-tax-rates-country-help")}>
-                  <Input
-                    className="flex-1"
-                    label={t("admin-tax-rates-country-code")}
-                    maxLength={2}
-                    placeholder="FR"
-                    value={formData.country_code || ""}
-                    onValueChange={(val) =>
-                      setFormData({
-                        ...formData,
-                        country_code: val.toUpperCase(),
-                      })
-                    }
-                  />
+                <Tooltip>
+                  <Tooltip.Trigger>
+                    <TextField className="flex-1">
+                      <Label>{t("admin-tax-rates-country-code")}</Label>
+                      <Input
+                        maxLength={2}
+                        placeholder="FR"
+                        value={formData.country_code || ""}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            country_code: e.target.value.toUpperCase(),
+                          })
+                        }
+                      />
+                    </TextField>
+                  </Tooltip.Trigger>
+                  <Tooltip.Content>
+                    {t("admin-tax-rates-country-help")}
+                  </Tooltip.Content>
                 </Tooltip>
-                <Tooltip content={t("admin-tax-rates-tax-code-help")}>
-                  <Input
-                    className="flex-1"
-                    label={t("admin-tax-rates-tax-code")}
-                    placeholder="txcd_99999999"
-                    value={formData.tax_code || ""}
-                    onValueChange={(val) =>
-                      setFormData({ ...formData, tax_code: val })
-                    }
-                  />
+                <Tooltip>
+                  <Tooltip.Trigger>
+                    <TextField className="flex-1">
+                      <Label>{t("admin-tax-rates-tax-code")}</Label>
+                      <Input
+                        placeholder="txcd_99999999"
+                        value={formData.tax_code || ""}
+                        onChange={(e) =>
+                          setFormData({ ...formData, tax_code: e.target.value })
+                        }
+                      />
+                    </TextField>
+                  </Tooltip.Trigger>
+                  <Tooltip.Content>
+                    {t("admin-tax-rates-tax-code-help")}
+                  </Tooltip.Content>
                 </Tooltip>
               </div>
-              <Tooltip content={t("admin-tax-rates-rate-help")}>
-                <Input
-                  label={t("admin-tax-rates-rate")}
-                  placeholder="20.0"
-                  type="number"
-                  value={formData.rate_percentage.toString()}
-                  onValueChange={(val) =>
-                    setFormData({ ...formData, rate_percentage: Number(val) })
-                  }
-                />
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <TextField>
+                    <Label>{t("admin-tax-rates-rate")}</Label>
+                    <Input
+                      placeholder="20.0"
+                      type="number"
+                      value={formData.rate_percentage.toString()}
+                      onChange={(e) =>
+                        setFormData({ ...formData, rate_percentage: Number(e.target.value) })
+                      }
+                    />
+                  </TextField>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t("admin-tax-rates-rate-help")}
+                </Tooltip.Content>
               </Tooltip>
               <Select
-                label={t("admin-common-status")}
-                selectedKeys={[formData.status]}
-                onSelectionChange={(key) =>
+                value={formData.status}
+                onChange={(value) =>
                   setFormData({
                     ...formData,
-                    status: Array.from(key).join("") as any,
+                    status: value as any,
                   })
                 }
               >
-                {STATUS_OPTIONS.map((opt) => (
-                  <SelectItem key={opt}>{opt}</SelectItem>
-                ))}
+                <Label>{t("admin-common-status")}</Label>
+                <Select.Trigger>
+                  <Select.Value />
+                  <Select.Indicator />
+                </Select.Trigger>
+                <Select.Popover>
+                  <ListBox>
+                    {STATUS_OPTIONS.map((opt) => (
+                      <ListBox.Item key={opt} id={opt} textValue={opt}>
+                        {opt}
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                    ))}
+                  </ListBox>
+                </Select.Popover>
               </Select>
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="light" onPress={() => onOpenChange()}>
-                {t("admin-common-cancel")}
-              </Button>
-              <Button
-                color="primary"
-                isDisabled={!formData.display_name}
-                onPress={handleSave}
-              >
-                {t("admin-common-save")}
-              </Button>
-            </ModalFooter>
-          </ModalContent>
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button variant="tertiary" onPress={close}>
+                      {t("admin-common-cancel")}
+                    </Button>
+                    <Button
+                      variant="primary"
+                      isDisabled={!formData.display_name}
+                      onPress={handleSave}
+                    >
+                      {t("admin-common-save")}
+                    </Button>
+                  </Modal.Footer>
+                  </>
+                )}
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
         </Modal>
       </div>
     </DefaultLayout>

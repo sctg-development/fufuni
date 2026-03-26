@@ -21,22 +21,14 @@ import { useTranslation } from "react-i18next";
 import {
   Button,
   Input,
+  TextField,
+  Label,
   Select,
-  SelectItem,
+  ListBox,
   Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
   Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
+  useOverlayState,
   Card,
-  CardBody,
   Tooltip,
 } from "@heroui/react";
 import { Plus, Edit2, Trash2 } from "lucide-react";
@@ -92,12 +84,11 @@ export default function CountriesPage() {
 
   // List state
   const [countries, setCountries] = useState<Country[]>([]);
-  const [loading, setLoading] = useState(true);
   const [globalFilter, setGlobalFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
 
   // Modal state
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const modalState = useOverlayState();
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingCountry, setEditingCountry] = useState<Country | null>(null);
   const [formData, setFormData] = useState({
@@ -114,15 +105,12 @@ export default function CountriesPage() {
    * Handles loading indicator and errors.
    */
   const loadCountries = async () => {
-    setLoading(true);
     try {
       const resp = await getJson(`${apiBase}/v1/regions/countries?limit=100`);
 
       setCountries(resp.items || []);
     } catch (err) {
       console.error("Failed to load countries", err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -164,7 +152,7 @@ export default function CountriesPage() {
       language_code: "en",
       status: "active",
     });
-    onOpen();
+    modalState.open();
   };
 
   /**
@@ -182,7 +170,7 @@ export default function CountriesPage() {
       language_code: country.language_code,
       status: country.status,
     });
-    onOpen();
+    modalState.open();
   };
 
   /**
@@ -227,7 +215,7 @@ export default function CountriesPage() {
           await loadCountries();
         }
       }
-      onOpenChange();
+      modalState.close();
     } catch (err) {
       console.error("Failed to save country", err);
     }
@@ -255,74 +243,88 @@ export default function CountriesPage() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">{t("admin-countries-title")}</h1>
           <Button
-            color="primary"
-            endContent={<Plus className="w-4 h-4" />}
             onPress={handleOpenCreate}
           >
+            <Plus className="w-4 h-4" />
             {t("admin-countries-add")}
           </Button>
         </div>
 
         <Card className="mb-6">
-          <CardBody className="flex gap-4">
-            <Input
-              isClearable
-              className="w-full"
-              placeholder={t("admin-common-search")}
-              startContent={<SearchIcon className="w-4 h-4" />}
-              value={globalFilter}
-              onValueChange={setGlobalFilter}
-            />
+          <Card.Content className="flex gap-4">
+            <div className="relative flex-1">
+              <TextField
+                className="w-full"
+                value={globalFilter}
+                onChange={(value) => setGlobalFilter(value)}
+              >
+                <Input placeholder={t("admin-common-search")} className="pl-8" />
+              </TextField>
+              <SearchIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 pointer-events-none text-default-400 w-4 h-4" />
+            </div>
             <Select
-              label={t("admin-common-status")}
-              selectedKeys={statusFilter ? [statusFilter] : []}
-              onSelectionChange={(key) =>
-                setStatusFilter(Array.from(key).join(""))
-              }
+              value={statusFilter}
+              onChange={(value) => setStatusFilter((value as string) || "")}
             >
-              <SelectItem key="">All</SelectItem>
-              <SelectItem key="active">Active</SelectItem>
-              <SelectItem key="inactive">Inactive</SelectItem>
+              <Label>{t("admin-common-status")}</Label>
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  <ListBox.Item id="" textValue="All">
+                    All
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                  <ListBox.Item id="active" textValue="Active">
+                    Active
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                  <ListBox.Item id="inactive" textValue="Inactive">
+                    Inactive
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                </ListBox>
+              </Select.Popover>
             </Select>
-          </CardBody>
+          </Card.Content>
         </Card>
 
         <Card>
-          <CardBody>
-            <Table isStriped>
-              <TableHeader>
-                <TableColumn key="code">{t("admin-common-code")}</TableColumn>
-                <TableColumn key="display_name">
+          <Card.Content>
+            <Table>
+              <Table.Header>
+                <Table.Column key="code">{t("admin-common-code")}</Table.Column>
+                <Table.Column key="display_name">
                   {t("admin-common-name")}
-                </TableColumn>
-                <TableColumn key="country_name">
+                </Table.Column>
+                <Table.Column key="country_name">
                   {t("admin-countries-fullname")}
-                </TableColumn>
-                <TableColumn key="language_code">
+                </Table.Column>
+                <Table.Column key="language_code">
                   {t("admin-common-language")}
-                </TableColumn>
-                <TableColumn key="status">
+                </Table.Column>
+                <Table.Column key="status">
                   {t("admin-common-status")}
-                </TableColumn>
-                <TableColumn key="actions">
+                </Table.Column>
+                <Table.Column key="actions">
                   {t("admin-common-actions")}
-                </TableColumn>
-              </TableHeader>
-              <TableBody
-                emptyContent={<div>{t("admin-common-empty")}</div>}
-                isLoading={loading}
+                </Table.Column>
+              </Table.Header>
+              <Table.Body
+                renderEmptyState={() => <div>{t("admin-common-empty")}</div>}
                 items={displayed}
-                loadingContent={<div>{t("admin-common-loading")}</div>}
               >
                 {(country) => (
-                  <TableRow key={country.id}>
-                    <TableCell className="font-mono font-bold">
+                  <Table.Row key={country.id} className="odd:bg-default-50">
+                    <Table.Cell className="font-mono font-bold">
                       {country.code}
-                    </TableCell>
-                    <TableCell>{country.display_name}</TableCell>
-                    <TableCell>{country.country_name}</TableCell>
-                    <TableCell>{country.language_code}</TableCell>
-                    <TableCell>
+                    </Table.Cell>
+                    <Table.Cell>{country.display_name}</Table.Cell>
+                    <Table.Cell>{country.country_name}</Table.Cell>
+                    <Table.Cell>{country.language_code}</Table.Cell>
+                    <Table.Cell>
                       <span
                         className={
                           country.status === "active"
@@ -332,136 +334,191 @@ export default function CountriesPage() {
                       >
                         {country.status}
                       </span>
-                    </TableCell>
-                    <TableCell>
+                    </Table.Cell>
+                    <Table.Cell>
                       <div className="flex gap-2">
                         <Button
                           isIconOnly
                           size="sm"
-                          variant="light"
+                          variant="tertiary"
                           onPress={() => handleOpenEdit(country)}
                         >
                           <Edit2 className="w-4 h-4" />
                         </Button>
                         <Button
                           isIconOnly
-                          color="danger"
                           size="sm"
-                          variant="light"
+                          variant="tertiary"
                           onPress={() => handleDelete(country.id)}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4 text-danger" />
                         </Button>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                    </Table.Cell>
+                  </Table.Row>
                 )}
-              </TableBody>
+              </Table.Body>
             </Table>
-          </CardBody>
+          </Card.Content>
         </Card>
 
-        <Modal isOpen={isOpen} size="lg" onOpenChange={onOpenChange}>
-          <ModalContent>
-            <ModalHeader className="flex flex-col gap-1">
-              {isEditMode
-                ? t("admin-countries-edit")
-                : t("admin-countries-create")}
-            </ModalHeader>
-            <ModalBody>
-              <Tooltip
-                content={t(
-                  "admin-countries-code-help",
-                  "ISO 3166-1 alpha-2 country code",
+        <Modal state={modalState}>
+          <Modal.Backdrop />
+          <Modal.Container size="lg">
+            <Modal.Dialog>
+              {({ close }) => (
+                <>
+                  <Modal.Header className="flex flex-col gap-1">
+                    <Modal.Heading>
+                      {isEditMode
+                        ? t("admin-countries-edit")
+                        : t("admin-countries-create")}
+                    </Modal.Heading>
+                  </Modal.Header>
+                  <Modal.Body>
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <TextField>
+                    <Label>{t("admin-common-code")}</Label>
+                    <Input
+                      disabled={isEditMode}
+                      maxLength={2}
+                      placeholder="US"
+                      value={formData.code}
+                      onChange={(e) =>
+                        setFormData({ ...formData, code: e.target.value.toUpperCase() })
+                      }
+                    />
+                  </TextField>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t(
+                    "admin-countries-code-help",
+                    "ISO 3166-1 alpha-2 country code",
+                  )}
+                </Tooltip.Content>
+              </Tooltip>
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <TextField>
+                    <Label>{t("admin-common-name")}</Label>
+                    <Input
+                      placeholder="United States"
+                      value={formData.display_name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, display_name: e.target.value })
+                      }
+                    />
+                  </TextField>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t("admin-common-name")}
+                </Tooltip.Content>
+              </Tooltip>
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <TextField>
+                    <Label>{t("admin-countries-fullname")}</Label>
+                    <Input
+                      placeholder="United States of America"
+                      value={formData.country_name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, country_name: e.target.value })
+                      }
+                    />
+                  </TextField>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t("admin-countries-code-help")}
+                </Tooltip.Content>
+              </Tooltip>
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <Select
+                    value={formData.language_code}
+                    onChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        language_code: (value as string) || "en",
+                      })
+                    }
+                  >
+                    <Label>{t("admin-common-language")}</Label>
+                    <Select.Trigger>
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        {LANGUAGE_OPTIONS.map((lang) => (
+                          <ListBox.Item key={lang.code} id={lang.code} textValue={lang.name}>
+                            {lang.name}
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                        ))}
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t(
+                    "admin-countries-languages-help",
+                    "Languages available for customers in this country",
+                  )}
+                </Tooltip.Content>
+              </Tooltip>
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <Select
+                    value={formData.status}
+                    onChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        status: value as "active" | "inactive",
+                      })
+                    }
+                  >
+                    <Label>{t("admin-common-status")}</Label>
+                    <Select.Trigger>
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        {STATUS_OPTIONS.map((opt) => (
+                          <ListBox.Item key={opt} id={opt} textValue={opt}>
+                            {opt}
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                        ))}
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t("admin-common-status")}
+                </Tooltip.Content>
+              </Tooltip>
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button
+                      variant="tertiary"
+                      onPress={close}
+                    >
+                      {t("admin-common-cancel")}
+                    </Button>
+                    <Button
+                      isDisabled={!formData.display_name || !formData.country_name}
+                      onPress={handleSave}
+                    >
+                      {t("admin-common-save")}
+                    </Button>
+                  </Modal.Footer>
+                  </>
                 )}
-              >
-                <Input
-                  isDisabled={isEditMode}
-                  label={t("admin-common-code")}
-                  maxLength={2}
-                  placeholder="US"
-                  value={formData.code}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, code: value.toUpperCase() })
-                  }
-                />
-              </Tooltip>
-              <Tooltip content={t("admin-common-name")}>
-                <Input
-                  label={t("admin-common-name")}
-                  placeholder="United States"
-                  value={formData.display_name}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, display_name: value })
-                  }
-                />
-              </Tooltip>
-              <Tooltip content={t("admin-countries-code-help")}>
-                <Input
-                  label={t("admin-countries-fullname")}
-                  placeholder="United States of America"
-                  value={formData.country_name}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, country_name: value })
-                  }
-                />
-              </Tooltip>
-              <Tooltip
-                content={t(
-                  "admin-countries-languages-help",
-                  "Languages available for customers in this country",
-                )}
-              >
-                <Select
-                  label={t("admin-common-language")}
-                  selectedKeys={[formData.language_code]}
-                  onSelectionChange={(key) =>
-                    setFormData({
-                      ...formData,
-                      language_code: Array.from(key).join(""),
-                    })
-                  }
-                >
-                  {LANGUAGE_OPTIONS.map((lang) => (
-                    <SelectItem key={lang.code}>{lang.name}</SelectItem>
-                  ))}
-                </Select>
-              </Tooltip>
-              <Tooltip content={t("admin-common-status")}>
-                <Select
-                  label={t("admin-common-status")}
-                  selectedKeys={[formData.status]}
-                  onSelectionChange={(key) =>
-                    setFormData({
-                      ...formData,
-                      status: Array.from(key).join("") as "active" | "inactive",
-                    })
-                  }
-                >
-                  {STATUS_OPTIONS.map((opt) => (
-                    <SelectItem key={opt}>{opt}</SelectItem>
-                  ))}
-                </Select>
-              </Tooltip>
-            </ModalBody>
-            <ModalFooter>
-              <Button
-                color="default"
-                variant="light"
-                onPress={() => onOpenChange()}
-              >
-                {t("admin-common-cancel")}
-              </Button>
-              <Button
-                color="primary"
-                isDisabled={!formData.display_name || !formData.country_name}
-                onPress={handleSave}
-              >
-                {t("admin-common-save")}
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal>
       </div>
     </DefaultLayout>
   );

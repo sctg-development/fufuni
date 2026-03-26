@@ -19,7 +19,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@heroui/react";
-import { Card, CardBody, CardHeader } from "@heroui/react";
+import { Card} from "@heroui/react";
 import { Radio, RadioGroup } from "@heroui/react";
 import { formatMoney } from "@/utils/currency";
 import { getAvailableShippingRates, selectShippingRate, type AvailableShippingRateItem } from "@/lib/store-api";
@@ -84,9 +84,9 @@ export default function ShippingRateSelector({
   if (loading) {
     return (
       <Card className="w-full">
-        <CardBody className="text-center py-8">
+        <Card.Content className="text-center py-8">
           <p className="text-default-500">{t("loading-shipping-rates") || "Loading shipping options…"}</p>
-        </CardBody>
+        </Card.Content>
       </Card>
     );
   }
@@ -94,14 +94,14 @@ export default function ShippingRateSelector({
   if (error) {
     return (
       <Card className="w-full border-red-300">
-        <CardBody>
+        <Card.Content>
           <p className="text-red-500 text-sm">{error}</p>
           {onBack && (
-            <Button size="sm" variant="flat" onClick={onBack} className="mt-4">
+            <Button size="sm" variant="primary" onClick={onBack} className="mt-4">
               {t("back") || "Back"}
             </Button>
           )}
-        </CardBody>
+        </Card.Content>
       </Card>
     );
   }
@@ -109,27 +109,27 @@ export default function ShippingRateSelector({
   if (rates.length === 0) {
     return (
       <Card className="w-full border-yellow-300">
-        <CardBody>
+        <Card.Content>
           <p className="text-yellow-600 text-sm">
             {t("no-shipping-options") || "No shipping options available for your address."}
           </p>
           {onBack && (
-            <Button size="sm" variant="flat" onClick={onBack} className="mt-4">
+            <Button size="sm" variant="primary" onClick={onBack} className="mt-4">
               {t("back-change-address") || "Back to Change Address"}
             </Button>
           )}
-        </CardBody>
+        </Card.Content>
       </Card>
     );
   }
 
   return (
     <Card className="w-full">
-      <CardHeader>
+      <Card.Header>
         <h2 className="text-lg font-semibold">{t("shipping-method") || "Shipping Method"}</h2>
-      </CardHeader>
-      <CardBody>
-        <RadioGroup value={selectedId || ""} onValueChange={setSelectedId} size="lg" className="space-y-3">
+      </Card.Header>
+      <Card.Content>
+        <RadioGroup value={selectedId || ""} onChange={setSelectedId} className="space-y-3">
           {rates.map((rate) => (
             <div
               key={rate.id}
@@ -138,7 +138,11 @@ export default function ShippingRateSelector({
                 : "border-default-200 hover:border-default-300"
                 }`}
             >
-              <Radio value={rate.id} className="shrink-0" />
+              <Radio value={rate.id} className="shrink-0">
+                <Radio.Control>
+                  <Radio.Indicator />
+                </Radio.Control>
+              </Radio>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-default-900">{rate.display_name}</p>
                 {rate.description && <p className="text-xs text-default-500 mt-0.5">{rate.description}</p>}
@@ -163,8 +167,7 @@ export default function ShippingRateSelector({
         <div className="flex gap-3 mt-6">
           {onBack && (
             <Button
-              variant="flat"
-              color="default"
+              variant="primary"
               onClick={onBack}
               isDisabled={saving || isLoading}
               fullWidth
@@ -173,16 +176,16 @@ export default function ShippingRateSelector({
             </Button>
           )}
           <Button
-            color="primary"
+            variant="primary"
             onClick={handleConfirm}
-            isLoading={saving || isLoading}
+            isPending={saving || isLoading}
             isDisabled={!selectedId || saving || isLoading}
             fullWidth
           >
             {t("continue-to-payment") || "Continue to Payment"}
           </Button>
         </div>
-      </CardBody>
+      </Card.Content>
     </Card>
   );
 }

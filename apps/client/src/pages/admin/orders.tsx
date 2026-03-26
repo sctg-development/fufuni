@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/react";
+import { Modal} from "@heroui/react";
 
 import { formatMoney } from "@/utils/currency";
 import { useSecuredApi } from "@/authentication";
@@ -264,7 +264,7 @@ export default function OrdersPage() {
             {t("admin-orders-title")}
           </h1>
           <button
-            className="p-2 rounded hover:bg-[var(--bg-hover)] transition-colors disabled:opacity-50"
+            className="p-2 rounded hover:bg-(--bg-hover) transition-colors disabled:opacity-50"
             disabled={isFetching}
             style={{ color: "var(--text-muted)" }}
             onClick={() => setRefreshIndex((i) => i + 1)}
@@ -291,7 +291,7 @@ export default function OrdersPage() {
               className="flex-1 flex items-center gap-2 px-4 py-3"
               style={{ color: "var(--text-muted)" }}
             >
-              <Search className="flex-shrink-0" size={16} />
+              <Search className="shrink-0" size={16} />
               <input
                 className="bg-transparent border-0 font-mono text-sm w-full focus:outline-none"
                 placeholder={t("search") + "..."}
@@ -351,7 +351,7 @@ export default function OrdersPage() {
                         className={clsx(
                           "px-4 py-3 text-left text-xs font-medium uppercase tracking-wide",
                           header.column.getCanSort() &&
-                            "cursor-pointer select-none hover:bg-[var(--bg-hover)]",
+                            "cursor-pointer select-none hover:bg-(--bg-hover)",
                         )}
                         style={{ color: "var(--text-muted)" }}
                         onClick={header.column.getToggleSortingHandler()}
@@ -385,7 +385,7 @@ export default function OrdersPage() {
                 {table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="cursor-pointer transition-colors hover:bg-[var(--bg-hover)]"
+                    className="cursor-pointer transition-colors hover:bg-(--bg-hover)"
                     style={{ borderBottom: "1px solid var(--border-subtle)" }}
                     onClick={() => setSelectedOrder(row.original)}
                   >
@@ -407,18 +407,21 @@ export default function OrdersPage() {
         {/* Order Detail Modal */}
         <Modal
           isOpen={!!selectedOrder}
-          size="lg"
-          onClose={() => setSelectedOrder(null)}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelectedOrder(null);
+            }
+          }}
         >
-          <ModalContent>
-            <ModalHeader>
+          <Modal.Container>
+            <Modal.Header>
               {selectedOrder
                 ? `${t("admin-orders-order-prefix")} ${
                     selectedOrder.number || selectedOrder.id.slice(0, 8)
                   }`
                 : t("admin-orders-title")}
-            </ModalHeader>
-            <ModalBody>
+            </Modal.Header>
+            <Modal.Body>
               {selectedOrder && (
                 <div className="space-y-5">
                   {/* Status Badge */}
@@ -777,8 +780,8 @@ export default function OrdersPage() {
                   </div>
                 </div>
               )}
-            </ModalBody>
-          </ModalContent>
+            </Modal.Body>
+          </Modal.Container>
         </Modal>
       </div>
     </DefaultLayout>

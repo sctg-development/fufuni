@@ -18,7 +18,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
-import { button as buttonStyles } from "@heroui/react";
 import { useTranslation } from "react-i18next";
 
 import DefaultLayout from "@/layouts/default";
@@ -124,7 +123,7 @@ export default function OrderPage() {
               {t("tracking-link-valid-30days")}
             </p>
           </div>
-          <Link className={buttonStyles({ color: "primary", radius: "full" })} to="/">
+          <Link className="inline-block px-6 py-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/80 font-semibold" to="/">
             {t("return-home")}
           </Link>
         </div>
@@ -224,7 +223,7 @@ export default function OrderPage() {
 
         {/* Action */}
         <div className="mt-8 text-center">
-          <Link className={buttonStyles({ variant: "bordered", radius: "full" })} to="/">
+          <Link className="inline-block px-6 py-2 rounded-full border-2 border-current hover:bg-default-100 font-semibold" to="/">
             {t("continue-shopping")}
           </Link>
         </div>

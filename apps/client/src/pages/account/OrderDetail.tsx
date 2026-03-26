@@ -8,18 +8,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Card,
-  CardBody,
-  CardHeader,
   Spinner,
   Button,
   Chip,
-  Divider,
+  Separator,
   Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
 } from "@heroui/react";
 
 import { useAuth } from "../../authentication/providers/use-auth";
@@ -100,7 +93,10 @@ export default function OrderDetail() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <Spinner label={t("loading")} />
+        <div className="flex flex-col items-center gap-2">
+          <Spinner />
+          <span className="text-default-500">{t("loading")}</span>
+        </div>
       </div>
     );
   }
@@ -108,7 +104,7 @@ export default function OrderDetail() {
   if (!order) {
     return (
       <Card>
-        <CardBody>{t("account-order-not-found")}</CardBody>
+        <Card.Content>{t("account-order-not-found")}</Card.Content>
       </Card>
     );
   }
@@ -145,10 +141,10 @@ export default function OrderDetail() {
           {t("account-order")} #{order.number}
         </h1>
         <div className="flex gap-2">
-          <Button variant="light" onClick={() => navigate("/account/orders")}>
+          <Button variant="tertiary" onPress={() => navigate("/account/orders")}>
             {t("account-back")}
           </Button>
-          <Button color="primary" onClick={handleDownloadPDF}>
+          <Button onPress={handleDownloadPDF}>
             {t("account-download-invoice")}
           </Button>
         </div>
@@ -156,16 +152,16 @@ export default function OrderDetail() {
 
       {/* Order Summary */}
       <Card>
-        <CardHeader className="flex gap-3 justify-between">
+        <Card.Header className="flex gap-3 justify-between">
           <h2 className="text-lg font-semibold">
             {t("account-order-details")}
           </h2>
-          <Chip color={STATUS_COLORS[order.status] || "default"} variant="flat">
+          <Chip color={(STATUS_COLORS[order.status] as any) || "default"} variant="tertiary">
             {order.status}
           </Chip>
-        </CardHeader>
-        <Divider />
-        <CardBody className="gap-4">
+        </Card.Header>
+        <Separator />
+        <Card.Content className="gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-gray-500">{t("account-date")}</p>
@@ -204,44 +200,44 @@ export default function OrderDetail() {
               </div>
             )}
           </div>
-        </CardBody>
+        </Card.Content>
       </Card>
 
       {/* Order Items */}
       <Card>
-        <CardHeader>
+        <Card.Header>
           <h2 className="text-lg font-semibold">{t("account-items")}</h2>
-        </CardHeader>
-        <Divider />
-        <CardBody>
+        </Card.Header>
+        <Separator />
+        <Card.Content>
           <Table>
-            <TableHeader>
-              <TableColumn>{t("account-item")}</TableColumn>
-              <TableColumn>{t("account-qty")}</TableColumn>
-              <TableColumn>{t("account-unit-price")}</TableColumn>
-              <TableColumn>{t("account-total")}</TableColumn>
-            </TableHeader>
-            <TableBody>
+            <Table.Header>
+              <Table.Column>{t("account-item")}</Table.Column>
+              <Table.Column>{t("account-qty")}</Table.Column>
+              <Table.Column>{t("account-unit-price")}</Table.Column>
+              <Table.Column>{t("account-total")}</Table.Column>
+            </Table.Header>
+            <Table.Body>
               {order.items.map((item, idx) => (
-                <TableRow key={idx}>
-                  <TableCell>{item.title}</TableCell>
-                  <TableCell>{item.qty}</TableCell>
-                  <TableCell>
+                <Table.Row key={idx}>
+                  <Table.Cell>{item.title}</Table.Cell>
+                  <Table.Cell>{item.qty}</Table.Cell>
+                  <Table.Cell>
                     ${(item.unit_price_cents / 100).toFixed(2)}
-                  </TableCell>
-                  <TableCell>
+                  </Table.Cell>
+                  <Table.Cell>
                     ${((item.qty * item.unit_price_cents) / 100).toFixed(2)}
-                  </TableCell>
-                </TableRow>
+                  </Table.Cell>
+                </Table.Row>
               ))}
-            </TableBody>
+            </Table.Body>
           </Table>
-        </CardBody>
+        </Card.Content>
       </Card>
 
       {/* Order Totals */}
       <Card>
-        <CardBody className="gap-3">
+        <Card.Content className="gap-3">
           <div className="flex justify-between">
             <span>{t("account-subtotal")}</span>
             <span>${(order.subtotal_cents / 100).toFixed(2)}</span>
@@ -254,12 +250,12 @@ export default function OrderDetail() {
             <span>{t("account-tax")}</span>
             <span>${(order.tax_cents / 100).toFixed(2)}</span>
           </div>
-          <Divider />
+          <Separator />
           <div className="flex justify-between font-bold text-lg">
             <span>{t("account-total")}</span>
             <span>${(order.total_cents / 100).toFixed(2)}</span>
           </div>
-        </CardBody>
+        </Card.Content>
       </Card>
     </div>
   );

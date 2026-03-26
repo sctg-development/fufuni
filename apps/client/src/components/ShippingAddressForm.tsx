@@ -18,10 +18,10 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Input } from "@heroui/react";
-import { Select, SelectItem } from "@heroui/react";
+import { Input, TextField, Label } from "@heroui/react";
+import { Select, ListBox } from "@heroui/react";
 import { Button } from "@heroui/react";
-import { Card, CardBody, CardHeader } from "@heroui/react";
+import { Card} from "@heroui/react";
 import { setShippingAddress } from "@/lib/store-api";
 
 const COUNTRIES = [
@@ -95,86 +95,97 @@ export default function ShippingAddressForm({ cartId, onSuccess, isLoading = fal
 
   return (
     <Card className="w-full">
-      <CardHeader>
+      <Card.Header>
         <h2 className="text-lg font-semibold">{t("shipping-address") || "Shipping Address"}</h2>
-      </CardHeader>
-      <CardBody>
+      </Card.Header>
+      <Card.Content>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label={t("full-name") || "Full Name"}
-            value={form.name}
-            onValueChange={(v) => setForm((f) => ({ ...f, name: v }))}
-            isRequired
-            isDisabled={submitting || isLoading}
-          />
+          <TextField isRequired isDisabled={submitting || isLoading}>
+            <Label>{t("full-name") || "Full Name"}</Label>
+            <Input
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            />
+          </TextField>
 
-          <Input
-            label={t("address-line-1") || "Address Line 1"}
-            value={form.line1}
-            onValueChange={(v) => setForm((f) => ({ ...f, line1: v }))}
-            isRequired
-            isDisabled={submitting || isLoading}
-          />
+          <TextField isRequired isDisabled={submitting || isLoading}>
+            <Label>{t("address-line-1") || "Address Line 1"}</Label>
+            <Input
+              value={form.line1}
+              onChange={(e) => setForm((f) => ({ ...f, line1: e.target.value }))}
+            />
+          </TextField>
 
-          <Input
-            label={t("address-line-2") || "Address Line 2 (optional)"}
-            value={form.line2}
-            onValueChange={(v) => setForm((f) => ({ ...f, line2: v }))}
-            isDisabled={submitting || isLoading}
-          />
+          <TextField isDisabled={submitting || isLoading}>
+            <Label>{t("address-line-2") || "Address Line 2 (optional)"}</Label>
+            <Input
+              value={form.line2}
+              onChange={(e) => setForm((f) => ({ ...f, line2: e.target.value }))}
+            />
+          </TextField>
 
           <div className="grid grid-cols-2 gap-3">
-            <Input
-              label={t("city") || "City"}
-              value={form.city}
-              onValueChange={(v) => setForm((f) => ({ ...f, city: v }))}
-              isRequired
-              isDisabled={submitting || isLoading}
-            />
+            <TextField isRequired isDisabled={submitting || isLoading}>
+              <Label>{t("city") || "City"}</Label>
+              <Input
+                value={form.city}
+                onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+              />
+            </TextField>
 
-            <Input
-              label={t("postal-code") || "Postal Code"}
-              value={form.postal_code}
-              onValueChange={(v) => setForm((f) => ({ ...f, postal_code: v }))}
-              isRequired
-              isDisabled={submitting || isLoading}
-            />
+            <TextField isRequired isDisabled={submitting || isLoading}>
+              <Label>{t("postal-code") || "Postal Code"}</Label>
+              <Input
+                value={form.postal_code}
+                onChange={(e) => setForm((f) => ({ ...f, postal_code: e.target.value }))}
+              />
+            </TextField>
           </div>
 
-          <Input
-            label={t("state-region") || "State / Region (optional)"}
-            value={form.state}
-            onValueChange={(v) => setForm((f) => ({ ...f, state: v }))}
-            isDisabled={submitting || isLoading}
-          />
+          <TextField isDisabled={submitting || isLoading}>
+            <Label>{t("state-region") || "State / Region (optional)"}</Label>
+            <Input
+              value={form.state}
+              onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}
+            />
+          </TextField>
 
           <Select
-            label={t("country") || "Country"}
-            selectedKeys={[form.country]}
-            onSelectionChange={(keys) => setForm((f) => ({ ...f, country: Array.from(keys).join("") }))}
+            value={form.country}
+            onChange={(value) => setForm((f) => ({ ...f, country: (value as string) || "" }))}
             isRequired
             isDisabled={submitting || isLoading}
           >
-            {COUNTRIES.map((c) => (
-              <SelectItem key={c.code}>
-                {c.name}
-              </SelectItem>
-            ))}
+            <Label>{t("country") || "Country"}</Label>
+            <Select.Trigger>
+              <Select.Value />
+              <Select.Indicator />
+            </Select.Trigger>
+            <Select.Popover>
+              <ListBox>
+                {COUNTRIES.map((c) => (
+                  <ListBox.Item key={c.code} id={c.code} textValue={c.name}>
+                    {c.name}
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                ))}
+              </ListBox>
+            </Select.Popover>
           </Select>
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
           <Button
             type="submit"
-            color="primary"
-            isLoading={submitting || isLoading}
+            variant="primary"
+            isPending={submitting || isLoading}
             isDisabled={!isValid || submitting || isLoading}
             fullWidth
           >
             {t("continue-to-shipping-rates") || "Continue to Shipping Options"}
           </Button>
         </form>
-      </CardBody>
+      </Card.Content>
     </Card>
   );
 }

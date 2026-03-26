@@ -34,8 +34,13 @@ export function Profile() {
   console.log(JSON.stringify(user));
 
   return (
-    <Tooltip content={user?.nickname} delay={750}>
-      <span>{user?.name}</span>
+    <Tooltip>
+      <Tooltip.Trigger>
+        <span>{user?.name}</span>
+      </Tooltip.Trigger>
+      <Tooltip.Content>
+        {user?.nickname}
+      </Tooltip.Content>
     </Tooltip>
   );
 }
@@ -90,7 +95,7 @@ export const LoginLink: FC<{
   | "danger";
   /** heroui size; defaults to 'lg' */
   size?: "sm" | "md" | "lg";
-}> = ({ text, i18nKey, color, size = "lg" }) => {
+}> = ({ text, i18nKey }) => {
   const { isAuthenticated, login } = useAuth();
   const { t } = useTranslation();
 
@@ -102,8 +107,6 @@ export const LoginLink: FC<{
 
   return (
     <Link
-      color={color}
-      size={size}
       onPress={() => {
         login();
       }}
@@ -147,26 +150,28 @@ export const LogoutButton: FC<LogoutButtonProps> = ({
 
   return (
     (isAuthenticated || showButtonIfNotAuthenticated) && (
-      <Tooltip
-        content={`${user?.name || ""}\n${user?.nickname || ""}\n${user?.email || ""}\n${user?.sub || ""} `}
-        delay={750}
-      >
-        <Button
-          className="text-sm font-normal text-default-600 bg-default-100"
-          type="button"
-          onPress={() => {
-            logout({
-              logoutParams: {
-                returnTo: new URL(
-                  import.meta.env.BASE_URL || "/",
-                  window.location.origin,
-                ).toString(),
-              },
-            });
-          }}
-        >
-          <span>{text}</span>
-        </Button>
+      <Tooltip>
+        <Tooltip.Trigger>
+          <Button
+            className="text-sm font-normal text-default-600 bg-default-100"
+            type="button"
+            onPress={() => {
+              logout({
+                logoutParams: {
+                  returnTo: new URL(
+                    import.meta.env.BASE_URL || "/",
+                    window.location.origin,
+                  ).toString(),
+                },
+              });
+            }}
+          >
+            <span>{text}</span>
+          </Button>
+        </Tooltip.Trigger>
+        <Tooltip.Content>
+          {`${user?.name || ""}\n${user?.nickname || ""}\n${user?.email || ""}\n${user?.sub || ""} `}
+        </Tooltip.Content>
       </Tooltip>
     )
   );
@@ -203,8 +208,6 @@ export const LogoutLink: FC<LogoutLinkProps & { i18nKey?: string }> = ({
   showButtonIfNotAuthenticated = false,
   text,
   i18nKey,
-  color,
-  size = "lg",
 }) => {
   const { isAuthenticated, logout, user } = useAuth();
   const { t } = useTranslation();
@@ -221,8 +224,6 @@ export const LogoutLink: FC<LogoutLinkProps & { i18nKey?: string }> = ({
 
   return (
     <Link
-      color={color}
-      size={size}
       onPress={() => {
         logout({
           logoutParams: {

@@ -18,7 +18,7 @@
 
 import { FC, useState, useEffect } from "react";
 import { VisuallyHidden } from "@react-aria/visually-hidden";
-import { SwitchProps, useSwitch } from "@heroui/react";
+import { Switch } from "@heroui/react";
 import { clsx } from "clsx";
 import { useTranslation } from "react-i18next";
 
@@ -27,81 +27,56 @@ import { SunFilledIcon, MoonFilledIcon } from "@/components/icons";
 
 export interface ThemeSwitchProps {
   className?: string;
-  classNames?: SwitchProps["classNames"];
 }
 
-export const ThemeSwitch: FC<ThemeSwitchProps> = ({
-  className,
-  classNames,
-}) => {
+export const ThemeSwitch: FC<ThemeSwitchProps> = ({ className }) => {
   const { t } = useTranslation();
-
   const [isMounted, setIsMounted] = useState(false);
-
   const { theme, toggleTheme } = useTheme();
 
-  const onChange = toggleTheme;
-
-  const {
-    Component,
-    slots,
-    isSelected,
-    getBaseProps,
-    getInputProps,
-    getWrapperProps,
-  } = useSwitch({
-    isSelected: theme === "light",
-    onChange,
-  });
+  // Sync the switch state with current theme
+  const isLightMode = theme === "light";
 
   useEffect(() => {
     setIsMounted(true);
-  }, [isMounted]);
+  }, []);
 
   // Prevent Hydration Mismatch
   if (!isMounted) return <div className="w-6 h-6" />;
 
   return (
-    <Component
+    <Switch
+      isSelected={isLightMode}
+      onChange={toggleTheme}
       aria-label={
-        isSelected ? t("switch-to-dark-mode") : t("switch-to-light-mode")
+        isLightMode ? t("switch-to-dark-mode") : t("switch-to-light-mode")
       }
-      {...getBaseProps({
-        className: clsx(
-          "px-px transition-opacity hover:opacity-80 cursor-pointer",
-          className,
-          classNames?.base,
-        ),
-      })}
+      className={clsx(
+        "px-px transition-opacity hover:opacity-80 cursor-pointer",
+        className,
+      )}
     >
-      <VisuallyHidden>
-        <input {...getInputProps()} />
-      </VisuallyHidden>
-      <div
-        {...getWrapperProps()}
-        className={slots.wrapper({
-          class: clsx(
-            [
-              "w-auto h-auto",
-              "bg-transparent",
-              "rounded-lg",
-              "flex items-center justify-center",
-              "group-data-[selected=true]:bg-transparent",
-              "!text-default-500",
-              "pt-px",
-              "px-0",
-              "mx-0",
-            ],
-            classNames?.wrapper,
-          ),
-        })}
-      >
-        {isSelected ? (
-          <MoonFilledIcon size={22} />
-        ) : (
-          <SunFilledIcon size={22} />
-        )}
-      </div>
-    </Component>
+      <Switch.Control>
+        <Switch.Thumb>
+          <VisuallyHidden>
+            <input
+              type="checkbox"
+              checked={isLightMode}
+              onChange={toggleTheme}
+              aria-hidden="true"
+            />
+          </VisuallyHidden>
+        </Switch.Thumb>
+      </Switch.Control>
+      <Switch.Content>
+        <div className="flex items-center justify-center">
+          {isLightMode ? (
+            <MoonFilledIcon size={22} />
+          ) : (
+            <SunFilledIcon size={22} />
+          )}
+        </div>
+      </Switch.Content>
+    </Switch>
   );
 };

@@ -7,7 +7,8 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../authentication/providers/use-auth';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Input, Card, CardBody, CardHeader, Button } from '@heroui/react';
+import { TextField, Label, Input, Card, Button } from '@heroui/react';
+import { X } from 'lucide-react';
 
 /**
  * Customer login page using Auth0 Passwordless (email magic link).
@@ -69,12 +70,12 @@ export default function LoginPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
         <Card className="w-full max-w-md">
-          <CardHeader className="flex gap-3 justify-center">
+          <Card.Header className="flex gap-3 justify-center">
             <div className="text-center">
               <h1 className="text-2xl font-bold">{t('login-check-email')}</h1>
             </div>
-          </CardHeader>
-          <CardBody className="gap-4">
+          </Card.Header>
+          <Card.Content className="gap-4">
             <div className="text-center space-y-4">
               <p className="text-gray-600">
                 {t('login-sent-link')}
@@ -92,7 +93,7 @@ export default function LoginPage() {
                   {t('login-didnt-receive')}
                 </p>
                 <Button
-                  variant="light"
+                  variant="tertiary"
                   onClick={() => {
                     setSent(false);
                     setEmail('');
@@ -103,7 +104,7 @@ export default function LoginPage() {
                 </Button>
               </div>
             </div>
-          </CardBody>
+          </Card.Content>
         </Card>
       </div>
     );
@@ -112,31 +113,45 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="flex gap-3 flex-col justify-center">
+        <Card.Header className="flex gap-3 flex-col justify-center">
           <div className="text-center">
             <h1 className="text-3xl font-bold">{t('login-title')}</h1>
             <p className="text-gray-500 mt-2">
               {t('login-subtitle')}
             </p>
           </div>
-        </CardHeader>
+        </Card.Header>
 
-        <CardBody className="gap-6">
+        <Card.Content className="gap-6">
           <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <Input
-                type="email"
-                label={t('login-email')}
-                placeholder={t('login-enter-email')}
-                value={email}
-                onValueChange={setEmail}
-                disabled={loading}
-                isRequired
-                isClearable
-                onClear={() => setEmail('')}
-                className="w-full"
-              />
-            </div>
+            <TextField 
+              name="email" 
+              type="email"
+              isRequired
+              isInvalid={!!error}
+              className="w-full"
+            >
+              <Label>{t('login-email')}</Label>
+              <div className="flex items-center">
+                <Input 
+                  placeholder={t('login-enter-email')}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                  fullWidth
+                />
+                {email && (
+                  <button
+                    type="button"
+                    onClick={() => setEmail('')}
+                    className="ml-2 p-1 text-gray-400 hover:text-gray-600"
+                    aria-label="Clear email"
+                  >
+                    <X size={18} />
+                  </button>
+                )}
+              </div>
+            </TextField>
 
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3">
@@ -146,10 +161,9 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              color="primary"
               className="w-full font-semibold"
-              disabled={loading || !email}
-              isLoading={loading}
+              isDisabled={loading || !email}
+              isPending={loading}
             >
               {loading
                 ? t('login-sending')
@@ -171,7 +185,7 @@ export default function LoginPage() {
               {t('login-signup-auto')}
             </p>
           </div>
-        </CardBody>
+        </Card.Content>
       </Card>
     </div>
   );

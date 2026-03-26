@@ -25,7 +25,7 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Card, CardBody } from "@heroui/react";
+import { Card} from "@heroui/react";
 import { Spinner } from "@heroui/react";
 
 import DefaultLayout from "@/layouts/default";
@@ -55,16 +55,19 @@ export default function ProductPage() {
       <div className="px-4 py-6">
         {isLoading && (
           <div className="flex justify-center items-center py-20">
-            <Spinner size="lg" />
+            <div className="flex flex-col items-center gap-2">
+              <Spinner size="lg" />
+              <span className="text-default-500">{t("loading")}</span>
+            </div>
           </div>
         )}
 
         {isError && (
           <Card className="border-red-200 bg-red-50">
-            <CardBody className="text-red-800">
+            <Card.Content className="text-red-800">
               <p className="font-semibold mb-2">{t("error")}</p>
               <p>{error?.message || t("admin-products-loading-error")}</p>
-            </CardBody>
+            </Card.Content>
           </Card>
         )}
 
@@ -76,9 +79,9 @@ export default function ProductPage() {
 
         {!isLoading && !product && !isError && (
           <Card>
-            <CardBody className="text-center text-default-500">
+            <Card.Content className="text-center text-default-500">
               {t("admin-products-empty")}
-            </CardBody>
+            </Card.Content>
           </Card>
         )}
       </div>

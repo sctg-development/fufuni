@@ -7,15 +7,12 @@ import { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Card,
-  CardBody,
-  CardHeader,
   Spinner,
   Button,
-  Tab,
   Tabs,
   Avatar,
   Chip,
-  Divider,
+  Separator,
   Link as HeroUILink,
 } from "@heroui/react";
 import { Link } from "react-router-dom";
@@ -92,7 +89,10 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-24">
-        <Spinner label={t("loading")} size="lg" />
+        <div className="flex flex-col items-center gap-2">
+          <Spinner size="lg" />
+          <span className="text-default-500">{t("loading")}</span>
+        </div>
       </div>
     );
   }
@@ -100,7 +100,7 @@ export default function Dashboard() {
   if (!profile) {
     return (
       <Card className="border-danger-200 bg-danger-50">
-        <CardBody className="text-danger-700">{t("account-error")}</CardBody>
+        <Card.Content className="text-danger-700">{t("account-error")}</Card.Content>
       </Card>
     );
   }
@@ -112,12 +112,12 @@ export default function Dashboard() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Avatar
-              isBordered
-              color="primary"
-              name={displayName}
-              radius="lg"
+              className="border-2 border-blue-400"
+              color="default"
               size="lg"
-            />
+            >
+              {displayName.charAt(0).toUpperCase()}
+            </Avatar>
             <div>
               <h1 className="text-3xl font-bold text-default-900">
                 {t("account-welcome")}, {displayName}
@@ -128,9 +128,8 @@ export default function Dashboard() {
           <Link to="/account/preferences">
             <Button
               className="md:self-start"
-              color="primary"
               size="lg"
-              variant="flat"
+              variant="primary"
             >
               {t("account-edit")}
             </Button>
@@ -142,7 +141,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Orders */}
         <Card className="bg-linear-to-br from-blue-500/10 to-blue-600/10 border border-blue-200">
-          <CardBody className="pb-4">
+          <Card.Content className="pb-4">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm text-default-500 font-medium">
@@ -151,17 +150,17 @@ export default function Dashboard() {
                 <p className="text-4xl font-bold text-blue-600 mt-2">
                   {profile.order_count}
                 </p>
-                <Chip className="mt-3" color="primary" size="sm" variant="flat">
+                <Chip className="mt-3" color="accent" size="sm" variant="tertiary">
                   {t("account-orders-count", { count: profile.order_count })}
                 </Chip>
               </div>
             </div>
-          </CardBody>
+          </Card.Content>
         </Card>
 
         {/* Total Spent */}
         <Card className="bg-linear-to-br from-green-500/10 to-green-600/10 border border-green-200">
-          <CardBody className="pb-4">
+          <Card.Content className="pb-4">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm text-default-500 font-medium">
@@ -175,21 +174,21 @@ export default function Dashboard() {
                 className="font-semibold"
                 color="success"
                 size="lg"
-                variant="flat"
+                variant="tertiary"
               >
                 {t("account-total-spent-status")}
               </Chip>
             </div>
-          </CardBody>
+          </Card.Content>
         </Card>
 
         {/* Saved Carts */}
         <Card
-          isPressable
+          
           className="bg-linear-to-br from-purple-500/10 to-purple-600/10 border border-purple-200 cursor-pointer hover:border-purple-400 transition-colors"
-          onPress={() => setSelectedTab("saved-carts")}
+          onClick={() => setSelectedTab("saved-carts")}
         >
-          <CardBody className="pb-4">
+          <Card.Content className="pb-4">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm text-default-500 font-medium">
@@ -200,24 +199,24 @@ export default function Dashboard() {
                 </p>
                 <Chip
                   className="mt-3"
-                  color="secondary"
+                  color="default"
                   size="sm"
-                  variant="flat"
+                  variant="tertiary"
                 >
                   {t("account-saved-carts-count", { count: savedCartsCount })}
                 </Chip>
               </div>
             </div>
-          </CardBody>
+          </Card.Content>
         </Card>
 
         {/* Wishlist */}
         <Card
-          isPressable
+          
           className="bg-linear-to-br from-pink-500/10 to-pink-600/10 border border-pink-200 cursor-pointer hover:border-pink-400 transition-colors"
-          onPress={() => setSelectedTab("wishlist")}
+          onClick={() => setSelectedTab("wishlist")}
         >
-          <CardBody className="pb-4">
+          <Card.Content className="pb-4">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm text-default-500 font-medium">
@@ -226,43 +225,61 @@ export default function Dashboard() {
                 <p className="text-4xl font-bold text-pink-600 mt-2">
                   {wishlist.length}
                 </p>
-                <Chip className="mt-3" color="danger" size="sm" variant="flat">
+                <Chip className="mt-3" color="danger" size="sm" variant="tertiary">
                   {t("account-wishlist-count", { count: wishlist.length })}
                 </Chip>
               </div>
             </div>
-          </CardBody>
+          </Card.Content>
         </Card>
       </div>
 
       {/* Tabbed Content Area */}
       <Card className="border border-default-200">
-        <CardBody className="p-0">
+        <Card.Content className="p-0">
           <Tabs
             aria-label={t("account-dashboard-tabs")}
-            classNames={{
-              tabList: "grid w-full grid-cols-1 md:grid-cols-4",
-              tab: "text-center font-semibold",
-              tabContent: "group-data-[selected=true]:font-bold",
-            }}
             selectedKey={selectedTab}
             onSelectionChange={(key) => setSelectedTab(key as string)}
           >
-            {/* Overview Tab */}
-            <Tab key="overview" title={t("account-overview")}>
-              {" "}
+            <Tabs.ListContainer>
+              <Tabs.List className="grid w-full grid-cols-1 md:grid-cols-4">
+                <Tabs.Tab id="overview" className="text-center font-semibold">
+                  {t("account-overview")}
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+
+                <Tabs.Tab id="saved-carts" className="text-center font-semibold">
+                  {t("account-saved-carts-tab", { count: savedCartsCount })}
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+
+                <Tabs.Tab id="wishlist" className="text-center font-semibold">
+                  {t("account-wishlist-tab", { count: wishlist.length })}
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+
+                <Tabs.Tab id="recent-orders" className="text-center font-semibold">
+                  {t("account-recent-orders-tab", { count: profile.order_count })}
+                  <Tabs.Indicator />
+                </Tabs.Tab>
+              </Tabs.List>
+            </Tabs.ListContainer>
+
+            {/* Overview Panel */}
+            <Tabs.Panel id="overview">
               <div className="space-y-6 py-6 px-6">
                 {/* Last Order Card */}
                 <Card className="border border-default-100">
-                  <CardHeader className="flex gap-3 items-center">
+                  <Card.Header className="flex gap-3 items-center">
                     <div className="flex flex-col">
                       <p className="text-lg font-semibold">
                         {t("account-last-order")}
                       </p>
                     </div>
-                  </CardHeader>
-                  <Divider />
-                  <CardBody>
+                  </Card.Header>
+                  <Separator />
+                  <Card.Content>
                     {profile.order_count === 0 ? (
                       <div className="text-center py-8">
                         <p className="text-default-500 text-lg">
@@ -271,8 +288,7 @@ export default function Dashboard() {
                         <Link to="/">
                           <Button
                             className="mt-4"
-                            color="primary"
-                            variant="flat"
+                            variant="primary"
                           >
                             {t("start-shopping")}
                           </Button>
@@ -297,80 +313,68 @@ export default function Dashboard() {
                         <Link to="/account/orders">
                           <Button
                             className="w-full mt-4"
-                            color="primary"
-                            variant="light"
+                            variant="tertiary"
                           >
                             {t("account-view-all")}
                           </Button>
                         </Link>
                       </div>
                     )}
-                  </CardBody>
+                  </Card.Content>
                 </Card>
 
                 {/* Quick Links */}
                 <Card className="border border-default-100">
-                  <CardHeader>
+                  <Card.Header>
                     <p className="text-lg font-semibold">
                       {t("quick-actions")}
                     </p>
-                  </CardHeader>
-                  <Divider />
-                  <CardBody>
+                  </Card.Header>
+                  <Separator />
+                  <Card.Content>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <Link to="/account/orders">
-                        <Button className="w-full" variant="flat">
+                        <Button className="w-full" variant="primary">
                           {t("account-orders")}
                         </Button>
                       </Link>
                       <Link to="/account/addresses">
-                        <Button className="w-full" variant="flat">
+                        <Button className="w-full" variant="primary">
                           {t("account-addresses")}
                         </Button>
                       </Link>
                       <Link to="/account/preferences">
-                        <Button className="w-full" variant="flat">
+                        <Button className="w-full" variant="primary">
                           {t("account-preferences")}
                         </Button>
                       </Link>
                       <Link to="/">
-                        <Button className="w-full" variant="flat">
+                        <Button className="w-full" variant="primary">
                           {t("continue-shopping")}
                         </Button>
                       </Link>
                     </div>
-                  </CardBody>
+                  </Card.Content>
                 </Card>
               </div>
-            </Tab>
+            </Tabs.Panel>
 
-            {/* Saved Carts Tab */}
-            <Tab
-              key="saved-carts"
-              title={t("account-saved-carts-tab", { count: savedCartsCount })}
-            >
+            {/* Saved Carts Panel */}
+            <Tabs.Panel id="saved-carts">
               <div className="py-6 px-6">
                 <SavedCartsManager />
               </div>
-            </Tab>
+            </Tabs.Panel>
 
-            {/* Wishlist Tab */}
-            <Tab
-              key="wishlist"
-              title={t("account-wishlist-tab", { count: wishlist.length })}
-            >
+            {/* Wishlist Panel */}
+            <Tabs.Panel id="wishlist">
               <div className="py-6 px-6">
                 <WishlistManager />
               </div>
-            </Tab>
+            </Tabs.Panel>
 
-            {/* Recent Orders Tab */}
-            <Tab
-              key="recent-orders"
-              title={t("account-recent-orders-tab", {
-                count: profile.order_count,
-              })}
-            >
+            {/* Recent Orders Panel */}
+            <Tabs.Panel id="recent-orders">
               <div className="py-6 px-6">
                 {profile.order_count === 0 ? (
                   <div className="text-center py-12">
@@ -378,7 +382,7 @@ export default function Dashboard() {
                       {t("account-no-orders")}
                     </p>
                     <Link to="/">
-                      <Button color="primary" variant="flat">
+                      <Button variant="primary">
                         {t("start-shopping")}
                       </Button>
                     </Link>
@@ -389,28 +393,28 @@ export default function Dashboard() {
                       {t("account-orders-summary-info")}
                     </p>
                     <Link to="/account/orders">
-                      <Button className="w-full" color="primary" variant="flat">
+                      <Button className="w-full" variant="primary">
                         {t("account-view-all")}
                       </Button>
                     </Link>
                   </div>
                 )}
               </div>
-            </Tab>
+            </Tabs.Panel>
           </Tabs>
-        </CardBody>
+        </Card.Content>
       </Card>
 
       {/* Bottom Info */}
       <Card className="bg-default-50 border border-default-200">
-        <CardBody className="py-4">
+        <Card.Content className="py-4">
           <p className="text-sm text-default-500 text-center">
             {t("account-help-text")} &nbsp;
-            <HeroUILink className="font-semibold" color="primary" href="#">
+            <HeroUILink className="font-semibold text-blue-600" href="#">
               {t("help-center")}
             </HeroUILink>
           </p>
-        </CardBody>
+        </Card.Content>
       </Card>
     </div>
   );

@@ -18,7 +18,6 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { button as buttonStyles } from "@heroui/react";
 import { useTranslation } from "react-i18next";
 
 import DefaultLayout from "@/layouts/default";
@@ -127,10 +126,10 @@ export default function SuccessPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link className={buttonStyles({ color: "primary", radius: "full" })} to="/">
+              <Link className="inline-block px-6 py-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/80 font-semibold" to="/">
                 {t("continue-shopping")}
               </Link>
-              <Link className={buttonStyles({ variant: "bordered", radius: "full" })} to="/cart">
+              <Link className="inline-block px-6 py-2 rounded-full border-2 border-current hover:bg-default-100 font-semibold" to="/cart">
                 {t("view-cart")}
               </Link>
             </div>
@@ -171,10 +170,10 @@ export default function SuccessPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link className={buttonStyles({ color: "primary", radius: "full" })} to="/">
+            <Link className="inline-block px-6 py-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/80 font-semibold" to="/">
               {t("continue-shopping")}
             </Link>
-            <Link className={buttonStyles({ variant: "bordered", radius: "full" })} to="/cart">
+            <Link className="inline-block px-6 py-2 rounded-full border-2 border-current hover:bg-default-100 font-semibold" to="/cart">
               {t("view-cart")}
             </Link>
           </div>
@@ -305,10 +304,10 @@ export default function SuccessPage() {
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Link className={buttonStyles({ color: "primary", radius: "full" })} to="/">
+          <Link className="inline-block px-6 py-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/80 font-semibold" to="/">
             {t("continue-shopping")}
           </Link>
-          <Link className={buttonStyles({ variant: "bordered", radius: "full" })} to="/cart">
+          <Link className="inline-block px-6 py-2 rounded-full border-2 border-current hover:bg-default-100 font-semibold" to="/cart">
             {t("view-cart")}
           </Link>
         </div>

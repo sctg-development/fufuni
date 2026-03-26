@@ -85,23 +85,28 @@ export function WishlistButton({
 
   return (
     <>
-      <Tooltip content={tooltipContent} delay={500}>
-        <Button
-          isIconOnly={isIconOnly}
-          className={`${
-            isFav ? 'text-red-500' : 'text-default-400'
-          } hover:text-red-500 transition-colors`}
-          variant="light"
-          size={size}
-          isLoading={isLoading}
-          onPress={onWishlistToggle}
-        >
-          <Heart
-            className="w-5 h-5"
-            fill={isFav ? 'currentColor' : 'none'}
-            strokeWidth={2}
-          />
-        </Button>
+      <Tooltip>
+        <Tooltip.Trigger>
+          <Button
+            isIconOnly={isIconOnly}
+            className={`${
+              isFav ? 'text-red-500' : 'text-default-400'
+            } hover:text-red-500 transition-colors`}
+            variant="tertiary"
+            size={size}
+            isPending={isLoading}
+            onPress={onWishlistToggle}
+          >
+            <Heart
+              className="w-5 h-5"
+              fill={isFav ? 'currentColor' : 'none'}
+              strokeWidth={2}
+            />
+          </Button>
+        </Tooltip.Trigger>
+        <Tooltip.Content>
+          {tooltipContent}
+        </Tooltip.Content>
       </Tooltip>
 
       <LoginModal

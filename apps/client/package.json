@@ -18,7 +18,8 @@
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.15.0",
-    "@heroui/react": "^2.8.10",
+    "@heroui/react": "^3.0.1",
+    "@heroui/styles": "^3.0.1",
     "@react-aria/visually-hidden": "3.8.30",
     "@react-types/shared": "^3.33.0",
     "@tailwindcss/postcss": "^4.2.1",
@@ -28,7 +29,6 @@
     "@tiptap/react": "^3.20.1",
     "@tiptap/starter-kit": "^3.20.1",
     "clsx": "^2.1.1",
-    "framer-motion": "12.34.3",
     "i18next": "^25.8.13",
     "i18next-http-backend": "^3.0.2",
     "jose": "^6.2.1",

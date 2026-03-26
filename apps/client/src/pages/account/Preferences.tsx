@@ -7,16 +7,15 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Card,
-  CardBody,
-  CardHeader,
   Spinner,
   Button,
   Input,
+  TextField,
+  Label,
   Select,
-  SelectItem,
+  ListBox,
   Switch,
-  Divider,
-} from "@heroui/react";
+  Separator} from "@heroui/react";
 
 import { useAuth } from "../../authentication/providers/use-auth";
 
@@ -106,7 +105,10 @@ export default function Preferences() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <Spinner label={t("loading")} />
+        <div className="flex flex-col items-center gap-2">
+          <Spinner />
+          <span className="text-default-500">{t("loading")}</span>
+        </div>
       </div>
     );
   }
@@ -114,7 +116,7 @@ export default function Preferences() {
   if (!profile) {
     return (
       <Card>
-        <CardBody>{t("account-error")}</CardBody>
+        <Card.Content>{t("account-error")}</Card.Content>
       </Card>
     );
   }
@@ -125,66 +127,73 @@ export default function Preferences() {
 
       {/* Profile Section */}
       <Card>
-        <CardHeader>
+        <Card.Header>
           <h2 className="text-lg font-semibold">{t("account-profile-info")}</h2>
-        </CardHeader>
-        <Divider />
-        <CardBody className="gap-4">
-          <Input
-            disabled
-            description={t(
-              "account-email-cannot-change",
-              "Email cannot be changed",
-            )}
-            label={t("account-email")}
-            value={profile.email}
-          />
+        </Card.Header>
+        <Separator />
+        <Card.Content className="gap-4">
+          <TextField isDisabled>
+            <Label>{t("account-email")}</Label>
+            <Input value={profile.email} />
+          </TextField>
 
-          <Input
-            label={t("account-name")}
-            placeholder={t("account-enter-name")}
-            value={formData.name || ""}
-            onValueChange={(value) => setFormData({ ...formData, name: value })}
-          />
+          <TextField>
+            <Label>{t("account-name")}</Label>
+            <Input
+              placeholder={t("account-enter-name")}
+              value={formData.name || ""}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            />
+          </TextField>
 
-          <Input
-            label={t("account-phone")}
-            placeholder={t("account-enter-phone")}
-            type="tel"
-            value={formData.phone || ""}
-            onValueChange={(value) =>
-              setFormData({ ...formData, phone: value })
-            }
-          />
+          <TextField>
+            <Label>{t("account-phone")}</Label>
+            <Input
+              placeholder={t("account-enter-phone")}
+              type="tel"
+              value={formData.phone || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
+            />
+          </TextField>
 
           <Select
-            label={t("account-language")}
-            selectedKeys={formData.locale ? [formData.locale] : ["en-US"]}
-            onSelectionChange={(keys) => {
-              const selected = Array.from(keys)[0] as string;
-
-              setFormData({ ...formData, locale: selected });
+            value={formData.locale || "en-US"}
+            onChange={(value) => {
+              setFormData({ ...formData, locale: (value as string) || "en-US" });
             }}
           >
-            {availableLanguages.map((locale) => (
-              <SelectItem key={locale.code}>{locale.nativeName}</SelectItem>
-            ))}
+            <Label>{t("account-language")}</Label>
+            <Select.Trigger>
+              <Select.Value />
+              <Select.Indicator />
+            </Select.Trigger>
+            <Select.Popover>
+              <ListBox>
+                {availableLanguages.map((locale) => (
+                  <ListBox.Item key={locale.code} id={locale.code} textValue={locale.nativeName}>
+                    {locale.nativeName}
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                ))}
+              </ListBox>
+            </Select.Popover>
           </Select>
-        </CardBody>
+        </Card.Content>
       </Card>
 
       {/* Communication Preferences */}
       <Card>
-        <CardHeader>
+        <Card.Header>
           <h2 className="text-lg font-semibold">
             {t("account-communication")}
           </h2>
-        </CardHeader>
-        <Divider />
-        <CardBody className="gap-4">
+        </Card.Header>
+        <Separator />
+        <Card.Content className="gap-4">
           <div className="flex justify-between items-center">
             <div>
-              <p className="font-semibold">{t("account-marketing-emails")}</p>
               <p className="text-sm text-gray-500">
                 {t(
                   "account-marketing-emails-desc",
@@ -200,17 +209,23 @@ export default function Preferences() {
                   accepts_marketing: e ? 1 : 0,
                 })
               }
-            />
+            >
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+              <Switch.Content>
+                <Label>{t("account-marketing-emails")}</Label>
+              </Switch.Content>
+            </Switch>
           </div>
-        </CardBody>
+        </Card.Content>
       </Card>
 
       {/* Save Button */}
       <div className="flex gap-2">
         <Button
-          color="primary"
-          disabled={saving}
-          isLoading={saving}
+          isDisabled={saving}
+          isPending={saving}
           onClick={handleSave}
         >
           {t("account-save-changes")}

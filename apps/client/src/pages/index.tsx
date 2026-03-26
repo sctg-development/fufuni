@@ -16,9 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { LinkUniversal } from "@/components/link-universal";
-import { button as buttonStyles } from "@heroui/react";
 import { Trans, useTranslation } from "react-i18next";
+import { Link as RouterLink, useSearchParams } from "react-router-dom";
 
 import { useAuth } from "@/authentication";
 import { LoginButton, LogoutButton } from "@/authentication";
@@ -31,7 +30,6 @@ import { useState } from "react";
 
 import { StoreProduct, searchProducts, getProducts } from "@/lib/store-api";
 import { ProductCard } from "@/components/product-card";
-import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
 
@@ -86,25 +84,23 @@ export default function IndexPage() {
 
         {/* call-to-action buttons */}
         <div className="flex gap-3">
-          <LinkUniversal
-            isExternal
-            className={buttonStyles({
-              color: "primary",
-              radius: "full",
-              variant: "shadow",
-            })}
+          <a
             href={siteConfig().links.docs}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-6 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full font-semibold hover:opacity-90 shadow-lg transition-opacity"
           >
             <Trans i18nKey="documentation" />
-          </LinkUniversal>
-          <LinkUniversal
-            isExternal
-            className={buttonStyles({ variant: "bordered", radius: "full" })}
+          </a>
+          <a
             href={siteConfig().links.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-6 py-2 border border-current rounded-full font-semibold hover:bg-default-100 transition-colors flex items-center gap-2"
           >
             <GithubIcon size={20} />
             GitHub
-          </LinkUniversal>
+          </a>
         </div>
 
         {/* dynamic area depending on auth state */}
@@ -116,15 +112,12 @@ export default function IndexPage() {
                 <Trans i18nKey="template_login_prompt" />
               </p>
               <div className="mt-2">
-                <LinkUniversal
-                  className={buttonStyles({
-                    variant: "bordered",
-                    radius: "full",
-                  })}
-                  href="/openapi"
+                <RouterLink
+                  to="/openapi"
+                  className="px-6 py-2 border border-current rounded-full font-semibold hover:bg-default-100 transition-colors inline-block"
                 >
                   {t("openapi-docs")}
-                </LinkUniversal>
+                </RouterLink>
                 <p className="text-xs mt-1 opacity-70">
                   <Trans i18nKey="template_login_required" />
                 </p>
@@ -139,24 +132,18 @@ export default function IndexPage() {
                 />
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center mt-4">
-                <LinkUniversal
-                  className={buttonStyles({
-                    variant: "bordered",
-                    radius: "full",
-                  })}
-                  href="/api"
+                <RouterLink
+                  to="/api"
+                  className="px-6 py-2 border border-current rounded-full font-semibold hover:bg-default-100 transition-colors inline-block"
                 >
                   {t("api")}
-                </LinkUniversal>
-                <LinkUniversal
-                  className={buttonStyles({
-                    variant: "bordered",
-                    radius: "full",
-                  })}
-                  href="/openapi"
+                </RouterLink>
+                <RouterLink
+                  to="/openapi"
+                  className="px-6 py-2 border border-current rounded-full font-semibold hover:bg-default-100 transition-colors inline-block"
                 >
                   {t("openapi-docs")}
-                </LinkUniversal>
+                </RouterLink>
               </div>
               <div className="mt-4">
                 <LogoutButton text={t("log-out")} />

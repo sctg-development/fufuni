@@ -19,12 +19,10 @@ import { type FC, useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
+  Button,
+  Tooltip,
+  Label,
 } from "@heroui/react";
-import { Button } from "@heroui/react";
-import { Tooltip } from "@heroui/react";
 
 import { type AvailableLanguage } from "@/i18n";
 import { type IconSvgProps } from "@/types";
@@ -151,44 +149,50 @@ export const LanguageSwitch: FC<LanguageSwitchProps> = ({
   };
 
   return (
-    <Tooltip content={t("language")} delay={750}>
-      <div className="flex gap-1">
-        <Dropdown>
-          <DropdownTrigger>
-            <Button aria-label={t("language")} variant="light">
-              <Icon className="text-default-500" size={24} />
-            </Button>
-          </DropdownTrigger>
-          <DropdownMenu aria-label={t("language")}>
-            {availableLanguages.map((languageIdentifier) => {
-              // Construct the language switch component with the language code
-              const isSelected = language === languageIdentifier.code;
+    <Tooltip>
+      <Tooltip.Trigger>
+        <div className="flex gap-1">
+          <Dropdown>
+            <Dropdown.Trigger>
+              <Button aria-label={t("language")} variant="secondary">
+                <Icon className="text-default-500" size={24} />
+              </Button>
+            </Dropdown.Trigger>
+            <Dropdown.Popover>
+              <Dropdown.Menu aria-label={t("language")}>
+                {availableLanguages.map((languageIdentifier) => {
+                  // Construct the language switch component with the language code
+                  const isSelected = language === languageIdentifier.code;
 
-              return (
-                <DropdownItem
-                  key={languageIdentifier.code}
-                  aria-label={`${t("language")}: ${languageIdentifier}`}
-                  aria-selected={isSelected}
-                >
-                  <button
-                    key={languageIdentifier.code}
-                    className={`${isSelected ? "text-primary" : "text-default-600"} w-full flex items-center justify-between`}
-                    type="button"
-                    onClick={() => changeLanguage(languageIdentifier.code)}
-                  >
-                    <span>{languageIdentifier.nativeName}</span>
-                    <span>
-                      {getShortLanguage(
-                        languageIdentifier.code,
-                      ).toLocaleUpperCase()}
-                    </span>
-                  </button>
-                </DropdownItem>
-              );
-            })}
-          </DropdownMenu>
-        </Dropdown>
-      </div>
+                  return (
+                    <Dropdown.Item
+                      key={languageIdentifier.code}
+                      id={languageIdentifier.code}
+                      textValue={languageIdentifier.nativeName}
+                      aria-label={`${t("language")}: ${languageIdentifier}`}
+                      aria-selected={isSelected}
+                      onPress={() => changeLanguage(languageIdentifier.code)}
+                      className={`${isSelected ? "text-primary" : "text-default-600"}`}
+                    >
+                      <Label className="w-full flex items-center justify-between">
+                        <span>{languageIdentifier.nativeName}</span>
+                        <span>
+                          {getShortLanguage(
+                            languageIdentifier.code,
+                          ).toLocaleUpperCase()}
+                        </span>
+                      </Label>
+                    </Dropdown.Item>
+                  );
+                })}
+              </Dropdown.Menu>
+            </Dropdown.Popover>
+          </Dropdown>
+        </div>
+      </Tooltip.Trigger>
+      <Tooltip.Content>
+        {t("language")}
+      </Tooltip.Content>
     </Tooltip>
   );
 };

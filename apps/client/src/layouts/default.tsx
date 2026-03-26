@@ -158,10 +158,9 @@ export default function DefaultLayout({
       </main>
       <footer className="w-full flex items-center justify-center py-3">
         <Link
-          isExternal
+          target="_blank"
           className="flex items-center gap-1 text-current"
           href="https://github.com/sctg-development/fufuni"
-          title={t("vite-react-heroui-auth0-template")}
         >
           <span className="text-default-600">
             <Trans ns="base">powered-by</Trans>

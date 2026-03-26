@@ -6,11 +6,9 @@
 import { useMemo } from "react";
 import {
   Card,
-  CardBody,
   Button,
   Link as HeroUILink,
-  Input,
-} from "@heroui/react";
+  Input} from "@heroui/react";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -33,7 +31,7 @@ export function WishlistManager() {
   if (wishlist.length === 0) {
     return (
       <Card className="border border-default-200 bg-default-50">
-        <CardBody className="py-12 text-center">
+        <Card.Content className="py-12 text-center">
           <div className="space-y-4">
             <p className="text-5xl">❤️</p>
             <p className="text-lg font-semibold text-default-700">
@@ -43,12 +41,12 @@ export function WishlistManager() {
               Ajoutez des produits à vos favoris pour les retrouver facilement
             </p>
             <HeroUILink href="/" className="mt-4">
-              <Button color="primary" variant="flat">
+              <Button variant="primary">
                 Découvrir nos produits
               </Button>
             </HeroUILink>
           </div>
-        </CardBody>
+        </Card.Content>
       </Card>
     );
   }
@@ -57,7 +55,7 @@ export function WishlistManager() {
     <div className="space-y-6">
       {/* Summary Card */}
       <Card className="bg-linear-to-br from-pink-500/10 to-pink-600/10 border border-pink-200">
-        <CardBody>
+        <Card.Content>
           <div className="flex justify-between items-center">
             <div>
               <p className="text-sm text-default-600 font-medium">Favoris</p>
@@ -74,19 +72,19 @@ export function WishlistManager() {
               </p>
             </div>
           </div>
-        </CardBody>
+        </Card.Content>
       </Card>
 
       {/* Search Bar */}
-      <Input
-        isClearable
-        radius="lg"
-        placeholder="Rechercher dans vos favoris..."
-        startContent={<span className="text-default-400">🔍</span>}
-        value={searchTerm}
-        onValueChange={setSearchTerm}
-        onClear={() => setSearchTerm("")}
-      />
+      <div className="relative">
+        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-default-400">🔍</span>
+        <Input
+          className="rounded-lg pl-10"
+          placeholder="Rechercher dans vos favoris..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
 
       {/* Results Info */}
       <div className="flex justify-between items-center px-2">
@@ -98,7 +96,7 @@ export function WishlistManager() {
         {searchTerm && (
           <Button
             size="sm"
-            variant="light"
+            variant="tertiary"
             onPress={() => setSearchTerm("")}
           >
             Réinitialiser
@@ -114,7 +112,7 @@ export function WishlistManager() {
               key={idx}
               className="border border-default-200 hover:border-pink-300 transition-colors"
             >
-              <CardBody className="flex-row justify-between items-center py-4">
+              <Card.Content className="flex-row justify-between items-center py-4">
                 <div className="flex items-center gap-4 flex-1">
                   {/* Product Icon */}
                   <div className="shrink-0 w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
@@ -137,62 +135,58 @@ export function WishlistManager() {
                   <Link to={`/products/${productId}`}>
                     <Button
                       isIconOnly
-                      color="primary"
-                      variant="light"
+                      variant="tertiary"
                       size="sm"
-                      title="Voir le produit"
                     >
                       👁️
                     </Button>
                   </Link>
                   <Button
                     isIconOnly
-                    color="danger"
-                    variant="flat"
+                    variant="danger"
                     size="sm"
-                    isLoading={isLoading}
+                    isPending={isLoading}
                     onPress={() => toggle(productId)}
-                    title="Retirer des favoris"
                   >
                     💔
                   </Button>
                 </div>
-              </CardBody>
+              </Card.Content>
             </Card>
           ))
         ) : (
           <Card className="border border-default-200 bg-default-50">
-            <CardBody className="py-8 text-center">
+            <Card.Content className="py-8 text-center">
               <p className="text-default-500">
                 Aucun produit ne correspond à votre recherche
               </p>
               <Button
                 size="sm"
-                variant="light"
+                variant="tertiary"
                 onPress={() => setSearchTerm("")}
                 className="mt-3"
               >
                 Réinitialiser la recherche
               </Button>
-            </CardBody>
+            </Card.Content>
           </Card>
         )}
       </div>
 
       {/* Actions Footer */}
       <Card className="bg-default-50 border border-default-200">
-        <CardBody className="py-4">
+        <Card.Content className="py-4">
           <div className="flex justify-between items-center">
             <p className="text-sm font-medium text-default-700">
               Gérer vos favoris
             </p>
             <HeroUILink href="/">
-              <Button size="sm" color="primary" variant="flat">
+              <Button size="sm" variant="primary">
                 Ajouter plus de produits
               </Button>
             </HeroUILink>
           </div>
-        </CardBody>
+        </Card.Content>
       </Card>
     </div>
   );

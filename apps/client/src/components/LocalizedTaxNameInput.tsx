@@ -4,8 +4,8 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Input } from '@heroui/input';
-import { Select, SelectItem } from '@heroui/select';
+import { Input, Label } from '@heroui/react';
+import { Select, ListBox } from '@heroui/react';
 import { useTranslation } from 'react-i18next';
 
 import { availableLanguages } from '@/i18n';
@@ -86,30 +86,40 @@ export function LocalizedTaxNameInput({
   );
 
   // --- Locale switch --------------------------------------------------------
-  const handleLocaleChange = useCallback((newLocale: string) => {
+  const handleLocaleChange = useCallback((selectedKey: string | number | undefined) => {
+    const newLocale = selectedKey ? String(selectedKey) : selectedLocale;
     if (onLocaleChange) {
       onLocaleChange(newLocale);
     } else {
       setInternalLocale(newLocale);
     }
-  }, [onLocaleChange]);
+  }, [selectedLocale, onLocaleChange]);
 
   return (
     <div className="flex items-center gap-2" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Language selector (hidden when controlled by parent) */}
       {!locale && (
         <Select
-          size="sm"
           className="w-36 shrink-0"
           aria-label={t('admin-common-language')}
-          selectedKeys={[selectedLocale]}
-          onSelectionChange={(keys) =>
-            handleLocaleChange(Array.from(keys).join(''))
-          }
+          value={selectedLocale}
+          onChange={(value) => handleLocaleChange(((value as string) || "") as any)}  
         >
-          {availableLanguages.map((lang) => (
-            <SelectItem key={lang.code}>{lang.nativeName}</SelectItem>
-          ))}
+          <Label>{t('admin-common-language')}</Label>
+          <Select.Trigger>
+            <Select.Value />
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover>
+            <ListBox>
+              {availableLanguages.map((lang) => (
+                <ListBox.Item key={lang.code} id={lang.code} textValue={lang.nativeName}>
+                  {lang.nativeName}
+                  <ListBox.ItemIndicator />
+                </ListBox.Item>
+              ))}
+            </ListBox>
+          </Select.Popover>
         </Select>
       )}
 
@@ -117,7 +127,7 @@ export function LocalizedTaxNameInput({
         className="flex-1"
         required={required}
         value={inputValue}
-        onValueChange={handleInputChange}
+        onChange={(e) => handleInputChange(e.target.value)}
         placeholder="e.g. VAT FR"
         dir={isRTL ? 'rtl' : 'ltr'}
       />

@@ -17,15 +17,12 @@
  */
 
 import { Button } from "@heroui/react";
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "@heroui/react";
 import { Trans, useTranslation } from "react-i18next";
 import {
   Modal,
-  ModalContent,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
+  useOverlayState,
 } from "@heroui/react";
 
 import { useCookieConsent } from "../contexts/cookie-consent-context";
@@ -37,67 +34,67 @@ import { siteConfig } from "@/config/site";
 export const CookieConsent: React.FC = () => {
   const { t } = useTranslation();
   const { cookieConsent, acceptCookies, rejectCookies } = useCookieConsent();
+  const modalState = useOverlayState();
 
   // État pour contrôler la visibilité du modal
   const isOpen = cookieConsent === "pending" && siteConfig().needCookieConsent;
 
+  useEffect(() => {
+    if (isOpen) {
+      modalState.open();
+    } else {
+      modalState.close();
+    }
+  }, [isOpen, modalState]);
+
   return (
     <Modal
-      backdrop="blur"
-      isDismissable={false}
-      isKeyboardDismissDisabled={true}
-      isOpen={isOpen}
-      motionProps={{
-        variants: {
-          enter: {
-            y: 0,
-            opacity: 1,
-            transition: {
-              duration: 0.3,
-              ease: "easeOut",
-            },
-          },
-          exit: {
-            y: 20,
-            opacity: 0,
-            transition: {
-              duration: 0.2,
-              ease: "easeIn",
-            },
-          },
-        },
-      }}
-      placement="bottom"
+      state={modalState}
     >
-      <ModalContent>
-        <ModalHeader className="text-lg font-semibold text-default-900">
-          {t("cookie-consent-title")}
-        </ModalHeader>
-        <ModalBody className="text-small font-normal text-default-700">
-          <Trans i18nKey="cookie-consent" t={t} />
-          &nbsp;
-          <Link className="text-small" href="#">
-            {t("cookie-policy")}
-          </Link>
-        </ModalBody>
-        <ModalFooter className="flex justify-end gap-2">
-          <div className="mt-4 flex items-center gap-x-1">
-            <Button
-              className={buttonGradient({ bordered: "violet" })}
-              onPress={acceptCookies}
-            >
-              {t("accept-all")}
-            </Button>
-            <Button
-              className="rounded-large"
-              variant="bordered"
-              onPress={rejectCookies}
-            >
-              {t("reject")}
-            </Button>
-          </div>
-        </ModalFooter>
-      </ModalContent>
+      <Modal.Backdrop variant="blur">
+      <Modal.Container placement="bottom">
+        <Modal.Dialog>
+          {({ close }) => (
+            <>
+              <Modal.Header className="text-lg font-semibold text-default-900">
+                {t("cookie-consent-title")}
+              </Modal.Header>
+              <Modal.Body className="text-small font-normal text-default-700">
+                <Trans i18nKey="cookie-consent" t={t} />
+                &nbsp;
+                <Link className="text-small" href="#">
+                  {t("cookie-policy")}
+                </Link>
+              </Modal.Body>
+              <Modal.Footer className="flex justify-end gap-2">
+                <div className="mt-4 flex items-center gap-x-1">
+                  <Button
+                    className={buttonGradient({ bordered: "violet" })}
+                    onPress={() => {
+                      console.log("User accepted cookies");
+                      acceptCookies();
+                      close();
+                    }}
+                  >
+                    {t("accept-all")}
+                  </Button>
+                  <Button
+                    className="rounded-large"
+                    variant="outline"
+                    onPress={() => {
+                      rejectCookies();
+                      close();
+                    }}
+                  >
+                    {t("reject")}
+                  </Button>
+                </div>
+              </Modal.Footer>
+            </>
+          )}
+        </Modal.Dialog>
+      </Modal.Container>
+      </Modal.Backdrop>
     </Modal>
   );
 };

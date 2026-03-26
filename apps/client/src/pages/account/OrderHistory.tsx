@@ -8,16 +8,10 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import {
   Card,
-  CardBody,
   Spinner,
   Button,
   Chip,
   Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
 } from "@heroui/react";
 
 import { useAuth } from "../../authentication/providers/use-auth";
@@ -108,7 +102,10 @@ export default function OrderHistory() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <Spinner label={t("loading")} />
+        <div className="flex flex-col items-center gap-2">
+          <Spinner />
+          <span className="text-default-500">{t("loading")}</span>
+        </div>
       </div>
     );
   }
@@ -119,47 +116,47 @@ export default function OrderHistory() {
 
       {orders.length === 0 ? (
         <Card>
-          <CardBody>{t("account-no-orders")}</CardBody>
+          <Card.Content>{t("account-no-orders")}</Card.Content>
         </Card>
       ) : (
         <>
           <Table>
-            <TableHeader>
-              <TableColumn>{t("account-order-number")}</TableColumn>
-              <TableColumn>{t("account-date")}</TableColumn>
-              <TableColumn>{t("account-status")}</TableColumn>
-              <TableColumn>{t("account-total")}</TableColumn>
-              <TableColumn>{t("account-actions")}</TableColumn>
-            </TableHeader>
-            <TableBody>
+            <Table.Header>
+              <Table.Column>{t("account-order-number")}</Table.Column>
+              <Table.Column>{t("account-date")}</Table.Column>
+              <Table.Column>{t("account-status")}</Table.Column>
+              <Table.Column>{t("account-total")}</Table.Column>
+              <Table.Column>{t("account-actions")}</Table.Column>
+            </Table.Header>
+            <Table.Body>
               {orders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell>{order.number}</TableCell>
-                  <TableCell>
+                <Table.Row key={order.id}>
+                  <Table.Cell>{order.number}</Table.Cell>
+                  <Table.Cell>
                     {new Date(order.created_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
+                  </Table.Cell>
+                  <Table.Cell>
                     <Chip
-                      color={STATUS_COLORS[order.status] || "default"}
+                      color={(STATUS_COLORS[order.status] as any) || "default"}
                       size="sm"
-                      variant="flat"
+                      variant="primary"
                     >
                       {order.status}
                     </Chip>
-                  </TableCell>
-                  <TableCell>
+                  </Table.Cell>
+                  <Table.Cell>
                     ${(order.total_cents / 100).toFixed(2)} {order.currency}
-                  </TableCell>
-                  <TableCell>
+                  </Table.Cell>
+                  <Table.Cell>
                     <Link to={`/account/orders/${order.number}`}>
-                      <Button size="sm" variant="light">
+                      <Button size="sm" variant="tertiary">
                         {t("account-view")}
                       </Button>
                     </Link>
-                  </TableCell>
-                </TableRow>
+                  </Table.Cell>
+                </Table.Row>
               ))}
-            </TableBody>
+            </Table.Body>
           </Table>
 
           {hasMore && (

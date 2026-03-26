@@ -6,24 +6,13 @@
 import { useMemo, useState } from "react";
 import {
   Card,
-  CardBody,
   Button,
   Chip,
-  Divider,
+  Separator,
   Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
+  useOverlayState,
   Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Link as HeroUILink,
-} from "@heroui/react";
+  Link as HeroUILink} from "@heroui/react";
 import { useSavedCarts } from "@/hooks/useSavedCarts";
 import { SavedCartSnapshot } from "@/hooks/useSavedCarts";
 import { formatMoney } from "@/utils/currency";
@@ -34,7 +23,7 @@ import { formatMoney } from "@/utils/currency";
  */
 export function SavedCartsManager() {
   const { savedCarts, toggleSavedCart, isLoading } = useSavedCarts();
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const modalState = useOverlayState();
   const [selectedCart, setSelectedCart] = useState<
     SavedCartSnapshot | null
   >(null);
@@ -49,7 +38,7 @@ export function SavedCartsManager() {
   const handleViewCart = (cart: SavedCartSnapshot | string) => {
     if (typeof cart !== "string") {
       setSelectedCart(cart);
-      onOpen();
+      modalState.open();
     }
   };
 
@@ -61,7 +50,7 @@ export function SavedCartsManager() {
   if (savedCarts.length === 0) {
     return (
       <Card className="border border-default-200 bg-default-50">
-        <CardBody className="py-12 text-center">
+        <Card.Content className="py-12 text-center">
           <div className="space-y-4">
             <p className="text-5xl">🛒</p>
             <p className="text-lg font-semibold text-default-700">
@@ -71,12 +60,12 @@ export function SavedCartsManager() {
               Sauvegardez vos paniers pour les finaliser plus tard
             </p>
             <HeroUILink href="/" className="mt-4">
-              <Button color="primary" variant="flat">
+              <Button variant="primary">
                 Découvrir nos produits
               </Button>
             </HeroUILink>
           </div>
-        </CardBody>
+        </Card.Content>
       </Card>
     );
   }
@@ -85,7 +74,7 @@ export function SavedCartsManager() {
     <div className="space-y-6">
       {/* Summary Card */}
       <Card className="bg-linear-to-br from-purple-500/10 to-purple-600/10 border border-purple-200">
-        <CardBody>
+        <Card.Content>
           <div className="flex justify-between items-center">
             <div>
               <p className="text-sm text-default-600 font-medium">
@@ -109,7 +98,7 @@ export function SavedCartsManager() {
               </p>
             </div>
           </div>
-        </CardBody>
+        </Card.Content>
       </Card>
 
       {/* Saved Carts List */}
@@ -121,7 +110,7 @@ export function SavedCartsManager() {
                 key={idx}
                 className="border border-default-200 hover:border-purple-300 transition-colors"
               >
-                <CardBody className="flex-row justify-between items-center">
+                <Card.Content className="flex-row justify-between items-center">
                   <div>
                     <p className="font-semibold">{cart}</p>
                     <p className="text-sm text-default-500">ID de panier</p>
@@ -129,16 +118,15 @@ export function SavedCartsManager() {
                   <div className="flex gap-2">
                     <Button
                       isIconOnly
-                      variant="light"
-                      color="danger"
+                      variant="danger"
                       size="sm"
-                      isLoading={isLoading}
+                      isPending={isLoading}
                       onPress={() => toggleSavedCart(cart)}
                     >
                       🗑️
                     </Button>
                   </div>
-                </CardBody>
+                </Card.Content>
               </Card>
             );
           }
@@ -155,7 +143,7 @@ export function SavedCartsManager() {
               key={idx}
               className="border border-default-200 hover:border-purple-300 transition-colors"
             >
-              <CardBody className="py-4">
+              <Card.Content className="py-4">
                 <div className="flex justify-between items-start gap-4">
                   {/* Info Section - Clickable */}
                   <div
@@ -168,7 +156,7 @@ export function SavedCartsManager() {
                       </p>
                       <Chip
                         size="sm"
-                        variant="flat"
+                        variant="primary"
                         color={
                           cartData.status === "open"
                             ? "success"
@@ -225,7 +213,7 @@ export function SavedCartsManager() {
                           <Chip
                             key={itemIdx}
                             size="sm"
-                            variant="flat"
+                            variant="primary"
                             className="text-xs"
                           >
                             {item.title} x{item.qty}
@@ -239,53 +227,49 @@ export function SavedCartsManager() {
                   <div className="flex flex-col gap-2 ml-3 shrink-0">
                     <Button
                       isIconOnly
-                      color="primary"
-                      variant="flat"
+                      variant="danger-soft"
                       size="sm"
                       onPress={() => handleViewCart(cartData)}
-                      title="Voir les détails"
                     >
                       👁️
                     </Button>
                     <Button
                       isIconOnly
-                      color="success"
-                      variant="flat"
+                      variant="danger-soft"
                       size="sm"
                       onPress={() => handleRestoreCart(cartData.id)}
-                      title="Restaurer le panier"
                     >
                       ↩️
                     </Button>
                     <Button
                       isIconOnly
-                      color="danger"
-                      variant="light"
+                      variant="tertiary"
                       size="sm"
-                      isLoading={isLoading}
+                      isPending={isLoading}
                       onPress={() => toggleSavedCart(cartData.id)}
-                      title="Supprimer"
                     >
                       🗑️
                     </Button>
                   </div>
                 </div>
-              </CardBody>
+              </Card.Content>
             </Card>
           );
         })}
       </div>
 
       {/* Cart Details Modal */}
-      <Modal size="2xl" isOpen={isOpen} onOpenChange={onOpenChange}>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                Détails du panier
-              </ModalHeader>
-              <Divider />
-              <ModalBody>
+      <Modal state={modalState}>
+        <Modal.Backdrop>
+          <Modal.Container size="lg">
+          <Modal.Dialog>
+            {({ close }) => (
+              <>
+                <Modal.Header className="flex flex-col gap-1">
+                  <Modal.Heading>Détails du panier</Modal.Heading>
+                </Modal.Header>
+                <Separator />
+                <Modal.Body>
                 {selectedCart && (
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
@@ -309,7 +293,7 @@ export function SavedCartsManager() {
                         <p className="text-sm text-default-500">Status</p>
                         <Chip
                           size="sm"
-                          variant="flat"
+                          variant="primary"
                           color={
                             selectedCart.status === "open"
                               ? "success"
@@ -323,36 +307,36 @@ export function SavedCartsManager() {
                       </div>
                     </div>
 
-                    <Divider />
+                    <Separator />
 
                     {/* Items Table */}
                     <Table aria-label="Articles du panier">
-                      <TableHeader>
-                        <TableColumn>Titre</TableColumn>
-                        <TableColumn>Quantité</TableColumn>
-                        <TableColumn>Prix unitaire</TableColumn>
-                        <TableColumn>Total</TableColumn>
-                      </TableHeader>
-                      <TableBody>
+                      <Table.Header>
+                        <Table.Column>Titre</Table.Column>
+                        <Table.Column>Quantité</Table.Column>
+                        <Table.Column>Prix unitaire</Table.Column>
+                        <Table.Column>Total</Table.Column>
+                      </Table.Header>
+                      <Table.Body>
                         {selectedCart.items.map((item, idx) => (
-                          <TableRow key={idx}>
-                            <TableCell>{item.title}</TableCell>
-                            <TableCell>{item.qty}</TableCell>
-                            <TableCell>
+                          <Table.Row key={idx}>
+                            <Table.Cell>{item.title}</Table.Cell>
+                            <Table.Cell>{item.qty}</Table.Cell>
+                            <Table.Cell>
                               ${(item.unit_price_cents / 100).toFixed(2)}
-                            </TableCell>
-                            <TableCell>
+                            </Table.Cell>
+                            <Table.Cell>
                               ${(
                                 (item.unit_price_cents * item.qty) /
                                 100
                               ).toFixed(2)}
-                            </TableCell>
-                          </TableRow>
+                            </Table.Cell>
+                          </Table.Row>
                         ))}
-                      </TableBody>
+                      </Table.Body>
                     </Table>
 
-                    <Divider />
+                    <Separator />
 
                     {/* Totals */}
                     <div className="space-y-2">
@@ -398,7 +382,7 @@ export function SavedCartsManager() {
                           </span>
                         </div>
                       )}
-                      <Divider className="my-2" />
+                      <Separator className="my-2" />
                       <div className="flex justify-between text-lg font-bold">
                         <span>Total</span>
                         <span className="text-primary">
@@ -423,32 +407,33 @@ export function SavedCartsManager() {
                     </div>
                   </div>
                 )}
-              </ModalBody>
-              <Divider />
-              <ModalFooter>
+              </Modal.Body>
+              <Separator />
+              <Modal.Footer>
                 <Button
-                  color="danger"
-                  variant="light"
-                  onPress={onClose}
+                  variant="danger"
+                  onPress={close}
                 >
                   Fermer
                 </Button>
                 {selectedCart && (
                   <Button
-                    color="primary"
+                    variant="primary"
                     onPress={() => {
                       handleRestoreCart(selectedCart.id);
-                      onClose();
+                      close();
                     }}
                   >
                     Restaurer le panier
                   </Button>
                 )}
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+              </Modal.Footer>
+              </>
+            )}
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+    </Modal>
     </div>
   );
 }

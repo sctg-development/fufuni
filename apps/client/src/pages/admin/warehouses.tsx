@@ -19,29 +19,18 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@heroui/react";
-import { Input } from "@heroui/react";
-import { Select, SelectItem } from "@heroui/react";
-import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@heroui/react";
+import { Input, TextField, Label } from "@heroui/react";
+import { Select, ListBox } from "@heroui/react";
+import { Table } from "@heroui/react";
 import {
   Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
+  useOverlayState,
 } from "@heroui/react";
-import { Card, CardBody } from "@heroui/react";
+import { Card } from "@heroui/react";
 import { Tooltip } from "@heroui/react";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
-import { SearchIcon } from "@/components/icons";
+
 import DefaultLayout from "@/layouts/default";
 import { useSecuredApi } from "@/authentication";
 
@@ -89,12 +78,11 @@ export default function WarehousesPage() {
   // List state
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
-  const [loading, setLoading] = useState(true);
   const [globalFilter, setGlobalFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
 
   // Modal state
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const modalState = useOverlayState();
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingWarehouse, setEditingWarehouse] = useState<Warehouse | null>(
     null,
@@ -117,7 +105,6 @@ export default function WarehousesPage() {
    * Updates state and shows a loading spinner during the fetch.
    */
   const loadData = async () => {
-    setLoading(true);
     try {
       const [warehousesResp, countriesResp] = await Promise.all([
         getJson(`${apiBase}/v1/regions/warehouses?limit=100`),
@@ -128,8 +115,6 @@ export default function WarehousesPage() {
       setCountries(countriesResp.items || []);
     } catch (err) {
       console.error("Failed to load data", err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -179,7 +164,7 @@ export default function WarehousesPage() {
       priority: 1,
       status: "active",
     });
-    onOpen();
+    modalState.open();
   };
 
   /**
@@ -201,7 +186,7 @@ export default function WarehousesPage() {
       priority: warehouse.priority,
       status: warehouse.status,
     });
-    onOpen();
+    modalState.open();
   };
 
   /**
@@ -251,7 +236,7 @@ export default function WarehousesPage() {
           await loadData();
         }
       }
-      onOpenChange();
+      modalState.close();
     } catch (err) {
       console.error("Failed to save warehouse", err);
     }
@@ -279,81 +264,93 @@ export default function WarehousesPage() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">{t("admin-warehouses-title")}</h1>
           <Button
-            color="primary"
-            endContent={<Plus className="w-4 h-4" />}
+            variant="primary"
             onPress={handleOpenCreate}
           >
+            <Plus className="w-4 h-4" />
             {t("admin-warehouses-add")}
           </Button>
         </div>
 
         <Card className="mb-6">
-          <CardBody className="flex gap-4">
-            <Input
-              isClearable
-              className="w-full"
-              placeholder={t("admin-common-search")}
-              startContent={<SearchIcon className="w-4 h-4" />}
-              value={globalFilter}
-              onValueChange={setGlobalFilter}
-            />
+          <Card.Content className="flex gap-4">
+            <TextField className="w-full">
+              <Input
+                placeholder={t("admin-warehouses-filter-placeholder")}
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+              />
+            </TextField>
             <Select
-              label={t("admin-common-status")}
-              selectedKeys={statusFilter ? [statusFilter] : []}
-              onSelectionChange={(key) =>
-                setStatusFilter(Array.from(key).join(""))
-              }
+              value={statusFilter || ""}
+              onChange={(value) => setStatusFilter((value as string) || "")}
             >
-              <SelectItem key="">All</SelectItem>
-              <SelectItem key="active">Active</SelectItem>
-              <SelectItem key="inactive">Inactive</SelectItem>
+              <Label>{t("admin-common-status")}</Label>
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  <ListBox.Item id="" textValue="All">
+                    All
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                  <ListBox.Item id="active" textValue="Active">
+                    Active
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                  <ListBox.Item id="inactive" textValue="Inactive">
+                    Inactive
+                    <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                </ListBox>
+              </Select.Popover>
             </Select>
-          </CardBody>
+          </Card.Content>
         </Card>
 
         <Card>
-          <CardBody>
-            <Table isStriped>
-              <TableHeader>
-                <TableColumn key="display_name">
+          <Card.Content>
+            <Table>
+              <Table.Header>
+                <Table.Column key="display_name">
                   {t("admin-common-name")}
-                </TableColumn>
-                <TableColumn key="city">
+                </Table.Column>
+                <Table.Column key="city">
                   {t("admin-warehouses-city")}
-                </TableColumn>
-                <TableColumn key="country">
+                </Table.Column>
+                <Table.Column key="country">
                   {t("admin-common-country")}
-                </TableColumn>
-                <TableColumn key="priority">
+                </Table.Column>
+                <Table.Column key="priority">
                   {t("admin-warehouses-priority")}
-                </TableColumn>
-                <TableColumn key="status">
+                </Table.Column>
+                <Table.Column key="status">
                   {t("admin-common-status")}
-                </TableColumn>
-                <TableColumn key="actions">
+                </Table.Column>
+                <Table.Column key="actions">
                   {t("admin-common-actions")}
-                </TableColumn>
-              </TableHeader>
-              <TableBody
-                emptyContent={<div>{t("admin-common-empty")}</div>}
-                isLoading={loading}
+                </Table.Column>
+              </Table.Header>
+              <Table.Body
+                renderEmptyState={() => <div>{t("admin-common-empty")}</div>}
                 items={displayed}
-                loadingContent={<div>{t("admin-common-loading")}</div>}
               >
                 {(warehouse) => (
-                  <TableRow key={warehouse.id}>
-                    <TableCell>{warehouse.display_name}</TableCell>
-                    <TableCell>
+                  <Table.Row key={warehouse.id} className="odd:bg-default-50">
+                    <Table.Cell>{warehouse.display_name}</Table.Cell>
+                    <Table.Cell>
                       {warehouse.city}
                       {warehouse.state ? `, ${warehouse.state}` : ""}
-                    </TableCell>
-                    <TableCell>{warehouse.country_code}</TableCell>
-                    <TableCell>
+                    </Table.Cell>
+                    <Table.Cell>{warehouse.country_code}</Table.Cell>
+                    <Table.Cell>
                       <span className="bg-gray-200 px-2 py-1 rounded">
                         {warehouse.priority}
                       </span>
-                    </TableCell>
-                    <TableCell>
+                    </Table.Cell>
+                    <Table.Cell>
                       <span
                         className={
                           warehouse.status === "active"
@@ -363,209 +360,277 @@ export default function WarehousesPage() {
                       >
                         {warehouse.status}
                       </span>
-                    </TableCell>
-                    <TableCell>
+                    </Table.Cell>
+                    <Table.Cell>
                       <div className="flex gap-2">
                         <Button
                           isIconOnly
                           size="sm"
-                          variant="light"
+                          variant="tertiary"
                           onPress={() => handleOpenEdit(warehouse)}
                         >
                           <Edit2 className="w-4 h-4" />
                         </Button>
                         <Button
                           isIconOnly
-                          color="danger"
                           size="sm"
-                          variant="light"
+                          variant="tertiary"
                           onPress={() => handleDelete(warehouse.id)}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                    </Table.Cell>
+                  </Table.Row>
                 )}
-              </TableBody>
+              </Table.Body>
             </Table>
-          </CardBody>
+          </Card.Content>
         </Card>
 
-        <Modal isOpen={isOpen} size="xl" onOpenChange={onOpenChange}>
-          <ModalContent>
-            <ModalHeader className="flex flex-col gap-1">
-              {isEditMode
-                ? t("admin-warehouses-edit")
-                : t("admin-warehouses-create")}
-            </ModalHeader>
-            <ModalBody>
-              <Tooltip
-                content={t(
-                  "admin-warehouses-name-help",
-                  "Display name for this warehouse location",
+        <Modal state={modalState}>
+          <Modal.Backdrop>
+            <Modal.Container size="lg">
+            <Modal.Dialog>
+              {({ close }) => (
+                <>
+                  <Modal.Header className="flex flex-col gap-1">
+                    <Modal.Heading>
+                      {isEditMode
+                        ? t("admin-warehouses-edit")
+                        : t("admin-warehouses-create")}
+                    </Modal.Heading>
+                  </Modal.Header>
+                  <Modal.Body>
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <TextField>
+                    <Label>{t("admin-common-name")}</Label>
+                    <Input
+                      placeholder="Main Warehouse"
+                      value={formData.display_name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, display_name: e.target.value })
+                      }
+                    />
+                  </TextField>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t(
+                    "admin-warehouses-name-help",
+                    "Display name for this warehouse location",
+                  )}
+                </Tooltip.Content>
+              </Tooltip>
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <TextField>
+                    <Label>{t("admin-warehouses-address1")}</Label>
+                    <Input
+                      placeholder="123 Main Street"
+                      value={formData.address_line1}
+                      onChange={(e) =>
+                        setFormData({ ...formData, address_line1: e.target.value })
+                      }
+                    />
+                  </TextField>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t(
+                    "admin-warehouses-address1-help",
+                    "Street address where the warehouse is located",
+                  )}
+                </Tooltip.Content>
+              </Tooltip>
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <TextField>
+                    <Label>{t("admin-warehouses-address2")}</Label>
+                    <Input
+                      placeholder="Suite 100"
+                      value={formData.address_line2}
+                      onChange={(e) =>
+                        setFormData({ ...formData, address_line2: e.target.value })
+                      }
+                    />
+                  </TextField>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t(
+                    "admin-warehouses-address2-help",
+                    "Additional address details",
+                  )}
+                </Tooltip.Content>
+              </Tooltip>
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <TextField>
+                    <Label>{t("admin-warehouses-city")}</Label>
+                    <Input
+                      placeholder="New York"
+                      value={formData.city}
+                      onChange={(e) =>
+                        setFormData({ ...formData, city: e.target.value })
+                      }
+                    />
+                  </TextField>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t(
+                    "admin-warehouses-city-help",
+                    "City or municipality where warehouse is located",
+                  )}
+                </Tooltip.Content>
+              </Tooltip>
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <TextField>
+                    <Label>{t("admin-warehouses-state")}</Label>
+                    <Input
+                      placeholder="NY"
+                      value={formData.state}
+                      onChange={(e) =>
+                        setFormData({ ...formData, state: e.target.value })
+                      }
+                    />
+                  </TextField>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t(
+                    "admin-warehouses-state-help",
+                    "State, province, or region code",
+                  )}
+                </Tooltip.Content>
+              </Tooltip>
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <TextField>
+                    <Label>{t("admin-warehouses-postal")}</Label>
+                    <Input
+                      placeholder="10001"
+                      value={formData.postal_code}
+                      onChange={(e) =>
+                        setFormData({ ...formData, postal_code: e.target.value })
+                      }
+                    />
+                  </TextField>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t(
+                    "admin-warehouses-postal-help",
+                    "ZIP code or postal code",
+                  )}
+                </Tooltip.Content>
+              </Tooltip>
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <Select
+                    value={formData.country_code || ""}
+                    onChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        country_code: (value as string) || "",
+                      })
+                    }
+                  >
+                    <Label>{t("admin-common-country")}</Label>
+                    <Select.Trigger>
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        {countries.map((country) => (
+                          <ListBox.Item key={country.code} id={country.code} textValue={country.code}>
+                            {country.code} - {country.display_name}
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                        ))}
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t(
+                    "admin-warehouses-country-help",
+                    "Country where warehouse is located",
+                  )}
+                </Tooltip.Content>
+              </Tooltip>
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <TextField>
+                    <Label>{t("admin-warehouses-priority")}</Label>
+                    <Input
+                      min={0}
+                      placeholder="1"
+                      type="number"
+                      value={formData.priority.toString()}
+                      onChange={(e) =>
+                        setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })
+                      }
+                    />
+                  </TextField>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t(
+                    "admin-warehouses-priority-help",
+                    "Lower number = higher priority for order fulfillment",
+                  )}
+                </Tooltip.Content>
+              </Tooltip>
+              <Tooltip>
+                <Tooltip.Trigger>
+                  <Select
+                    value={formData.status}
+                    onChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        status: value as "active" | "inactive",
+                      })
+                    }
+                  >
+                    <Label>{t("admin-common-status")}</Label>
+                    <Select.Trigger>
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        {STATUS_OPTIONS.map((opt) => (
+                          <ListBox.Item key={opt} id={opt} textValue={opt}>
+                            {opt}
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                        ))}
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
+                </Tooltip.Trigger>
+                <Tooltip.Content>
+                  {t("admin-common-status")}
+                </Tooltip.Content>
+              </Tooltip>
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button
+                      variant="tertiary"
+                      onPress={close}
+                    >
+                      {t("admin-common-cancel")}
+                    </Button>
+                    <Button
+                      isDisabled={!formData.display_name || !formData.country_code}
+                      onPress={handleSave}
+                    >
+                      {t("admin-common-save")}
+                    </Button>
+                  </Modal.Footer>
+                  </>
                 )}
-              >
-                <Input
-                  label={t("admin-common-name")}
-                  placeholder="Main Warehouse"
-                  value={formData.display_name}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, display_name: value })
-                  }
-                />
-              </Tooltip>
-              <Tooltip
-                content={t(
-                  "admin-warehouses-address1-help",
-                  "Street address where the warehouse is located",
-                )}
-              >
-                <Input
-                  label={t("admin-warehouses-address1")}
-                  placeholder="123 Main Street"
-                  value={formData.address_line1}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, address_line1: value })
-                  }
-                />
-              </Tooltip>
-              <Tooltip
-                content={t(
-                  "admin-warehouses-address2-help",
-                  "Additional address details",
-                )}
-              >
-                <Input
-                  label={t("admin-warehouses-address2")}
-                  placeholder="Suite 100"
-                  value={formData.address_line2}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, address_line2: value })
-                  }
-                />
-              </Tooltip>
-              <Tooltip
-                content={t(
-                  "admin-warehouses-city-help",
-                  "City or municipality where warehouse is located",
-                )}
-              >
-                <Input
-                  label={t("admin-warehouses-city")}
-                  placeholder="New York"
-                  value={formData.city}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, city: value })
-                  }
-                />
-              </Tooltip>
-              <Tooltip
-                content={t(
-                  "admin-warehouses-state-help",
-                  "State, province, or region code",
-                )}
-              >
-                <Input
-                  label={t("admin-warehouses-state")}
-                  placeholder="NY"
-                  value={formData.state}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, state: value })
-                  }
-                />
-              </Tooltip>
-              <Tooltip
-                content={t(
-                  "admin-warehouses-postal-help",
-                  "ZIP code or postal code",
-                )}
-              >
-                <Input
-                  label={t("admin-warehouses-postal")}
-                  placeholder="10001"
-                  value={formData.postal_code}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, postal_code: value })
-                  }
-                />
-              </Tooltip>
-              <Tooltip
-                content={t(
-                  "admin-warehouses-country-help",
-                  "Country where warehouse is located",
-                )}
-              >
-                <Select
-                  label={t("admin-common-country")}
-                  selectedKeys={
-                    formData.country_code ? [formData.country_code] : []
-                  }
-                  onSelectionChange={(key) =>
-                    setFormData({
-                      ...formData,
-                      country_code: Array.from(key).join(""),
-                    })
-                  }
-                >
-                  {countries.map((country) => (
-                    <SelectItem key={country.code} textValue={country.code}>
-                      {country.code} - {country.display_name}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </Tooltip>
-              <Tooltip
-                content={t(
-                  "admin-warehouses-priority-help",
-                  "Lower number = higher priority for order fulfillment",
-                )}
-              >
-                <Input
-                  label={t("admin-warehouses-priority")}
-                  min={0}
-                  placeholder="1"
-                  type="number"
-                  value={formData.priority.toString()}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, priority: parseInt(value) || 0 })
-                  }
-                />
-              </Tooltip>
-              <Tooltip content={t("admin-common-status")}>
-                <Select
-                  label={t("admin-common-status")}
-                  selectedKeys={[formData.status]}
-                  onSelectionChange={(key) =>
-                    setFormData({
-                      ...formData,
-                      status: Array.from(key).join("") as "active" | "inactive",
-                    })
-                  }
-                >
-                  {STATUS_OPTIONS.map((opt) => (
-                    <SelectItem key={opt}>{opt}</SelectItem>
-                  ))}
-                </Select>
-              </Tooltip>
-            </ModalBody>
-            <ModalFooter>
-              <Button
-                color="default"
-                variant="light"
-                onPress={() => onOpenChange()}
-              >
-                {t("admin-common-cancel")}
-              </Button>
-              <Button
-                color="primary"
-                isDisabled={!formData.display_name || !formData.country_code}
-                onPress={handleSave}
-              >
-                {t("admin-common-save")}
-              </Button>
-            </ModalFooter>
-          </ModalContent>
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
         </Modal>
       </div>
     </DefaultLayout>

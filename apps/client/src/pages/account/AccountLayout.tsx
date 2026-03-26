@@ -8,11 +8,9 @@ import { useTranslation } from "react-i18next";
 import {
   Button,
   Card,
-  CardBody,
-  Divider,
+  Separator,
   Avatar,
-  Link as HeroUILink,
-} from "@heroui/react";
+  Link as HeroUILink} from "@heroui/react";
 
 import { useAuth } from "../../authentication/providers/use-auth";
 
@@ -58,15 +56,23 @@ export default function AccountLayout() {
         <aside className="w-full lg:w-64">
           <Card className="sticky top-6 border border-default-200">
             {/* User Profile Section */}
-            <CardBody className="gap-4 py-6">
+            <Card.Content className="gap-4 py-6">
               <div className="flex items-center gap-4">
                 <Avatar
-                  isBordered
-                  color="primary"
-                  name={user?.name || user?.email || "User"}
-                  radius="lg"
+                  className="ring-2 ring-background rounded-lg"
+                  color="accent"
                   size="lg"
-                />
+                ><Avatar.Fallback>
+                    {user?.name
+                      ? user.name
+                          .split(" ")
+                          .map((n: string) => n[0])
+                          .join("")
+                      : user?.email
+                      ? user.email[0].toUpperCase()
+                      : "U"}
+                  </Avatar.Fallback>
+                  </Avatar>
                 <div className="flex-1 min-w-0">
                   <h2 className="text-sm font-bold truncate">
                     {user?.name || user?.email || "Account"}
@@ -77,7 +83,7 @@ export default function AccountLayout() {
                 </div>
               </div>
 
-              <Divider className="my-2" />
+              <Separator className="my-2" />
 
               {/* Navigation Links */}
               <nav className="flex flex-col gap-2">
@@ -96,7 +102,6 @@ export default function AccountLayout() {
                             : "text-default-700 hover:bg-default-200 active:bg-default-300"
                         }
                       `}
-                      color={isActive ? "primary" : "foreground"}
                       href={link.to}
                     >
                       <span className="text-lg">{link.icon}</span>
@@ -106,18 +111,17 @@ export default function AccountLayout() {
                 })}
               </nav>
 
-              <Divider className="my-2" />
+              <Separator className="my-2" />
 
               {/* Logout Button */}
               <Button
                 className="w-full font-semibold"
-                color="danger"
-                variant="light"
+                variant="danger"
                 onPress={handleLogout}
               >
                 {t("account-logout")}
               </Button>
-            </CardBody>
+            </Card.Content>
           </Card>
         </aside>
 

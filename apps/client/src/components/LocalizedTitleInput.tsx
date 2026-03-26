@@ -18,10 +18,7 @@
 
 // apps/client/src/components/LocalizedTitleInput.tsx
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Input } from '@heroui/input';
-import { Button } from '@heroui/button';
-import { Select, SelectItem } from '@heroui/select';
-import { Tooltip } from '@heroui/tooltip';
+import { Input, Button, Select, Label, ListBox, Tooltip } from '@heroui/react';
 import { Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -52,7 +49,6 @@ export function LocalizedTitleInput({
   onChange,
   required = false,
   locale,
-  onLocaleChange,
 }: LocalizedTitleInputProps) {
   const { t } = useTranslation();
   const { getJson, hasPermission } = useSecuredApi();
@@ -60,7 +56,7 @@ export function LocalizedTitleInput({
   // --- Locale state ---------------------------------------------------------
   const defaultLocale =
     availableLanguages.find((l) => l.isDefault)?.code ?? 'en-US';
-  const [internalLocale, setInternalLocale] = useState(defaultLocale);
+  const internalLocale = defaultLocale;
   const selectedLocale = locale ?? internalLocale;
   const [inputValue, setInputValue] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
@@ -124,13 +120,6 @@ export function LocalizedTitleInput({
   // --- Locale switch --------------------------------------------------------
   // When locale changes, just update the UI.
   // Migration to JSON will happen on save via the parent component.
-  const handleLocaleChange = useCallback((newLocale: string) => {
-    if (onLocaleChange) {
-      onLocaleChange(newLocale);
-    } else {
-      setInternalLocale(newLocale);
-    }
-  }, [onLocaleChange]);
 
   // --- AI translation -------------------------------------------------------
   const handleAiTranslate = useCallback(async () => {
@@ -188,17 +177,25 @@ export function LocalizedTitleInput({
       {/* Language selector (hidden when controlled by parent) */}
       {!locale && (
         <Select
-          size="sm"
           className="w-36 shrink-0"
           aria-label={t('admin-products-title-locale')}
-          selectedKeys={[selectedLocale]}
-          onSelectionChange={(keys) =>
-            handleLocaleChange(Array.from(keys).join(''))
-          }
+          value={selectedLocale}
         >
-          {availableLanguages.map((lang) => (
-            <SelectItem key={lang.code}>{lang.nativeName}</SelectItem>
-          ))}
+          <Label>{t('admin-products-title-locale')}</Label>
+          <Select.Trigger>
+            <Select.Value />
+            <Select.Indicator />
+          </Select.Trigger>
+          <Select.Popover>
+            <ListBox>
+              {availableLanguages.map((lang) => (
+                <ListBox.Item key={lang.code} id={lang.code} textValue={lang.nativeName}>
+                  {lang.nativeName}
+                  <ListBox.ItemIndicator />
+                </ListBox.Item>
+              ))}
+            </ListBox>
+          </Select.Popover>
         </Select>
       )}
 
@@ -207,24 +204,28 @@ export function LocalizedTitleInput({
         className="flex-1"
         required={required}
         value={inputValue}
-        onValueChange={handleInputChange}
+        onChange={(e) => handleInputChange(e.target.value)}
         placeholder={t('admin-products-title-placeholder')}
         dir={isRTL ? 'rtl' : 'ltr'}
       />
 
       {/* AI translate — only shown if user has the AI permission */}
       {canUseAi && (
-        <Tooltip content={t('admin-products-title-ai')}>
-          <Button
-            isIconOnly
-            size="sm"
-            variant="light"
-            color="secondary"
-            isLoading={isTranslating}
-            onPress={handleAiTranslate}
-          >
-            {!isTranslating && <Sparkles size={14} />}
-          </Button>
+        <Tooltip>
+          <Tooltip.Trigger>
+            <Button
+              isIconOnly
+              size="sm"
+              variant="tertiary"
+              isPending={isTranslating}
+              onPress={handleAiTranslate}
+            >
+              {!isTranslating && <Sparkles size={14} />}
+            </Button>
+          </Tooltip.Trigger>
+          <Tooltip.Content>
+            {t('admin-products-title-ai')}
+          </Tooltip.Content>
         </Tooltip>
       )}
     </div>

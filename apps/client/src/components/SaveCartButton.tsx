@@ -78,19 +78,16 @@ export function SaveCartButton({
 
   return (
     <Button
-      isLoading={isLoading || isProcessingLocal}
-      variant={saved ? "solid" : "bordered"}
-      color={saved ? "primary" : "default"}
+      isPending={isLoading || isProcessingLocal}
+      variant={saved ? "primary" : "outline"}
       size="md"
       className={saved ? "text-primary-foreground" : ""}
-      startContent={
-        <Bookmark 
-          className="w-4 h-4" 
-          fill={saved ? "currentColor" : "none"}
-        />
-      }
       onPress={handleToggleCart}
     >
+      <Bookmark 
+        className="w-4 h-4" 
+        fill={saved ? "currentColor" : "none"}
+      />
       {saved ? t('unsave-cart', 'Unsave Cart') : t('save-cart')}
     </Button>
   );

@@ -7,21 +7,16 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Card,
-  CardBody,
-  CardHeader,
   Spinner,
   Button,
   Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
+  useOverlayState,
+  TextField,
   Input,
+  Label,
   Select,
-  SelectItem,
-  Divider,
-} from "@heroui/react";
+  ListBox,
+  Separator} from "@heroui/react";
 
 import { useAuth } from "../../authentication/providers/use-auth";
 
@@ -55,7 +50,7 @@ export default function Addresses() {
     | "ar_SA"
     | "zh_CN"
     | "he_IL"; // Extend this union type based on the languages you support
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const modalState = useOverlayState();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
@@ -98,7 +93,7 @@ export default function Addresses() {
         country: "US",
       });
     }
-    onOpen();
+    modalState.open();
   };
 
   const handleSaveAddress = async () => {
@@ -111,7 +106,7 @@ export default function Addresses() {
         await auth.postJson(`${apiBase}/v1/me/addresses`, formData);
       }
       await fetchAddresses();
-      onOpenChange();
+      modalState.close();
     } catch (error) {
       console.error("Error saving address:", error);
     }
@@ -129,7 +124,10 @@ export default function Addresses() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <Spinner label={t("loading")} />
+        <div className="flex flex-col items-center gap-2">
+          <Spinner />
+          <span className="text-default-500">{t("loading")}</span>
+        </div>
       </div>
     );
   }
@@ -138,20 +136,20 @@ export default function Addresses() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">{t("account-addresses")}</h1>
-        <Button color="primary" onClick={() => handleOpenForm()}>
+        <Button onPress={() => handleOpenForm()}>
           {t("account-add-address")}
         </Button>
       </div>
 
       {addresses.length === 0 ? (
         <Card>
-          <CardBody>{t("account-no-addresses")}</CardBody>
+          <Card.Content>{t("account-no-addresses")}</Card.Content>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {addresses.map((address) => (
             <Card key={address.id}>
-              <CardHeader>
+              <Card.Header>
                 <div className="flex-1">
                   <h3 className="font-semibold">
                     {address.label || address.name}
@@ -162,9 +160,9 @@ export default function Addresses() {
                     </span>
                   )}
                 </div>
-              </CardHeader>
-              <Divider />
-              <CardBody className="gap-2 text-sm">
+              </Card.Header>
+              <Separator />
+              <Card.Content className="gap-2 text-sm">
                 <p>{address.line1}</p>
                 {address.line2 && <p>{address.line2}</p>}
                 <p>
@@ -176,111 +174,142 @@ export default function Addresses() {
                     {t("account-phone")}: {address.phone}
                   </p>
                 )}
-              </CardBody>
-              <Divider />
-              <CardBody className="flex-row justify-end gap-2 py-2">
+              </Card.Content>
+              <Separator />
+              <Card.Content className="flex-row justify-end gap-2 py-2">
                 <Button
                   size="sm"
-                  variant="light"
-                  onClick={() => handleOpenForm(address)}
+                  variant="tertiary"
+                  onPress={() => handleOpenForm(address)}
                 >
                   {t("account-edit")}
                 </Button>
                 <Button
-                  color="danger"
                   size="sm"
-                  variant="light"
-                  onClick={() => handleDeleteAddress(address.id)}
+                  variant="tertiary"
+                  onPress={() => handleDeleteAddress(address.id)}
                 >
                   {t("account-delete")}
                 </Button>
-              </CardBody>
+              </Card.Content>
             </Card>
           ))}
         </div>
       )}
 
       {/* Address Form Modal */}
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-        <ModalContent>
-          <ModalHeader>
-            {editingAddress
-              ? t("account-edit-address")
-              : t("account-add-address")}
-          </ModalHeader>
-          <ModalBody className="gap-4">
-            <Input
-              label={t("account-name")}
-              value={formData.name || ""}
-              onValueChange={(value) =>
-                setFormData({ ...formData, name: value })
-              }
-            />
-            <Input
-              label={t("account-address-line1")}
-              value={formData.line1 || ""}
-              onValueChange={(value) =>
-                setFormData({ ...formData, line1: value })
-              }
-            />
-            <Input
-              label={t("account-address-line2")}
-              value={formData.line2 || ""}
-              onValueChange={(value) =>
-                setFormData({ ...formData, line2: value })
-              }
-            />
-            <Input
-              label={t("account-city")}
-              value={formData.city || ""}
-              onValueChange={(value) =>
-                setFormData({ ...formData, city: value })
-              }
-            />
-            <Input
-              label={t("account-state")}
-              value={formData.state || ""}
-              onValueChange={(value) =>
-                setFormData({ ...formData, state: value })
-              }
-            />
-            <Input
-              label={t("account-postal-code")}
-              value={formData.postal_code || ""}
-              onValueChange={(value) =>
-                setFormData({ ...formData, postal_code: value })
-              }
-            />
+      <Modal state={modalState}>
+        <Modal.Backdrop>
+          <Modal.Container>
+          <Modal.Dialog>
+            {({ close }) => (
+              <>
+                <Modal.Header>
+                  <Modal.Heading>
+                    {editingAddress
+                      ? t("account-edit-address")
+                      : t("account-add-address")}
+                  </Modal.Heading>
+                </Modal.Header>
+                <Modal.Body className="gap-4">
+            <TextField>
+              <Label>{t("account-name")}</Label>
+              <Input
+                value={formData.name || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+              />
+            </TextField>
+            <TextField>
+              <Label>{t("account-address-line1")}</Label>
+              <Input
+                value={formData.line1 || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, line1: e.target.value })
+                }
+              />
+            </TextField>
+            <TextField>
+              <Label>{t("account-address-line2")}</Label>
+              <Input
+                value={formData.line2 || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, line2: e.target.value })
+                }
+              />
+            </TextField>
+            <TextField>
+              <Label>{t("account-city")}</Label>
+              <Input
+                value={formData.city || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, city: e.target.value })
+                }
+              />
+            </TextField>
+            <TextField>
+              <Label>{t("account-state")}</Label>
+              <Input
+                value={formData.state || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, state: e.target.value })
+                }
+              />
+            </TextField>
+            <TextField>
+              <Label>{t("account-postal-code")}</Label>
+              <Input
+                value={formData.postal_code || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, postal_code: e.target.value })
+                }
+              />
+            </TextField>
             <Select
-              label={t("account-country")}
-              selectedKeys={formData.country ? [formData.country] : ["US"]}
-              onSelectionChange={(keys) => {
-                const selected = Array.from(keys)[0] as string;
-
-                setFormData({ ...formData, country: selected });
+              value={formData.country || "US"}
+              onChange={(value) => {
+                setFormData({ ...formData, country: (value as string) || "US" });
               }}
             >
-              {countries.map((country) => (
-                <SelectItem key={country.code}>
-                  {country[localeKey] || country.en_US}
-                </SelectItem>
-              ))}
+              <Label>{t("account-country")}</Label>
+              <Select.Trigger>
+                <Select.Value />
+                <Select.Indicator />
+              </Select.Trigger>
+              <Select.Popover>
+                <ListBox>
+                  {countries.map((country) => (
+                    <ListBox.Item
+                      key={country.code}
+                      id={country.code}
+                      textValue={country[localeKey] || country.en_US}
+                    >
+                      {country[localeKey] || country.en_US}
+                      <ListBox.ItemIndicator />
+                    </ListBox.Item>
+                  ))}
+                </ListBox>
+              </Select.Popover>
             </Select>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              color="danger"
-              variant="light"
-              onPress={() => onOpenChange()}
-            >
-              {t("account-cancel")}
-            </Button>
-            <Button color="primary" onPress={handleSaveAddress}>
-              {t("account-save")}
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button
+                    variant="tertiary"
+                    onPress={close}
+                  >
+                    {t("account-cancel")}
+                  </Button>
+                  <Button onPress={handleSaveAddress}>
+                    {t("account-save")}
+                  </Button>
+                </Modal.Footer>
+              </>
+            )}
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+    </Modal>
     </div>
   );
 }

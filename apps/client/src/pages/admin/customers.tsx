@@ -21,15 +21,7 @@ import { useTranslation } from "react-i18next";
 import {
   Input,
   Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
+  Modal
 } from "@heroui/react";
 
 import DefaultLayout from "@/layouts/default";
@@ -198,13 +190,15 @@ export default function CustomersPage() {
             {t("admin-customers-title")}
           </h1>
           <div className="flex items-center gap-2">
-            <Input
-              placeholder={t("search") + "..."}
-              size="sm"
-              startContent={<SearchIcon className="text-default-400" />}
-              value={globalFilter}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-            />
+            <div className="relative flex flex-1">
+              <Input
+                placeholder={t("search") + "..."}
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                className="pl-8"
+              />
+              <SearchIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 pointer-events-none text-default-400 w-4 h-4" />
+            </div>
           </div>
         </div>
 
@@ -214,33 +208,35 @@ export default function CustomersPage() {
         ) : customers.length === 0 ? (
           <p>{t("admin-customers-empty")}</p>
         ) : (
-          <Table aria-label="Customers" selectionMode="none">
-            <TableHeader>
-              <TableColumn>{t("admin-customers-col-name")}</TableColumn>
-              <TableColumn>{t("admin-customers-col-email")}</TableColumn>
-              <TableColumn>{t("admin-customers-col-orders")}</TableColumn>
-              <TableColumn>{t("admin-customers-col-spent")}</TableColumn>
-              <TableColumn>{t("admin-customers-col-first-order")}</TableColumn>
-            </TableHeader>
-            <TableBody emptyContent="">
+          <Table aria-label="Customers">
+            <Table.Content selectionMode="none">
+              <Table.Header>
+                <Table.Column>{t("admin-customers-col-name")}</Table.Column>
+                <Table.Column>{t("admin-customers-col-email")}</Table.Column>
+                <Table.Column>{t("admin-customers-col-orders")}</Table.Column>
+                <Table.Column>{t("admin-customers-col-spent")}</Table.Column>
+                <Table.Column>{t("admin-customers-col-first-order")}</Table.Column>
+              </Table.Header>
+              <Table.Body renderEmptyState={() => ""}>
               {customers.map((c) => (
-                <TableRow
+                <Table.Row
                   key={c.id}
                   className="cursor-pointer"
                   onClick={() => openCustomer(c)}
                 >
-                  <TableCell>{c.name || "-"}</TableCell>
-                  <TableCell>{c.email}</TableCell>
-                  <TableCell>{c.stats.order_count}</TableCell>
-                  <TableCell>
+                  <Table.Cell>{c.name || "-"}</Table.Cell>
+                  <Table.Cell>{c.email}</Table.Cell>
+                  <Table.Cell>{c.stats.order_count}</Table.Cell>
+                  <Table.Cell>
                     {formatMoney(c.stats.total_spent_cents, "EUR")}
-                  </TableCell>
-                  <TableCell>
+                  </Table.Cell>
+                  <Table.Cell>
                     {new Date(c.created_at).toLocaleDateString()}
-                  </TableCell>
-                </TableRow>
+                  </Table.Cell>
+                </Table.Row>
               ))}
-            </TableBody>
+            </Table.Body>
+            </Table.Content>
           </Table>
         )}
       </div>
@@ -248,13 +244,18 @@ export default function CustomersPage() {
       {/* customer detail modal */}
       <Modal
         isOpen={!!selectedCustomer}
-        onClose={() => setSelectedCustomer(null)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedCustomer(null);
+          }
+        }}
       >
-        <ModalContent>
-          <ModalHeader>
+        <Modal.Backdrop>
+          <Modal.Container>
+          <Modal.Header>
             {customerDetail?.name || selectedCustomer?.email || t("customer")}
-          </ModalHeader>
-          <ModalBody>
+          </Modal.Header>
+          <Modal.Body>
             {customerDetail && selectedCustomer ? (
               <div className="space-y-5">
                 {/* Contact / Stats / Addresses / Orders copied roughly from merchant */}
@@ -517,9 +518,10 @@ export default function CustomersPage() {
             ) : (
               <p>Loading…</p>
             )}
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-    </DefaultLayout>
+          </Modal.Body>
+        </Modal.Container>
+      </Modal.Backdrop>
+    </Modal>
+  </DefaultLayout>
   );
 }
