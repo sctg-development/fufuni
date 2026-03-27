@@ -17,8 +17,6 @@
  */
 
 import { FC, useState, useEffect } from "react";
-import { VisuallyHidden } from "@react-aria/visually-hidden";
-import { Switch } from "@heroui/react";
 import { clsx } from "clsx";
 import { useTranslation } from "react-i18next";
 
@@ -29,13 +27,15 @@ export interface ThemeSwitchProps {
   className?: string;
 }
 
+const themes = [
+  { key: "light", Icon: MoonFilledIcon, i18nKey: "switch-to-dark-mode" },
+  { key: "dark", Icon: SunFilledIcon, i18nKey: "switch-to-light-mode" },
+] as const;
+
 export const ThemeSwitch: FC<ThemeSwitchProps> = ({ className }) => {
   const { t } = useTranslation();
   const [isMounted, setIsMounted] = useState(false);
   const { theme, toggleTheme } = useTheme();
-
-  // Sync the switch state with current theme
-  const isLightMode = theme === "light";
 
   useEffect(() => {
     setIsMounted(true);
@@ -44,39 +44,36 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({ className }) => {
   // Prevent Hydration Mismatch
   if (!isMounted) return <div className="w-6 h-6" />;
 
+  const currentTheme = theme as "light" | "dark";
+
   return (
-    <Switch
-      isSelected={isLightMode}
-      onChange={toggleTheme}
+    <button
       aria-label={
-        isLightMode ? t("switch-to-dark-mode") : t("switch-to-light-mode")
+        currentTheme === "light"
+          ? t("switch-to-dark-mode")
+          : t("switch-to-light-mode")
       }
+      onClick={toggleTheme}
       className={clsx(
-        "px-px transition-opacity hover:opacity-80 cursor-pointer",
+        "inline-flex items-center justify-center",
+        "rounded-md p-2 transition-colors",
+        "hover:bg-default-100 active:bg-default-200",
+        "text-foreground",
         className,
       )}
     >
-      <Switch.Control>
-        <Switch.Thumb>
-          <VisuallyHidden>
-            <input
-              type="checkbox"
-              checked={isLightMode}
-              onChange={toggleTheme}
-              aria-hidden="true"
-            />
-          </VisuallyHidden>
-        </Switch.Thumb>
-      </Switch.Control>
-      <Switch.Content>
-        <div className="flex items-center justify-center">
-          {isLightMode ? (
-            <MoonFilledIcon size={22} />
-          ) : (
-            <SunFilledIcon size={22} />
+      {themes.map(({ key, Icon }) => (
+        <Icon
+          key={key}
+          className={clsx(
+            "w-5 h-5 transition-all absolute",
+            currentTheme === key
+              ? "opacity-100 scale-100"
+              : "opacity-0 scale-75 pointer-events-none",
           )}
-        </div>
-      </Switch.Content>
-    </Switch>
+          aria-hidden="true"
+        />
+      ))}
+    </button>
   );
 };
