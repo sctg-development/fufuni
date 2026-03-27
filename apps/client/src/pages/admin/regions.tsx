@@ -20,16 +20,10 @@ import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@heroui/react";
 import { Input, TextField, Label } from "@heroui/react";
-import { Select,  ListBox } from "@heroui/react";
-import {
-  Table,
-} from "@heroui/react";
+import { Table } from "@heroui/react";
 import { Checkbox } from "@heroui/react";
-import {
-  Modal,
-} from "@heroui/react";
-import { Card} from "@heroui/react";
-import { Tooltip } from "@heroui/react";
+import { Modal } from "@heroui/react";
+import { Card } from "@heroui/react";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
 
@@ -251,7 +245,7 @@ export default function RegionsPage() {
 
         <Card className="mb-6">
           <Card.Content className="flex gap-4">
-            <TextField className="w-full">
+            <TextField className="flex-1">
               <Label>{t("admin-regions-filter-placeholder")}</Label>
               <Input
                 placeholder={t("admin-regions-filter-placeholder")}
@@ -259,32 +253,18 @@ export default function RegionsPage() {
                 onChange={(e) => setGlobalFilter(e.target.value)}
               />
             </TextField>
-            <Select
-              value={statusFilter || ""}
-              onChange={(value) => setStatusFilter((value as string) || "")}
-            >
+            <div className="flex flex-col gap-1">
               <Label>{t("admin-common-status")}</Label>
-              <Select.Trigger>
-                <Select.Value />
-                <Select.Indicator />
-              </Select.Trigger>
-              <Select.Popover>
-                <ListBox>
-                  <ListBox.Item id="" textValue="All">
-                    All
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                  <ListBox.Item id="active" textValue="Active">
-                    Active
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                  <ListBox.Item id="inactive" textValue="Inactive">
-                    Inactive
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                </ListBox>
-              </Select.Popover>
-            </Select>
+              <select
+                className="px-3 py-2 rounded-lg bg-default-100 border border-default-300 text-sm focus:outline-none focus:ring-2"
+                value={statusFilter || ""}
+                onChange={(e) => setStatusFilter(e.target.value || "")}
+              >
+                <option value="">All</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
           </Card.Content>
         </Card>
 
@@ -382,154 +362,108 @@ export default function RegionsPage() {
         </Card>
 
         <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
-          <Modal.Backdrop />
-          <Modal.Container size="lg">
-            <Modal.Dialog>
-              {({ close }) => (
-                <>
-                  <Modal.CloseTrigger onPress={close} />
-                  <Modal.Header>
-                    {isEditMode ? t("admin-regions-edit") : t("admin-regions-create")}
-                  </Modal.Header>
-                  <Modal.Body>
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <TextField>
-                    <Label>{t("admin-common-name")}</Label>
-                    <Input
-                      placeholder="Enter region name"
-                      value={formData.display_name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, display_name: e.target.value })
-                      }
-                    />
-                  </TextField>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t(
-                    "admin-regions-code-help",
-                    "Unique identifier for this region",
-                  )}
-                </Tooltip.Content>
-              </Tooltip>
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <Select
-                    value={formData.currency_id || ""}
-                    onChange={(value) =>
-                      setFormData({
-                        ...formData,
-                        currency_id: (value as string) || "",
-                      })
-                    }
-                  >
-                    <Label>{t("admin-common-currency")}</Label>
-                    <Select.Trigger>
-                      <Select.Value />
-                      <Select.Indicator />
-                    </Select.Trigger>
-                    <Select.Popover>
-                      <ListBox>
-                        {currencies.map((curr) => (
-                          <ListBox.Item key={curr.id} id={curr.id} textValue={curr.code}>
-                            {curr.code} - {curr.display_name}
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                        ))}
-                      </ListBox>
-                    </Select.Popover>
-                  </Select>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t(
-                    "admin-regions-currency-help",
-                    "Primary currency for products in this region",
-                  )}
-                </Tooltip.Content>
-              </Tooltip>
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <Select
-                    value={formData.status}
-                    onChange={(value) =>
-                      setFormData({
-                        ...formData,
-                        status: value as "active" | "inactive",
-                      })
-                    }
-                  >
-                    <Label>{t("admin-common-status")}</Label>
-                    <Select.Trigger>
-                      <Select.Value />
-                      <Select.Indicator />
-                    </Select.Trigger>
-                    <Select.Popover>
-                      <ListBox>
-                        {STATUS_OPTIONS.map((opt) => (
-                          <ListBox.Item key={opt} id={opt} textValue={opt}>
-                            {opt}
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                        ))}
-                      </ListBox>
-                    </Select.Popover>
-                  </Select>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t(
-                    "admin-regions-default-help",
-                    "Mark as default region for unrecognized customers",
-                  )}
-                </Tooltip.Content>
-              </Tooltip>
+          <Modal.Backdrop>
+            <Modal.Container size="lg">
+              <Modal.Dialog>
+                {({ close }) => (
+                  <>
+                    <Modal.CloseTrigger onPress={close} />
+                    <Modal.Header>
+                      {isEditMode ? t("admin-regions-edit") : t("admin-regions-create")}
+                    </Modal.Header>
+                    <Modal.Body>
+                      <div className="space-y-4">
+                        <TextField>
+                          <Label>{t("admin-common-name")}</Label>
+                          <Input
+                            placeholder="Enter region name"
+                            value={formData.display_name}
+                            onChange={(e) =>
+                              setFormData({ ...formData, display_name: e.target.value })
+                            }
+                          />
+                        </TextField>
 
-              <div className="flex flex-col gap-2 mt-2">
-                <Checkbox
-                  id="region-tax-inclusive"
-                  isSelected={formData.tax_inclusive}
-                  onChange={(value) =>
-                    setFormData({ ...formData, tax_inclusive: value })
-                  }
-                >
-                  <Checkbox.Control>
-                    <Checkbox.Indicator />
-                  </Checkbox.Control>
-                  <Checkbox.Content>
-                    <Label htmlFor="region-tax-inclusive">
-                      {t(
-                        "admin-regions-tax-inclusive-label",
-                        "Prices include taxes (TTC)",
-                      )}
-                    </Label>
-                  </Checkbox.Content>
-                </Checkbox>
-                <p className="text-small text-default-500 ml-7">
-                  {t(
-                    "admin-regions-tax-inclusive-help",
-                    "If checked, product prices in this region are considered tax-inclusive.",
-                  )}
-                </p>
-              </div>
-              </Modal.Body>
-                  <Modal.Footer>
-                    <Button
-                      variant="tertiary"
-                      onPress={close}
-                    >
-                      {t("admin-common-cancel")}
-                    </Button>
-                    <Button
-                      variant="primary"
-                      isDisabled={!formData.display_name || !formData.currency_id}
-                      onPress={handleSave}
-                    >
-                      {t("admin-common-save")}
-                    </Button>
-                  </Modal.Footer>
-                </>
-              )}
-            </Modal.Dialog>
-          </Modal.Container>
+                        <div className="flex flex-col gap-1">
+                          <Label>{t("admin-common-currency")}</Label>
+                          <select
+                            className="px-3 py-2 rounded-lg bg-default-100 border border-default-300 text-sm focus:outline-none focus:ring-2"
+                            value={formData.currency_id || ""}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                currency_id: e.target.value || "",
+                              })
+                            }
+                          >
+                            <option value="">Select a currency</option>
+                            {currencies.map((curr) => (
+                              <option key={curr.id} value={curr.id}>
+                                {curr.code} - {curr.display_name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <Label>{t("admin-common-status")}</Label>
+                          <select
+                            className="px-3 py-2 rounded-lg bg-default-100 border border-default-300 text-sm focus:outline-none focus:ring-2"
+                            value={formData.status}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                status: e.target.value as "active" | "inactive",
+                              })
+                            }
+                          >
+                            {STATUS_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>
+                                {opt}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                          <Checkbox
+                            id="region-tax-inclusive"
+                            isSelected={formData.tax_inclusive}
+                            onChange={(value) =>
+                              setFormData({ ...formData, tax_inclusive: value })
+                            }
+                          >
+                            {t(
+                              "admin-regions-tax-inclusive-label",
+                              "Prices include taxes (TTC)",
+                            )}
+                          </Checkbox>
+                          <p className="text-sm text-default-500 ml-6">
+                            {t(
+                              "admin-regions-tax-inclusive-help",
+                              "If checked, product prices in this region are considered tax-inclusive.",
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </Modal.Body>
+                    <Modal.Footer>
+                      <Button variant="tertiary" onPress={close}>
+                        {t("admin-common-cancel")}
+                      </Button>
+                      <Button
+                        variant="primary"
+                        isDisabled={!formData.display_name || !formData.currency_id}
+                        onPress={handleSave}
+                      >
+                        {t("admin-common-save")}
+                      </Button>
+                    </Modal.Footer>
+                  </>
+                )}
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
         </Modal>
       </div>
     </DefaultLayout>
