@@ -237,45 +237,20 @@ export default function CustomersPage() {
                     key={c.id}
                     className="cursor-pointer hover:bg-default-100 transition-colors"
                   >
-                    <Table.Cell>
-                      <div
-                        className="block w-full"
-                        onClick={() => openCustomer(c)}
-                      >
+                    <Table.Cell onClick={() => openCustomer(c)}>
                         {c.name || "-"}
-                      </div>
                     </Table.Cell>
-                    <Table.Cell>
-                      <div
-                        className="block w-full"
-                        onClick={() => openCustomer(c)}
-                      >
+                    <Table.Cell onClick={() => openCustomer(c)}>
                         {c.email}
-                      </div>
                     </Table.Cell>
-                    <Table.Cell>
-                      <div
-                        className="block w-full"
-                        onClick={() => openCustomer(c)}
-                      >
-                        {c.stats.order_count}
-                      </div>
+                    <Table.Cell onClick={() => openCustomer(c)}>
+                      {c.stats.order_count}
                     </Table.Cell>
-                    <Table.Cell>
-                      <div
-                        className="block w-full"
-                        onClick={() => openCustomer(c)}
-                      >
-                        {formatMoney(c.stats.total_spent_cents, "EUR")}
-                      </div>
+                    <Table.Cell onClick={() => openCustomer(c)}>
+                      {formatMoney(c.stats.total_spent_cents, "EUR")}
                     </Table.Cell>
-                    <Table.Cell>
-                      <div
-                        className="block w-full"
-                        onClick={() => openCustomer(c)}
-                      >
-                        {new Date(c.created_at).toLocaleDateString()}
-                      </div>
+                    <Table.Cell onClick={() => openCustomer(c)}>
+                      {new Date(c.created_at).toLocaleDateString()}
                     </Table.Cell>
                   </Table.Row>
                 ))}
