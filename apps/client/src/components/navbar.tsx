@@ -77,8 +77,8 @@ export const Navbar = () => {
         placeholder={`${t("search")}…`}
         type="search"
       />
-      <Kbd className="hidden lg:inline-block ml-2">
-        <Kbd.Abbr keyValue="command" />
+      <Kbd className="ml-2">
+        <Kbd.Abbr keyValue="command" title="Command">⌘</Kbd.Abbr>
         <Kbd.Content>K</Kbd.Content>
       </Kbd>
     </div>
