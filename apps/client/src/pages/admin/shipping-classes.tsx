@@ -20,14 +20,9 @@ import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@heroui/react";
 import { Input, TextField, Label } from "@heroui/react";
-import { Select,  ListBox } from "@heroui/react";
-import {
-  Table,
-} from "@heroui/react";
-import {
-  Modal,
-} from "@heroui/react";
-import { Card, Tooltip } from "@heroui/react";
+import { Table } from "@heroui/react";
+import { Modal } from "@heroui/react";
+import { Card } from "@heroui/react";
 import { Chip } from "@heroui/react";
 import { Plus, Edit2, Trash2, Package } from "lucide-react";
 import DefaultLayout from "@/layouts/default";
@@ -226,7 +221,7 @@ export default function ShippingClassesPage() {
         {/* Filters */}
         <Card className="mb-6">
           <Card.Content className="flex gap-4">
-            <TextField className="w-full">
+            <TextField className="flex-1">
               <Label>{t("admin-shipping-classes-filter-placeholder")}</Label>
               <Input
                 placeholder={t("admin-shipping-classes-filter-placeholder")}
@@ -234,32 +229,18 @@ export default function ShippingClassesPage() {
                 onChange={(e) => setGlobalFilter(e.target.value)}
               />
             </TextField>
-            <Select
-              value={statusFilter || ""}
-              onChange={(value) => setStatusFilter((value as string) || "")}
-            >
+            <div className="flex flex-col gap-1">
               <Label>{t("admin-shipping-classes-status")}</Label>
-              <Select.Trigger>
-                <Select.Value />
-                <Select.Indicator />
-              </Select.Trigger>
-              <Select.Popover>
-                <ListBox>
-                  <ListBox.Item id="" textValue={t("admin-shipping-classes-filter-status")}>
-                    {t("admin-shipping-classes-filter-status")}
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                  <ListBox.Item id="active" textValue={t("admin-shipping-classes-active")}>
-                    {t("admin-shipping-classes-active")}
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                  <ListBox.Item id="inactive" textValue={t("admin-shipping-classes-inactive")}>
-                    {t("admin-shipping-classes-inactive")}
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                </ListBox>
-              </Select.Popover>
-            </Select>
+              <select
+                className="px-3 py-2 rounded-lg bg-default-100 border border-default-300 text-sm focus:outline-none focus:ring-2"
+                value={statusFilter || ""}
+                onChange={(e) => setStatusFilter(e.target.value || "")}
+              >
+                <option value="">{t("admin-shipping-classes-filter-status")}</option>
+                <option value="active">{t("admin-shipping-classes-active")}</option>
+                <option value="inactive">{t("admin-shipping-classes-inactive")}</option>
+              </select>
+            </div>
           </Card.Content>
         </Card>
 
@@ -328,37 +309,22 @@ export default function ShippingClassesPage() {
                     </Table.Cell>
                     <Table.Cell>
                       <div className="flex gap-2">
-                        <Tooltip>
-                          <Tooltip.Trigger>
-                            <Button
-                              isIconOnly
-                              size="sm"
-                              variant="tertiary"
-                              onPress={() => handleOpenEdit(cls)}
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </Button>
-                          </Tooltip.Trigger>
-                          <Tooltip.Content>
-                            {t("admin-shipping-classes-btn-edit")}
-                          </Tooltip.Content>
-                        </Tooltip>
-                        <Tooltip>
-                          <Tooltip.Trigger>
-                            <Button
-                              isIconOnly
-
-                              size="sm"
-                              variant="tertiary"
-                              onPress={() => handleDelete(cls.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </Tooltip.Trigger>
-                          <Tooltip.Content>
-                            {t("admin-shipping-classes-btn-delete")}
-                          </Tooltip.Content>
-                        </Tooltip>
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          variant="tertiary"
+                          onPress={() => handleOpenEdit(cls)}
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          variant="tertiary"
+                          onPress={() => handleDelete(cls.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </Table.Cell>
                   </Table.Row>
@@ -370,118 +336,96 @@ export default function ShippingClassesPage() {
       </Card>
 
       {/* Create / Edit Modal */}
-        <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
-          <Modal.Backdrop />
+      <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
+        <Modal.Backdrop>
           <Modal.Container size="lg">
             <Modal.Dialog>
               {({ close }) => (
                 <>
                   <Modal.CloseTrigger onPress={close} />
                   <Modal.Header>
-                      {isEditMode
-                        ? t("admin-shipping-classes-modal-title-edit")
-                        : t("admin-shipping-classes-modal-title-create")}
+                    {isEditMode
+                      ? t("admin-shipping-classes-modal-title-edit")
+                      : t("admin-shipping-classes-modal-title-create")}
                   </Modal.Header>
-                  <Modal.Body className="gap-4">
-              {/* Code — only editable on creation */}
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <TextField isRequired isDisabled={isEditMode}>
-                    <Label>{t("admin-shipping-classes-code")}</Label>
-                    <Input
-                      placeholder={t("admin-shipping-classes-code-placeholder")}
-                      value={formData.code}
-                      onChange={(e) =>
-                        setFormData({ ...formData, code: e.target.value.toLowerCase() })
-                      }
-                    />
-                  </TextField>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t("admin-shipping-classes-code-help")}
-                </Tooltip.Content>
-              </Tooltip>
-              <TextField isRequired>
-                <Label>{t("admin-shipping-classes-display-name")}</Label>
-                <Input
-                  placeholder={t(
-                    "admin-shipping-classes-display-name-placeholder",
-                  )}
-                  value={formData.display_name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, display_name: e.target.value })
-                  }
-                />
-              </TextField>
-              <TextField>
-                <Label>{t("admin-shipping-classes-description")}</Label>
-                <Input
-                  placeholder={t(
-                    "admin-shipping-classes-description-placeholder",
-                  )}
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                />
-              </TextField>
-              <Select
-                isRequired
-                value={formData.resolution}
-                onChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    resolution: value as any,
-                  })
-                }
-              >
-                <Label>{t("admin-shipping-classes-resolution-mode")}</Label>
-                <Select.Trigger>
-                  <Select.Value />
-                  <Select.Indicator />
-                </Select.Trigger>
-                <Select.Popover>
-                  <ListBox>
-                    <ListBox.Item key="exclusive" id="exclusive" textValue={t("admin-shipping-classes-resolution-exclusive-label")}>
-                      {t("admin-shipping-classes-resolution-exclusive-label")}
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                    <ListBox.Item key="additive" id="additive" textValue={t("admin-shipping-classes-resolution-additive-label")}>
-                      {t("admin-shipping-classes-resolution-additive-label")}
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                  </ListBox>
-                </Select.Popover>
-              </Select>
-              {isEditMode && (
-                <Select
-                  value={formData.status}
-                  onChange={(value) =>
-                    setFormData({
-                      ...formData,
-                      status: value as any,
-                    })
-                  }
-                >
-                  <Label>{t("admin-shipping-classes-status")}</Label>
-                  <Select.Trigger>
-                    <Select.Value />
-                    <Select.Indicator />
-                  </Select.Trigger>
-                  <Select.Popover>
-                    <ListBox>
-                      <ListBox.Item key="active" id="active" textValue={t("admin-shipping-classes-active")}>
-                        {t("admin-shipping-classes-active")}
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                      <ListBox.Item key="inactive" id="inactive" textValue={t("admin-shipping-classes-inactive")}>
-                        {t("admin-shipping-classes-inactive")}
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                    </ListBox>
-                  </Select.Popover>
-                </Select>
-              )}
+                  <Modal.Body>
+                    <div className="space-y-4">
+                      {/* Code — only editable on creation */}
+                      <TextField isDisabled={isEditMode}>
+                        <Label>{t("admin-shipping-classes-code")}</Label>
+                        <Input
+                          placeholder={t("admin-shipping-classes-code-placeholder")}
+                          value={formData.code}
+                          onChange={(e) =>
+                            setFormData({ ...formData, code: e.target.value.toLowerCase() })
+                          }
+                        />
+                      </TextField>
+
+                      <TextField>
+                        <Label>{t("admin-shipping-classes-display-name")}</Label>
+                        <Input
+                          placeholder={t("admin-shipping-classes-display-name-placeholder")}
+                          value={formData.display_name}
+                          onChange={(e) =>
+                            setFormData({ ...formData, display_name: e.target.value })
+                          }
+                        />
+                      </TextField>
+
+                      <TextField>
+                        <Label>{t("admin-shipping-classes-description")}</Label>
+                        <Input
+                          placeholder={t("admin-shipping-classes-description-placeholder")}
+                          value={formData.description}
+                          onChange={(e) =>
+                            setFormData({ ...formData, description: e.target.value })
+                          }
+                        />
+                      </TextField>
+
+                      <div className="flex flex-col gap-1">
+                        <Label>{t("admin-shipping-classes-resolution-mode")}</Label>
+                        <select
+                          className="px-3 py-2 rounded-lg bg-default-100 border border-default-300 text-sm focus:outline-none focus:ring-2"
+                          value={formData.resolution}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              resolution: e.target.value as "exclusive" | "additive",
+                            })
+                          }
+                        >
+                          <option value="exclusive">
+                            {t("admin-shipping-classes-resolution-exclusive-label")}
+                          </option>
+                          <option value="additive">
+                            {t("admin-shipping-classes-resolution-additive-label")}
+                          </option>
+                        </select>
+                      </div>
+
+                      {isEditMode && (
+                        <div className="flex flex-col gap-1">
+                          <Label>{t("admin-shipping-classes-status")}</Label>
+                          <select
+                            className="px-3 py-2 rounded-lg bg-default-100 border border-default-300 text-sm focus:outline-none focus:ring-2"
+                            value={formData.status}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                status: e.target.value as "active" | "inactive",
+                              })
+                            }
+                          >
+                            <option value="active">{t("admin-shipping-classes-active")}</option>
+                            <option value="inactive">
+                              {t("admin-shipping-classes-inactive")}
+                            </option>
+                          </select>
+                        </div>
+                      )}
+                    </div>
                   </Modal.Body>
                   <Modal.Footer>
                     <Button variant="tertiary" onPress={close}>
@@ -499,7 +443,8 @@ export default function ShippingClassesPage() {
               )}
             </Modal.Dialog>
           </Modal.Container>
-        </Modal>
+        </Modal.Backdrop>
+      </Modal>
       </div>
     </DefaultLayout>
   );

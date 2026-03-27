@@ -86,10 +86,10 @@ export const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-40 w-full border-b border-separator bg-background/70 backdrop-blur-lg">
-      <header className="flex h-16 items-center justify-between px-6 max-w-6xl mx-auto">
+      <header className="flex h-16 items-center justify-between px-6 max-w-6xl mx-auto gap-4">
         {/* Logo */}
         <RouterLink
-          className="flex justify-start items-center gap-1 text-foreground hover:opacity-80 transition-opacity shrink-0"
+          className="flex justify-start items-center gap-2 text-foreground hover:opacity-80 transition-opacity shrink-0"
           to="/"
         >
           <Logo />
@@ -97,12 +97,12 @@ export const Navbar = () => {
         </RouterLink>
 
         {/* Desktop Navigation */}
-        <ul className="hidden lg:flex gap-4 justify-start items-center ml-2">
+        <ul className="hidden lg:flex gap-6 justify-start items-center ml-2">
           {siteConfig().navItems.filter(item => !item.permissions || item.permissions.length === 0).map((item) => (
             <li key={item.href}>
               <RouterLink
                 className={clsx(
-                  "text-foreground hover:opacity-80 transition-opacity",
+                  "text-foreground hover:opacity-80 transition-opacity text-sm whitespace-nowrap",
                   "data-[active=true]:text-primary data-[active=true]:font-medium",
                 )}
                 to={item.href}
@@ -113,23 +113,23 @@ export const Navbar = () => {
           ))}
           {!isAuthenticated && (
             <li>
-              <Button onPress={() => setIsLoginModalOpen(true)}>
+              <Button size="sm" onPress={() => setIsLoginModalOpen(true)}>
                 {t('log-in')}
               </Button>
             </li>
           )}
           <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
           <AuthenticationGuardWithPermission permission="admin:store">
-            <li>
+            <li className="hidden lg:block">
               <Dropdown>
-                <Dropdown.Trigger className="p-0 bg-transparent data-[hover=true]:bg-transparent">
+                <Dropdown.Trigger className="cursor-pointer flex items-center gap-2 px-2 py-1 rounded hover:bg-default-100 transition-colors text-sm">
                   {t("nav-admin")}
                   <ChevronDown className="w-4 h-4" />
                 </Dropdown.Trigger>
                 <Dropdown.Popover>
                   <Dropdown.Menu
                     aria-label="Admin actions"
-                    className="w-85"
+                    className="w-full"
                   >
                     {siteConfig().navItems.filter(item => item.permissions && item.permissions.includes("admin:store")).map((item) => (
                       <Dropdown.Item
@@ -156,8 +156,8 @@ export const Navbar = () => {
         </ul>
 
         {/* Desktop Right Items */}
-        <ul className="hidden sm:flex gap-2 items-center ml-auto">
-          <li className="hidden sm:flex gap-2 items-center">
+        <ul className="hidden sm:flex gap-4 items-center ml-auto">
+          <li className="hidden sm:flex gap-4 items-center">
             <UserListsMenu />
             <RouterLink
               to="/cart"
@@ -218,7 +218,15 @@ export const Navbar = () => {
         </ul>
 
         {/* Mobile Menu Icon */}
-        <div className="sm:hidden flex gap-2 items-center ml-auto">
+        <div className="sm:hidden flex gap-4 items-center ml-auto">
+          <button
+            onClick={() => setIsLoginModalOpen(true)}
+            className="text-foreground hover:opacity-80 transition-opacity"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M11 11c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm0 2c-2.21 0-6 1.11-6 3.33v2.67h12v-2.67c0-2.22-3.79-3.33-6-3.33z"/>
+            </svg>
+          </button>
           <a
             href={siteConfig().links.github}
             target="_blank"

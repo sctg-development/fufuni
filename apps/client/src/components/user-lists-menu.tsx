@@ -164,7 +164,7 @@ export function UserListsMenu() {
                           <Bookmark className="w-4 h-4 text-primary shrink-0" fill="currentColor" />
                           <div className="flex flex-col flex-1 gap-1">
                             <Label>{t('cart-number', { num: (snapshot as string).slice(0, 8) }) || `Cart #${(snapshot as string).slice(0, 8)}`}</Label>
-                            <p className="text-xs text-default-400">ID: {snapshot} ({t('legacy', 'legacy')})</p>
+                            <p className="text-xs text-default-400">ID: {snapshot} (${t('legacy', 'legacy')})</p>
                           </div>
                         </div>
                       </Dropdown.Item>
@@ -187,7 +187,7 @@ export function UserListsMenu() {
                         <Bookmark className="w-4 h-4 text-primary shrink-0" fill="currentColor" />
                         <div className="flex flex-col flex-1 gap-1">
                           <Label>{t('cart-number', { num: snapshot.id.slice(0, 8) }) || `Cart #${snapshot.id.slice(0, 8)}`}</Label>
-                          <p className="text-xs text-default-400">{itemCount} {itemCount === 1 ? t('item') : t('items')} • {formatMoney(totalCents, currency)}</p>
+                          <p className="text-xs text-default-400">{itemCount} ${itemCount === 1 ? t('item') : t('items')} • ${formatMoney(totalCents, currency)}</p>
                         </div>
                       </div>
                     </Dropdown.Item>

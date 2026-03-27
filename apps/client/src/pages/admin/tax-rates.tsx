@@ -7,15 +7,9 @@ import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@heroui/react";
 import { Input, TextField, Label } from "@heroui/react";
-import { Select,  ListBox } from "@heroui/react";
-import {
-  Table,
-} from "@heroui/react";
-import {
-  Modal,
-} from "@heroui/react";
+import { Table } from "@heroui/react";
+import { Modal } from "@heroui/react";
 import { Card } from "@heroui/react";
-import { Tooltip } from "@heroui/react";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
 
@@ -190,8 +184,8 @@ export default function TaxRatesPage() {
         </div>
 
         <Card className="mb-6">
-          <Card.Content className="flex flex-row gap-4">
-            <TextField className="w-full">
+          <Card.Content className="flex gap-4">
+            <TextField className="flex-1">
               <Label>{t("admin-tax-rates-filter-placeholder")}</Label>
               <Input
                 placeholder={t("admin-tax-rates-filter-placeholder")}
@@ -199,33 +193,18 @@ export default function TaxRatesPage() {
                 onChange={(e) => setGlobalFilter(e.target.value)}
               />
             </TextField>
-            <Select
-              className="w-48"
-              value={statusFilter || ""}
-              onChange={(value) => setStatusFilter((value as string) || "")}
-            >
+            <div className="flex flex-col gap-1">
               <Label>{t("admin-common-status")}</Label>
-              <Select.Trigger>
-                <Select.Value />
-                <Select.Indicator />
-              </Select.Trigger>
-              <Select.Popover>
-                <ListBox>
-                  <ListBox.Item id="" textValue={t("all")}>
-                    {t("all")}
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                  <ListBox.Item id="active" textValue="Active">
-                    Active
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                  <ListBox.Item id="inactive" textValue="Inactive">
-                    Inactive
-                    <ListBox.ItemIndicator />
-                  </ListBox.Item>
-                </ListBox>
-              </Select.Popover>
-            </Select>
+              <select
+                className="px-3 py-2 rounded-lg bg-default-100 border border-default-300 text-sm focus:outline-none focus:ring-2"
+                value={statusFilter || ""}
+                onChange={(e) => setStatusFilter(e.target.value || "")}
+              >
+                <option value="">{t("all")}</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
           </Card.Content>
         </Card>
 
@@ -300,158 +279,131 @@ export default function TaxRatesPage() {
         </Card>
 
         <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
-          <Modal.Backdrop />
-          <Modal.Container size="lg">
-            <Modal.Dialog>
-              {({ close }) => (
-                <>
-                  <Modal.CloseTrigger onPress={close} />
-                  <Modal.Header>
+          <Modal.Backdrop>
+            <Modal.Container size="lg">
+              <Modal.Dialog>
+                {({ close }) => (
+                  <>
+                    <Modal.CloseTrigger onPress={close} />
+                    <Modal.Header>
                       {isEditMode
                         ? t("admin-tax-rates-edit")
                         : t("admin-tax-rates-create")}
-                  </Modal.Header>
-                  <Modal.Body className="gap-4">
-              <div className="flex items-center gap-2">
-                <label className="block text-sm font-medium">
-                  {t("admin-products-title-locale")}
-                </label>
-                <Select
-                  className="w-36"
-                  value={selectedLocale}
-                  onChange={(value) => setSelectedLocale((value as string) || "en-US")}
-                >
-                  <Label>{t("admin-products-title-locale")}</Label>
-                  <Select.Trigger>
-                    <Select.Value />
-                    <Select.Indicator />
-                  </Select.Trigger>
-                  <Select.Popover>
-                    <ListBox>
-                      {availableLanguages.map((lang) => (
-                        <ListBox.Item key={lang.code} id={lang.code} textValue={lang.nativeName}>
-                          {lang.nativeName}
-                          <ListBox.ItemIndicator />
-                        </ListBox.Item>
-                      ))}
-                    </ListBox>
-                  </Select.Popover>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  {t("admin-common-name")}
-                </label>
-                <LocalizedTaxNameInput
-                  required
-                  locale={selectedLocale}
-                  value={formData.display_name}
-                  onChange={(val) =>
-                    setFormData({ ...formData, display_name: val })
-                  }
-                  onLocaleChange={setSelectedLocale}
-                />
-              </div>
-              <div className="flex gap-4">
-                <Tooltip>
-                  <Tooltip.Trigger>
-                    <TextField className="flex-1">
-                      <Label>{t("admin-tax-rates-country-code")}</Label>
-                      <Input
-                        maxLength={2}
-                        placeholder="FR"
-                        value={formData.country_code || ""}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            country_code: e.target.value.toUpperCase(),
-                          })
-                        }
-                      />
-                    </TextField>
-                  </Tooltip.Trigger>
-                  <Tooltip.Content>
-                    {t("admin-tax-rates-country-help")}
-                  </Tooltip.Content>
-                </Tooltip>
-                <Tooltip>
-                  <Tooltip.Trigger>
-                    <TextField className="flex-1">
-                      <Label>{t("admin-tax-rates-tax-code")}</Label>
-                      <Input
-                        placeholder="txcd_99999999"
-                        value={formData.tax_code || ""}
-                        onChange={(e) =>
-                          setFormData({ ...formData, tax_code: e.target.value })
-                        }
-                      />
-                    </TextField>
-                  </Tooltip.Trigger>
-                  <Tooltip.Content>
-                    {t("admin-tax-rates-tax-code-help")}
-                  </Tooltip.Content>
-                </Tooltip>
-              </div>
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <TextField>
-                    <Label>{t("admin-tax-rates-rate")}</Label>
-                    <Input
-                      placeholder="20.0"
-                      type="number"
-                      value={formData.rate_percentage.toString()}
-                      onChange={(e) =>
-                        setFormData({ ...formData, rate_percentage: Number(e.target.value) })
-                      }
-                    />
-                  </TextField>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t("admin-tax-rates-rate-help")}
-                </Tooltip.Content>
-              </Tooltip>
-              <Select
-                value={formData.status}
-                onChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    status: value as any,
-                  })
-                }
-              >
-                <Label>{t("admin-common-status")}</Label>
-                <Select.Trigger>
-                  <Select.Value />
-                  <Select.Indicator />
-                </Select.Trigger>
-                <Select.Popover>
-                  <ListBox>
-                    {STATUS_OPTIONS.map((opt) => (
-                      <ListBox.Item key={opt} id={opt} textValue={opt}>
-                        {opt}
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                    ))}
-                  </ListBox>
-                </Select.Popover>
-              </Select>
-                  </Modal.Body>
-                  <Modal.Footer>
-                    <Button variant="tertiary" onPress={close}>
-                      {t("admin-common-cancel")}
-                    </Button>
-                    <Button
-                      variant="primary"
-                      isDisabled={!formData.display_name}
-                      onPress={handleSave}
-                    >
-                      {t("admin-common-save")}
-                    </Button>
-                  </Modal.Footer>
-                </>
-              )}
-            </Modal.Dialog>
-          </Modal.Container>
+                    </Modal.Header>
+                    <Modal.Body>
+                      <div className="space-y-4">
+                        {/* Locale selector */}
+                        <div className="flex flex-col gap-1">
+                          <Label>{t("admin-products-title-locale")}</Label>
+                          <select
+                            className="px-3 py-2 rounded-lg bg-default-100 border border-default-300 text-sm focus:outline-none focus:ring-2"
+                            value={selectedLocale}
+                            onChange={(e) => setSelectedLocale(e.target.value || "en-US")}
+                          >
+                            {availableLanguages.map((lang) => (
+                              <option key={lang.code} value={lang.code}>
+                                {lang.nativeName}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Tax name */}
+                        <div>
+                          <Label>{t("admin-common-name")}</Label>
+                          <div className="mt-1">
+                            <LocalizedTaxNameInput
+                              required
+                              locale={selectedLocale}
+                              value={formData.display_name}
+                              onChange={(val) =>
+                                setFormData({ ...formData, display_name: val })
+                              }
+                              onLocaleChange={setSelectedLocale}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Country and Tax code */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <TextField>
+                            <Label>{t("admin-tax-rates-country-code")}</Label>
+                            <Input
+                              maxLength={2}
+                              placeholder="FR"
+                              value={formData.country_code || ""}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  country_code: e.target.value.toUpperCase(),
+                                })
+                              }
+                            />
+                          </TextField>
+                          <TextField>
+                            <Label>{t("admin-tax-rates-tax-code")}</Label>
+                            <Input
+                              placeholder="txcd_99999999"
+                              value={formData.tax_code || ""}
+                              onChange={(e) =>
+                                setFormData({ ...formData, tax_code: e.target.value })
+                              }
+                            />
+                          </TextField>
+                        </div>
+
+                        {/* Tax rate percentage */}
+                        <TextField>
+                          <Label>{t("admin-tax-rates-rate")}</Label>
+                          <Input
+                            placeholder="20.0"
+                            type="number"
+                            value={formData.rate_percentage.toString()}
+                            onChange={(e) =>
+                              setFormData({ ...formData, rate_percentage: Number(e.target.value) })
+                            }
+                          />
+                        </TextField>
+
+                        {/* Status */}
+                        <div className="flex flex-col gap-1">
+                          <Label>{t("admin-common-status")}</Label>
+                          <select
+                            className="px-3 py-2 rounded-lg bg-default-100 border border-default-300 text-sm focus:outline-none focus:ring-2"
+                            value={formData.status}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                status: e.target.value as "active" | "inactive",
+                              })
+                            }
+                          >
+                            {STATUS_OPTIONS.map((opt) => (
+                              <option key={opt} value={opt}>
+                                {opt}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </Modal.Body>
+                    <Modal.Footer>
+                      <Button variant="tertiary" onPress={close}>
+                        {t("admin-common-cancel")}
+                      </Button>
+                      <Button
+                        variant="primary"
+                        isDisabled={!formData.display_name}
+                        onPress={handleSave}
+                      >
+                        {t("admin-common-save")}
+                      </Button>
+                    </Modal.Footer>
+                  </>
+                )}
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
         </Modal>
       </div>
     </DefaultLayout>
