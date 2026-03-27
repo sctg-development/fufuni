@@ -24,7 +24,6 @@ import { Select, ListBox } from "@heroui/react";
 import { Table } from "@heroui/react";
 import {
   Modal,
-  useOverlayState,
 } from "@heroui/react";
 import { Card } from "@heroui/react";
 import { Tooltip } from "@heroui/react";
@@ -82,7 +81,7 @@ export default function WarehousesPage() {
   const [statusFilter, setStatusFilter] = useState<string>("");
 
   // Modal state
-  const modalState = useOverlayState();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingWarehouse, setEditingWarehouse] = useState<Warehouse | null>(
     null,
@@ -164,7 +163,7 @@ export default function WarehousesPage() {
       priority: 1,
       status: "active",
     });
-    modalState.open();
+    setIsModalOpen(true);
   };
 
   /**
@@ -186,7 +185,7 @@ export default function WarehousesPage() {
       priority: warehouse.priority,
       status: warehouse.status,
     });
-    modalState.open();
+    setIsModalOpen(true);
   };
 
   /**
@@ -236,7 +235,7 @@ export default function WarehousesPage() {
           await loadData();
         }
       }
-      modalState.close();
+      setIsModalOpen(false);
     } catch (err) {
       console.error("Failed to save warehouse", err);
     }
@@ -275,6 +274,7 @@ export default function WarehousesPage() {
         <Card className="mb-6">
           <Card.Content className="flex gap-4">
             <TextField className="w-full">
+              <Label>{t("admin-common-search")}</Label>
               <Input
                 placeholder={t("admin-warehouses-filter-placeholder")}
                 value={globalFilter}
@@ -313,11 +313,12 @@ export default function WarehousesPage() {
         <Card>
           <Card.Content>
             <Table>
-              <Table.Header>
-                <Table.Column key="display_name">
-                  {t("admin-common-name")}
-                </Table.Column>
-                <Table.Column key="city">
+              <Table.Content>
+                <Table.Header>
+                  <Table.Column key="display_name" isRowHeader>
+                    {t("admin-common-name")}
+                  </Table.Column>
+                  <Table.Column key="city">
                   {t("admin-warehouses-city")}
                 </Table.Column>
                 <Table.Column key="country">
@@ -333,11 +334,10 @@ export default function WarehousesPage() {
                   {t("admin-common-actions")}
                 </Table.Column>
               </Table.Header>
-              <Table.Body
-                renderEmptyState={() => <div>{t("admin-common-empty")}</div>}
-                items={displayed}
-              >
-                {(warehouse) => (
+                <Table.Body
+                  renderEmptyState={() => <div>{t("admin-common-empty")}</div>}
+                >
+                  {displayed.map((warehouse) => (
                   <Table.Row key={warehouse.id} className="odd:bg-default-50">
                     <Table.Cell>{warehouse.display_name}</Table.Cell>
                     <Table.Cell>
@@ -382,24 +382,24 @@ export default function WarehousesPage() {
                       </div>
                     </Table.Cell>
                   </Table.Row>
-                )}
-              </Table.Body>
+                  ))}
+                </Table.Body>
+              </Table.Content>
             </Table>
           </Card.Content>
         </Card>
 
-        <Modal state={modalState}>
-          <Modal.Backdrop>
-            <Modal.Container size="lg">
+        <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
+          <Modal.Backdrop />
+          <Modal.Container size="lg">
             <Modal.Dialog>
               {({ close }) => (
                 <>
+                  <Modal.CloseTrigger onPress={close} />
                   <Modal.Header className="flex flex-col gap-1">
-                    <Modal.Heading>
                       {isEditMode
                         ? t("admin-warehouses-edit")
                         : t("admin-warehouses-create")}
-                    </Modal.Heading>
                   </Modal.Header>
                   <Modal.Body>
               <Tooltip>
@@ -626,11 +626,10 @@ export default function WarehousesPage() {
                       {t("admin-common-save")}
                     </Button>
                   </Modal.Footer>
-                  </>
-                )}
-              </Modal.Dialog>
-            </Modal.Container>
-          </Modal.Backdrop>
+                </>
+              )}
+            </Modal.Dialog>
+          </Modal.Container>
         </Modal>
       </div>
     </DefaultLayout>

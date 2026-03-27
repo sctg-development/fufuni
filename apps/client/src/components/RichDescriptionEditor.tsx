@@ -372,7 +372,6 @@ export function RichDescriptionEditor({
                 onPress={handleAiTranslate}
               >
                 {!isTranslating && <Sparkles size={14} />}
-                {t('admin-products-editor-ai-btn')}
               </Button>
             </Tooltip.Trigger>
             <Tooltip.Content>

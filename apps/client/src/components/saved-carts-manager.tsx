@@ -266,7 +266,7 @@ export function SavedCartsManager() {
             {({ close }) => (
               <>
                 <Modal.Header className="flex flex-col gap-1">
-                  <Modal.Heading>Détails du panier</Modal.Heading>
+                  Détails du panier
                 </Modal.Header>
                 <Separator />
                 <Modal.Body>

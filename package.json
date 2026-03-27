@@ -11,6 +11,7 @@
   ],
   "devDependencies": {
     "@auth0/auth0-mcp-server": "^0.1.0-beta.9",
+    "@heroui/react-mcp": "^1.1.0",
     "fast-glob": "^3.3.3",
     "jose": "^6.2.2",
     "turbo": "^2.8.20"

@@ -27,7 +27,6 @@ import {
   ListBox,
   Table,
   Modal,
-  useOverlayState,
   Card,
   Tooltip,
 } from "@heroui/react";
@@ -88,7 +87,7 @@ export default function CountriesPage() {
   const [statusFilter, setStatusFilter] = useState<string>("");
 
   // Modal state
-  const modalState = useOverlayState();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingCountry, setEditingCountry] = useState<Country | null>(null);
   const [formData, setFormData] = useState({
@@ -152,7 +151,7 @@ export default function CountriesPage() {
       language_code: "en",
       status: "active",
     });
-    modalState.open();
+    setIsModalOpen(true);
   };
 
   /**
@@ -170,7 +169,7 @@ export default function CountriesPage() {
       language_code: country.language_code,
       status: country.status,
     });
-    modalState.open();
+    setIsModalOpen(true);
   };
 
   /**
@@ -215,7 +214,7 @@ export default function CountriesPage() {
           await loadCountries();
         }
       }
-      modalState.close();
+      setIsModalOpen(false);
     } catch (err) {
       console.error("Failed to save country", err);
     }
@@ -258,6 +257,7 @@ export default function CountriesPage() {
                 value={globalFilter}
                 onChange={(value) => setGlobalFilter(value)}
               >
+                <Label>{t("admin-common-search")}</Label>
                 <Input placeholder={t("admin-common-search")} className="pl-8" />
               </TextField>
               <SearchIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 pointer-events-none text-default-400 w-4 h-4" />
@@ -294,29 +294,29 @@ export default function CountriesPage() {
         <Card>
           <Card.Content>
             <Table>
-              <Table.Header>
-                <Table.Column key="code">{t("admin-common-code")}</Table.Column>
-                <Table.Column key="display_name">
-                  {t("admin-common-name")}
-                </Table.Column>
-                <Table.Column key="country_name">
-                  {t("admin-countries-fullname")}
-                </Table.Column>
-                <Table.Column key="language_code">
-                  {t("admin-common-language")}
-                </Table.Column>
-                <Table.Column key="status">
-                  {t("admin-common-status")}
-                </Table.Column>
-                <Table.Column key="actions">
-                  {t("admin-common-actions")}
-                </Table.Column>
-              </Table.Header>
-              <Table.Body
-                renderEmptyState={() => <div>{t("admin-common-empty")}</div>}
-                items={displayed}
-              >
-                {(country) => (
+              <Table.Content>
+                <Table.Header>
+                  <Table.Column key="code" isRowHeader>{t("admin-common-code")}</Table.Column>
+                  <Table.Column key="display_name">
+                    {t("admin-common-name")}
+                  </Table.Column>
+                  <Table.Column key="country_name">
+                    {t("admin-countries-fullname")}
+                  </Table.Column>
+                  <Table.Column key="language_code">
+                    {t("admin-common-language")}
+                  </Table.Column>
+                  <Table.Column key="status">
+                    {t("admin-common-status")}
+                  </Table.Column>
+                  <Table.Column key="actions">
+                    {t("admin-common-actions")}
+                  </Table.Column>
+                </Table.Header>
+                <Table.Body
+                  renderEmptyState={() => <div>{t("admin-common-empty")}</div>}
+                >
+                {displayed.map((country) => (
                   <Table.Row key={country.id} className="odd:bg-default-50">
                     <Table.Cell className="font-mono font-bold">
                       {country.code}
@@ -356,24 +356,24 @@ export default function CountriesPage() {
                       </div>
                     </Table.Cell>
                   </Table.Row>
-                )}
-              </Table.Body>
+                ))}
+                </Table.Body>
+              </Table.Content>
             </Table>
           </Card.Content>
         </Card>
 
-        <Modal state={modalState}>
+        <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
           <Modal.Backdrop />
           <Modal.Container size="lg">
             <Modal.Dialog>
               {({ close }) => (
                 <>
-                  <Modal.Header className="flex flex-col gap-1">
-                    <Modal.Heading>
-                      {isEditMode
-                        ? t("admin-countries-edit")
-                        : t("admin-countries-create")}
-                    </Modal.Heading>
+                  <Modal.CloseTrigger onPress={close} />
+                  <Modal.Header>
+                    {isEditMode
+                      ? t("admin-countries-edit")
+                      : t("admin-countries-create")}
                   </Modal.Header>
                   <Modal.Body>
               <Tooltip>
@@ -500,25 +500,25 @@ export default function CountriesPage() {
                 </Tooltip.Content>
               </Tooltip>
                   </Modal.Body>
-                  <Modal.Footer>
-                    <Button
-                      variant="tertiary"
-                      onPress={close}
-                    >
-                      {t("admin-common-cancel")}
-                    </Button>
-                    <Button
-                      isDisabled={!formData.display_name || !formData.country_name}
-                      onPress={handleSave}
-                    >
-                      {t("admin-common-save")}
-                    </Button>
-                  </Modal.Footer>
-                  </>
-                )}
-              </Modal.Dialog>
-            </Modal.Container>
-          </Modal>
+                    <Modal.Footer>
+                      <Button
+                        variant="tertiary"
+                        onPress={close}
+                      >
+                        {t("admin-common-cancel")}
+                      </Button>
+                      <Button
+                        isDisabled={!formData.display_name || !formData.country_name}
+                        onPress={handleSave}
+                      >
+                        {t("admin-common-save")}
+                      </Button>
+                    </Modal.Footer>
+                </>
+              )}
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal>
       </div>
     </DefaultLayout>
   );

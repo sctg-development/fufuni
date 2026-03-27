@@ -13,7 +13,6 @@ import {
 } from "@heroui/react";
 import {
   Modal,
-  useOverlayState,
 } from "@heroui/react";
 import { Card } from "@heroui/react";
 import { Tooltip } from "@heroui/react";
@@ -49,7 +48,7 @@ export default function TaxRatesPage() {
   const [globalFilter, setGlobalFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("");
 
-  const modalState = useOverlayState();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingTaxRate, setEditingTaxRate] = useState<TaxRate | null>(null);
   const [formData, setFormData] = useState({
@@ -112,7 +111,7 @@ export default function TaxRatesPage() {
     setSelectedLocale(
       availableLanguages.find((l) => l.isDefault)?.code || "en-US",
     );
-    modalState.open();
+    setIsModalOpen(true);
   };
 
   const handleOpenEdit = (taxRate: TaxRate) => {
@@ -125,7 +124,7 @@ export default function TaxRatesPage() {
       rate_percentage: taxRate.rate_percentage,
       status: taxRate.status,
     });
-    modalState.open();
+    setIsModalOpen(true);
   };
 
   const handleSave = async () => {
@@ -159,7 +158,7 @@ export default function TaxRatesPage() {
           await loadData();
         }
       }
-      modalState.close();
+      setIsModalOpen(false);
     } catch (err) {
       console.error("Failed to save tax rate", err);
     }
@@ -193,6 +192,7 @@ export default function TaxRatesPage() {
         <Card className="mb-6">
           <Card.Content className="flex flex-row gap-4">
             <TextField className="w-full">
+              <Label>{t("admin-tax-rates-filter-placeholder")}</Label>
               <Input
                 placeholder={t("admin-tax-rates-filter-placeholder")}
                 value={globalFilter}
@@ -232,9 +232,10 @@ export default function TaxRatesPage() {
         <Card>
           <Card.Content>
             <Table aria-label="Tax Rates Table">
-              <Table.Header>
-                <Table.Column>{t("admin-common-name")}</Table.Column>
-                <Table.Column>{t("admin-tax-rates-country-code")}</Table.Column>
+              <Table.Content>
+                <Table.Header>
+                  <Table.Column isRowHeader>{t("admin-common-name")}</Table.Column>
+                  <Table.Column>{t("admin-tax-rates-country-code")}</Table.Column>
                 <Table.Column>{t("admin-tax-rates-tax-code")}</Table.Column>
                 <Table.Column>{t("admin-tax-rates-rate")}</Table.Column>
                 <Table.Column>{t("admin-common-status")}</Table.Column>
@@ -244,9 +245,8 @@ export default function TaxRatesPage() {
               </Table.Header>
               <Table.Body
                 renderEmptyState={() => t("admin-common-empty")}
-                items={displayed}
               >
-                {(item) => (
+                {displayed.map((item) => (
                   <Table.Row key={item.id} className="odd:bg-default-50">
                     <Table.Cell>
                       {getTaxNameForLocale(item.display_name, i18n.language)}
@@ -292,24 +292,24 @@ export default function TaxRatesPage() {
                       </div>
                     </Table.Cell>
                   </Table.Row>
-                )}
+                ))}
               </Table.Body>
-            </Table>
+            </Table.Content>
+          </Table>
           </Card.Content>
         </Card>
 
-        <Modal state={modalState}>
-          <Modal.Backdrop>
-            <Modal.Container size="lg">
+        <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
+          <Modal.Backdrop />
+          <Modal.Container size="lg">
             <Modal.Dialog>
               {({ close }) => (
                 <>
+                  <Modal.CloseTrigger onPress={close} />
                   <Modal.Header>
-                    <Modal.Heading>
                       {isEditMode
                         ? t("admin-tax-rates-edit")
                         : t("admin-tax-rates-create")}
-                    </Modal.Heading>
                   </Modal.Header>
                   <Modal.Body className="gap-4">
               <div className="flex items-center gap-2">
@@ -448,11 +448,10 @@ export default function TaxRatesPage() {
                       {t("admin-common-save")}
                     </Button>
                   </Modal.Footer>
-                  </>
-                )}
-              </Modal.Dialog>
-            </Modal.Container>
-          </Modal.Backdrop>
+                </>
+              )}
+            </Modal.Dialog>
+          </Modal.Container>
         </Modal>
       </div>
     </DefaultLayout>

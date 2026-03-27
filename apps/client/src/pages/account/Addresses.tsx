@@ -205,11 +205,9 @@ export default function Addresses() {
             {({ close }) => (
               <>
                 <Modal.Header>
-                  <Modal.Heading>
                     {editingAddress
                       ? t("account-edit-address")
                       : t("account-add-address")}
-                  </Modal.Heading>
                 </Modal.Header>
                 <Modal.Body className="gap-4">
             <TextField>

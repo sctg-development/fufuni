@@ -26,7 +26,6 @@ import {
 } from "@heroui/react";
 import {
   Modal,
-  useOverlayState,
 } from "@heroui/react";
 import { Card } from "@heroui/react";
 import { Tooltip } from "@heroui/react";
@@ -105,7 +104,7 @@ export default function ShippingRatesPage() {
   >([]);
 
   // Modal state
-  const modalState = useOverlayState();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingRate, setEditingRate] = useState<ShippingRate | null>(null);
   const [pricesByDivisa, setPricesByDivisa] = useState<Record<string, number>>(
@@ -126,7 +125,7 @@ export default function ShippingRatesPage() {
   });
 
   // Shipping Classes Modal state
-  const classModalState = useOverlayState();
+  const [isClassModalOpen, setIsClassModalOpen] = useState(false);
   const [isClassEditMode, setIsClassEditMode] = useState(false);
   const [editingClass, setEditingClass] = useState<ShippingClass | null>(null);
   const [classFormData, setClassFormData] = useState({
@@ -311,7 +310,7 @@ export default function ShippingRatesPage() {
       tax_code: "",
       tax_inclusive: false,
     });
-    modalState.open();
+    setIsModalOpen(true);
   };
 
   /**
@@ -386,7 +385,7 @@ export default function ShippingRatesPage() {
       tax_code: (rate as any).tax_code || "",
       tax_inclusive: (rate as any).tax_inclusive || false,
     });
-    modalState.open();
+    setIsModalOpen(true);
   };
 
   /**
@@ -483,7 +482,7 @@ export default function ShippingRatesPage() {
           await loadData();
         }
       }
-      modalState.close();
+      setIsModalOpen(false);
     } catch (err) {
       console.error("Failed to save shipping rate", err);
     }
@@ -521,7 +520,7 @@ export default function ShippingRatesPage() {
       resolution: "exclusive",
       status: "active",
     });
-    classModalState.open();
+    setIsClassModalOpen(true);
   };
 
   /**
@@ -539,7 +538,7 @@ export default function ShippingRatesPage() {
       resolution: cls.resolution,
       status: cls.status,
     });
-    classModalState.open();
+    setIsClassModalOpen(true);
   };
 
   /**
@@ -593,7 +592,7 @@ export default function ShippingRatesPage() {
           setShippingClasses(resp.items || []);
         }
       }
-      classModalState.close();
+      setIsClassModalOpen(false);
     } catch (err) {
       console.error("Failed to save shipping class", err);
     }
@@ -639,7 +638,7 @@ export default function ShippingRatesPage() {
               value={globalFilter}
               onChange={(value: string) => setGlobalFilter(value)}
             >
-              <Label className="hidden">{t("admin-common-search")}</Label>
+              <Label>{t("admin-common-search")}</Label>
               <Input
                 placeholder={t("admin-common-search")}
                 className="pl-8"
@@ -679,10 +678,11 @@ export default function ShippingRatesPage() {
         <Card>
           <Card.Content>
             <Table>
-              <Table.Header>
-                <Table.Column key="display_name">
-                  {t("admin-common-name")}
-                </Table.Column>
+              <Table.Content>
+                <Table.Header>
+                  <Table.Column key="display_name" isRowHeader>
+                    {t("admin-common-name")}
+                  </Table.Column>
                 <Table.Column key="description">
                   {t("admin-common-description")}
                 </Table.Column>
@@ -702,12 +702,11 @@ export default function ShippingRatesPage() {
                   {t("admin-common-actions")}
                 </Table.Column>
               </Table.Header>
-              <Table.Body
-                renderEmptyState={() => <div>{t("admin-common-empty")}</div>}
-                items={displayed}
-              >
-                {(rate) => (
-                  <Table.Row key={rate.id} className="odd:bg-default-50">
+                <Table.Body
+                  renderEmptyState={() => <div>{t("admin-common-empty")}</div>}
+                >
+                  {displayed.map((rate) => (
+                    <Table.Row key={rate.id} className="odd:bg-default-50">
                     <Table.Cell>{rate.display_name}</Table.Cell>
                     <Table.Cell>
                       {rate.description
@@ -758,9 +757,10 @@ export default function ShippingRatesPage() {
                         </Button>
                       </div>
                     </Table.Cell>
-                  </Table.Row>
-                )}
-              </Table.Body>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Content>
             </Table>
           </Card.Content>
         </Card>
@@ -783,10 +783,11 @@ export default function ShippingRatesPage() {
           <Card>
             <Card.Content>
               <Table>
-                <Table.Header>
-                  <Table.Column key="code">
-                    {t("admin-shipping-classes-col-code")}
-                  </Table.Column>
+                <Table.Content>
+                  <Table.Header>
+                    <Table.Column key="code" isRowHeader>
+                      {t("admin-shipping-classes-col-code")}
+                    </Table.Column>
                   <Table.Column key="display_name">
                     {t("admin-shipping-classes-col-name")}
                   </Table.Column>
@@ -803,12 +804,11 @@ export default function ShippingRatesPage() {
                     {t("admin-shipping-classes-col-actions")}
                   </Table.Column>
                 </Table.Header>
-                <Table.Body
-                  renderEmptyState={() => <div>{t("admin-shipping-classes-empty")}</div>}
-                  items={shippingClasses}
-                >
-                  {(cls) => (
-                    <Table.Row key={cls.id} className="odd:bg-default-50">
+                  <Table.Body
+                    renderEmptyState={() => <div>{t("admin-shipping-classes-empty")}</div>}
+                  >
+                    {shippingClasses.map((cls) => (
+                      <Table.Row key={cls.id} className="odd:bg-default-50">
                       <Table.Cell>
                         <code className="text-xs bg-default-100 px-2 py-0.5 rounded">
                           {cls.code}
@@ -893,27 +893,27 @@ export default function ShippingRatesPage() {
                           </Tooltip>
                         </div>
                       </Table.Cell>
-                    </Table.Row>
-                  )}
-                </Table.Body>
+                      </Table.Row>
+                    ))}
+                  </Table.Body>
+                </Table.Content>
               </Table>
             </Card.Content>
           </Card>
         </div>
 
         {/* Create / Edit Shipping Rate Modal */}
-        <Modal state={modalState}>
+        <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
           <Modal.Backdrop />
           <Modal.Container size="lg">
             <Modal.Dialog>
               {({ close }) => (
                 <>
+                  <Modal.CloseTrigger onPress={close} />
                   <Modal.Header className="flex flex-col gap-1">
-                    <Modal.Heading>
                       {isEditMode
                         ? t("admin-shipping-rates-edit")
                         : t("admin-shipping-rates-create")}
-                    </Modal.Heading>
                   </Modal.Header>
                   <Modal.Body>
               <Tooltip>
@@ -1273,21 +1273,21 @@ export default function ShippingRatesPage() {
                       {t("admin-common-save")}
                     </Button>
                   </Modal.Footer>
-                  </>
-                )}
-              </Modal.Dialog>
-            </Modal.Container>
-          </Modal>
+                </>
+              )}
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal>
 
         {/* Create / Edit Shipping Class Modal */}
-        <Modal state={classModalState}>
+        <Modal isOpen={isClassModalOpen} onOpenChange={setIsClassModalOpen}>
           <Modal.Backdrop />
           <Modal.Container>
             <Modal.Dialog>
               {({ close: classClose }) => (
                 <>
+                  <Modal.CloseTrigger onPress={classClose} />
                   <Modal.Header className="flex flex-col gap-1">
-                    <Modal.Heading>
                       {isClassEditMode
                         ? t(
                             "admin-shipping-classes-modal-title-edit",
@@ -1297,7 +1297,6 @@ export default function ShippingRatesPage() {
                             "admin-shipping-classes-modal-title-create",
                             "New Shipping Class",
                           )}
-                    </Modal.Heading>
                   </Modal.Header>
                   <Modal.Body className="gap-4">
               <Tooltip>

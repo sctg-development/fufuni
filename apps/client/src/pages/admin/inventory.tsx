@@ -26,7 +26,6 @@ import { Select,  ListBox } from "@heroui/react";
 import { Table } from "@heroui/react";
 import {
   Modal,
-  useOverlayState,
 } from "@heroui/react";
 import { Card } from "@heroui/react";
 import { Tooltip } from "@heroui/react";
@@ -102,7 +101,7 @@ export default function InventoryPage() {
   const [globalFilter, setGlobalFilter] = useState<string>("");
 
   // Modal state
-  const modalState = useOverlayState();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>("");
   const [adjustDelta, setAdjustDelta] = useState("");
@@ -259,7 +258,7 @@ export default function InventoryPage() {
       {
         onSuccess: () => {
           // Close modal after successful adjustment
-          modalState.close();
+          setIsModalOpen(false);
         },
       },
     );
@@ -286,7 +285,7 @@ export default function InventoryPage() {
     setSelectedWarehouse(item.warehouses?.[0]?.warehouse_id || "");
     setAdjustDelta("");
     setAdjustReason("restock");
-    modalState.open();
+    setIsModalOpen(true);
   };
 
   return (
@@ -305,6 +304,7 @@ export default function InventoryPage() {
         <Card className="mb-6">
           <Card.Content>
             <TextField className="w-full">
+              <Label>{t("admin-inventory-filter-placeholder")}</Label>
               <Input
                 placeholder={t("admin-inventory-filter-placeholder")}
                 value={globalFilter}
@@ -317,28 +317,28 @@ export default function InventoryPage() {
         <Card>
           <Card.Content>
             <Table>
-              <Table.Header>
-                <Table.Column key="sku">
-                  {t("admin-inventory-col-sku")}
-                </Table.Column>
-                <Table.Column key="product">
-                  {t("admin-inventory-col-product")}
-                </Table.Column>
-                <Table.Column key="on_hand">
-                  {t("admin-inventory-col-on-hand")}
-                </Table.Column>
-                <Table.Column key="reserved">
-                  {t("admin-inventory-col-reserved")}
-                </Table.Column>
-                <Table.Column key="available">
-                  {t("admin-inventory-col-available")}
-                </Table.Column>
-              </Table.Header>
-              <Table.Body
-                renderEmptyState={() => <div>{t("admin-inventory-empty")}</div>}
-                items={displayedItems}
-              >
-                {(item) => {
+              <Table.Content>
+                <Table.Header>
+                  <Table.Column key="sku" isRowHeader>
+                    {t("admin-inventory-col-sku")}
+                  </Table.Column>
+                  <Table.Column key="product">
+                    {t("admin-inventory-col-product")}
+                  </Table.Column>
+                  <Table.Column key="on_hand">
+                    {t("admin-inventory-col-on-hand")}
+                  </Table.Column>
+                  <Table.Column key="reserved">
+                    {t("admin-inventory-col-reserved")}
+                  </Table.Column>
+                  <Table.Column key="available">
+                    {t("admin-inventory-col-available")}
+                  </Table.Column>
+                </Table.Header>
+                <Table.Body
+                  renderEmptyState={() => <div>{t("admin-inventory-empty")}</div>}
+                >
+                {displayedItems.map((item) => {
                   const isLow = item.available <= 5 && item.available > 0;
                   const isOut = item.available <= 0;
 
@@ -385,25 +385,25 @@ export default function InventoryPage() {
                       </Table.Cell>
                     </Table.Row>
                   );
-                }}
-              </Table.Body>
+                })}
+                </Table.Body>
+              </Table.Content>
             </Table>
           </Card.Content>
         </Card>
 
         {/* Detail modal */}
-        <Modal state={modalState}>
+        <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
           <Modal.Backdrop>
             <Modal.Container size="md">
-            <Modal.Dialog>
-              {({ close }) => (
-                <>
-                  <Modal.Header className="flex flex-col gap-1">
-                    <Modal.Heading>
+              <Modal.Dialog>
+                {({ close }) => (
+                  <>
+                    <Modal.CloseTrigger onPress={close} />
+                    <Modal.Header>
                       {selectedItem?.sku || t("admin-inventory-title")}
-                    </Modal.Heading>
-                  </Modal.Header>
-                  <Modal.Body>
+                    </Modal.Header>
+                    <Modal.Body>
               {selectedItem && (
                 <div className="space-y-5">
                   {/* Product info */}
@@ -684,33 +684,33 @@ export default function InventoryPage() {
                 </div>
               )}
             </Modal.Body>
-            <Modal.Footer>
-              <Button
-                variant="tertiary"
-                onPress={close}
-              >
-                {t("admin-common-cancel")}
-              </Button>
-              <Button
-                isDisabled={
-                  adjustMutation.isPending ||
-                  !adjustDelta ||
-                  !selectedWarehouse ||
-                  !hasProductInWarehouse(selectedWarehouse)
-                }
-                onPress={handleAdjust}
-              >
-                {adjustMutation.isPending
-                  ? t("admin-inventory-adjusting")
-                  : t("admin-inventory-btn-apply")}
-              </Button>
-            </Modal.Footer>
-            </>
-          )}
-        </Modal.Dialog>
-      </Modal.Container>
-    </Modal.Backdrop>
-  </Modal>
+                    <Modal.Footer>
+                      <Button
+                        variant="tertiary"
+                        onPress={close}
+                      >
+                        {t("admin-common-cancel")}
+                      </Button>
+                      <Button
+                        isDisabled={
+                          adjustMutation.isPending ||
+                          !adjustDelta ||
+                          !selectedWarehouse ||
+                          !hasProductInWarehouse(selectedWarehouse)
+                        }
+                        onPress={handleAdjust}
+                      >
+                        {adjustMutation.isPending
+                          ? t("admin-inventory-adjusting")
+                          : t("admin-inventory-btn-apply")}
+                      </Button>
+                    </Modal.Footer>
+                  </>
+                )}
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
+        </Modal>
     </div>
     </DefaultLayout>
   );

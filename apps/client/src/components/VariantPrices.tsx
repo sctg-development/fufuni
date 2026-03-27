@@ -24,7 +24,6 @@ import { Select, Label, ListBox } from "@heroui/react";
 import { Table } from "@heroui/react";
 import {
   Modal,
-  useOverlayState,
 } from "@heroui/react";
 import { Card} from "@heroui/react";
 import { Trash2, Plus, Pencil, Save } from "lucide-react";
@@ -80,7 +79,7 @@ export function VariantPrices({
   const [currencies, setCurrencies] = useState<Currency[]>([]);
 
   // Modal state for adding price
-  const modalState = useOverlayState();
+  const [isAddPriceModalOpen, setIsAddPriceModalOpen] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState<string>("");
   const [priceInput, setPriceInput] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
@@ -147,7 +146,7 @@ export function VariantPrices({
         setPrices([...prices, response]);
       }
 
-      modalState.close();
+      setIsAddPriceModalOpen(false);
       setSelectedCurrency("");
       setPriceInput("");
     } catch (err) {
@@ -215,7 +214,7 @@ export function VariantPrices({
   const handleOpenModal = () => {
     setSelectedCurrency("");
     setPriceInput("");
-    modalState.open();
+    setIsAddPriceModalOpen(true);
   };
 
   return (
@@ -312,18 +311,19 @@ export function VariantPrices({
         </Card>
       ) : (
         <Table>
-          <Table.Header>
-            <Table.Column>
-              {t("admin-variant-prices-currency")}
-            </Table.Column>
-            <Table.Column>
-              {t("admin-variant-prices-price")}
-            </Table.Column>
-            <Table.Column>
-              {t("admin-common-actions")}
-            </Table.Column>
-          </Table.Header>
-          <Table.Body items={prices} renderEmptyState={() => "No prices"}>
+          <Table.Content>
+            <Table.Header>
+              <Table.Column isRowHeader>
+                {t("admin-variant-prices-currency")}
+              </Table.Column>
+              <Table.Column>
+                {t("admin-variant-prices-price")}
+              </Table.Column>
+              <Table.Column>
+                {t("admin-common-actions")}
+              </Table.Column>
+            </Table.Header>
+            <Table.Body items={prices} renderEmptyState={() => "No prices"}>
             {(price) => {
               const isEditing = editingCurrencyId === price.currency_id;
 
@@ -407,20 +407,23 @@ export function VariantPrices({
               );
             }}
           </Table.Body>
+          </Table.Content>
         </Table>
       )}
 
       {/* Add price modal */}
-      <Modal state={modalState}>
+      <Modal
+        isOpen={isAddPriceModalOpen}
+        onOpenChange={setIsAddPriceModalOpen}
+      >
         <Modal.Backdrop>
           <Modal.Container>
             <Modal.Dialog>
               {({ close }) => (
                 <>
+                  <Modal.CloseTrigger onPress={close} />
                   <Modal.Header>
-                    <Modal.Heading>
-                      {t("admin-variant-prices-add-title")}
-                    </Modal.Heading>
+                    {t("admin-variant-prices-add-title")}
                   </Modal.Header>
                   <Modal.Body>
                     <div className="space-y-4">

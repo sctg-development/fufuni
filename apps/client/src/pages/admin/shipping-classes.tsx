@@ -26,7 +26,6 @@ import {
 } from "@heroui/react";
 import {
   Modal,
-  useOverlayState,
 } from "@heroui/react";
 import { Card, Tooltip } from "@heroui/react";
 import { Chip } from "@heroui/react";
@@ -51,7 +50,7 @@ export default function ShippingClassesPage() {
   const [statusFilter, setStatusFilter] = useState("");
 
   // Modal state
-  const modalState = useOverlayState();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingClass, setEditingClass] = useState<ShippingClass | null>(null);
   const [formData, setFormData] = useState({
@@ -110,7 +109,7 @@ export default function ShippingClassesPage() {
       resolution: "exclusive",
       status: "active",
     });
-    modalState.open();
+    setIsModalOpen(true);
   };
 
   const handleOpenEdit = (cls: ShippingClass) => {
@@ -123,7 +122,7 @@ export default function ShippingClassesPage() {
       resolution: cls.resolution,
       status: cls.status,
     });
-    modalState.open();
+    setIsModalOpen(true);
   };
 
   const handleSave = async () => {
@@ -157,7 +156,7 @@ export default function ShippingClassesPage() {
           await loadData();
         }
       }
-      modalState.close();
+      setIsModalOpen(false);
     } catch (err) {
       console.error("Failed to save shipping class", err);
     }
@@ -228,6 +227,7 @@ export default function ShippingClassesPage() {
         <Card className="mb-6">
           <Card.Content className="flex gap-4">
             <TextField className="w-full">
+              <Label>{t("admin-shipping-classes-filter-placeholder")}</Label>
               <Input
                 placeholder={t("admin-shipping-classes-filter-placeholder")}
                 value={globalFilter}
@@ -267,10 +267,11 @@ export default function ShippingClassesPage() {
         <Card>
           <Card.Content>
             <Table>
-              <Table.Header>
-                <Table.Column key="code">
-                  {t("admin-shipping-classes-col-code")}
-                </Table.Column>
+              <Table.Content>
+                <Table.Header>
+                  <Table.Column key="code" isRowHeader>
+                    {t("admin-shipping-classes-col-code")}
+                  </Table.Column>
                 <Table.Column key="display_name">
                   {t("admin-shipping-classes-col-name")}
                 </Table.Column>
@@ -289,9 +290,8 @@ export default function ShippingClassesPage() {
               </Table.Header>
               <Table.Body
                 renderEmptyState={() => <div>{t("admin-shipping-classes-empty")}</div>}
-                items={displayed}
               >
-                {(cls) => (
+                {displayed.map((cls) => (
                   <Table.Row key={cls.id} className="odd:bg-default-50">
                     <Table.Cell>
                       <code className="text-xs bg-default-100 px-2 py-0.5 rounded">
@@ -362,25 +362,25 @@ export default function ShippingClassesPage() {
                       </div>
                     </Table.Cell>
                   </Table.Row>
-                )}
+                ))}
               </Table.Body>
-            </Table>
-          </Card.Content>
-        </Card>
+            </Table.Content>
+          </Table>
+        </Card.Content>
+      </Card>
 
-        {/* Create / Edit Modal */}
-        <Modal state={modalState}>
-          <Modal.Backdrop>
-            <Modal.Container size="lg">
+      {/* Create / Edit Modal */}
+        <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
+          <Modal.Backdrop />
+          <Modal.Container size="lg">
             <Modal.Dialog>
               {({ close }) => (
                 <>
+                  <Modal.CloseTrigger onPress={close} />
                   <Modal.Header>
-                    <Modal.Heading>
                       {isEditMode
                         ? t("admin-shipping-classes-modal-title-edit")
                         : t("admin-shipping-classes-modal-title-create")}
-                    </Modal.Heading>
                   </Modal.Header>
                   <Modal.Body className="gap-4">
               {/* Code — only editable on creation */}
@@ -495,11 +495,10 @@ export default function ShippingClassesPage() {
                       {t("admin-shipping-classes-modal-save")}
                     </Button>
                   </Modal.Footer>
-                  </>
-                )}
-              </Modal.Dialog>
-            </Modal.Container>
-          </Modal.Backdrop>
+                </>
+              )}
+            </Modal.Dialog>
+          </Modal.Container>
         </Modal>
       </div>
     </DefaultLayout>

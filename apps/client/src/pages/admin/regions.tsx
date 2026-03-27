@@ -27,7 +27,6 @@ import {
 import { Checkbox } from "@heroui/react";
 import {
   Modal,
-  useOverlayState,
 } from "@heroui/react";
 import { Card} from "@heroui/react";
 import { Tooltip } from "@heroui/react";
@@ -81,7 +80,7 @@ export default function RegionsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("");
 
   // Modal state
-  const modalState = useOverlayState();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingRegion, setEditingRegion] = useState<Region | null>(null);
   const [formData, setFormData] = useState({
@@ -148,7 +147,7 @@ export default function RegionsPage() {
       tax_inclusive: false,
       status: "active",
     });
-    modalState.open();
+    setIsModalOpen(true);
   };
 
   /**
@@ -166,7 +165,7 @@ export default function RegionsPage() {
       tax_inclusive: region.tax_inclusive,
       status: region.status,
     });
-    modalState.open();
+    setIsModalOpen(true);
   };
 
   /**
@@ -200,7 +199,7 @@ export default function RegionsPage() {
           await loadData();
         }
       }
-      modalState.close();
+      setIsModalOpen(false);
     } catch (err) {
       console.error("Failed to save region", err);
     }
@@ -253,6 +252,7 @@ export default function RegionsPage() {
         <Card className="mb-6">
           <Card.Content className="flex gap-4">
             <TextField className="w-full">
+              <Label>{t("admin-regions-filter-placeholder")}</Label>
               <Input
                 placeholder={t("admin-regions-filter-placeholder")}
                 value={globalFilter}
@@ -291,31 +291,31 @@ export default function RegionsPage() {
         <Card>
           <Card.Content>
             <Table>
-              <Table.Header>
-                <Table.Column key="display_name">
-                  {t("admin-common-name")}
-                </Table.Column>
-                <Table.Column key="currency">
-                  {t("admin-common-currency")}
-                </Table.Column>
-                <Table.Column key="is_default">
-                  {t("admin-common-default")}
-                </Table.Column>
-                <Table.Column key="tax_inclusive">
-                  {t("admin-regions-tax-inclusive")}
-                </Table.Column>
-                <Table.Column key="status">
-                  {t("admin-common-status")}
-                </Table.Column>
-                <Table.Column key="actions">
-                  {t("admin-common-actions")}
-                </Table.Column>
-              </Table.Header>
-              <Table.Body
-                renderEmptyState={() => <div>{t("admin-common-empty")}</div>}
-                items={displayed}
-              >
-                {(region: Region) => (
+              <Table.Content>
+                <Table.Header>
+                  <Table.Column key="display_name" isRowHeader>
+                    {t("admin-common-name")}
+                  </Table.Column>
+                  <Table.Column key="currency">
+                    {t("admin-common-currency")}
+                  </Table.Column>
+                  <Table.Column key="is_default">
+                    {t("admin-common-default")}
+                  </Table.Column>
+                  <Table.Column key="tax_inclusive">
+                    {t("admin-regions-tax-inclusive")}
+                  </Table.Column>
+                  <Table.Column key="status">
+                    {t("admin-common-status")}
+                  </Table.Column>
+                  <Table.Column key="actions">
+                    {t("admin-common-actions")}
+                  </Table.Column>
+                </Table.Header>
+                <Table.Body
+                  renderEmptyState={() => <div>{t("admin-common-empty")}</div>}
+                >
+                {displayed.map((region: Region) => (
                   <Table.Row key={region.id} className="odd:bg-default-50">
                     <Table.Cell>{region.display_name}</Table.Cell>
                     <Table.Cell>
@@ -374,22 +374,22 @@ export default function RegionsPage() {
                       </div>
                     </Table.Cell>
                   </Table.Row>
-                )}
-              </Table.Body>
+                ))}
+                </Table.Body>
+              </Table.Content>
             </Table>
           </Card.Content>
         </Card>
 
-        <Modal state={modalState}>
+        <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
           <Modal.Backdrop />
           <Modal.Container size="lg">
             <Modal.Dialog>
               {({ close }) => (
                 <>
-                  <Modal.Header className="flex flex-col gap-1">
-                    <Modal.Heading>
-                      {isEditMode ? t("admin-regions-edit") : t("admin-regions-create")}
-                    </Modal.Heading>
+                  <Modal.CloseTrigger onPress={close} />
+                  <Modal.Header>
+                    {isEditMode ? t("admin-regions-edit") : t("admin-regions-create")}
                   </Modal.Header>
                   <Modal.Body>
               <Tooltip>
@@ -511,26 +511,26 @@ export default function RegionsPage() {
                 </p>
               </div>
               </Modal.Body>
-              <Modal.Footer>
-                <Button
-                  variant="tertiary"
-                  onPress={close}
-                >
-                  {t("admin-common-cancel")}
-                </Button>
-                <Button
-                  variant="primary"
-                  isDisabled={!formData.display_name || !formData.currency_id}
-                  onPress={handleSave}
-                >
-                  {t("admin-common-save")}
-                </Button>
-              </Modal.Footer>
-              </>
-            )}
-          </Modal.Dialog>
-        </Modal.Container>
-      </Modal>
+                  <Modal.Footer>
+                    <Button
+                      variant="tertiary"
+                      onPress={close}
+                    >
+                      {t("admin-common-cancel")}
+                    </Button>
+                    <Button
+                      variant="primary"
+                      isDisabled={!formData.display_name || !formData.currency_id}
+                      onPress={handleSave}
+                    >
+                      {t("admin-common-save")}
+                    </Button>
+                  </Modal.Footer>
+                </>
+              )}
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal>
       </div>
     </DefaultLayout>
   );

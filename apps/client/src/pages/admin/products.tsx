@@ -623,29 +623,29 @@ export default function ProductsPage() {
           <Table aria-label="Products">
             <Table.Content selectionMode="none">
               <Table.Header>
-                <Table.Column>{t("admin-products-col-title")}</Table.Column>
+                <Table.Column isRowHeader>{t("admin-products-col-title")}</Table.Column>
                 <Table.Column>{t("admin-products-col-description")}</Table.Column>
                 <Table.Column>{t("admin-products-col-variants")}</Table.Column>
                 <Table.Column>{t("admin-products-col-status")}</Table.Column>
                 <Table.Column>{t("actions")}</Table.Column>
               </Table.Header>
               <Table.Body renderEmptyState={() => t("admin-products-empty")}>
-              {displayed.map((p) => (
-                <Table.Row key={p.id}>
-                  <Table.Cell>{resolveTitle(p.title, i18n.language)}</Table.Cell>
-                  <Table.Cell>
-                    {resolveDescription(p.description, i18n.language) || "-"}
-                  </Table.Cell>
-                  <Table.Cell>{p.variants.length}</Table.Cell>
-                  <Table.Cell>{p.status}</Table.Cell>
-                  <Table.Cell>
-                    <Button size="sm" onPress={() => openEdit(p)}>
-                      {t("admin-products-btn-edit")}
-                    </Button>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
+                {displayed.map((p) => (
+                  <Table.Row key={p.id}>
+                    <Table.Cell>{resolveTitle(p.title, i18n.language)}</Table.Cell>
+                    <Table.Cell>
+                      {resolveDescription(p.description, i18n.language) || "-"}
+                    </Table.Cell>
+                    <Table.Cell>{p.variants.length}</Table.Cell>
+                    <Table.Cell>{p.status}</Table.Cell>
+                    <Table.Cell>
+                      <Button size="sm" onPress={() => openEdit(p)}>
+                        {t("admin-products-btn-edit")}
+                      </Button>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
             </Table.Content>
           </Table>
         )}
@@ -662,278 +662,285 @@ export default function ProductsPage() {
           }
         }}
       >
-        <Modal.Backdrop>
+        <Modal.Backdrop variant="blur">
           <Modal.Container>
-          <Modal.Header>
-            {editingProduct
-              ? resolveTitle(editingProduct.title, i18n.language)
-              : t("admin-products-modal-title")}
-          </Modal.Header>
-          <Modal.Body className="space-y-4">
-            <form className="space-y-4" id="product-form" onSubmit={submitForm}>
-              <div className="flex items-center gap-2">
-                <label className="block text-sm font-medium">
-                  {t("admin-products-title-locale")}
-                </label>
-                <Select
-                  className="w-36"
-                  value={selectedLocale}
-                  onChange={(value) => setSelectedLocale((value as string) || "")}
-                >
-                  <Label>{t("admin-products-title-locale")}</Label>
-                  <Select.Trigger>
-                    <Select.Value />
-                    <Select.Indicator />
-                  </Select.Trigger>
-                  <Select.Popover>
-                    <ListBox>
-                      {availableLanguages.map((lang) => (
-                        <ListBox.Item key={lang.code} id={lang.code} textValue={lang.nativeName}>
-                          {lang.nativeName}
+            <Modal.Dialog>
+              {({ close }) => (
+                <>
+                  <Modal.CloseTrigger onPress={close} />
+                  <Modal.Header>
+              {editingProduct
+                ? resolveTitle(editingProduct.title, i18n.language)
+                : t("admin-products-modal-title")}
+            </Modal.Header>
+            <Modal.Body className="space-y-4">
+              <form className="space-y-4" id="product-form" onSubmit={submitForm}>
+                <div className="flex items-center gap-2">
+                  <label className="block text-sm font-medium">
+                    {t("admin-products-title-locale")}
+                  </label>
+                  <Select
+                    className="w-36"
+                    value={selectedLocale}
+                    onChange={(value) => setSelectedLocale((value as string) || "")}
+                  >
+                    <Label>{t("admin-products-title-locale")}</Label>
+                    <Select.Trigger>
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        {availableLanguages.map((lang) => (
+                          <ListBox.Item key={lang.code} id={lang.code} textValue={lang.nativeName}>
+                            {lang.nativeName}
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                        ))}
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    {t("admin-products-modal-field-title")}
+                  </label>
+                  <LocalizedTitleInput
+                    required
+                    locale={selectedLocale}
+                    value={formTitle}
+                    onChange={setFormTitle}
+                    onLocaleChange={setSelectedLocale}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    {t("admin-products-modal-field-description")}
+                  </label>
+                  <RichDescriptionEditor
+                    locale={selectedLocale}
+                    value={formDescription}
+                    onChange={setFormDescription}
+                    onLocaleChange={setSelectedLocale}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium">
+                    {t("status")}
+                  </label>
+                  <select
+                    className="border rounded px-2 py-1 w-full"
+                    value={formStatus}
+                    onChange={(e) => setFormStatus(e.target.value as any)}
+                  >
+                    <option value="active">active</option>
+                    <option value="draft">draft</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    {t("admin-products-shipping-class-label")}
+                  </label>
+                  <Select
+                    value={formShippingClassId || ""}
+                    onChange={(value) => setFormShippingClassId((value as string) || "")}
+                  >
+                    <Label>{t("admin-products-shipping-class-select-label")}</Label>
+                    <Select.Trigger>
+                      <Select.Value />
+                      <Select.Indicator />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        <ListBox.Item id="" textValue={t("admin-products-shipping-class-default")}>
+                          {t("admin-products-shipping-class-default")}
                           <ListBox.ItemIndicator />
                         </ListBox.Item>
-                      ))}
-                    </ListBox>
-                  </Select.Popover>
-                </Select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  {t("admin-products-modal-field-title")}
-                </label>
-                <LocalizedTitleInput
-                  required
-                  locale={selectedLocale}
-                  value={formTitle}
-                  onChange={setFormTitle}
-                  onLocaleChange={setSelectedLocale}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  {t("admin-products-modal-field-description")}
-                </label>
-                <RichDescriptionEditor
-                  locale={selectedLocale}
-                  value={formDescription}
-                  onChange={setFormDescription}
-                  onLocaleChange={setSelectedLocale}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium">
-                  {t("status")}
-                </label>
-                <select
-                  className="border rounded px-2 py-1 w-full"
-                  value={formStatus}
-                  onChange={(e) => setFormStatus(e.target.value as any)}
-                >
-                  <option value="active">active</option>
-                  <option value="draft">draft</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  {t("admin-products-shipping-class-label")}
-                </label>
-                <Select
-                  value={formShippingClassId || ""}
-                  onChange={(value) => setFormShippingClassId((value as string) || "")}
-                >
-                  <Label>{t("admin-products-shipping-class-select-label")}</Label>
-                  <Select.Trigger>
-                    <Select.Value />
-                    <Select.Indicator />
-                  </Select.Trigger>
-                  <Select.Popover>
-                    <ListBox>
-                      <ListBox.Item id="" textValue={t("admin-products-shipping-class-default")}>
-                        {t("admin-products-shipping-class-default")}
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                      {shippingClasses.map((cls) => {
-                        const resolutionLabel =
-                          cls.resolution === "exclusive"
-                            ? t(
+                        {shippingClasses.map((cls) => {
+                          const resolutionLabel =
+                            cls.resolution === "exclusive"
+                              ? t(
                                 "admin-products-shipping-class-resolution-exclusive",
                               )
-                            : t(
+                              : t(
                                 "admin-products-shipping-class-resolution-additive",
                               );
 
-                        const displayLabel = `${resolutionLabel} ${cls.display_name}`;
-                        const fullLabel = cls.description
-                          ? `${displayLabel} — ${cls.description}`
-                          : displayLabel;
+                          const displayLabel = `${resolutionLabel} ${cls.display_name}`;
+                          const fullLabel = cls.description
+                            ? `${displayLabel} — ${cls.description}`
+                            : displayLabel;
 
-                        return (
-                          <ListBox.Item key={cls.id} id={cls.id} textValue={displayLabel}>
-                            {fullLabel}
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                        );
-                      })}
-                    </ListBox>
-                  </Select.Popover>
-                </Select>
-              </div>
-
-              {/* Enrichment Fields - Simple values (not localized) */}
-              <div className="border-t pt-4 mt-4">
-                <h3 className="font-semibold text-sm mb-3">
-                  {t("admin-products-enrichment-heading")}
-                </h3>
-
-                {/* Vendor */}
-                <div className="mb-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-sm font-medium">
-                      {t("admin-products-field-vendor")}{" "}
-                      <span className="text-xs text-default-500">
-                        (optional)
-                      </span>
-                    </label>
-                    <div className="flex gap-2">
-                      <p className="text-xs text-default-500">
-                        {selectedLocale}
-                      </p>
-                      <Button
-                        isIconOnly
-                        size="sm"
-                        variant="tertiary"
-                        onPress={handleTranslateVendor}
-                      >
-                        <Wand2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <Input
-                    placeholder={t("admin-products-field-vendor-placeholder")}
-                    value={formVendorValue}
-                    onChange={(e) => setFormVendorValue(e.target.value)}
-                  />
+                          return (
+                            <ListBox.Item key={cls.id} id={cls.id} textValue={displayLabel}>
+                              {fullLabel}
+                              <ListBox.ItemIndicator />
+                            </ListBox.Item>
+                          );
+                        })}
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
                 </div>
 
-                {/* Tags */}
-                <div className="mb-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-sm font-medium">
-                      {t("admin-products-field-tags")}{" "}
-                      <span className="text-xs text-default-500">
-                        (comma-separated)
-                      </span>
-                    </label>
-                    <div className="flex gap-2">
-                      <p className="text-xs text-default-500">
-                        {selectedLocale}
-                      </p>
+                {/* Enrichment Fields - Simple values (not localized) */}
+                <div className="border-t pt-4 mt-4">
+                  <h3 className="font-semibold text-sm mb-3">
+                    {t("admin-products-enrichment-heading")}
+                  </h3>
+
+                  {/* Vendor */}
+                  <div className="mb-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-sm font-medium">
+                        {t("admin-products-field-vendor")}{" "}
+                        <span className="text-xs text-default-500">
+                          (optional)
+                        </span>
+                      </label>
+                      <div className="flex gap-2">
+                        <p className="text-xs text-default-500">
+                          {selectedLocale}
+                        </p>
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          variant="tertiary"
+                          onPress={handleTranslateVendor}
+                        >
+                          <Wand2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <Input
+                      placeholder={t("admin-products-field-vendor-placeholder")}
+                      value={formVendorValue}
+                      onChange={(e) => setFormVendorValue(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Tags */}
+                  <div className="mb-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-sm font-medium">
+                        {t("admin-products-field-tags")}{" "}
+                        <span className="text-xs text-default-500">
+                          (comma-separated)
+                        </span>
+                      </label>
+                      <div className="flex gap-2">
+                        <p className="text-xs text-default-500">
+                          {selectedLocale}
+                        </p>
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          variant="tertiary"
+                          onPress={handleTranslateTags}
+                        >
+                          <Wand2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <Input
+                      placeholder={t("admin-products-field-tags-placeholder")}
+                      value={formTagsValue}
+                      onChange={(e) => setFormTagsValue(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Handle */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-sm font-medium">
+                        {t("admin-products-field-handle")}{" "}
+                        <span className="text-xs text-default-500">
+                          (URL slug - optional, auto-generated if empty)
+                        </span>
+                      </label>
+                      <div className="flex gap-2">
+                        <p className="text-xs text-default-500">
+                          {selectedLocale}
+                        </p>
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          variant="tertiary"
+                          onPress={handleTranslateHandle}
+                        >
+                          <Wand2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <Input
+                      placeholder={t("admin-products-field-handle-placeholder")}
+                      value={formHandleValue}
+                      onChange={(e) => setFormHandleValue(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </form>
+
+              {/* Variants section */}
+              {editingProduct && (
+                <Card>
+                  <Card.Content className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold">
+                        {t("admin-products-variants")} (
+                        {editingProduct.variants.length})
+                      </h3>
                       <Button
-                        isIconOnly
+                        variant="primary"
                         size="sm"
-                        variant="tertiary"
-                        onPress={handleTranslateTags}
+                        onPress={openCreateVariant}
                       >
-                        <Wand2 className="w-4 h-4" />
+                        {t("admin-products-btn-add-variant")}
                       </Button>
                     </div>
-                  </div>
-                  <Input
-                    placeholder={t("admin-products-field-tags-placeholder")}
-                    value={formTagsValue}
-                    onChange={(e) => setFormTagsValue(e.target.value)}
-                  />
-                </div>
 
-                {/* Handle */}
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-sm font-medium">
-                      {t("admin-products-field-handle")}{" "}
-                      <span className="text-xs text-default-500">
-                        (URL slug - optional, auto-generated if empty)
-                      </span>
-                    </label>
-                    <div className="flex gap-2">
-                      <p className="text-xs text-default-500">
-                        {selectedLocale}
+                    {editingProduct.variants.length === 0 ? (
+                      <p className="text-sm text-default-500">
+                        {t("admin-products-no-variants")}
                       </p>
-                      <Button
-                        isIconOnly
-                        size="sm"
-                        variant="tertiary"
-                        onPress={handleTranslateHandle}
-                      >
-                        <Wand2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <Input
-                    placeholder={t("admin-products-field-handle-placeholder")}
-                    value={formHandleValue}
-                    onChange={(e) => setFormHandleValue(e.target.value)}
-                  />
-                </div>
-              </div>
-            </form>
-
-            {/* Variants section */}
-            {editingProduct && (
-              <Card>
-                <Card.Content className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold">
-                      {t("admin-products-variants")} (
-                      {editingProduct.variants.length})
-                    </h3>
+                    ) : (
+                      <div className="space-y-2">
+                        {editingProduct.variants.map((v) => (
+                          <VariantCard
+                            key={v.id}
+                            variant={v}
+                            onEdit={() => openEditVariant(v)}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </Card.Content>
+                </Card>
+              )}
+            </Modal.Body>
+                  <Modal.Footer>
                     <Button
-                      variant="primary"
-                      size="sm"
-                      onPress={openCreateVariant}
+                      onPress={() => {
+                        setCreateModal(false);
+                        setEditingProduct(null);
+                      }}
                     >
-                      {t("admin-products-btn-add-variant")}
+                      {t("admin-products-btn-cancel")}
                     </Button>
-                  </div>
+                    <Button variant="primary" form="product-form" type="submit">
+                      {editingProduct ? t("save") : t("admin-products-btn-create")}
+                    </Button>
+                  </Modal.Footer>
+                </>
+              )}
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
 
-                  {editingProduct.variants.length === 0 ? (
-                    <p className="text-sm text-default-500">
-                      {t("admin-products-no-variants")}
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {editingProduct.variants.map((v) => (
-                        <VariantCard
-                          key={v.id}
-                          variant={v}
-                          onEdit={() => openEditVariant(v)}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </Card.Content>
-              </Card>
-            )}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button
-              onPress={() => {
-                setCreateModal(false);
-                setEditingProduct(null);
-              }}
-            >
-              {t("admin-products-btn-cancel")}
-            </Button>
-            <Button variant="primary" form="product-form" type="submit">
-              {editingProduct ? t("save") : t("admin-products-btn-create")}
-            </Button>
-          </Modal.Footer>
-        </Modal.Container>
-      </Modal.Backdrop>
-    </Modal>
-
-    {/* Variant modal */}
-    <Modal
+      {/* Variant modal */}
+      <Modal
         isOpen={variantModal}
         onOpenChange={(open) => {
           setVariantModal(open);
@@ -944,250 +951,257 @@ export default function ProductsPage() {
       >
         <Modal.Backdrop>
           <Modal.Container>
-          <Modal.Header>
-            {editingVariant
-              ? t("admin-products-edit-variant")
-              : t("admin-products-add-variant")}
-          </Modal.Header>
-          <Modal.Body>
-            <form
-              className="space-y-4"
-              id="variant-form"
-              onSubmit={submitVariant}
-            >
-              <div>
-                <label className="block text-sm font-medium">
-                  {t("admin-products-field-sku")}
-                </label>
-                <Input
-                  required
-                  placeholder={t("admin-products-field-sku-placeholder")}
-                  value={variantSku}
-                  onChange={(e) => setVariantSku(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium">
-                  {t("admin-products-field-variant-title")}
-                </label>
-                <Input
-                  required
-                  placeholder={t(
-                    "admin-products-field-variant-title-placeholder",
-                  )}
-                  value={variantTitle}
-                  onChange={(e) => setVariantTitle(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium">
-                  {t("admin-products-field-price")}
-                </label>
-                <Input
-                  required
-                  placeholder={t("admin-products-field-price-placeholder")}
-                  type="number"
-                  value={variantPrice}
-                  onChange={(e) => setVariantPrice(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium">
-                  {t("admin-products-field-image")}
-                </label>
-                {variantImage ? (
-                  <div className="relative inline-block mt-2">
-                    <img
-                      alt="Preview"
-                      className="w-20 h-20 object-cover rounded border"
-                      src={variantImage}
-                    />
-                    <button
-                      className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
-                      type="button"
-                      onClick={() => setVariantImage(null)}
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="mt-2">
-                    <Input
-                      accept="image/*"
-                      disabled={uploadingImage}
-                      type="file"
-                      onChange={handleImageUpload}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Enrichment Fields */}
-              <div className="border-t pt-4 mt-4">
-                <h3 className="font-semibold text-sm mb-3">
-                  {t("admin-products-enrichment-heading")}
-                </h3>
-
-                {/* Weight */}
-                <div className="mb-3">
-                  <label className="block text-sm font-medium">
-                    {t("admin-products-field-weight")}
-                  </label>
-                  <Input
-                    placeholder={t("admin-products-field-weight-placeholder")}
-                    type="number"
-                    value={variantWeightG}
-                    onChange={(e) => setVariantWeightG(e.target.value)}
-                  />
-                </div>
-
-                {/* Dimensions */}
-                <div className="mb-3">
-                  <label className="block text-sm font-medium mb-2">
-                    {t("admin-products-field-dimensions")}
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    <Input
-                      placeholder={t("admin-products-field-dimension-length")}
-                      type="number"
-                      value={variantDimsL}
-                      onChange={(e) => setVariantDimsL(e.target.value)}
-                    />
-                    <Input
-                      placeholder={t("admin-products-field-dimension-width")}
-                      type="number"
-                      value={variantDimsW}
-                      onChange={(e) => setVariantDimsW(e.target.value)}
-                    />
-                    <Input
-                      placeholder={t("admin-products-field-dimension-height")}
-                      type="number"
-                      value={variantDimsH}
-                      onChange={(e) => setVariantDimsH(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                {/* Requires Shipping Toggle */}
-                <div className="mb-3 flex items-center">
-                  <label className="block text-sm font-medium mr-2">
-                    {t("admin-products-field-requires-shipping")}
-                  </label>
-                  <input
-                    checked={variantRequiresShipping}
-                    type="checkbox"
-                    onChange={(e) =>
-                      setVariantRequiresShipping(e.target.checked)
-                    }
-                  />
-                </div>
-
-                {/* Barcode */}
-                <div className="mb-3">
-                  <label className="block text-sm font-medium">
-                    {t("admin-products-field-barcode")}
-                  </label>
-                  <Input
-                    placeholder={t("admin-products-field-barcode-placeholder")}
-                    value={variantBarcode}
-                    onChange={(e) => setVariantBarcode(e.target.value)}
-                  />
-                </div>
-
-                {/* Compare at Price */}
-                <div className="mb-3">
-                  <label className="block text-sm font-medium">
-                    {t("admin-products-field-compare-at-price")}
-                  </label>
-                  <Input
-                    placeholder={t(
-                      "admin-products-field-compare-at-price-placeholder",
-                    )}
-                    type="number"
-                    value={variantCompareAtPrice}
-                    onChange={(e) => setVariantCompareAtPrice(e.target.value)}
-                  />
-                </div>
-
-                {/* Tax Code */}
+            <Modal.Dialog>
+              {({ close }) => (
+                <>
+                  <Modal.CloseTrigger onPress={close} />
+                  <Modal.Header>
+              {editingVariant
+                ? t("admin-products-edit-variant")
+                : t("admin-products-add-variant")}
+            </Modal.Header>
+            <Modal.Body>
+              <form
+                className="space-y-4"
+                id="variant-form"
+                onSubmit={submitVariant}
+              >
                 <div>
-                  <label className="block text-sm font-medium mb-1">
-                    {t("admin-products-field-tax-code")}
+                  <label className="block text-sm font-medium">
+                    {t("admin-products-field-sku")}
                   </label>
-                  <Select
-                    placeholder={t("admin-products-field-tax-code-placeholder")}
-                    value={variantTaxCode || ""}
-                    onChange={(value) => setVariantTaxCode((value as string) || "")}
-                  >
-                    <Label>{t("admin-products-field-tax-code")}</Label>
-                    <Select.Trigger>
-                      <Select.Value />
-                      <Select.Indicator />
-                    </Select.Trigger>
-                    <Select.Popover>
-                      <ListBox>
-                        <ListBox.Item key="" id="" textValue={t("none") || "None"}>
-                          {t("none") || "None"}
-                          <ListBox.ItemIndicator />
-                        </ListBox.Item>
-                        {Array.from(
-                          new Map(taxRates.map((r) => [r.tax_code, r])).values(),
-                        )
-                          .filter((r) => r.tax_code)
-                          .map((r) => (
-                            <ListBox.Item
-                              key={r.tax_code!}
-                              id={r.tax_code!}
-                              textValue={`${getTaxNameForLocale(r.display_name, i18n.language)} (${r.tax_code})`}
-                            >
-                              {getTaxNameForLocale(r.display_name, i18n.language)}{" "}
-                              ({r.tax_code})
-                              <ListBox.ItemIndicator />
-                            </ListBox.Item>
-                          ))}
-                      </ListBox>
-                    </Select.Popover>
-                  </Select>
+                  <Input
+                    required
+                    placeholder={t("admin-products-field-sku-placeholder")}
+                    value={variantSku}
+                    onChange={(e) => setVariantSku(e.target.value)}
+                  />
                 </div>
-              </div>
-            </form>
+                <div>
+                  <label className="block text-sm font-medium">
+                    {t("admin-products-field-variant-title")}
+                  </label>
+                  <Input
+                    required
+                    placeholder={t(
+                      "admin-products-field-variant-title-placeholder",
+                    )}
+                    value={variantTitle}
+                    onChange={(e) => setVariantTitle(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium">
+                    {t("admin-products-field-price")}
+                  </label>
+                  <Input
+                    required
+                    placeholder={t("admin-products-field-price-placeholder")}
+                    type="number"
+                    value={variantPrice}
+                    onChange={(e) => setVariantPrice(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium">
+                    {t("admin-products-field-image")}
+                  </label>
+                  {variantImage ? (
+                    <div className="relative inline-block mt-2">
+                      <img
+                        alt="Preview"
+                        className="w-20 h-20 object-cover rounded border"
+                        src={variantImage}
+                      />
+                      <button
+                        className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
+                        type="button"
+                        onClick={() => setVariantImage(null)}
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mt-2">
+                      <Input
+                        accept="image/*"
+                        disabled={uploadingImage}
+                        type="file"
+                        onChange={handleImageUpload}
+                      />
+                    </div>
+                  )}
+                </div>
 
-            {/* Multi-currency pricing section */}
-            {editingProduct && editingVariant && (
-              <div className="border-t pt-6">
-                <VariantPrices
-                  basePriceCents={editingVariant.price_cents}
-                  currency={editingVariant.currency || "USD"}
-                  productId={editingProduct.id}
-                  variantId={editingVariant.id}
-                  variantTitle={editingVariant.title}
-                />
-              </div>
-            )}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button
-              onPress={() => {
-                setVariantModal(false);
-                resetVariantForm();
-              }}
-            >
-              {t("admin-products-btn-cancel")}
-            </Button>
-            <Button
-              variant="primary"
-              isDisabled={uploadingImage}
-              form="variant-form"
-              isPending={submittingVariant}
-              type="submit"
-            >
-              {editingVariant ? t("save") : t("admin-products-btn-add-variant")}
-            </Button>
-          </Modal.Footer>
-        </Modal.Container>
-      </Modal.Backdrop>
-    </Modal>
-  </DefaultLayout>
+                {/* Enrichment Fields */}
+                <div className="border-t pt-4 mt-4">
+                  <h3 className="font-semibold text-sm mb-3">
+                    {t("admin-products-enrichment-heading")}
+                  </h3>
+
+                  {/* Weight */}
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium">
+                      {t("admin-products-field-weight")}
+                    </label>
+                    <Input
+                      placeholder={t("admin-products-field-weight-placeholder")}
+                      type="number"
+                      value={variantWeightG}
+                      onChange={(e) => setVariantWeightG(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Dimensions */}
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium mb-2">
+                      {t("admin-products-field-dimensions")}
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Input
+                        placeholder={t("admin-products-field-dimension-length")}
+                        type="number"
+                        value={variantDimsL}
+                        onChange={(e) => setVariantDimsL(e.target.value)}
+                      />
+                      <Input
+                        placeholder={t("admin-products-field-dimension-width")}
+                        type="number"
+                        value={variantDimsW}
+                        onChange={(e) => setVariantDimsW(e.target.value)}
+                      />
+                      <Input
+                        placeholder={t("admin-products-field-dimension-height")}
+                        type="number"
+                        value={variantDimsH}
+                        onChange={(e) => setVariantDimsH(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Requires Shipping Toggle */}
+                  <div className="mb-3 flex items-center">
+                    <label className="block text-sm font-medium mr-2">
+                      {t("admin-products-field-requires-shipping")}
+                    </label>
+                    <input
+                      checked={variantRequiresShipping}
+                      type="checkbox"
+                      onChange={(e) =>
+                        setVariantRequiresShipping(e.target.checked)
+                      }
+                    />
+                  </div>
+
+                  {/* Barcode */}
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium">
+                      {t("admin-products-field-barcode")}
+                    </label>
+                    <Input
+                      placeholder={t("admin-products-field-barcode-placeholder")}
+                      value={variantBarcode}
+                      onChange={(e) => setVariantBarcode(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Compare at Price */}
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium">
+                      {t("admin-products-field-compare-at-price")}
+                    </label>
+                    <Input
+                      placeholder={t(
+                        "admin-products-field-compare-at-price-placeholder",
+                      )}
+                      type="number"
+                      value={variantCompareAtPrice}
+                      onChange={(e) => setVariantCompareAtPrice(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Tax Code */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      {t("admin-products-field-tax-code")}
+                    </label>
+                    <Select
+                      placeholder={t("admin-products-field-tax-code-placeholder")}
+                      value={variantTaxCode || ""}
+                      onChange={(value) => setVariantTaxCode((value as string) || "")}
+                    >
+                      <Label>{t("admin-products-field-tax-code")}</Label>
+                      <Select.Trigger>
+                        <Select.Value />
+                        <Select.Indicator />
+                      </Select.Trigger>
+                      <Select.Popover>
+                        <ListBox>
+                          <ListBox.Item key="" id="" textValue={t("none") || "None"}>
+                            {t("none") || "None"}
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                          {Array.from(
+                            new Map(taxRates.map((r) => [r.tax_code, r])).values(),
+                          )
+                            .filter((r) => r.tax_code)
+                            .map((r) => (
+                              <ListBox.Item
+                                key={r.tax_code!}
+                                id={r.tax_code!}
+                                textValue={`${getTaxNameForLocale(r.display_name, i18n.language)} (${r.tax_code})`}
+                              >
+                                {getTaxNameForLocale(r.display_name, i18n.language)}{" "}
+                                ({r.tax_code})
+                                <ListBox.ItemIndicator />
+                              </ListBox.Item>
+                            ))}
+                        </ListBox>
+                      </Select.Popover>
+                    </Select>
+                  </div>
+                </div>
+              </form>
+
+              {/* Multi-currency pricing section */}
+              {editingProduct && editingVariant && (
+                <div className="border-t pt-6">
+                  <VariantPrices
+                    basePriceCents={editingVariant.price_cents}
+                    currency={editingVariant.currency || "USD"}
+                    productId={editingProduct.id}
+                    variantId={editingVariant.id}
+                    variantTitle={editingVariant.title}
+                  />
+                </div>
+              )}
+            </Modal.Body>
+                  <Modal.Footer>
+                    <Button
+                      onPress={() => {
+                        setVariantModal(false);
+                        resetVariantForm();
+                      }}
+                    >
+                      {t("admin-products-btn-cancel")}
+                    </Button>
+                    <Button
+                      variant="primary"
+                      isDisabled={uploadingImage}
+                      form="variant-form"
+                      isPending={submittingVariant}
+                      type="submit"
+                    >
+                      {editingVariant ? t("save") : t("admin-products-btn-add-variant")}
+                    </Button>
+                  </Modal.Footer>
+                </>
+              )}
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+    </DefaultLayout>
   );
 }
 

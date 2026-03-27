@@ -28,7 +28,6 @@ import {
   ListBox,
   Table,
   Modal,
-  useOverlayState,
   Card,
   Tooltip,
 } from "@heroui/react";
@@ -74,7 +73,7 @@ export default function CurrenciesPage() {
   const [statusFilter, setStatusFilter] = useState<string>("");
 
   // Modal state
-  const modalState = useOverlayState();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingCurrency, setEditingCurrency] = useState<Currency | null>(null);
   const [formData, setFormData] = useState({
@@ -138,7 +137,7 @@ export default function CurrenciesPage() {
       decimal_places: 2,
       status: "active",
     });
-    modalState.open();
+    setIsModalOpen(true);
   };
 
   /**
@@ -156,7 +155,7 @@ export default function CurrenciesPage() {
       decimal_places: currency.decimal_places,
       status: currency.status,
     });
-    modalState.open();
+    setIsModalOpen(true);
   };
 
   /**
@@ -199,7 +198,7 @@ export default function CurrenciesPage() {
           await loadCurrencies();
         }
       }
-      modalState.close();
+      setIsModalOpen(false);
     } catch (err) {
       console.error("Failed to save currency", err);
     }
@@ -238,6 +237,7 @@ export default function CurrenciesPage() {
         <Card className="mb-6">
           <Card.Content className="flex gap-4">
             <TextField className="w-full">
+              <Label>{t("admin-currencies-filter-placeholder")}</Label>
               <Input
                 placeholder={t("admin-currencies-filter-placeholder")}
                 value={globalFilter}
@@ -276,29 +276,29 @@ export default function CurrenciesPage() {
         <Card>
           <Card.Content>
             <Table>
-              <Table.Header>
-                <Table.Column key="code">{t("admin-common-code")}</Table.Column>
-                <Table.Column key="display_name">
-                  {t("admin-common-name")}
-                </Table.Column>
-                <Table.Column key="symbol">
-                  {t("admin-common-symbol")}
-                </Table.Column>
-                <Table.Column key="decimal_places">
-                  {t("admin-currencies-decimals")}
-                </Table.Column>
-                <Table.Column key="status">
-                  {t("admin-common-status")}
-                </Table.Column>
-                <Table.Column key="actions">
-                  {t("admin-common-actions")}
-                </Table.Column>
-              </Table.Header>
-              <Table.Body
-                renderEmptyState={() => <div>{t("admin-common-empty")}</div>}
-                items={displayed}
-              >
-                {(currency) => (
+              <Table.Content>
+                <Table.Header>
+                  <Table.Column key="code" isRowHeader>{t("admin-common-code")}</Table.Column>
+                  <Table.Column key="display_name">
+                    {t("admin-common-name")}
+                  </Table.Column>
+                  <Table.Column key="symbol">
+                    {t("admin-common-symbol")}
+                  </Table.Column>
+                  <Table.Column key="decimal_places">
+                    {t("admin-currencies-decimals")}
+                  </Table.Column>
+                  <Table.Column key="status">
+                    {t("admin-common-status")}
+                  </Table.Column>
+                  <Table.Column key="actions">
+                    {t("admin-common-actions")}
+                  </Table.Column>
+                </Table.Header>
+                <Table.Body
+                  renderEmptyState={() => <div>{t("admin-common-empty")}</div>}
+                >
+                {displayed.map((currency) => (
                   <Table.Row key={currency.id} className="odd:bg-default-50">
                     <Table.Cell className="font-mono font-bold">
                       {currency.code}
@@ -338,26 +338,26 @@ export default function CurrenciesPage() {
                       </div>
                     </Table.Cell>
                   </Table.Row>
-                )}
-              </Table.Body>
+                ))}
+                </Table.Body>
+              </Table.Content>
             </Table>
           </Card.Content>
         </Card>
 
-        <Modal state={modalState}>
+        <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
           <Modal.Backdrop>
             <Modal.Container size="lg">
-            <Modal.Dialog>
-              {({ close }) => (
-                <>
-                  <Modal.Header className="flex flex-col gap-1">
-                    <Modal.Heading>
+              <Modal.Dialog>
+                {({ close }) => (
+                  <>
+                    <Modal.CloseTrigger onPress={close} />
+                    <Modal.Header>
                       {isEditMode
                         ? t("admin-currencies-edit")
                         : t("admin-currencies-create")}
-                    </Modal.Heading>
-                  </Modal.Header>
-                  <Modal.Body>
+                    </Modal.Header>
+                    <Modal.Body>
               <Tooltip>
                 <Tooltip.Trigger>
                   <TextField>
@@ -476,28 +476,28 @@ export default function CurrenciesPage() {
                   {t("admin-common-status")}
                 </Tooltip.Content>
               </Tooltip>
-                  </Modal.Body>
-                  <Modal.Footer>
-                    <Button
-                      variant="tertiary"
-                      onPress={close}
-                    >
-                      {t("admin-common-cancel")}
-                    </Button>
-                    <Button
-                      variant="primary"
-                      isDisabled={!formData.display_name}
-                      onPress={handleSave}
-                    >
-                      {t("admin-common-save")}
-                    </Button>
-                  </Modal.Footer>
-                </>
-              )}
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+                    </Modal.Body>
+                    <Modal.Footer>
+                      <Button
+                        variant="tertiary"
+                        onPress={close}
+                      >
+                        {t("admin-common-cancel")}
+                      </Button>
+                      <Button
+                        variant="primary"
+                        isDisabled={!formData.display_name}
+                        onPress={handleSave}
+                      >
+                        {t("admin-common-save")}
+                      </Button>
+                    </Modal.Footer>
+                  </>
+                )}
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
+        </Modal>
     </div>
     </DefaultLayout>
   );
