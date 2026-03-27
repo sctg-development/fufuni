@@ -241,9 +241,7 @@ export default function CountriesPage() {
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">{t("admin-countries-title")}</h1>
-          <Button
-            onPress={handleOpenCreate}
-          >
+          <Button onPress={handleOpenCreate}>
             <Plus className="w-4 h-4" />
             {t("admin-countries-add")}
           </Button>
@@ -258,7 +256,10 @@ export default function CountriesPage() {
                 onChange={(value) => setGlobalFilter(value)}
               >
                 <Label>{t("admin-common-search")}</Label>
-                <Input placeholder={t("admin-common-search")} className="pl-8" />
+                <Input
+                  className="pl-8"
+                  placeholder={t("admin-common-search")}
+                />
               </TextField>
               <SearchIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 pointer-events-none text-default-400 w-4 h-4" />
             </div>
@@ -296,7 +297,9 @@ export default function CountriesPage() {
             <Table>
               <Table.Content>
                 <Table.Header>
-                  <Table.Column key="code" isRowHeader>{t("admin-common-code")}</Table.Column>
+                  <Table.Column key="code" isRowHeader>
+                    {t("admin-common-code")}
+                  </Table.Column>
                   <Table.Column key="display_name">
                     {t("admin-common-name")}
                   </Table.Column>
@@ -316,47 +319,47 @@ export default function CountriesPage() {
                 <Table.Body
                   renderEmptyState={() => <div>{t("admin-common-empty")}</div>}
                 >
-                {displayed.map((country) => (
-                  <Table.Row key={country.id} className="odd:bg-default-50">
-                    <Table.Cell className="font-mono font-bold">
-                      {country.code}
-                    </Table.Cell>
-                    <Table.Cell>{country.display_name}</Table.Cell>
-                    <Table.Cell>{country.country_name}</Table.Cell>
-                    <Table.Cell>{country.language_code}</Table.Cell>
-                    <Table.Cell>
-                      <span
-                        className={
-                          country.status === "active"
-                            ? "text-green-600"
-                            : "text-gray-600"
-                        }
-                      >
-                        {country.status}
-                      </span>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <div className="flex gap-2">
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="tertiary"
-                          onPress={() => handleOpenEdit(country)}
+                  {displayed.map((country) => (
+                    <Table.Row key={country.id} className="odd:bg-default-50">
+                      <Table.Cell className=" font-bold">
+                        {country.code}
+                      </Table.Cell>
+                      <Table.Cell>{country.display_name}</Table.Cell>
+                      <Table.Cell>{country.country_name}</Table.Cell>
+                      <Table.Cell>{country.language_code}</Table.Cell>
+                      <Table.Cell>
+                        <span
+                          className={
+                            country.status === "active"
+                              ? "text-green-600"
+                              : "text-gray-600"
+                          }
                         >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="tertiary"
-                          onPress={() => handleDelete(country.id)}
-                        >
-                          <Trash2 className="w-4 h-4 text-danger" />
-                        </Button>
-                      </div>
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
+                          {country.status}
+                        </span>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <div className="flex gap-2">
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="tertiary"
+                            onPress={() => handleOpenEdit(country)}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="tertiary"
+                            onPress={() => handleDelete(country.id)}
+                          >
+                            <Trash2 className="w-4 h-4 text-danger" />
+                          </Button>
+                        </div>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
                 </Table.Body>
               </Table.Content>
             </Table>
@@ -376,144 +379,160 @@ export default function CountriesPage() {
                       : t("admin-countries-create")}
                   </Modal.Header>
                   <Modal.Body>
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <TextField>
-                    <Label>{t("admin-common-code")}</Label>
-                    <Input
-                      disabled={isEditMode}
-                      maxLength={2}
-                      placeholder="US"
-                      value={formData.code}
-                      onChange={(e) =>
-                        setFormData({ ...formData, code: e.target.value.toUpperCase() })
-                      }
-                    />
-                  </TextField>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t(
-                    "admin-countries-code-help",
-                    "ISO 3166-1 alpha-2 country code",
-                  )}
-                </Tooltip.Content>
-              </Tooltip>
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <TextField>
-                    <Label>{t("admin-common-name")}</Label>
-                    <Input
-                      placeholder="United States"
-                      value={formData.display_name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, display_name: e.target.value })
-                      }
-                    />
-                  </TextField>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t("admin-common-name")}
-                </Tooltip.Content>
-              </Tooltip>
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <TextField>
-                    <Label>{t("admin-countries-fullname")}</Label>
-                    <Input
-                      placeholder="United States of America"
-                      value={formData.country_name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, country_name: e.target.value })
-                      }
-                    />
-                  </TextField>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t("admin-countries-code-help")}
-                </Tooltip.Content>
-              </Tooltip>
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <Select
-                    value={formData.language_code}
-                    onChange={(value) =>
-                      setFormData({
-                        ...formData,
-                        language_code: (value as string) || "en",
-                      })
-                    }
-                  >
-                    <Label>{t("admin-common-language")}</Label>
-                    <Select.Trigger>
-                      <Select.Value />
-                      <Select.Indicator />
-                    </Select.Trigger>
-                    <Select.Popover>
-                      <ListBox>
-                        {LANGUAGE_OPTIONS.map((lang) => (
-                          <ListBox.Item key={lang.code} id={lang.code} textValue={lang.name}>
-                            {lang.name}
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                        ))}
-                      </ListBox>
-                    </Select.Popover>
-                  </Select>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t(
-                    "admin-countries-languages-help",
-                    "Languages available for customers in this country",
-                  )}
-                </Tooltip.Content>
-              </Tooltip>
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <Select
-                    value={formData.status}
-                    onChange={(value) =>
-                      setFormData({
-                        ...formData,
-                        status: value as "active" | "inactive",
-                      })
-                    }
-                  >
-                    <Label>{t("admin-common-status")}</Label>
-                    <Select.Trigger>
-                      <Select.Value />
-                      <Select.Indicator />
-                    </Select.Trigger>
-                    <Select.Popover>
-                      <ListBox>
-                        {STATUS_OPTIONS.map((opt) => (
-                          <ListBox.Item key={opt} id={opt} textValue={opt}>
-                            {opt}
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                        ))}
-                      </ListBox>
-                    </Select.Popover>
-                  </Select>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t("admin-common-status")}
-                </Tooltip.Content>
-              </Tooltip>
+                    <Tooltip>
+                      <Tooltip.Trigger>
+                        <TextField>
+                          <Label>{t("admin-common-code")}</Label>
+                          <Input
+                            disabled={isEditMode}
+                            maxLength={2}
+                            placeholder="US"
+                            value={formData.code}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                code: e.target.value.toUpperCase(),
+                              })
+                            }
+                          />
+                        </TextField>
+                      </Tooltip.Trigger>
+                      <Tooltip.Content>
+                        {t(
+                          "admin-countries-code-help",
+                          "ISO 3166-1 alpha-2 country code",
+                        )}
+                      </Tooltip.Content>
+                    </Tooltip>
+                    <Tooltip>
+                      <Tooltip.Trigger>
+                        <TextField>
+                          <Label>{t("admin-common-name")}</Label>
+                          <Input
+                            placeholder="United States"
+                            value={formData.display_name}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                display_name: e.target.value,
+                              })
+                            }
+                          />
+                        </TextField>
+                      </Tooltip.Trigger>
+                      <Tooltip.Content>
+                        {t("admin-common-name")}
+                      </Tooltip.Content>
+                    </Tooltip>
+                    <Tooltip>
+                      <Tooltip.Trigger>
+                        <TextField>
+                          <Label>{t("admin-countries-fullname")}</Label>
+                          <Input
+                            placeholder="United States of America"
+                            value={formData.country_name}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                country_name: e.target.value,
+                              })
+                            }
+                          />
+                        </TextField>
+                      </Tooltip.Trigger>
+                      <Tooltip.Content>
+                        {t("admin-countries-code-help")}
+                      </Tooltip.Content>
+                    </Tooltip>
+                    <Tooltip>
+                      <Tooltip.Trigger>
+                        <Select
+                          value={formData.language_code}
+                          onChange={(value) =>
+                            setFormData({
+                              ...formData,
+                              language_code: (value as string) || "en",
+                            })
+                          }
+                        >
+                          <Label>{t("admin-common-language")}</Label>
+                          <Select.Trigger>
+                            <Select.Value />
+                            <Select.Indicator />
+                          </Select.Trigger>
+                          <Select.Popover>
+                            <ListBox>
+                              {LANGUAGE_OPTIONS.map((lang) => (
+                                <ListBox.Item
+                                  key={lang.code}
+                                  id={lang.code}
+                                  textValue={lang.name}
+                                >
+                                  {lang.name}
+                                  <ListBox.ItemIndicator />
+                                </ListBox.Item>
+                              ))}
+                            </ListBox>
+                          </Select.Popover>
+                        </Select>
+                      </Tooltip.Trigger>
+                      <Tooltip.Content>
+                        {t(
+                          "admin-countries-languages-help",
+                          "Languages available for customers in this country",
+                        )}
+                      </Tooltip.Content>
+                    </Tooltip>
+                    <Tooltip>
+                      <Tooltip.Trigger>
+                        <Select
+                          value={formData.status}
+                          onChange={(value) =>
+                            setFormData({
+                              ...formData,
+                              status: value as "active" | "inactive",
+                            })
+                          }
+                        >
+                          <Label>{t("admin-common-status")}</Label>
+                          <Select.Trigger>
+                            <Select.Value />
+                            <Select.Indicator />
+                          </Select.Trigger>
+                          <Select.Popover>
+                            <ListBox>
+                              {STATUS_OPTIONS.map((opt) => (
+                                <ListBox.Item
+                                  key={opt}
+                                  id={opt}
+                                  textValue={opt}
+                                >
+                                  {opt}
+                                  <ListBox.ItemIndicator />
+                                </ListBox.Item>
+                              ))}
+                            </ListBox>
+                          </Select.Popover>
+                        </Select>
+                      </Tooltip.Trigger>
+                      <Tooltip.Content>
+                        {t("admin-common-status")}
+                      </Tooltip.Content>
+                    </Tooltip>
                   </Modal.Body>
-                    <Modal.Footer>
-                      <Button
-                        variant="tertiary"
-                        onPress={close}
-                      >
-                        {t("admin-common-cancel")}
-                      </Button>
-                      <Button
-                        isDisabled={!formData.display_name || !formData.country_name}
-                        onPress={handleSave}
-                      >
-                        {t("admin-common-save")}
-                      </Button>
-                    </Modal.Footer>
+                  <Modal.Footer>
+                    <Button variant="tertiary" onPress={close}>
+                      {t("admin-common-cancel")}
+                    </Button>
+                    <Button
+                      isDisabled={
+                        !formData.display_name || !formData.country_name
+                      }
+                      onPress={handleSave}
+                    >
+                      {t("admin-common-save")}
+                    </Button>
+                  </Modal.Footer>
                 </>
               )}
             </Modal.Dialog>

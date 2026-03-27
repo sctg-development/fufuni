@@ -149,7 +149,7 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
                       <p className="text-sm font-semibold text-foreground">
                         {user.name}
                       </p>
-                      <p className="text-xs text-default-500 font-mono break-all">
+                      <p className="text-xs text-default-500  break-all">
                         ID: {user.sub}
                       </p>
                     </div>
@@ -199,7 +199,7 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
                               {t("nav-user-dropdown-expires-in")}
                             </span>
                             <Chip
-                              className="font-mono font-bold text-xs"
+                              className=" font-bold text-xs"
                               color={isExpiringSoon ? "danger" : "success"}
                               size="sm"
                             >
@@ -208,7 +208,7 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
                           </div>
                           <div className="flex justify-between items-center text-xs text-default-500">
                             <span>Expiration</span>
-                            <span className="font-mono text-default-400">
+                            <span className=" text-default-400">
                               {formatExpiry(tokenPayload.exp)}
                             </span>
                           </div>
@@ -244,7 +244,7 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
                                     }
                                   >
                                     <Chip
-                                      className="text-xs font-mono cursor-pointer hover:bg-accent-600 transition-colors"
+                                      className="text-xs  cursor-pointer hover:bg-accent-600 transition-colors"
                                       color="accent"
                                       size="sm"
                                       onClick={() => {
@@ -261,7 +261,7 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
                               return (
                                 <Chip
                                   key={perm}
-                                  className="text-xs font-mono"
+                                  className="text-xs "
                                   color="default"
                                   size="sm"
                                 >
@@ -291,7 +291,7 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
                         className="h-20 w-full"
                         orientation="horizontal"
                       >
-                        <p className="text-[10px] text-default-500 font-mono break-all leading-relaxed select-all">
+                        <p className="text-[10px] text-default-500  break-all leading-relaxed select-all">
                           {accessToken || t("nav-user-dropdown-loading")}
                         </p>
                       </ScrollShadow>

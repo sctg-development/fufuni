@@ -275,7 +275,7 @@ export function SavedCartsManager() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-default-500">ID</p>
-                        <p className="font-mono text-xs">
+                        <p className=" text-xs">
                           {selectedCart.id}
                         </p>
                       </div>

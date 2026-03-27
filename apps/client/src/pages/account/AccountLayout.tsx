@@ -10,7 +10,8 @@ import {
   Card,
   Separator,
   Avatar,
-  Link as HeroUILink} from "@heroui/react";
+  Link as HeroUILink,
+} from "@heroui/react";
 
 import { useAuth } from "../../authentication/providers/use-auth";
 
@@ -62,17 +63,18 @@ export default function AccountLayout() {
                   className="ring-2 ring-background rounded-lg"
                   color="accent"
                   size="lg"
-                ><Avatar.Fallback>
+                >
+                  <Avatar.Fallback>
                     {user?.name
                       ? user.name
                           .split(" ")
                           .map((n: string) => n[0])
                           .join("")
                       : user?.email
-                      ? user.email[0].toUpperCase()
-                      : "U"}
+                        ? user.email[0].toUpperCase()
+                        : "U"}
                   </Avatar.Fallback>
-                  </Avatar>
+                </Avatar>
                 <div className="flex-1 min-w-0">
                   <h2 className="text-sm font-bold truncate">
                     {user?.name || user?.email || "Account"}

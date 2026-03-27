@@ -6,13 +6,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import {
-  Card,
-  Spinner,
-  Button,
-  Chip,
-  Table,
-} from "@heroui/react";
+import { Card, Spinner, Button, Chip, Table } from "@heroui/react";
 
 import { useAuth } from "../../authentication/providers/use-auth";
 

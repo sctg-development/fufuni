@@ -182,7 +182,7 @@ export default function OrdersPage() {
       columnHelper.accessor("number", {
         header: t("admin-orders-col-order"),
         cell: (info) => (
-          <span className="font-mono text-sm">
+          <span className=" text-sm">
             {info.getValue() || info.row.original.id.slice(0, 8)}
           </span>
         ),
@@ -191,20 +191,18 @@ export default function OrdersPage() {
         id: "name",
         header: t("admin-orders-col-name"),
         cell: (info) => (
-          <span className="font-mono text-sm">{info.getValue() || "-"}</span>
+          <span className=" text-sm">{info.getValue() || "-"}</span>
         ),
       }),
       columnHelper.accessor("customer_email", {
         header: t("admin-orders-col-email"),
         cell: (info) => (
-          <span className="font-mono text-sm">{info.getValue() || "-"}</span>
+          <span className=" text-sm">{info.getValue() || "-"}</span>
         ),
       }),
       columnHelper.accessor("status", {
         header: t("admin-orders-col-status"),
-        cell: (info) => (
-          <span className="font-mono text-sm">{info.getValue()}</span>
-        ),
+        cell: (info) => <span className=" text-sm">{info.getValue()}</span>,
       }),
       columnHelper.accessor((row) => row.amounts.total_cents, {
         id: "total",
@@ -214,7 +212,7 @@ export default function OrdersPage() {
           const currency = order.amounts.currency || order.currency || "USD";
 
           return (
-            <span className="font-mono text-sm">
+            <span className=" text-sm">
               {formatMoney(info.getValue(), currency)}
             </span>
           );
@@ -223,7 +221,7 @@ export default function OrdersPage() {
       columnHelper.accessor("created_at", {
         header: t("admin-orders-col-date"),
         cell: (info) => (
-          <span className="font-mono text-sm">
+          <span className=" text-sm">
             {new Date(info.getValue()).toLocaleDateString()}
           </span>
         ),
@@ -293,7 +291,7 @@ export default function OrdersPage() {
             >
               <Search className="shrink-0" size={16} />
               <input
-                className="bg-transparent border-0 font-mono text-sm w-full focus:outline-none"
+                className="bg-transparent border-0  text-sm w-full focus:outline-none"
                 placeholder={t("search") + "..."}
                 style={{ color: "var(--text)" }}
                 type="text"
@@ -304,7 +302,7 @@ export default function OrdersPage() {
 
             {/* Status filter */}
             <select
-              className="h-full px-4 py-3 font-mono text-sm bg-transparent border-0 border-l focus:outline-none cursor-pointer"
+              className="h-full px-4 py-3  text-sm bg-transparent border-0 border-l focus:outline-none cursor-pointer"
               style={{
                 borderColor: "var(--border)",
                 color: statusFilter ? "var(--text)" : "var(--text-muted)",
@@ -430,8 +428,10 @@ export default function OrdersPage() {
                       {selectedOrder && (
                         <div className="space-y-5">
                           {/* Status Badge */}
-                          <Chip size="sm" color="accent" variant="primary">
-                            <span className="text-sm capitalize">{selectedOrder.status}</span>
+                          <Chip color="accent" size="sm" variant="primary">
+                            <span className="text-sm capitalize">
+                              {selectedOrder.status}
+                            </span>
                           </Chip>
 
                           {/* Two column layout */}
@@ -441,17 +441,19 @@ export default function OrdersPage() {
                               {/* Customer */}
                               <Card>
                                 <Card.Content className="gap-3">
-                                  <h4 className="text-sm font-semibold">{t("admin-orders-customer")}</h4>
+                                  <h4 className="text-sm font-semibold">
+                                    {t("admin-orders-customer")}
+                                  </h4>
                                   {selectedOrder.shipping?.name && (
-                                    <p className="font-mono text-sm font-medium">
+                                    <p className=" text-sm font-medium">
                                       {selectedOrder.shipping.name}
                                     </p>
                                   )}
-                                  <p className="font-mono text-sm text-default-500">
+                                  <p className=" text-sm text-default-500">
                                     {selectedOrder.customer_email}
                                   </p>
                                   {selectedOrder.shipping?.phone && (
-                                    <p className="font-mono text-sm text-default-500">
+                                    <p className=" text-sm text-default-500">
                                       {selectedOrder.shipping.phone}
                                     </p>
                                   )}
@@ -462,30 +464,43 @@ export default function OrdersPage() {
                               {selectedOrder.shipping?.address && (
                                 <Card>
                                   <Card.Content className="gap-3">
-                                    <h4 className="text-sm font-semibold">{t("admin-orders-ship-to")}</h4>
-                                    <div className="font-mono text-sm space-y-1">
+                                    <h4 className="text-sm font-semibold">
+                                      {t("admin-orders-ship-to")}
+                                    </h4>
+                                    <div className=" text-sm space-y-1">
                                       {selectedOrder.shipping.name && (
                                         <p className="font-medium">
                                           {selectedOrder.shipping.name}
                                         </p>
                                       )}
                                       {selectedOrder.shipping.address.line1 && (
-                                        <p>{selectedOrder.shipping.address.line1}</p>
+                                        <p>
+                                          {selectedOrder.shipping.address.line1}
+                                        </p>
                                       )}
                                       {selectedOrder.shipping.address.line2 && (
-                                        <p>{selectedOrder.shipping.address.line2}</p>
+                                        <p>
+                                          {selectedOrder.shipping.address.line2}
+                                        </p>
                                       )}
                                       <p>
                                         {[
                                           selectedOrder.shipping.address.city,
                                           selectedOrder.shipping.address.state,
-                                          selectedOrder.shipping.address.postal_code,
+                                          selectedOrder.shipping.address
+                                            .postal_code,
                                         ]
                                           .filter(Boolean)
                                           .join(", ")}
                                       </p>
-                                      {selectedOrder.shipping.address.country && (
-                                        <p>{selectedOrder.shipping.address.country}</p>
+                                      {selectedOrder.shipping.address
+                                        .country && (
+                                        <p>
+                                          {
+                                            selectedOrder.shipping.address
+                                              .country
+                                          }
+                                        </p>
                                       )}
                                     </div>
                                   </Card.Content>
@@ -496,8 +511,10 @@ export default function OrdersPage() {
                               {selectedOrder.stripe?.payment_intent_id && (
                                 <Card>
                                   <Card.Content className="gap-2">
-                                    <h4 className="text-sm font-semibold">{t("admin-orders-stripe")}</h4>
-                                    <p className="text-xs font-mono break-all text-default-500">
+                                    <h4 className="text-sm font-semibold">
+                                      {t("admin-orders-stripe")}
+                                    </h4>
+                                    <p className="text-xs  break-all text-default-500">
                                       {t("admin-orders-stripe-prefix")}{" "}
                                       {selectedOrder.stripe.payment_intent_id}
                                     </p>
@@ -511,7 +528,9 @@ export default function OrdersPage() {
                               {/* Items */}
                               <Card>
                                 <Card.Content className="gap-3">
-                                  <h4 className="text-sm font-semibold">{t("admin-orders-items")}</h4>
+                                  <h4 className="text-sm font-semibold">
+                                    {t("admin-orders-items")}
+                                  </h4>
                                   <div className="space-y-2">
                                     {selectedOrder.items.map((item, i) => (
                                       <div
@@ -519,12 +538,12 @@ export default function OrdersPage() {
                                         className="flex items-center justify-between text-sm pb-2 border-b last:pb-0 last:border-0"
                                       >
                                         <div>
-                                          <p className="font-mono">{item.title}</p>
-                                          <p className="text-xs font-mono text-default-500">
+                                          <p className="">{item.title}</p>
+                                          <p className="text-xs  text-default-500">
                                             {item.sku} × {item.qty}
                                           </p>
                                         </div>
-                                        <p className="font-mono">
+                                        <p className="">
                                           {formatCurrency(
                                             item.unit_price_cents * item.qty,
                                             selectedOrder.amounts.currency ||
@@ -541,14 +560,15 @@ export default function OrdersPage() {
                               {/* Summary */}
                               <Card>
                                 <Card.Content className="gap-1">
-                                  <div className="space-y-1 text-sm font-mono">
+                                  <div className="space-y-1 text-sm ">
                                     <div className="flex justify-between">
                                       <span className="text-default-500">
                                         {t("admin-orders-subtotal")}
                                       </span>
                                       <span>
                                         {formatCurrency(
-                                          selectedOrder.amounts.subtotal_cents || 0,
+                                          selectedOrder.amounts
+                                            .subtotal_cents || 0,
                                           selectedOrder.amounts.currency ||
                                             selectedOrder.currency ||
                                             "USD",
@@ -574,7 +594,8 @@ export default function OrdersPage() {
                                       </span>
                                       <span>
                                         {formatCurrency(
-                                          selectedOrder.amounts.shipping_cents || 0,
+                                          selectedOrder.amounts
+                                            .shipping_cents || 0,
                                           selectedOrder.amounts.currency ||
                                             selectedOrder.currency ||
                                             "USD",
@@ -606,11 +627,12 @@ export default function OrdersPage() {
                             <div>
                               <Label>{t("admin-orders-status")}</Label>
                               <select
-                                className="w-full px-3 py-2 mt-2 font-mono text-sm rounded-lg bg-default-100 border border-default-300 focus:outline-none focus:ring-2"
+                                className="w-full px-3 py-2 mt-2  text-sm rounded-lg bg-default-100 border border-default-300 focus:outline-none focus:ring-2"
                                 disabled={updateMutation.isPending}
                                 value={selectedOrder.status}
                                 onChange={(e) => {
                                   const newStatus = e.target.value;
+
                                   console.log("select status", newStatus);
                                   setSelectedOrder((o) =>
                                     o ? { ...o, status: newStatus } : o,
@@ -636,9 +658,13 @@ export default function OrdersPage() {
                                 {t("admin-orders-tracking")}
                               </Label>
                               <input
-                                className="w-full px-3 py-2 mt-2 font-mono text-sm rounded-lg bg-default-100 border border-default-300 focus:outline-none focus:ring-2"
-                                defaultValue={selectedOrder.tracking?.number || ""}
-                                placeholder={t("admin-orders-tracking-placeholder")}
+                                className="w-full px-3 py-2 mt-2  text-sm rounded-lg bg-default-100 border border-default-300 focus:outline-none focus:ring-2"
+                                defaultValue={
+                                  selectedOrder.tracking?.number || ""
+                                }
+                                placeholder={t(
+                                  "admin-orders-tracking-placeholder",
+                                )}
                                 type="text"
                                 onBlur={(e) => {
                                   if (
@@ -670,17 +696,23 @@ export default function OrdersPage() {
 
                           {/* Footer: Timestamp + Refund */}
                           <div className="flex items-center justify-between">
-                            <p className="text-xs font-mono text-default-500">
+                            <p className="text-xs  text-default-500">
                               {t("admin-orders-created")}{" "}
-                              {new Date(selectedOrder.created_at).toLocaleString()}
+                              {new Date(
+                                selectedOrder.created_at,
+                              ).toLocaleString()}
                             </p>
                             <div className="flex items-center gap-3">
                               <Button
+                                isDisabled={
+                                  resendConfirmationMutation.isPending
+                                }
                                 size="sm"
                                 variant="secondary"
-                                isDisabled={resendConfirmationMutation.isPending}
                                 onPress={() => {
-                                  resendConfirmationMutation.mutate(selectedOrder.id);
+                                  resendConfirmationMutation.mutate(
+                                    selectedOrder.id,
+                                  );
                                 }}
                               >
                                 {resendConfirmationMutation.isPending
@@ -689,11 +721,13 @@ export default function OrdersPage() {
                               </Button>
 
                               <Button
+                                isDisabled={regenerateLinkMutation.isPending}
                                 size="sm"
                                 variant="tertiary"
-                                isDisabled={regenerateLinkMutation.isPending}
                                 onPress={() => {
-                                  regenerateLinkMutation.mutate(selectedOrder.id);
+                                  regenerateLinkMutation.mutate(
+                                    selectedOrder.id,
+                                  );
                                 }}
                               >
                                 {regenerateLinkMutation.isPending
@@ -704,11 +738,15 @@ export default function OrdersPage() {
                               {selectedOrder.status === "paid" &&
                                 selectedOrder.stripe?.payment_intent_id && (
                                   <Button
+                                    isDisabled={refundMutation.isPending}
                                     size="sm"
                                     variant="danger"
-                                    isDisabled={refundMutation.isPending}
                                     onPress={() => {
-                                      if (confirm(t("admin-orders-confirm-refund"))) {
+                                      if (
+                                        confirm(
+                                          t("admin-orders-confirm-refund"),
+                                        )
+                                      ) {
                                         refundMutation.mutate(selectedOrder.id);
                                       }
                                     }}

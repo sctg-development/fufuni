@@ -26,7 +26,6 @@ import { Modal } from "@heroui/react";
 import { Card } from "@heroui/react";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
-
 import DefaultLayout from "@/layouts/default";
 import { useSecuredApi } from "@/authentication";
 
@@ -234,10 +233,7 @@ export default function RegionsPage() {
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">{t("admin-regions-title")}</h1>
-          <Button
-            variant="primary"
-            onPress={handleOpenCreate}
-          >
+          <Button variant="primary" onPress={handleOpenCreate}>
             <Plus className="w-4 h-4" />
             {t("admin-regions-add")}
           </Button>
@@ -295,66 +291,66 @@ export default function RegionsPage() {
                 <Table.Body
                   renderEmptyState={() => <div>{t("admin-common-empty")}</div>}
                 >
-                {displayed.map((region: Region) => (
-                  <Table.Row key={region.id} className="odd:bg-default-50">
-                    <Table.Cell>{region.display_name}</Table.Cell>
-                    <Table.Cell>
-                      {region.currency_code || region.currency_id}
-                    </Table.Cell>
-                    <Table.Cell>
-                      {region.is_default ? (
-                        <span className="text-green-600">✓ Default</span>
-                      ) : (
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="tertiary"
-                          onPress={() => handleSetDefault(region.id)}
+                  {displayed.map((region: Region) => (
+                    <Table.Row key={region.id} className="odd:bg-default-50">
+                      <Table.Cell>{region.display_name}</Table.Cell>
+                      <Table.Cell>
+                        {region.currency_code || region.currency_id}
+                      </Table.Cell>
+                      <Table.Cell>
+                        {region.is_default ? (
+                          <span className="text-green-600">✓ Default</span>
+                        ) : (
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="tertiary"
+                            onPress={() => handleSetDefault(region.id)}
+                          >
+                            Set Default
+                          </Button>
+                        )}
+                      </Table.Cell>
+                      <Table.Cell>
+                        {region.tax_inclusive ? (
+                          <span className="text-blue-600">TTC</span>
+                        ) : (
+                          <span className="text-gray-500">HT</span>
+                        )}
+                      </Table.Cell>
+                      <Table.Cell>
+                        <span
+                          className={
+                            region.status === "active"
+                              ? "text-green-600"
+                              : "text-gray-600"
+                          }
                         >
-                          Set Default
-                        </Button>
-                      )}
-                    </Table.Cell>
-                    <Table.Cell>
-                      {region.tax_inclusive ? (
-                        <span className="text-blue-600">TTC</span>
-                      ) : (
-                        <span className="text-gray-500">HT</span>
-                      )}
-                    </Table.Cell>
-                    <Table.Cell>
-                      <span
-                        className={
-                          region.status === "active"
-                            ? "text-green-600"
-                            : "text-gray-600"
-                        }
-                      >
-                        {region.status}
-                      </span>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <div className="flex gap-2">
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="tertiary"
-                          onPress={() => handleOpenEdit(region)}
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="tertiary"
-                          onPress={() => handleDelete(region.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
+                          {region.status}
+                        </span>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <div className="flex gap-2">
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="tertiary"
+                            onPress={() => handleOpenEdit(region)}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="tertiary"
+                            onPress={() => handleDelete(region.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
                 </Table.Body>
               </Table.Content>
             </Table>
@@ -369,7 +365,9 @@ export default function RegionsPage() {
                   <>
                     <Modal.CloseTrigger onPress={close} />
                     <Modal.Header>
-                      {isEditMode ? t("admin-regions-edit") : t("admin-regions-create")}
+                      {isEditMode
+                        ? t("admin-regions-edit")
+                        : t("admin-regions-create")}
                     </Modal.Header>
                     <Modal.Body>
                       <div className="space-y-4">
@@ -379,7 +377,10 @@ export default function RegionsPage() {
                             placeholder="Enter region name"
                             value={formData.display_name}
                             onChange={(e) =>
-                              setFormData({ ...formData, display_name: e.target.value })
+                              setFormData({
+                                ...formData,
+                                display_name: e.target.value,
+                              })
                             }
                           />
                         </TextField>
@@ -452,8 +453,10 @@ export default function RegionsPage() {
                         {t("admin-common-cancel")}
                       </Button>
                       <Button
+                        isDisabled={
+                          !formData.display_name || !formData.currency_id
+                        }
                         variant="primary"
-                        isDisabled={!formData.display_name || !formData.currency_id}
                         onPress={handleSave}
                       >
                         {t("admin-common-save")}

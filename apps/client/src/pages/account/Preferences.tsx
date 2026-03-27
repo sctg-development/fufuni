@@ -15,7 +15,8 @@ import {
   Select,
   ListBox,
   Switch,
-  Separator} from "@heroui/react";
+  Separator,
+} from "@heroui/react";
 
 import { useAuth } from "../../authentication/providers/use-auth";
 
@@ -142,7 +143,9 @@ export default function Preferences() {
             <Input
               placeholder={t("account-enter-name")}
               value={formData.name || ""}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
             />
           </TextField>
 
@@ -161,7 +164,10 @@ export default function Preferences() {
           <Select
             value={formData.locale || "en-US"}
             onChange={(value) => {
-              setFormData({ ...formData, locale: (value as string) || "en-US" });
+              setFormData({
+                ...formData,
+                locale: (value as string) || "en-US",
+              });
             }}
           >
             <Label>{t("account-language")}</Label>
@@ -172,7 +178,11 @@ export default function Preferences() {
             <Select.Popover>
               <ListBox>
                 {availableLanguages.map((locale) => (
-                  <ListBox.Item key={locale.code} id={locale.code} textValue={locale.nativeName}>
+                  <ListBox.Item
+                    key={locale.code}
+                    id={locale.code}
+                    textValue={locale.nativeName}
+                  >
                     {locale.nativeName}
                     <ListBox.ItemIndicator />
                   </ListBox.Item>
@@ -223,11 +233,7 @@ export default function Preferences() {
 
       {/* Save Button */}
       <div className="flex gap-2">
-        <Button
-          isDisabled={saving}
-          isPending={saving}
-          onClick={handleSave}
-        >
+        <Button isDisabled={saving} isPending={saving} onClick={handleSave}>
           {t("account-save-changes")}
         </Button>
         {saveSuccess && (

@@ -242,12 +242,12 @@ export function VariantPrices({
         <Card.Content className="text-sm">
           <div className="flex justify-between items-center">
             <div>
-              <p className="font-mono text-xs text-default-500">
+              <p className=" text-xs text-default-500">
                 {t("admin-variant-prices-base")} ({currency})
               </p>
               <p className="font-semibold">{variantTitle}</p>
             </div>
-            <p className="font-mono font-bold text-sm">
+            <p className=" font-bold text-sm">
               {formatMoney(basePriceCents, currency)}
             </p>
           </div>
@@ -331,7 +331,7 @@ export function VariantPrices({
                 <Table.Row key={price.currency_id} className="odd:bg-default-50">
                   <Table.Cell>
                     <div>
-                      <p className="font-mono font-semibold text-sm">
+                      <p className=" font-semibold text-sm">
                         {price.currency_code}
                       </p>
                       <p className="text-xs text-default-500">
@@ -353,12 +353,12 @@ export function VariantPrices({
                           autoFocus
                           aria-label={`Edit price for ${price.currency_code}`}
                         />
-                        <span className="text-xs text-default-400 font-mono">
+                        <span className="text-xs text-default-400 ">
                           {price.currency_code}
                         </span>
                       </div>
                     ) : (
-                      <p className="font-mono font-semibold text-sm">
+                      <p className=" font-semibold text-sm">
                         {formatMoney(price.price_cents, price.currency_code)}
                       </p>
                     )}

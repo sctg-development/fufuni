@@ -25,6 +25,7 @@ import { Modal } from "@heroui/react";
 import { Card } from "@heroui/react";
 import { Chip } from "@heroui/react";
 import { Plus, Edit2, Trash2, Package } from "lucide-react";
+
 import DefaultLayout from "@/layouts/default";
 import {
   ShippingClass,
@@ -185,10 +186,7 @@ export default function ShippingClassesPage() {
               </p>
             </div>
           </div>
-          <Button
-            variant="primary"
-            onPress={handleOpenCreate}
-          >
+          <Button variant="primary" onPress={handleOpenCreate}>
             <Plus className="w-4 h-4" />
             {t("admin-shipping-classes-btn-new")}
           </Button>
@@ -236,9 +234,15 @@ export default function ShippingClassesPage() {
                 value={statusFilter || ""}
                 onChange={(e) => setStatusFilter(e.target.value || "")}
               >
-                <option value="">{t("admin-shipping-classes-filter-status")}</option>
-                <option value="active">{t("admin-shipping-classes-active")}</option>
-                <option value="inactive">{t("admin-shipping-classes-inactive")}</option>
+                <option value="">
+                  {t("admin-shipping-classes-filter-status")}
+                </option>
+                <option value="active">
+                  {t("admin-shipping-classes-active")}
+                </option>
+                <option value="inactive">
+                  {t("admin-shipping-classes-inactive")}
+                </option>
               </select>
             </div>
           </Card.Content>
@@ -253,198 +257,231 @@ export default function ShippingClassesPage() {
                   <Table.Column key="code" isRowHeader>
                     {t("admin-shipping-classes-col-code")}
                   </Table.Column>
-                <Table.Column key="display_name">
-                  {t("admin-shipping-classes-col-name")}
-                </Table.Column>
-                <Table.Column key="resolution">
-                  {t("admin-shipping-classes-col-resolution")}
-                </Table.Column>
-                <Table.Column key="description">
-                  {t("admin-shipping-classes-col-description")}
-                </Table.Column>
-                <Table.Column key="status">
-                  {t("admin-shipping-classes-col-status")}
-                </Table.Column>
-                <Table.Column key="actions">
-                  {t("admin-shipping-classes-col-actions")}
-                </Table.Column>
-              </Table.Header>
-              <Table.Body
-                renderEmptyState={() => <div>{t("admin-shipping-classes-empty")}</div>}
-              >
-                {displayed.map((cls) => (
-                  <Table.Row key={cls.id} className="odd:bg-default-50">
-                    <Table.Cell>
-                      <code className="text-xs bg-default-100 px-2 py-0.5 rounded">
-                        {cls.code}
-                      </code>
-                    </Table.Cell>
-                    <Table.Cell className="font-medium">
-                      {cls.display_name}
-                    </Table.Cell>
-                    <Table.Cell>
-                      {cls.resolution === "exclusive" ? (
-                        <Chip size="sm" variant="tertiary">
-                          {t("admin-shipping-classes-exclusive")}
-                        </Chip>
-                      ) : (
-                        <Chip size="sm" variant="tertiary">
-                          {t("admin-shipping-classes-additive")}
-                        </Chip>
-                      )}
-                    </Table.Cell>
-                    <Table.Cell className="text-default-500 text-sm">
-                      {cls.description ?? "—"}
-                    </Table.Cell>
-                    <Table.Cell>
-                      <span
-                        className={
-                          cls.status === "active"
-                            ? "text-green-600"
-                            : "text-gray-400"
-                        }
-                      >
-                        {cls.status}
-                      </span>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <div className="flex gap-2">
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="tertiary"
-                          onPress={() => handleOpenEdit(cls)}
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="tertiary"
-                          onPress={() => handleDelete(cls.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-            </Table.Content>
-          </Table>
-        </Card.Content>
-      </Card>
-
-      {/* Create / Edit Modal */}
-      <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
-        <Modal.Backdrop>
-          <Modal.Container size="lg">
-            <Modal.Dialog>
-              {({ close }) => (
-                <>
-                  <Modal.CloseTrigger onPress={close} />
-                  <Modal.Header>
-                    {isEditMode
-                      ? t("admin-shipping-classes-modal-title-edit")
-                      : t("admin-shipping-classes-modal-title-create")}
-                  </Modal.Header>
-                  <Modal.Body>
-                    <div className="space-y-4">
-                      {/* Code — only editable on creation */}
-                      <TextField isDisabled={isEditMode}>
-                        <Label>{t("admin-shipping-classes-code")}</Label>
-                        <Input
-                          placeholder={t("admin-shipping-classes-code-placeholder")}
-                          value={formData.code}
-                          onChange={(e) =>
-                            setFormData({ ...formData, code: e.target.value.toLowerCase() })
-                          }
-                        />
-                      </TextField>
-
-                      <TextField>
-                        <Label>{t("admin-shipping-classes-display-name")}</Label>
-                        <Input
-                          placeholder={t("admin-shipping-classes-display-name-placeholder")}
-                          value={formData.display_name}
-                          onChange={(e) =>
-                            setFormData({ ...formData, display_name: e.target.value })
-                          }
-                        />
-                      </TextField>
-
-                      <TextField>
-                        <Label>{t("admin-shipping-classes-description")}</Label>
-                        <Input
-                          placeholder={t("admin-shipping-classes-description-placeholder")}
-                          value={formData.description}
-                          onChange={(e) =>
-                            setFormData({ ...formData, description: e.target.value })
-                          }
-                        />
-                      </TextField>
-
-                      <div className="flex flex-col gap-1">
-                        <Label>{t("admin-shipping-classes-resolution-mode")}</Label>
-                        <select
-                          className="px-3 py-2 rounded-lg bg-default-100 border border-default-300 text-sm focus:outline-none focus:ring-2"
-                          value={formData.resolution}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              resolution: e.target.value as "exclusive" | "additive",
-                            })
+                  <Table.Column key="display_name">
+                    {t("admin-shipping-classes-col-name")}
+                  </Table.Column>
+                  <Table.Column key="resolution">
+                    {t("admin-shipping-classes-col-resolution")}
+                  </Table.Column>
+                  <Table.Column key="description">
+                    {t("admin-shipping-classes-col-description")}
+                  </Table.Column>
+                  <Table.Column key="status">
+                    {t("admin-shipping-classes-col-status")}
+                  </Table.Column>
+                  <Table.Column key="actions">
+                    {t("admin-shipping-classes-col-actions")}
+                  </Table.Column>
+                </Table.Header>
+                <Table.Body
+                  renderEmptyState={() => (
+                    <div>{t("admin-shipping-classes-empty")}</div>
+                  )}
+                >
+                  {displayed.map((cls) => (
+                    <Table.Row key={cls.id} className="odd:bg-default-50">
+                      <Table.Cell>
+                        <code className="text-xs bg-default-100 px-2 py-0.5 rounded">
+                          {cls.code}
+                        </code>
+                      </Table.Cell>
+                      <Table.Cell className="font-medium">
+                        {cls.display_name}
+                      </Table.Cell>
+                      <Table.Cell>
+                        {cls.resolution === "exclusive" ? (
+                          <Chip size="sm" variant="tertiary">
+                            {t("admin-shipping-classes-exclusive")}
+                          </Chip>
+                        ) : (
+                          <Chip size="sm" variant="tertiary">
+                            {t("admin-shipping-classes-additive")}
+                          </Chip>
+                        )}
+                      </Table.Cell>
+                      <Table.Cell className="text-default-500 text-sm">
+                        {cls.description ?? "—"}
+                      </Table.Cell>
+                      <Table.Cell>
+                        <span
+                          className={
+                            cls.status === "active"
+                              ? "text-green-600"
+                              : "text-gray-400"
                           }
                         >
-                          <option value="exclusive">
-                            {t("admin-shipping-classes-resolution-exclusive-label")}
-                          </option>
-                          <option value="additive">
-                            {t("admin-shipping-classes-resolution-additive-label")}
-                          </option>
-                        </select>
-                      </div>
+                          {cls.status}
+                        </span>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <div className="flex gap-2">
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="tertiary"
+                            onPress={() => handleOpenEdit(cls)}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="tertiary"
+                            onPress={() => handleDelete(cls.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Content>
+            </Table>
+          </Card.Content>
+        </Card>
 
-                      {isEditMode && (
-                        <div className="flex flex-col gap-1">
-                          <Label>{t("admin-shipping-classes-status")}</Label>
-                          <select
-                            className="px-3 py-2 rounded-lg bg-default-100 border border-default-300 text-sm focus:outline-none focus:ring-2"
-                            value={formData.status}
+        {/* Create / Edit Modal */}
+        <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
+          <Modal.Backdrop>
+            <Modal.Container size="lg">
+              <Modal.Dialog>
+                {({ close }) => (
+                  <>
+                    <Modal.CloseTrigger onPress={close} />
+                    <Modal.Header>
+                      {isEditMode
+                        ? t("admin-shipping-classes-modal-title-edit")
+                        : t("admin-shipping-classes-modal-title-create")}
+                    </Modal.Header>
+                    <Modal.Body>
+                      <div className="space-y-4">
+                        {/* Code — only editable on creation */}
+                        <TextField isDisabled={isEditMode}>
+                          <Label>{t("admin-shipping-classes-code")}</Label>
+                          <Input
+                            placeholder={t(
+                              "admin-shipping-classes-code-placeholder",
+                            )}
+                            value={formData.code}
                             onChange={(e) =>
                               setFormData({
                                 ...formData,
-                                status: e.target.value as "active" | "inactive",
+                                code: e.target.value.toLowerCase(),
+                              })
+                            }
+                          />
+                        </TextField>
+
+                        <TextField>
+                          <Label>
+                            {t("admin-shipping-classes-display-name")}
+                          </Label>
+                          <Input
+                            placeholder={t(
+                              "admin-shipping-classes-display-name-placeholder",
+                            )}
+                            value={formData.display_name}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                display_name: e.target.value,
+                              })
+                            }
+                          />
+                        </TextField>
+
+                        <TextField>
+                          <Label>
+                            {t("admin-shipping-classes-description")}
+                          </Label>
+                          <Input
+                            placeholder={t(
+                              "admin-shipping-classes-description-placeholder",
+                            )}
+                            value={formData.description}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                description: e.target.value,
+                              })
+                            }
+                          />
+                        </TextField>
+
+                        <div className="flex flex-col gap-1">
+                          <Label>
+                            {t("admin-shipping-classes-resolution-mode")}
+                          </Label>
+                          <select
+                            className="px-3 py-2 rounded-lg bg-default-100 border border-default-300 text-sm focus:outline-none focus:ring-2"
+                            value={formData.resolution}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                resolution: e.target.value as
+                                  | "exclusive"
+                                  | "additive",
                               })
                             }
                           >
-                            <option value="active">{t("admin-shipping-classes-active")}</option>
-                            <option value="inactive">
-                              {t("admin-shipping-classes-inactive")}
+                            <option value="exclusive">
+                              {t(
+                                "admin-shipping-classes-resolution-exclusive-label",
+                              )}
+                            </option>
+                            <option value="additive">
+                              {t(
+                                "admin-shipping-classes-resolution-additive-label",
+                              )}
                             </option>
                           </select>
                         </div>
-                      )}
-                    </div>
-                  </Modal.Body>
-                  <Modal.Footer>
-                    <Button variant="tertiary" onPress={close}>
-                      {t("admin-shipping-classes-modal-cancel")}
-                    </Button>
-                    <Button
-                      variant="primary"
-                      isDisabled={!formData.code || !formData.display_name}
-                      onPress={handleSave}
-                    >
-                      {t("admin-shipping-classes-modal-save")}
-                    </Button>
-                  </Modal.Footer>
-                </>
-              )}
-            </Modal.Dialog>
-          </Modal.Container>
-        </Modal.Backdrop>
-      </Modal>
+
+                        {isEditMode && (
+                          <div className="flex flex-col gap-1">
+                            <Label>{t("admin-shipping-classes-status")}</Label>
+                            <select
+                              className="px-3 py-2 rounded-lg bg-default-100 border border-default-300 text-sm focus:outline-none focus:ring-2"
+                              value={formData.status}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  status: e.target.value as
+                                    | "active"
+                                    | "inactive",
+                                })
+                              }
+                            >
+                              <option value="active">
+                                {t("admin-shipping-classes-active")}
+                              </option>
+                              <option value="inactive">
+                                {t("admin-shipping-classes-inactive")}
+                              </option>
+                            </select>
+                          </div>
+                        )}
+                      </div>
+                    </Modal.Body>
+                    <Modal.Footer>
+                      <Button variant="tertiary" onPress={close}>
+                        {t("admin-shipping-classes-modal-cancel")}
+                      </Button>
+                      <Button
+                        isDisabled={!formData.code || !formData.display_name}
+                        variant="primary"
+                        onPress={handleSave}
+                      >
+                        {t("admin-shipping-classes-modal-save")}
+                      </Button>
+                    </Modal.Footer>
+                  </>
+                )}
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
+        </Modal>
       </div>
     </DefaultLayout>
   );

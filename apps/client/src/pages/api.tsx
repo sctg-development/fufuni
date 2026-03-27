@@ -65,7 +65,7 @@ export default function ApiPage() {
         </div>
         <div className="rounded-lg bg-default-100 px-3 py-2 max-w-2xl">
           <div className="flex items-start justify-between gap-2">
-            <pre className="text-sm font-mono overflow-auto max-h-96">
+            <pre className="text-sm  overflow-auto max-h-96">
               <code>{JSON.stringify(apiResponse, null, 2)}</code>
             </pre>
             <Tooltip>

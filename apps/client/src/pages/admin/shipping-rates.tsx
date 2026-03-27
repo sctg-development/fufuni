@@ -20,13 +20,9 @@ import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@heroui/react";
 import { Input, TextField, Label } from "@heroui/react";
-import { Select,  ListBox } from "@heroui/react";
-import {
-  Table,
-} from "@heroui/react";
-import {
-  Modal,
-} from "@heroui/react";
+import { Select, ListBox } from "@heroui/react";
+import { Table } from "@heroui/react";
+import { Modal } from "@heroui/react";
 import { Card } from "@heroui/react";
 import { Tooltip } from "@heroui/react";
 import { Switch } from "@heroui/react";
@@ -621,10 +617,7 @@ export default function ShippingRatesPage() {
           <h1 className="text-3xl font-bold">
             {t("admin-shipping-rates-title")}
           </h1>
-          <Button
-            variant="primary"
-            onPress={handleOpenCreate}
-          >
+          <Button variant="primary" onPress={handleOpenCreate}>
             <Plus className="w-4 h-4" />
             {t("admin-shipping-rates-add")}
           </Button>
@@ -639,16 +632,13 @@ export default function ShippingRatesPage() {
               onChange={(value: string) => setGlobalFilter(value)}
             >
               <Label>{t("admin-common-search")}</Label>
-              <Input
-                placeholder={t("admin-common-search")}
-                className="pl-8"
-              />
+              <Input className="pl-8" placeholder={t("admin-common-search")} />
               <SearchIcon className="w-4 h-4 absolute left-2 top-1/2 transform -translate-y-1/2 pointer-events-none text-default-400" />
             </TextField>
             <Select
-              value={statusFilter || ""}
-              onChange={(value) => setStatusFilter(value as string || "")}
               className="w-48"
+              value={statusFilter || ""}
+              onChange={(value) => setStatusFilter((value as string) || "")}
             >
               <Label>{t("admin-common-status")}</Label>
               <Select.Trigger>
@@ -683,80 +673,80 @@ export default function ShippingRatesPage() {
                   <Table.Column key="display_name" isRowHeader>
                     {t("admin-common-name")}
                   </Table.Column>
-                <Table.Column key="description">
-                  {t("admin-common-description")}
-                </Table.Column>
-                <Table.Column key="max_weight">
-                  {t("admin-shipping-rates-max-weight")}
-                </Table.Column>
-                <Table.Column key="price">
-                  {t("admin-shipping-rates-price")}
-                </Table.Column>
-                <Table.Column key="delivery_days">
-                  {t("admin-shipping-rates-delivery-days")}
-                </Table.Column>
-                <Table.Column key="status">
-                  {t("admin-common-status")}
-                </Table.Column>
-                <Table.Column key="actions">
-                  {t("admin-common-actions")}
-                </Table.Column>
-              </Table.Header>
+                  <Table.Column key="description">
+                    {t("admin-common-description")}
+                  </Table.Column>
+                  <Table.Column key="max_weight">
+                    {t("admin-shipping-rates-max-weight")}
+                  </Table.Column>
+                  <Table.Column key="price">
+                    {t("admin-shipping-rates-price")}
+                  </Table.Column>
+                  <Table.Column key="delivery_days">
+                    {t("admin-shipping-rates-delivery-days")}
+                  </Table.Column>
+                  <Table.Column key="status">
+                    {t("admin-common-status")}
+                  </Table.Column>
+                  <Table.Column key="actions">
+                    {t("admin-common-actions")}
+                  </Table.Column>
+                </Table.Header>
                 <Table.Body
                   renderEmptyState={() => <div>{t("admin-common-empty")}</div>}
                 >
                   {displayed.map((rate) => (
                     <Table.Row key={rate.id} className="odd:bg-default-50">
-                    <Table.Cell>{rate.display_name}</Table.Cell>
-                    <Table.Cell>
-                      {rate.description
-                        ? rate.description.substring(0, 50)
-                        : "-"}
-                    </Table.Cell>
-                    <Table.Cell>
-                      {rate.max_weight_g ? `${rate.max_weight_g}g` : "-"}
-                    </Table.Cell>
-                    <Table.Cell>
-                      {rate.price_cents != null && rate.currency_code
-                        ? formatMoney(rate.price_cents, rate.currency_code)
-                        : "-"}
-                    </Table.Cell>
-                    <Table.Cell>
-                      {rate.min_delivery_days || rate.max_delivery_days
-                        ? `${rate.min_delivery_days || "?"}-${rate.max_delivery_days || "?"} days`
-                        : "-"}
-                    </Table.Cell>
-                    <Table.Cell>
-                      <span
-                        className={
-                          rate.status === "active"
-                            ? "text-green-600"
-                            : "text-gray-600"
-                        }
-                      >
-                        {rate.status}
-                      </span>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <div className="flex gap-2">
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="tertiary"
-                          onPress={() => handleOpenEdit(rate)}
+                      <Table.Cell>{rate.display_name}</Table.Cell>
+                      <Table.Cell>
+                        {rate.description
+                          ? rate.description.substring(0, 50)
+                          : "-"}
+                      </Table.Cell>
+                      <Table.Cell>
+                        {rate.max_weight_g ? `${rate.max_weight_g}g` : "-"}
+                      </Table.Cell>
+                      <Table.Cell>
+                        {rate.price_cents != null && rate.currency_code
+                          ? formatMoney(rate.price_cents, rate.currency_code)
+                          : "-"}
+                      </Table.Cell>
+                      <Table.Cell>
+                        {rate.min_delivery_days || rate.max_delivery_days
+                          ? `${rate.min_delivery_days || "?"}-${rate.max_delivery_days || "?"} days`
+                          : "-"}
+                      </Table.Cell>
+                      <Table.Cell>
+                        <span
+                          className={
+                            rate.status === "active"
+                              ? "text-green-600"
+                              : "text-gray-600"
+                          }
                         >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="danger"
-                          onPress={() => handleDelete(rate.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </Table.Cell>
+                          {rate.status}
+                        </span>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <div className="flex gap-2">
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="tertiary"
+                            onPress={() => handleOpenEdit(rate)}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="danger"
+                            onPress={() => handleDelete(rate.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </Table.Cell>
                     </Table.Row>
                   ))}
                 </Table.Body>
@@ -771,10 +761,7 @@ export default function ShippingRatesPage() {
             <h2 className="text-2xl font-bold">
               {t("admin-shipping-classes-title")}
             </h2>
-            <Button
-              variant="primary"
-              onPress={handleOpenCreateClass}
-            >
+            <Button variant="primary" onPress={handleOpenCreateClass}>
               <Plus className="w-4 h-4" />
               {t("admin-shipping-classes-btn-new")}
             </Button>
@@ -788,111 +775,110 @@ export default function ShippingRatesPage() {
                     <Table.Column key="code" isRowHeader>
                       {t("admin-shipping-classes-col-code")}
                     </Table.Column>
-                  <Table.Column key="display_name">
-                    {t("admin-shipping-classes-col-name")}
-                  </Table.Column>
-                  <Table.Column key="resolution">
-                    {t("admin-shipping-classes-col-resolution")}
-                  </Table.Column>
-                  <Table.Column key="description">
-                    {t("admin-shipping-classes-col-description")}
-                  </Table.Column>
-                  <Table.Column key="status">
-                    {t("admin-shipping-classes-col-status")}
-                  </Table.Column>
-                  <Table.Column key="actions">
-                    {t("admin-shipping-classes-col-actions")}
-                  </Table.Column>
-                </Table.Header>
+                    <Table.Column key="display_name">
+                      {t("admin-shipping-classes-col-name")}
+                    </Table.Column>
+                    <Table.Column key="resolution">
+                      {t("admin-shipping-classes-col-resolution")}
+                    </Table.Column>
+                    <Table.Column key="description">
+                      {t("admin-shipping-classes-col-description")}
+                    </Table.Column>
+                    <Table.Column key="status">
+                      {t("admin-shipping-classes-col-status")}
+                    </Table.Column>
+                    <Table.Column key="actions">
+                      {t("admin-shipping-classes-col-actions")}
+                    </Table.Column>
+                  </Table.Header>
                   <Table.Body
-                    renderEmptyState={() => <div>{t("admin-shipping-classes-empty")}</div>}
+                    renderEmptyState={() => (
+                      <div>{t("admin-shipping-classes-empty")}</div>
+                    )}
                   >
                     {shippingClasses.map((cls) => (
                       <Table.Row key={cls.id} className="odd:bg-default-50">
-                      <Table.Cell>
-                        <code className="text-xs bg-default-100 px-2 py-0.5 rounded">
-                          {cls.code}
-                        </code>
-                      </Table.Cell>
-                      <Table.Cell className="font-medium">
-                        {cls.display_name}
-                      </Table.Cell>
-                      <Table.Cell>
-                        <span
-                          className="text-xs px-2 py-1 rounded"
-                          style={{
-                            backgroundColor:
-                              cls.resolution === "exclusive"
-                                ? "#fed7aa"
-                                : "#dbeafe",
-                            color:
-                              cls.resolution === "exclusive"
-                                ? "#92400e"
-                                : "#0c2340",
-                          }}
-                        >
-                          {cls.resolution === "exclusive"
-                            ? t("admin-shipping-classes-exclusive")
-                            : t("admin-shipping-classes-additive")}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell className="text-default-500 text-sm">
-                        {cls.description
-                          ? cls.description.substring(0, 40) +
-                            (cls.description.length > 40 ? "..." : "")
-                          : "—"}
-                      </Table.Cell>
-                      <Table.Cell>
-                        <span
-                          className={
-                            cls.status === "active"
-                              ? "text-green-600 font-medium"
-                              : "text-gray-400"
-                          }
-                        >
-                          {cls.status}
-                        </span>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <div className="flex gap-2">
-                          <Tooltip>
-                            <Tooltip.Trigger>
-                              <Button
-                                isIconOnly
-                                size="sm"
-                                variant="tertiary"
-                                onPress={() => handleOpenEditClass(cls)}
-                              >
-                                <Edit2 className="w-4 h-4" />
-                              </Button>
-                            </Tooltip.Trigger>
-                            <Tooltip.Content>
-                              {t(
-                                "admin-shipping-classes-btn-edit",
-                                "Edit",
-                              )}
-                            </Tooltip.Content>
-                          </Tooltip>
-                          <Tooltip>
-                            <Tooltip.Trigger>
-                              <Button
-                                isIconOnly
-                                size="sm"
-                                variant="danger"
-                                onPress={() => handleDeleteClass(cls.id)}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </Tooltip.Trigger>
-                            <Tooltip.Content>
-                              {t(
-                                "admin-shipping-classes-btn-delete",
-                                "Delete",
-                              )}
-                            </Tooltip.Content>
-                          </Tooltip>
-                        </div>
-                      </Table.Cell>
+                        <Table.Cell>
+                          <code className="text-xs bg-default-100 px-2 py-0.5 rounded">
+                            {cls.code}
+                          </code>
+                        </Table.Cell>
+                        <Table.Cell className="font-medium">
+                          {cls.display_name}
+                        </Table.Cell>
+                        <Table.Cell>
+                          <span
+                            className="text-xs px-2 py-1 rounded"
+                            style={{
+                              backgroundColor:
+                                cls.resolution === "exclusive"
+                                  ? "#fed7aa"
+                                  : "#dbeafe",
+                              color:
+                                cls.resolution === "exclusive"
+                                  ? "#92400e"
+                                  : "#0c2340",
+                            }}
+                          >
+                            {cls.resolution === "exclusive"
+                              ? t("admin-shipping-classes-exclusive")
+                              : t("admin-shipping-classes-additive")}
+                          </span>
+                        </Table.Cell>
+                        <Table.Cell className="text-default-500 text-sm">
+                          {cls.description
+                            ? cls.description.substring(0, 40) +
+                              (cls.description.length > 40 ? "..." : "")
+                            : "—"}
+                        </Table.Cell>
+                        <Table.Cell>
+                          <span
+                            className={
+                              cls.status === "active"
+                                ? "text-green-600 font-medium"
+                                : "text-gray-400"
+                            }
+                          >
+                            {cls.status}
+                          </span>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <div className="flex gap-2">
+                            <Tooltip>
+                              <Tooltip.Trigger>
+                                <Button
+                                  isIconOnly
+                                  size="sm"
+                                  variant="tertiary"
+                                  onPress={() => handleOpenEditClass(cls)}
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </Button>
+                              </Tooltip.Trigger>
+                              <Tooltip.Content>
+                                {t("admin-shipping-classes-btn-edit", "Edit")}
+                              </Tooltip.Content>
+                            </Tooltip>
+                            <Tooltip>
+                              <Tooltip.Trigger>
+                                <Button
+                                  isIconOnly
+                                  size="sm"
+                                  variant="danger"
+                                  onPress={() => handleDeleteClass(cls.id)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </Tooltip.Trigger>
+                              <Tooltip.Content>
+                                {t(
+                                  "admin-shipping-classes-btn-delete",
+                                  "Delete",
+                                )}
+                              </Tooltip.Content>
+                            </Tooltip>
+                          </div>
+                        </Table.Cell>
                       </Table.Row>
                     ))}
                   </Table.Body>
@@ -911,363 +897,410 @@ export default function ShippingRatesPage() {
                 <>
                   <Modal.CloseTrigger onPress={close} />
                   <Modal.Header className="flex flex-col gap-1">
-                      {isEditMode
-                        ? t("admin-shipping-rates-edit")
-                        : t("admin-shipping-rates-create")}
+                    {isEditMode
+                      ? t("admin-shipping-rates-edit")
+                      : t("admin-shipping-rates-create")}
                   </Modal.Header>
                   <Modal.Body>
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <TextField>
-                    <Label>{t("admin-common-name")}</Label>
-                    <Input
-                      placeholder="Standard Shipping"
-                      value={formData.display_name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, display_name: e.target.value })
-                      }
-                    />
-                  </TextField>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t(
-                    "admin-common-name",
-                    "Display name for this shipping rate",
-                  )}
-                </Tooltip.Content>
-              </Tooltip>
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <TextField>
-                    <Label>{t("admin-common-description")}</Label>
-                    <Input
-                      placeholder="Fast delivery option"
-                      value={formData.description}
-                      onChange={(e) =>
-                        setFormData({ ...formData, description: e.target.value })
-                      }
-                    />
-                  </TextField>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t(
-                    "admin-common-description",
-                    "Describe this shipping option",
-                  )}
-                </Tooltip.Content>
-              </Tooltip>
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <TextField>
-                    <Label>{t("admin-shipping-rates-max-weight")}</Label>
-                    <Input
-                      min={0}
-                      placeholder="5000"
-                      type="number"
-                      value={formData.max_weight_g}
-                      onChange={(e) =>
-                        setFormData({ ...formData, max_weight_g: e.target.value })
-                      }
-                    />
-                  </TextField>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t(
-                    "admin-shipping-rates-max-weight-help",
-                    "Maximum package weight for this rate",
-                  )}
-                </Tooltip.Content>
-              </Tooltip>
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <Select
-                    value={formData.shipping_class_id || ""}
-                    onChange={(value) => {
-                      setFormData({ ...formData, shipping_class_id: (value as string) || "" });
-                    }}
-                  >
-                    <Label>Classe d'expédition (optionnel)</Label>
-                    <Select.Trigger>
-                      <Select.Value />
-                      <Select.Indicator />
-                    </Select.Trigger>
-                    <Select.Popover>
-                      <ListBox>
-                        <ListBox.Item id="" textValue="Universel — tous produits standards">
-                          Universel — tous produits standards
-                          <ListBox.ItemIndicator />
-                        </ListBox.Item>
-                        {shippingClasses.map((cls) => (
-                          <ListBox.Item
-                            key={cls.id}
-                            id={cls.id}
-                            textValue={`[${cls.resolution === "exclusive" ? "EXCL" : "ADD"}] ${cls.display_name}`}
-                          >
-                            {`[${cls.resolution === "exclusive" ? "EXCL" : "ADD"}] ${cls.display_name}`}
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                        ))}
-                      </ListBox>
-                    </Select.Popover>
-                  </Select>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t(
-                    "admin-shipping-rates-shipping-class-help",
-                    "Classe d'expédition (laissez vide pour un tarif universel)",
-                  )}
-                </Tooltip.Content>
-              </Tooltip>
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <TextField>
-                    <Label>{t(
-                      "admin-shipping-rates-min-delivery-days",
-                      "Min Delivery Days",
-                    )}</Label>
-                    <Input
-                      min={0}
-                      placeholder="1"
-                      type="number"
-                      value={formData.min_delivery_days}
-                      onChange={(e) =>
-                        setFormData({ ...formData, min_delivery_days: e.target.value })
-                      }
-                    />
-                  </TextField>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t(
-                    "admin-shipping-rates-min-delivery-days-help",
-                    "Minimum days until delivery",
-                  )}
-                </Tooltip.Content>
-              </Tooltip>
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <TextField>
-                    <Label>{t(
-                      "admin-shipping-rates-max-delivery-days",
-                      "Max Delivery Days",
-                    )}</Label>
-                    <Input
-                      min={0}
-                      placeholder="7"
-                      type="number"
-                      value={formData.max_delivery_days}
-                      onChange={(e) =>
-                        setFormData({ ...formData, max_delivery_days: e.target.value })
-                      }
-                    />
-                  </TextField>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t(
-                    "admin-shipping-rates-max-delivery-days-help",
-                    "Maximum days until delivery",
-                  )}
-                </Tooltip.Content>
-              </Tooltip>
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <Select
-                    value={formData.status}
-                    onChange={(value) =>
-                      setFormData({
-                        ...formData,
-                        status: value as "active" | "inactive",
-                      })
-                    }
-                  >
-                    <Label>{t("admin-common-status")}</Label>
-                    <Select.Trigger>
-                      <Select.Value />
-                      <Select.Indicator />
-                    </Select.Trigger>
-                    <Select.Popover>
-                      <ListBox>
-                        {STATUS_OPTIONS.map((opt) => (
-                          <ListBox.Item key={opt} id={opt} textValue={opt}>
-                            {opt}
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                        ))}
-                      </ListBox>
-                    </Select.Popover>
-                  </Select>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t("admin-common-status")}
-                </Tooltip.Content>
-              </Tooltip>
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <Select
-                    value={formData.tax_code || ""}
-                    onChange={(value) => {
-                      setFormData({ ...formData, tax_code: (value as string) || "" });
-                    }}
-                  >
-                    <Label>{t(
-                      "admin-shipping-rates-tax-code",
-                      "Code de taxe (optionnel)",
-                    )}</Label>
-                    <Select.Trigger>
-                      <Select.Value />
-                      <Select.Indicator />
-                    </Select.Trigger>
-                    <Select.Popover>
-                      <ListBox>
-                        <ListBox.Item
-                          id=""
-                          textValue="Aucune taxe spécifique"
-                        >
-                          Aucune taxe spécifique
-                          <ListBox.ItemIndicator />
-                        </ListBox.Item>
-                        {(taxRates as {
-                          tax_code: string | null;
-                          display_name: string;
-                        }[]).map((rate: any) => (
-                          <ListBox.Item
-                            key={rate.tax_code || "null"}
-                            id={rate.tax_code || "null"}
-                            textValue={
-                              rate.tax_code
-                                ? `${resolveTaxName(rate.display_name, i18n.language)} (${rate.tax_code})`
-                                : rate.display_name
+                    <Tooltip>
+                      <Tooltip.Trigger>
+                        <TextField>
+                          <Label>{t("admin-common-name")}</Label>
+                          <Input
+                            placeholder="Standard Shipping"
+                            value={formData.display_name}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                display_name: e.target.value,
+                              })
                             }
-                          >
-                            {rate.tax_code
-                              ? `${resolveTaxName(rate.display_name, i18n.language)} (${rate.tax_code})`
-                              : rate.display_name}
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                        ))}
-                      </ListBox>
-                    </Select.Popover>
-                  </Select>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t(
-                    "admin-shipping-rates-tax-code-help",
-                    "Tax code for this shipping rate (e.g. VAT for Chronopost)",
-                  )}
-                </Tooltip.Content>
-              </Tooltip>
+                          />
+                        </TextField>
+                      </Tooltip.Trigger>
+                      <Tooltip.Content>
+                        {t(
+                          "admin-common-name",
+                          "Display name for this shipping rate",
+                        )}
+                      </Tooltip.Content>
+                    </Tooltip>
+                    <Tooltip>
+                      <Tooltip.Trigger>
+                        <TextField>
+                          <Label>{t("admin-common-description")}</Label>
+                          <Input
+                            placeholder="Fast delivery option"
+                            value={formData.description}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                description: e.target.value,
+                              })
+                            }
+                          />
+                        </TextField>
+                      </Tooltip.Trigger>
+                      <Tooltip.Content>
+                        {t(
+                          "admin-common-description",
+                          "Describe this shipping option",
+                        )}
+                      </Tooltip.Content>
+                    </Tooltip>
+                    <Tooltip>
+                      <Tooltip.Trigger>
+                        <TextField>
+                          <Label>{t("admin-shipping-rates-max-weight")}</Label>
+                          <Input
+                            min={0}
+                            placeholder="5000"
+                            type="number"
+                            value={formData.max_weight_g}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                max_weight_g: e.target.value,
+                              })
+                            }
+                          />
+                        </TextField>
+                      </Tooltip.Trigger>
+                      <Tooltip.Content>
+                        {t(
+                          "admin-shipping-rates-max-weight-help",
+                          "Maximum package weight for this rate",
+                        )}
+                      </Tooltip.Content>
+                    </Tooltip>
+                    <Tooltip>
+                      <Tooltip.Trigger>
+                        <Select
+                          value={formData.shipping_class_id || ""}
+                          onChange={(value) => {
+                            setFormData({
+                              ...formData,
+                              shipping_class_id: (value as string) || "",
+                            });
+                          }}
+                        >
+                          <Label>Classe d'expédition (optionnel)</Label>
+                          <Select.Trigger>
+                            <Select.Value />
+                            <Select.Indicator />
+                          </Select.Trigger>
+                          <Select.Popover>
+                            <ListBox>
+                              <ListBox.Item
+                                id=""
+                                textValue="Universel — tous produits standards"
+                              >
+                                Universel — tous produits standards
+                                <ListBox.ItemIndicator />
+                              </ListBox.Item>
+                              {shippingClasses.map((cls) => (
+                                <ListBox.Item
+                                  key={cls.id}
+                                  id={cls.id}
+                                  textValue={`[${cls.resolution === "exclusive" ? "EXCL" : "ADD"}] ${cls.display_name}`}
+                                >
+                                  {`[${cls.resolution === "exclusive" ? "EXCL" : "ADD"}] ${cls.display_name}`}
+                                  <ListBox.ItemIndicator />
+                                </ListBox.Item>
+                              ))}
+                            </ListBox>
+                          </Select.Popover>
+                        </Select>
+                      </Tooltip.Trigger>
+                      <Tooltip.Content>
+                        {t(
+                          "admin-shipping-rates-shipping-class-help",
+                          "Classe d'expédition (laissez vide pour un tarif universel)",
+                        )}
+                      </Tooltip.Content>
+                    </Tooltip>
+                    <Tooltip>
+                      <Tooltip.Trigger>
+                        <TextField>
+                          <Label>
+                            {t(
+                              "admin-shipping-rates-min-delivery-days",
+                              "Min Delivery Days",
+                            )}
+                          </Label>
+                          <Input
+                            min={0}
+                            placeholder="1"
+                            type="number"
+                            value={formData.min_delivery_days}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                min_delivery_days: e.target.value,
+                              })
+                            }
+                          />
+                        </TextField>
+                      </Tooltip.Trigger>
+                      <Tooltip.Content>
+                        {t(
+                          "admin-shipping-rates-min-delivery-days-help",
+                          "Minimum days until delivery",
+                        )}
+                      </Tooltip.Content>
+                    </Tooltip>
+                    <Tooltip>
+                      <Tooltip.Trigger>
+                        <TextField>
+                          <Label>
+                            {t(
+                              "admin-shipping-rates-max-delivery-days",
+                              "Max Delivery Days",
+                            )}
+                          </Label>
+                          <Input
+                            min={0}
+                            placeholder="7"
+                            type="number"
+                            value={formData.max_delivery_days}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                max_delivery_days: e.target.value,
+                              })
+                            }
+                          />
+                        </TextField>
+                      </Tooltip.Trigger>
+                      <Tooltip.Content>
+                        {t(
+                          "admin-shipping-rates-max-delivery-days-help",
+                          "Maximum days until delivery",
+                        )}
+                      </Tooltip.Content>
+                    </Tooltip>
+                    <Tooltip>
+                      <Tooltip.Trigger>
+                        <Select
+                          value={formData.status}
+                          onChange={(value) =>
+                            setFormData({
+                              ...formData,
+                              status: value as "active" | "inactive",
+                            })
+                          }
+                        >
+                          <Label>{t("admin-common-status")}</Label>
+                          <Select.Trigger>
+                            <Select.Value />
+                            <Select.Indicator />
+                          </Select.Trigger>
+                          <Select.Popover>
+                            <ListBox>
+                              {STATUS_OPTIONS.map((opt) => (
+                                <ListBox.Item
+                                  key={opt}
+                                  id={opt}
+                                  textValue={opt}
+                                >
+                                  {opt}
+                                  <ListBox.ItemIndicator />
+                                </ListBox.Item>
+                              ))}
+                            </ListBox>
+                          </Select.Popover>
+                        </Select>
+                      </Tooltip.Trigger>
+                      <Tooltip.Content>
+                        {t("admin-common-status")}
+                      </Tooltip.Content>
+                    </Tooltip>
+                    <Tooltip>
+                      <Tooltip.Trigger>
+                        <Select
+                          value={formData.tax_code || ""}
+                          onChange={(value) => {
+                            setFormData({
+                              ...formData,
+                              tax_code: (value as string) || "",
+                            });
+                          }}
+                        >
+                          <Label>
+                            {t(
+                              "admin-shipping-rates-tax-code",
+                              "Code de taxe (optionnel)",
+                            )}
+                          </Label>
+                          <Select.Trigger>
+                            <Select.Value />
+                            <Select.Indicator />
+                          </Select.Trigger>
+                          <Select.Popover>
+                            <ListBox>
+                              <ListBox.Item
+                                id=""
+                                textValue="Aucune taxe spécifique"
+                              >
+                                Aucune taxe spécifique
+                                <ListBox.ItemIndicator />
+                              </ListBox.Item>
+                              {(
+                                taxRates as {
+                                  tax_code: string | null;
+                                  display_name: string;
+                                }[]
+                              ).map((rate: any) => (
+                                <ListBox.Item
+                                  key={rate.tax_code || "null"}
+                                  id={rate.tax_code || "null"}
+                                  textValue={
+                                    rate.tax_code
+                                      ? `${resolveTaxName(rate.display_name, i18n.language)} (${rate.tax_code})`
+                                      : rate.display_name
+                                  }
+                                >
+                                  {rate.tax_code
+                                    ? `${resolveTaxName(rate.display_name, i18n.language)} (${rate.tax_code})`
+                                    : rate.display_name}
+                                  <ListBox.ItemIndicator />
+                                </ListBox.Item>
+                              ))}
+                            </ListBox>
+                          </Select.Popover>
+                        </Select>
+                      </Tooltip.Trigger>
+                      <Tooltip.Content>
+                        {t(
+                          "admin-shipping-rates-tax-code-help",
+                          "Tax code for this shipping rate (e.g. VAT for Chronopost)",
+                        )}
+                      </Tooltip.Content>
+                    </Tooltip>
 
-              <div className="flex items-center gap-4 mt-2 mb-4">
-                <Switch
-                  isSelected={formData.tax_inclusive}
-                  onChange={(val) =>
-                    setFormData({ ...formData, tax_inclusive: val })
-                  }
-                >
-                  <Switch.Control>
-                    <Switch.Thumb />
-                  </Switch.Control>
-                  <Switch.Content>
-                    <Label>
-                      {t(
-                        "admin-shipping-rates-tax-inclusive",
-                        "Les prix incluent les taxes",
-                      )}
-                    </Label>
-                  </Switch.Content>
-                </Switch>
-                <Tooltip>
-                  <Tooltip.Trigger>
-                    <div className="text-xs text-default-400 cursor-help underline decoration-dotted">
-                      {t("common-help")}
-                    </div>
-                  </Tooltip.Trigger>
-                  <Tooltip.Content>
-                    {t(
-                      "admin-shipping-rates-tax-inclusive-help",
-                      "Cochez si le tarif de livraison configuré est TTC",
-                    )}
-                  </Tooltip.Content>
-                </Tooltip>
-              </div>
-
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <div className="flex gap-2">
-                    <Select
-                      className="w-32"
-                      value={formData.currency_id || ""}
-                      onChange={(newCurrencyId) => {
-                        const currencyId = (newCurrencyId as string) || "";
-                        console.log("💱 Changing currency to:", currencyId);
-                        console.log("pricesByDivisa:", pricesByDivisa);
-                        console.log(
-                          "💰 Price for this currency:",
-                          pricesByDivisa[currencyId],
-                        );
-
-                        const newPrice =
-                          pricesByDivisa[currencyId] !== undefined
-                            ? (pricesByDivisa[currencyId] / 100).toFixed(2)
-                            : "";
-
-                        console.log("✅ Setting price to:", newPrice);
-
-                        setFormData({
-                          ...formData,
-                          currency_id: currencyId,
-                          price: newPrice,
-                        });
-                      }}
-                    >
-                      <Label>{t("admin-common-currency")}</Label>
-                      <Select.Trigger>
-                        <Select.Value />
-                        <Select.Indicator />
-                      </Select.Trigger>
-                      <Select.Popover>
-                        <ListBox>
-                          {currencies.map((c) => (
-                            <ListBox.Item key={c.id} id={c.id} textValue={c.code}>
-                              {c.code}
-                              <ListBox.ItemIndicator />
-                            </ListBox.Item>
-                          ))}
-                        </ListBox>
-                      </Select.Popover>
-                    </Select>
-                    <TextField className="flex-1">
-                      <Label>{t("admin-shipping-rates-price")}</Label>
-                      <Input
-                        min={0}
-                        placeholder="0.00"
-                        step={0.01}
-                        type="number"
-                        value={formData.price}
-                        onChange={(e) =>
-                          setFormData({ ...formData, price: e.target.value })
+                    <div className="flex items-center gap-4 mt-2 mb-4">
+                      <Switch
+                        isSelected={formData.tax_inclusive}
+                        onChange={(val) =>
+                          setFormData({ ...formData, tax_inclusive: val })
                         }
-                      />
-                    </TextField>
-                  </div>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t(
-                    "admin-shipping-rates-price-help",
-                    "Shipping cost for this rate (in selected currency)",
-                  )}
-                </Tooltip.Content>
-              </Tooltip>
+                      >
+                        <Switch.Control>
+                          <Switch.Thumb />
+                        </Switch.Control>
+                        <Switch.Content>
+                          <Label>
+                            {t(
+                              "admin-shipping-rates-tax-inclusive",
+                              "Les prix incluent les taxes",
+                            )}
+                          </Label>
+                        </Switch.Content>
+                      </Switch>
+                      <Tooltip>
+                        <Tooltip.Trigger>
+                          <div className="text-xs text-default-400 cursor-help underline decoration-dotted">
+                            {t("common-help")}
+                          </div>
+                        </Tooltip.Trigger>
+                        <Tooltip.Content>
+                          {t(
+                            "admin-shipping-rates-tax-inclusive-help",
+                            "Cochez si le tarif de livraison configuré est TTC",
+                          )}
+                        </Tooltip.Content>
+                      </Tooltip>
+                    </div>
+
+                    <Tooltip>
+                      <Tooltip.Trigger>
+                        <div className="flex gap-2">
+                          <Select
+                            className="w-32"
+                            value={formData.currency_id || ""}
+                            onChange={(newCurrencyId) => {
+                              const currencyId =
+                                (newCurrencyId as string) || "";
+
+                              console.log(
+                                "💱 Changing currency to:",
+                                currencyId,
+                              );
+                              console.log("pricesByDivisa:", pricesByDivisa);
+                              console.log(
+                                "💰 Price for this currency:",
+                                pricesByDivisa[currencyId],
+                              );
+
+                              const newPrice =
+                                pricesByDivisa[currencyId] !== undefined
+                                  ? (pricesByDivisa[currencyId] / 100).toFixed(
+                                      2,
+                                    )
+                                  : "";
+
+                              console.log("✅ Setting price to:", newPrice);
+
+                              setFormData({
+                                ...formData,
+                                currency_id: currencyId,
+                                price: newPrice,
+                              });
+                            }}
+                          >
+                            <Label>{t("admin-common-currency")}</Label>
+                            <Select.Trigger>
+                              <Select.Value />
+                              <Select.Indicator />
+                            </Select.Trigger>
+                            <Select.Popover>
+                              <ListBox>
+                                {currencies.map((c) => (
+                                  <ListBox.Item
+                                    key={c.id}
+                                    id={c.id}
+                                    textValue={c.code}
+                                  >
+                                    {c.code}
+                                    <ListBox.ItemIndicator />
+                                  </ListBox.Item>
+                                ))}
+                              </ListBox>
+                            </Select.Popover>
+                          </Select>
+                          <TextField className="flex-1">
+                            <Label>{t("admin-shipping-rates-price")}</Label>
+                            <Input
+                              min={0}
+                              placeholder="0.00"
+                              step={0.01}
+                              type="number"
+                              value={formData.price}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  price: e.target.value,
+                                })
+                              }
+                            />
+                          </TextField>
+                        </div>
+                      </Tooltip.Trigger>
+                      <Tooltip.Content>
+                        {t(
+                          "admin-shipping-rates-price-help",
+                          "Shipping cost for this rate (in selected currency)",
+                        )}
+                      </Tooltip.Content>
+                    </Tooltip>
                   </Modal.Body>
                   <Modal.Footer>
-                    <Button
-                      variant="tertiary"
-                      onPress={close}
-                    >
+                    <Button variant="tertiary" onPress={close}>
                       {t("admin-common-cancel")}
                     </Button>
                     <Button
-                      variant="primary"
                       isDisabled={!formData.display_name}
+                      variant="primary"
                       onPress={handleSave}
                     >
                       {t("admin-common-save")}
@@ -1288,160 +1321,185 @@ export default function ShippingRatesPage() {
                 <>
                   <Modal.CloseTrigger onPress={classClose} />
                   <Modal.Header className="flex flex-col gap-1">
-                      {isClassEditMode
-                        ? t(
-                            "admin-shipping-classes-modal-title-edit",
-                            "Edit Shipping Class",
-                  )
-                        : t(
-                            "admin-shipping-classes-modal-title-create",
-                            "New Shipping Class",
-                          )}
+                    {isClassEditMode
+                      ? t(
+                          "admin-shipping-classes-modal-title-edit",
+                          "Edit Shipping Class",
+                        )
+                      : t(
+                          "admin-shipping-classes-modal-title-create",
+                          "New Shipping Class",
+                        )}
                   </Modal.Header>
                   <Modal.Body className="gap-4">
-              <Tooltip>
-                <Tooltip.Trigger>
-                  <TextField isRequired isDisabled={isClassEditMode}>
-                    <Label>{t("admin-shipping-classes-code")}</Label>
-                    <Input
-                      placeholder={t(
-                        "admin-shipping-classes-code-placeholder",
-                        "e.g., oversized",
-                      )}
-                      value={classFormData.code}
-                      onChange={(e) =>
+                    <Tooltip>
+                      <Tooltip.Trigger>
+                        <TextField isRequired isDisabled={isClassEditMode}>
+                          <Label>{t("admin-shipping-classes-code")}</Label>
+                          <Input
+                            placeholder={t(
+                              "admin-shipping-classes-code-placeholder",
+                              "e.g., oversized",
+                            )}
+                            value={classFormData.code}
+                            onChange={(e) =>
+                              setClassFormData({
+                                ...classFormData,
+                                code: e.target.value.toLowerCase(),
+                              })
+                            }
+                          />
+                        </TextField>
+                      </Tooltip.Trigger>
+                      <Tooltip.Content>
+                        {t(
+                          "admin-shipping-classes-code-help",
+                          "Unique lowercase identifier",
+                        )}
+                      </Tooltip.Content>
+                    </Tooltip>
+                    <TextField isRequired>
+                      <Label>{t("admin-shipping-classes-display-name")}</Label>
+                      <Input
+                        placeholder={t(
+                          "admin-shipping-classes-display-name-placeholder",
+                          "e.g., Oversized Items",
+                        )}
+                        value={classFormData.display_name}
+                        onChange={(e) =>
+                          setClassFormData({
+                            ...classFormData,
+                            display_name: e.target.value,
+                          })
+                        }
+                      />
+                    </TextField>
+                    <TextField>
+                      <Label>
+                        {t(
+                          "admin-shipping-classes-description",
+                          "Description (optional)",
+                        )}
+                      </Label>
+                      <Input
+                        placeholder={t(
+                          "admin-shipping-classes-description-placeholder",
+                          "e.g., For items > 50kg",
+                        )}
+                        value={classFormData.description}
+                        onChange={(e) =>
+                          setClassFormData({
+                            ...classFormData,
+                            description: e.target.value,
+                          })
+                        }
+                      />
+                    </TextField>
+                    <Select
+                      isRequired
+                      value={classFormData.resolution}
+                      onChange={(value) =>
                         setClassFormData({
                           ...classFormData,
-                          code: e.target.value.toLowerCase(),
+                          resolution: value as any,
                         })
                       }
-                    />
-                  </TextField>
-                </Tooltip.Trigger>
-                <Tooltip.Content>
-                  {t(
-                    "admin-shipping-classes-code-help",
-                    "Unique lowercase identifier",
-                  )}
-                </Tooltip.Content>
-              </Tooltip>
-              <TextField isRequired>
-                <Label>{t("admin-shipping-classes-display-name")}</Label>
-                <Input
-                  placeholder={t(
-                    "admin-shipping-classes-display-name-placeholder",
-                    "e.g., Oversized Items",
-                  )}
-                  value={classFormData.display_name}
-                  onChange={(e) =>
-                    setClassFormData({ ...classFormData, display_name: e.target.value })
-                  }
-                />
-              </TextField>
-              <TextField>
-                <Label>{t(
-                  "admin-shipping-classes-description",
-                  "Description (optional)",
-                )}</Label>
-                <Input
-                  placeholder={t(
-                    "admin-shipping-classes-description-placeholder",
-                    "e.g., For items > 50kg",
-                  )}
-                  value={classFormData.description}
-                  onChange={(e) =>
-                    setClassFormData({ ...classFormData, description: e.target.value })
-                  }
-                />
-              </TextField>
-              <Select
-                isRequired
-                value={classFormData.resolution}
-                onChange={(value) =>
-                  setClassFormData({
-                    ...classFormData,
-                    resolution: value as any,
-                  })
-                }
-              >
-                <Label>{t(
-                  "admin-shipping-classes-resolution-mode",
-                  "Resolution Mode",
-                )}</Label>
-                <Select.Trigger>
-                  <Select.Value />
-                  <Select.Indicator />
-                </Select.Trigger>
-                <Select.Popover>
-                  <ListBox>
-                    <ListBox.Item key="exclusive" id="exclusive" textValue={t(
-                      "admin-shipping-classes-resolution-exclusive-label",
-                      "Exclusive — replaces other rates",
-                    )}>
-                      {t(
-                        "admin-shipping-classes-resolution-exclusive-label",
-                        "Exclusive — replaces other rates",
-                      )}
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                    <ListBox.Item key="additive" id="additive" textValue={t(
-                      "admin-shipping-classes-resolution-additive-label",
-                      "Additive — adds to other rates",
-                    )}>
-                      {t(
-                        "admin-shipping-classes-resolution-additive-label",
-                        "Additive — adds to other rates",
-                      )}
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                  </ListBox>
-                </Select.Popover>
-              </Select>
-              {isClassEditMode && (
-                <Select
-                  value={classFormData.status}
-                  onChange={(value) =>
-                    setClassFormData({
-                      ...classFormData,
-                      status: value as any,
-                    })
-                  }
-                >
-                  <Label>{t("admin-shipping-classes-status")}</Label>
-                  <Select.Trigger>
-                    <Select.Value />
-                    <Select.Indicator />
-                  </Select.Trigger>
-                  <Select.Popover>
-                    <ListBox>
-                      <ListBox.Item key="active" id="active" textValue={t("admin-shipping-classes-active")}>
-                        {t("admin-shipping-classes-active")}
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                      <ListBox.Item key="inactive" id="inactive" textValue={t("admin-shipping-classes-inactive")}>
-                        {t("admin-shipping-classes-inactive")}
-                        <ListBox.ItemIndicator />
-                      </ListBox.Item>
-                    </ListBox>
-                  </Select.Popover>
-                </Select>
-              )}
-                </Modal.Body>
-                <Modal.Footer>
-                  <Button
-                    variant="tertiary"
-                    onPress={classClose}
-                  >
-                    {t("admin-shipping-classes-modal-cancel")}
-                  </Button>
-                  <Button
-                    variant="primary"
-                    isDisabled={!classFormData.code || !classFormData.display_name}
-                    onPress={handleSaveClass}
-                  >
-                    {t("admin-shipping-classes-modal-save")}
-                  </Button>
-                </Modal.Footer>
+                    >
+                      <Label>
+                        {t(
+                          "admin-shipping-classes-resolution-mode",
+                          "Resolution Mode",
+                        )}
+                      </Label>
+                      <Select.Trigger>
+                        <Select.Value />
+                        <Select.Indicator />
+                      </Select.Trigger>
+                      <Select.Popover>
+                        <ListBox>
+                          <ListBox.Item
+                            key="exclusive"
+                            id="exclusive"
+                            textValue={t(
+                              "admin-shipping-classes-resolution-exclusive-label",
+                              "Exclusive — replaces other rates",
+                            )}
+                          >
+                            {t(
+                              "admin-shipping-classes-resolution-exclusive-label",
+                              "Exclusive — replaces other rates",
+                            )}
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                          <ListBox.Item
+                            key="additive"
+                            id="additive"
+                            textValue={t(
+                              "admin-shipping-classes-resolution-additive-label",
+                              "Additive — adds to other rates",
+                            )}
+                          >
+                            {t(
+                              "admin-shipping-classes-resolution-additive-label",
+                              "Additive — adds to other rates",
+                            )}
+                            <ListBox.ItemIndicator />
+                          </ListBox.Item>
+                        </ListBox>
+                      </Select.Popover>
+                    </Select>
+                    {isClassEditMode && (
+                      <Select
+                        value={classFormData.status}
+                        onChange={(value) =>
+                          setClassFormData({
+                            ...classFormData,
+                            status: value as any,
+                          })
+                        }
+                      >
+                        <Label>{t("admin-shipping-classes-status")}</Label>
+                        <Select.Trigger>
+                          <Select.Value />
+                          <Select.Indicator />
+                        </Select.Trigger>
+                        <Select.Popover>
+                          <ListBox>
+                            <ListBox.Item
+                              key="active"
+                              id="active"
+                              textValue={t("admin-shipping-classes-active")}
+                            >
+                              {t("admin-shipping-classes-active")}
+                              <ListBox.ItemIndicator />
+                            </ListBox.Item>
+                            <ListBox.Item
+                              key="inactive"
+                              id="inactive"
+                              textValue={t("admin-shipping-classes-inactive")}
+                            >
+                              {t("admin-shipping-classes-inactive")}
+                              <ListBox.ItemIndicator />
+                            </ListBox.Item>
+                          </ListBox>
+                        </Select.Popover>
+                      </Select>
+                    )}
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button variant="tertiary" onPress={classClose}>
+                      {t("admin-shipping-classes-modal-cancel")}
+                    </Button>
+                    <Button
+                      isDisabled={
+                        !classFormData.code || !classFormData.display_name
+                      }
+                      variant="primary"
+                      onPress={handleSaveClass}
+                    >
+                      {t("admin-shipping-classes-modal-save")}
+                    </Button>
+                  </Modal.Footer>
                 </>
               )}
             </Modal.Dialog>

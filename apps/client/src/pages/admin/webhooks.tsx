@@ -293,8 +293,8 @@ export default function WebhooksPage() {
             </button>
             <Button
               className="inline-flex items-center gap-1.5"
-              variant="primary"
               size="sm"
+              variant="primary"
               onPress={() => createModalState.open()}
             >
               <Plus size={16} />
@@ -358,7 +358,7 @@ export default function WebhooksPage() {
                     className="cursor-pointer transition-colors hover:bg-(--bg-hover)"
                     onClick={() => setSelectedWebhook(webhook.id)}
                   >
-                    <td className="px-4 py-4 font-mono text-sm break-all">
+                    <td className="px-4 py-4  text-sm break-all">
                       {webhook.url}
                     </td>
                     <td
@@ -391,11 +391,13 @@ export default function WebhooksPage() {
           <Modal.Backdrop>
             <Modal.Container size="md">
               <Modal.Dialog>
-                <Modal.Header>
-                  {t("admin-webhooks-modal-title")}
-                </Modal.Header>
+                <Modal.Header>{t("admin-webhooks-modal-title")}</Modal.Header>
                 <Modal.Body>
-                  <form className="space-y-4" data-webhook-create onSubmit={handleCreate}>
+                  <form
+                    data-webhook-create
+                    className="space-y-4"
+                    onSubmit={handleCreate}
+                  >
                     <div>
                       <label
                         className="block text-xs font-medium uppercase tracking-wide mb-2"
@@ -405,7 +407,7 @@ export default function WebhooksPage() {
                       </label>
                       <input
                         required
-                        className="w-full px-3 py-2 text-sm font-mono rounded-lg focus:outline-none focus:ring-2"
+                        className="w-full px-3 py-2 text-sm  rounded-lg focus:outline-none focus:ring-2"
                         placeholder="https://your-server.com/webhook"
                         style={{
                           background: "var(--bg-card)",
@@ -441,7 +443,7 @@ export default function WebhooksPage() {
                               onChange={() => toggleEvent(event.value)}
                             />
                             <div>
-                              <p className="text-sm font-mono">{event.label}</p>
+                              <p className="text-sm ">{event.label}</p>
                               <p
                                 className="text-xs"
                                 style={{ color: "var(--text-muted)" }}
@@ -459,12 +461,15 @@ export default function WebhooksPage() {
                         {t("cancel")}
                       </Button>
                       <Button
-                        variant="primary"
                         isDisabled={
                           createMutation.isPending || newEvents.length === 0
                         }
+                        variant="primary"
                         onPress={() => {
-                          const formElement = document.querySelector('form[data-webhook-create]');
+                          const formElement = document.querySelector(
+                            "form[data-webhook-create]",
+                          );
+
                           if (formElement instanceof HTMLFormElement) {
                             formElement.requestSubmit();
                           }
@@ -487,9 +492,7 @@ export default function WebhooksPage() {
           <Modal.Backdrop>
             <Modal.Container size="sm">
               <Modal.Dialog>
-                <Modal.Header>
-                  {t("admin-webhooks-secret-title")}
-                </Modal.Header>
+                <Modal.Header>{t("admin-webhooks-secret-title")}</Modal.Header>
                 <Modal.Body>
                   <div className="space-y-4">
                     <div
@@ -503,7 +506,7 @@ export default function WebhooksPage() {
                         {t("admin-webhooks-secret-savehint")}
                       </p>
                       <div className="flex items-center gap-2">
-                        <code className="flex-1 font-mono text-xs break-all">
+                        <code className="flex-1  text-xs break-all">
                           {newSecret}
                         </code>
                         <button
@@ -520,7 +523,7 @@ export default function WebhooksPage() {
                       </div>
                     </div>
                     <p
-                      className="text-xs font-mono"
+                      className="text-xs "
                       style={{ color: "var(--text-muted)" }}
                     >
                       {t("admin-webhooks-secret-note")}
@@ -544,9 +547,7 @@ export default function WebhooksPage() {
           <Modal.Backdrop>
             <Modal.Container size="lg">
               <Modal.Dialog>
-                <Modal.Header>
-                  {t("admin-webhooks-detail-title")}
-                </Modal.Header>
+                <Modal.Header>{t("admin-webhooks-detail-title")}</Modal.Header>
                 <Modal.Body>
                   {webhookDetail && (
                     <div className="space-y-5">
@@ -561,7 +562,7 @@ export default function WebhooksPage() {
                         >
                           {t("admin-webhooks-field-endpoint")}
                         </h4>
-                        <p className="font-mono text-sm break-all">
+                        <p className=" text-sm break-all">
                           {webhookDetail.url}
                         </p>
                         <div
@@ -575,7 +576,7 @@ export default function WebhooksPage() {
                             {t("status")}
                           </h4>
                           <select
-                            className="px-3 py-2 text-sm font-mono rounded-lg focus:outline-none focus:ring-2"
+                            className="px-3 py-2 text-sm  rounded-lg focus:outline-none focus:ring-2"
                             disabled={updateMutation.isPending}
                             style={{
                               background: "var(--bg-card)",
@@ -611,7 +612,7 @@ export default function WebhooksPage() {
                           {webhookDetail.events.map((event: string) => (
                             <span
                               key={event}
-                              className="px-2 py-1 text-xs font-mono rounded-lg"
+                              className="px-2 py-1 text-xs  rounded-lg"
                               style={{
                                 background: "var(--bg-subtle)",
                                 border: "1px solid var(--border-subtle)",
@@ -636,7 +637,7 @@ export default function WebhooksPage() {
                         </h4>
                         {webhookDetail.recent_deliveries.length === 0 ? (
                           <p
-                            className="text-sm font-mono"
+                            className="text-sm "
                             style={{ color: "var(--text-secondary)" }}
                           >
                             {t("admin-webhooks-no-deliveries")}
@@ -650,7 +651,9 @@ export default function WebhooksPage() {
                                 <div
                                   key={delivery.id}
                                   className="flex items-center justify-between py-2 border-b last:border-0"
-                                  style={{ borderColor: "var(--border-subtle)" }}
+                                  style={{
+                                    borderColor: "var(--border-subtle)",
+                                  }}
                                 >
                                   <div className="flex items-center gap-2">
                                     {delivery.status === "success" && (
@@ -666,15 +669,18 @@ export default function WebhooksPage() {
                                       />
                                     )}
                                     {delivery.status === "pending" && (
-                                      <Clock className="text-amber-500" size={14} />
+                                      <Clock
+                                        className="text-amber-500"
+                                        size={14}
+                                      />
                                     )}
-                                    <span className="font-mono text-sm">
+                                    <span className=" text-sm">
                                       {delivery.event_type}
                                     </span>
                                   </div>
                                   <div className="text-right">
                                     <span
-                                      className="text-xs font-mono"
+                                      className="text-xs "
                                       style={{ color: "var(--text-muted)" }}
                                     >
                                       {delivery.response_code &&
@@ -685,7 +691,7 @@ export default function WebhooksPage() {
                                       })}
                                     </span>
                                     <p
-                                      className="text-xs font-mono"
+                                      className="text-xs "
                                       style={{ color: "var(--text-muted)" }}
                                     >
                                       {new Date(
@@ -706,7 +712,7 @@ export default function WebhooksPage() {
                         style={{ borderColor: "var(--border)" }}
                       >
                         <p
-                          className="text-xs font-mono"
+                          className="text-xs "
                           style={{ color: "var(--text-muted)" }}
                         >
                           {t("admin-webhooks-created")}{" "}

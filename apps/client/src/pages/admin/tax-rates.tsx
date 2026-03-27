@@ -12,7 +12,6 @@ import { Modal } from "@heroui/react";
 import { Card } from "@heroui/react";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
-
 import DefaultLayout from "@/layouts/default";
 import { useSecuredApi } from "@/authentication";
 import { LocalizedTaxNameInput } from "@/components/LocalizedTaxNameInput";
@@ -174,10 +173,7 @@ export default function TaxRatesPage() {
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">{t("admin-tax-rates-title")}</h1>
-          <Button
-            variant="primary"
-            onPress={handleOpenCreate}
-          >
+          <Button variant="primary" onPress={handleOpenCreate}>
             <Plus className="w-4 h-4" />
             {t("admin-tax-rates-add")}
           </Button>
@@ -213,68 +209,70 @@ export default function TaxRatesPage() {
             <Table aria-label="Tax Rates Table">
               <Table.Content>
                 <Table.Header>
-                  <Table.Column isRowHeader>{t("admin-common-name")}</Table.Column>
-                  <Table.Column>{t("admin-tax-rates-country-code")}</Table.Column>
-                <Table.Column>{t("admin-tax-rates-tax-code")}</Table.Column>
-                <Table.Column>{t("admin-tax-rates-rate")}</Table.Column>
-                <Table.Column>{t("admin-common-status")}</Table.Column>
-                <Table.Column width={100}>
-                  {t("admin-common-actions")}
-                </Table.Column>
-              </Table.Header>
-              <Table.Body
-                renderEmptyState={() => t("admin-common-empty")}
-              >
-                {displayed.map((item) => (
-                  <Table.Row key={item.id} className="odd:bg-default-50">
-                    <Table.Cell>
-                      {getTaxNameForLocale(item.display_name, i18n.language)}
-                    </Table.Cell>
-                    <Table.Cell>
-                      {item.country_code || (
-                        <span className="text-gray-400 italic">
-                          {t("admin-tax-rates-fallback")}
+                  <Table.Column isRowHeader>
+                    {t("admin-common-name")}
+                  </Table.Column>
+                  <Table.Column>
+                    {t("admin-tax-rates-country-code")}
+                  </Table.Column>
+                  <Table.Column>{t("admin-tax-rates-tax-code")}</Table.Column>
+                  <Table.Column>{t("admin-tax-rates-rate")}</Table.Column>
+                  <Table.Column>{t("admin-common-status")}</Table.Column>
+                  <Table.Column width={100}>
+                    {t("admin-common-actions")}
+                  </Table.Column>
+                </Table.Header>
+                <Table.Body renderEmptyState={() => t("admin-common-empty")}>
+                  {displayed.map((item) => (
+                    <Table.Row key={item.id} className="odd:bg-default-50">
+                      <Table.Cell>
+                        {getTaxNameForLocale(item.display_name, i18n.language)}
+                      </Table.Cell>
+                      <Table.Cell>
+                        {item.country_code || (
+                          <span className="text-gray-400 italic">
+                            {t("admin-tax-rates-fallback")}
+                          </span>
+                        )}
+                      </Table.Cell>
+                      <Table.Cell>{item.tax_code || "-"}</Table.Cell>
+                      <Table.Cell>{item.rate_percentage}%</Table.Cell>
+                      <Table.Cell>
+                        <span
+                          className={
+                            item.status === "active"
+                              ? "text-green-600 font-semibold"
+                              : "text-gray-400"
+                          }
+                        >
+                          {item.status}
                         </span>
-                      )}
-                    </Table.Cell>
-                    <Table.Cell>{item.tax_code || "-"}</Table.Cell>
-                    <Table.Cell>{item.rate_percentage}%</Table.Cell>
-                    <Table.Cell>
-                      <span
-                        className={
-                          item.status === "active"
-                            ? "text-green-600 font-semibold"
-                            : "text-gray-400"
-                        }
-                      >
-                        {item.status}
-                      </span>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <div className="flex gap-2">
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="tertiary"
-                          onPress={() => handleOpenEdit(item)}
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="danger"
-                          onPress={() => handleDelete(item.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </Table.Cell>
-                  </Table.Row>
-                ))}
-              </Table.Body>
-            </Table.Content>
-          </Table>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <div className="flex gap-2">
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="tertiary"
+                            onPress={() => handleOpenEdit(item)}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="danger"
+                            onPress={() => handleDelete(item.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table.Content>
+            </Table>
           </Card.Content>
         </Card>
 
@@ -298,7 +296,9 @@ export default function TaxRatesPage() {
                           <select
                             className="px-3 py-2 rounded-lg bg-default-100 border border-default-300 text-sm focus:outline-none focus:ring-2"
                             value={selectedLocale}
-                            onChange={(e) => setSelectedLocale(e.target.value || "en-US")}
+                            onChange={(e) =>
+                              setSelectedLocale(e.target.value || "en-US")
+                            }
                           >
                             {availableLanguages.map((lang) => (
                               <option key={lang.code} value={lang.code}>
@@ -346,7 +346,10 @@ export default function TaxRatesPage() {
                               placeholder="txcd_99999999"
                               value={formData.tax_code || ""}
                               onChange={(e) =>
-                                setFormData({ ...formData, tax_code: e.target.value })
+                                setFormData({
+                                  ...formData,
+                                  tax_code: e.target.value,
+                                })
                               }
                             />
                           </TextField>
@@ -360,7 +363,10 @@ export default function TaxRatesPage() {
                             type="number"
                             value={formData.rate_percentage.toString()}
                             onChange={(e) =>
-                              setFormData({ ...formData, rate_percentage: Number(e.target.value) })
+                              setFormData({
+                                ...formData,
+                                rate_percentage: Number(e.target.value),
+                              })
                             }
                           />
                         </TextField>
@@ -392,8 +398,8 @@ export default function TaxRatesPage() {
                         {t("admin-common-cancel")}
                       </Button>
                       <Button
-                        variant="primary"
                         isDisabled={!formData.display_name}
+                        variant="primary"
                         onPress={handleSave}
                       >
                         {t("admin-common-save")}

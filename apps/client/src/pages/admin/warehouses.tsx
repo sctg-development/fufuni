@@ -25,7 +25,6 @@ import { Modal } from "@heroui/react";
 import { Card } from "@heroui/react";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
-
 import DefaultLayout from "@/layouts/default";
 import { useSecuredApi } from "@/authentication";
 
@@ -258,10 +257,7 @@ export default function WarehousesPage() {
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">{t("admin-warehouses-title")}</h1>
-          <Button
-            variant="primary"
-            onPress={handleOpenCreate}
-          >
+          <Button variant="primary" onPress={handleOpenCreate}>
             <Plus className="w-4 h-4" />
             {t("admin-warehouses-add")}
           </Button>
@@ -301,69 +297,69 @@ export default function WarehousesPage() {
                     {t("admin-common-name")}
                   </Table.Column>
                   <Table.Column key="city">
-                  {t("admin-warehouses-city")}
-                </Table.Column>
-                <Table.Column key="country">
-                  {t("admin-common-country")}
-                </Table.Column>
-                <Table.Column key="priority">
-                  {t("admin-warehouses-priority")}
-                </Table.Column>
-                <Table.Column key="status">
-                  {t("admin-common-status")}
-                </Table.Column>
-                <Table.Column key="actions">
-                  {t("admin-common-actions")}
-                </Table.Column>
-              </Table.Header>
+                    {t("admin-warehouses-city")}
+                  </Table.Column>
+                  <Table.Column key="country">
+                    {t("admin-common-country")}
+                  </Table.Column>
+                  <Table.Column key="priority">
+                    {t("admin-warehouses-priority")}
+                  </Table.Column>
+                  <Table.Column key="status">
+                    {t("admin-common-status")}
+                  </Table.Column>
+                  <Table.Column key="actions">
+                    {t("admin-common-actions")}
+                  </Table.Column>
+                </Table.Header>
                 <Table.Body
                   renderEmptyState={() => <div>{t("admin-common-empty")}</div>}
                 >
                   {displayed.map((warehouse) => (
-                  <Table.Row key={warehouse.id} className="odd:bg-default-50">
-                    <Table.Cell>{warehouse.display_name}</Table.Cell>
-                    <Table.Cell>
-                      {warehouse.city}
-                      {warehouse.state ? `, ${warehouse.state}` : ""}
-                    </Table.Cell>
-                    <Table.Cell>{warehouse.country_code}</Table.Cell>
-                    <Table.Cell>
-                      <span className="bg-gray-200 px-2 py-1 rounded">
-                        {warehouse.priority}
-                      </span>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <span
-                        className={
-                          warehouse.status === "active"
-                            ? "text-green-600"
-                            : "text-gray-600"
-                        }
-                      >
-                        {warehouse.status}
-                      </span>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <div className="flex gap-2">
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="tertiary"
-                          onPress={() => handleOpenEdit(warehouse)}
+                    <Table.Row key={warehouse.id} className="odd:bg-default-50">
+                      <Table.Cell>{warehouse.display_name}</Table.Cell>
+                      <Table.Cell>
+                        {warehouse.city}
+                        {warehouse.state ? `, ${warehouse.state}` : ""}
+                      </Table.Cell>
+                      <Table.Cell>{warehouse.country_code}</Table.Cell>
+                      <Table.Cell>
+                        <span className="bg-gray-200 px-2 py-1 rounded">
+                          {warehouse.priority}
+                        </span>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <span
+                          className={
+                            warehouse.status === "active"
+                              ? "text-green-600"
+                              : "text-gray-600"
+                          }
                         >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          isIconOnly
-                          size="sm"
-                          variant="tertiary"
-                          onPress={() => handleDelete(warehouse.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </Table.Cell>
-                  </Table.Row>
+                          {warehouse.status}
+                        </span>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <div className="flex gap-2">
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="tertiary"
+                            onPress={() => handleOpenEdit(warehouse)}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="tertiary"
+                            onPress={() => handleDelete(warehouse.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </Table.Cell>
+                    </Table.Row>
                   ))}
                 </Table.Body>
               </Table.Content>
@@ -391,7 +387,10 @@ export default function WarehousesPage() {
                             placeholder="Main Warehouse"
                             value={formData.display_name}
                             onChange={(e) =>
-                              setFormData({ ...formData, display_name: e.target.value })
+                              setFormData({
+                                ...formData,
+                                display_name: e.target.value,
+                              })
                             }
                           />
                         </TextField>
@@ -402,7 +401,10 @@ export default function WarehousesPage() {
                             placeholder="123 Main Street"
                             value={formData.address_line1}
                             onChange={(e) =>
-                              setFormData({ ...formData, address_line1: e.target.value })
+                              setFormData({
+                                ...formData,
+                                address_line1: e.target.value,
+                              })
                             }
                           />
                         </TextField>
@@ -413,7 +415,10 @@ export default function WarehousesPage() {
                             placeholder="Suite 100"
                             value={formData.address_line2}
                             onChange={(e) =>
-                              setFormData({ ...formData, address_line2: e.target.value })
+                              setFormData({
+                                ...formData,
+                                address_line2: e.target.value,
+                              })
                             }
                           />
                         </TextField>
@@ -435,7 +440,10 @@ export default function WarehousesPage() {
                             placeholder="NY"
                             value={formData.state}
                             onChange={(e) =>
-                              setFormData({ ...formData, state: e.target.value })
+                              setFormData({
+                                ...formData,
+                                state: e.target.value,
+                              })
                             }
                           />
                         </TextField>
@@ -446,7 +454,10 @@ export default function WarehousesPage() {
                             placeholder="10001"
                             value={formData.postal_code}
                             onChange={(e) =>
-                              setFormData({ ...formData, postal_code: e.target.value })
+                              setFormData({
+                                ...formData,
+                                postal_code: e.target.value,
+                              })
                             }
                           />
                         </TextField>
@@ -480,7 +491,10 @@ export default function WarehousesPage() {
                             type="number"
                             value={formData.priority.toString()}
                             onChange={(e) =>
-                              setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })
+                              setFormData({
+                                ...formData,
+                                priority: parseInt(e.target.value) || 0,
+                              })
                             }
                           />
                         </TextField>
@@ -511,8 +525,10 @@ export default function WarehousesPage() {
                         {t("admin-common-cancel")}
                       </Button>
                       <Button
+                        isDisabled={
+                          !formData.display_name || !formData.country_code
+                        }
                         variant="primary"
-                        isDisabled={!formData.display_name || !formData.country_code}
                         onPress={handleSave}
                       >
                         {t("admin-common-save")}

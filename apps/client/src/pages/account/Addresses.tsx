@@ -16,7 +16,8 @@ import {
   Label,
   Select,
   ListBox,
-  Separator} from "@heroui/react";
+  Separator,
+} from "@heroui/react";
 
 import { useAuth } from "../../authentication/providers/use-auth";
 
@@ -201,113 +202,116 @@ export default function Addresses() {
       <Modal state={modalState}>
         <Modal.Backdrop>
           <Modal.Container>
-          <Modal.Dialog>
-            {({ close }) => (
-              <>
-                <Modal.Header>
+            <Modal.Dialog>
+              {({ close }) => (
+                <>
+                  <Modal.Header>
                     {editingAddress
                       ? t("account-edit-address")
                       : t("account-add-address")}
-                </Modal.Header>
-                <Modal.Body className="gap-4">
-            <TextField>
-              <Label>{t("account-name")}</Label>
-              <Input
-                value={formData.name || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-              />
-            </TextField>
-            <TextField>
-              <Label>{t("account-address-line1")}</Label>
-              <Input
-                value={formData.line1 || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, line1: e.target.value })
-                }
-              />
-            </TextField>
-            <TextField>
-              <Label>{t("account-address-line2")}</Label>
-              <Input
-                value={formData.line2 || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, line2: e.target.value })
-                }
-              />
-            </TextField>
-            <TextField>
-              <Label>{t("account-city")}</Label>
-              <Input
-                value={formData.city || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, city: e.target.value })
-                }
-              />
-            </TextField>
-            <TextField>
-              <Label>{t("account-state")}</Label>
-              <Input
-                value={formData.state || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, state: e.target.value })
-                }
-              />
-            </TextField>
-            <TextField>
-              <Label>{t("account-postal-code")}</Label>
-              <Input
-                value={formData.postal_code || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, postal_code: e.target.value })
-                }
-              />
-            </TextField>
-            <Select
-              value={formData.country || "US"}
-              onChange={(value) => {
-                setFormData({ ...formData, country: (value as string) || "US" });
-              }}
-            >
-              <Label>{t("account-country")}</Label>
-              <Select.Trigger>
-                <Select.Value />
-                <Select.Indicator />
-              </Select.Trigger>
-              <Select.Popover>
-                <ListBox>
-                  {countries.map((country) => (
-                    <ListBox.Item
-                      key={country.code}
-                      id={country.code}
-                      textValue={country[localeKey] || country.en_US}
+                  </Modal.Header>
+                  <Modal.Body className="gap-4">
+                    <TextField>
+                      <Label>{t("account-name")}</Label>
+                      <Input
+                        value={formData.name || ""}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
+                        }
+                      />
+                    </TextField>
+                    <TextField>
+                      <Label>{t("account-address-line1")}</Label>
+                      <Input
+                        value={formData.line1 || ""}
+                        onChange={(e) =>
+                          setFormData({ ...formData, line1: e.target.value })
+                        }
+                      />
+                    </TextField>
+                    <TextField>
+                      <Label>{t("account-address-line2")}</Label>
+                      <Input
+                        value={formData.line2 || ""}
+                        onChange={(e) =>
+                          setFormData({ ...formData, line2: e.target.value })
+                        }
+                      />
+                    </TextField>
+                    <TextField>
+                      <Label>{t("account-city")}</Label>
+                      <Input
+                        value={formData.city || ""}
+                        onChange={(e) =>
+                          setFormData({ ...formData, city: e.target.value })
+                        }
+                      />
+                    </TextField>
+                    <TextField>
+                      <Label>{t("account-state")}</Label>
+                      <Input
+                        value={formData.state || ""}
+                        onChange={(e) =>
+                          setFormData({ ...formData, state: e.target.value })
+                        }
+                      />
+                    </TextField>
+                    <TextField>
+                      <Label>{t("account-postal-code")}</Label>
+                      <Input
+                        value={formData.postal_code || ""}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            postal_code: e.target.value,
+                          })
+                        }
+                      />
+                    </TextField>
+                    <Select
+                      value={formData.country || "US"}
+                      onChange={(value) => {
+                        setFormData({
+                          ...formData,
+                          country: (value as string) || "US",
+                        });
+                      }}
                     >
-                      {country[localeKey] || country.en_US}
-                      <ListBox.ItemIndicator />
-                    </ListBox.Item>
-                  ))}
-                </ListBox>
-              </Select.Popover>
-            </Select>
-                </Modal.Body>
-                <Modal.Footer>
-                  <Button
-                    variant="tertiary"
-                    onPress={close}
-                  >
-                    {t("account-cancel")}
-                  </Button>
-                  <Button onPress={handleSaveAddress}>
-                    {t("account-save")}
-                  </Button>
-                </Modal.Footer>
-              </>
-            )}
-          </Modal.Dialog>
-        </Modal.Container>
-      </Modal.Backdrop>
-    </Modal>
+                      <Label>{t("account-country")}</Label>
+                      <Select.Trigger>
+                        <Select.Value />
+                        <Select.Indicator />
+                      </Select.Trigger>
+                      <Select.Popover>
+                        <ListBox>
+                          {countries.map((country) => (
+                            <ListBox.Item
+                              key={country.code}
+                              id={country.code}
+                              textValue={country[localeKey] || country.en_US}
+                            >
+                              {country[localeKey] || country.en_US}
+                              <ListBox.ItemIndicator />
+                            </ListBox.Item>
+                          ))}
+                        </ListBox>
+                      </Select.Popover>
+                    </Select>
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button variant="tertiary" onPress={close}>
+                      {t("account-cancel")}
+                    </Button>
+                    <Button onPress={handleSaveAddress}>
+                      {t("account-save")}
+                    </Button>
+                  </Modal.Footer>
+                </>
+              )}
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
     </div>
   );
 }

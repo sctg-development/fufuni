@@ -100,7 +100,9 @@ export default function Dashboard() {
   if (!profile) {
     return (
       <Card className="border-danger-200 bg-danger-50">
-        <Card.Content className="text-danger-700">{t("account-error")}</Card.Content>
+        <Card.Content className="text-danger-700">
+          {t("account-error")}
+        </Card.Content>
       </Card>
     );
   }
@@ -126,11 +128,7 @@ export default function Dashboard() {
             </div>
           </div>
           <Link to="/account/preferences">
-            <Button
-              className="md:self-start"
-              size="lg"
-              variant="primary"
-            >
+            <Button className="md:self-start" size="lg" variant="primary">
               {t("account-edit")}
             </Button>
           </Link>
@@ -150,7 +148,12 @@ export default function Dashboard() {
                 <p className="text-4xl font-bold text-blue-600 mt-2">
                   {profile.order_count}
                 </p>
-                <Chip className="mt-3" color="accent" size="sm" variant="tertiary">
+                <Chip
+                  className="mt-3"
+                  color="accent"
+                  size="sm"
+                  variant="tertiary"
+                >
                   {t("account-orders-count", { count: profile.order_count })}
                 </Chip>
               </div>
@@ -184,7 +187,6 @@ export default function Dashboard() {
 
         {/* Saved Carts */}
         <Card
-          
           className="bg-linear-to-br from-purple-500/10 to-purple-600/10 border border-purple-200 cursor-pointer hover:border-purple-400 transition-colors"
           onClick={() => setSelectedTab("saved-carts")}
         >
@@ -212,7 +214,6 @@ export default function Dashboard() {
 
         {/* Wishlist */}
         <Card
-          
           className="bg-linear-to-br from-pink-500/10 to-pink-600/10 border border-pink-200 cursor-pointer hover:border-pink-400 transition-colors"
           onClick={() => setSelectedTab("wishlist")}
         >
@@ -225,7 +226,12 @@ export default function Dashboard() {
                 <p className="text-4xl font-bold text-pink-600 mt-2">
                   {wishlist.length}
                 </p>
-                <Chip className="mt-3" color="danger" size="sm" variant="tertiary">
+                <Chip
+                  className="mt-3"
+                  color="danger"
+                  size="sm"
+                  variant="tertiary"
+                >
                   {t("account-wishlist-count", { count: wishlist.length })}
                 </Chip>
               </div>
@@ -244,23 +250,31 @@ export default function Dashboard() {
           >
             <Tabs.ListContainer>
               <Tabs.List className="grid w-full grid-cols-1 md:grid-cols-4">
-                <Tabs.Tab id="overview" className="text-center font-semibold">
+                <Tabs.Tab className="text-center font-semibold" id="overview">
                   {t("account-overview")}
                   <Tabs.Indicator />
                 </Tabs.Tab>
 
-                <Tabs.Tab id="saved-carts" className="text-center font-semibold">
+                <Tabs.Tab
+                  className="text-center font-semibold"
+                  id="saved-carts"
+                >
                   {t("account-saved-carts-tab", { count: savedCartsCount })}
                   <Tabs.Indicator />
                 </Tabs.Tab>
 
-                <Tabs.Tab id="wishlist" className="text-center font-semibold">
+                <Tabs.Tab className="text-center font-semibold" id="wishlist">
                   {t("account-wishlist-tab", { count: wishlist.length })}
                   <Tabs.Indicator />
                 </Tabs.Tab>
 
-                <Tabs.Tab id="recent-orders" className="text-center font-semibold">
-                  {t("account-recent-orders-tab", { count: profile.order_count })}
+                <Tabs.Tab
+                  className="text-center font-semibold"
+                  id="recent-orders"
+                >
+                  {t("account-recent-orders-tab", {
+                    count: profile.order_count,
+                  })}
                   <Tabs.Indicator />
                 </Tabs.Tab>
               </Tabs.List>
@@ -286,10 +300,7 @@ export default function Dashboard() {
                           {t("account-no-orders")}
                         </p>
                         <Link to="/">
-                          <Button
-                            className="mt-4"
-                            variant="primary"
-                          >
+                          <Button className="mt-4" variant="primary">
                             {t("start-shopping")}
                           </Button>
                         </Link>
@@ -311,10 +322,7 @@ export default function Dashboard() {
                           </span>
                         </div>
                         <Link to="/account/orders">
-                          <Button
-                            className="w-full mt-4"
-                            variant="tertiary"
-                          >
+                          <Button className="w-full mt-4" variant="tertiary">
                             {t("account-view-all")}
                           </Button>
                         </Link>
@@ -382,9 +390,7 @@ export default function Dashboard() {
                       {t("account-no-orders")}
                     </p>
                     <Link to="/">
-                      <Button variant="primary">
-                        {t("start-shopping")}
-                      </Button>
+                      <Button variant="primary">{t("start-shopping")}</Button>
                     </Link>
                   </div>
                 ) : (

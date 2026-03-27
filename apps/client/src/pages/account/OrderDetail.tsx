@@ -6,14 +6,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import {
-  Card,
-  Spinner,
-  Button,
-  Chip,
-  Separator,
-  Table,
-} from "@heroui/react";
+import { Card, Spinner, Button, Chip, Separator, Table } from "@heroui/react";
 
 import { useAuth } from "../../authentication/providers/use-auth";
 import { downloadInvoicePdf } from "../../utils/invoice-pdf";
@@ -141,7 +134,10 @@ export default function OrderDetail() {
           {t("account-order")} #{order.number}
         </h1>
         <div className="flex gap-2">
-          <Button variant="tertiary" onPress={() => navigate("/account/orders")}>
+          <Button
+            variant="tertiary"
+            onPress={() => navigate("/account/orders")}
+          >
             {t("account-back")}
           </Button>
           <Button onPress={handleDownloadPDF}>
@@ -156,7 +152,10 @@ export default function OrderDetail() {
           <h2 className="text-lg font-semibold">
             {t("account-order-details")}
           </h2>
-          <Chip color={(STATUS_COLORS[order.status] as any) || "default"} variant="tertiary">
+          <Chip
+            color={(STATUS_COLORS[order.status] as any) || "default"}
+            variant="tertiary"
+          >
             {order.status}
           </Chip>
         </Card.Header>

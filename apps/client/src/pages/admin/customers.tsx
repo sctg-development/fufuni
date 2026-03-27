@@ -149,10 +149,12 @@ export default function CustomersPage() {
     setCustomerOrders(null);
     try {
       const detail = await getJson(`${apiBase}/v1/customers/${c.id}`);
+
       setCustomerDetail(detail);
       const ordersResp = await getJson(
         `${apiBase}/v1/customers/${c.id}/orders?limit=10`,
       );
+
       setCustomerOrders(ordersResp.items || []);
     } catch (err) {
       console.error("Failed to load customer detail/orders", err);
@@ -197,10 +199,10 @@ export default function CustomersPage() {
           <div className="flex items-center gap-2">
             <div className="relative flex flex-1">
               <Input
+                className="pl-8"
                 placeholder={t("search") + "..."}
                 value={globalFilter}
                 onChange={(e) => setGlobalFilter(e.target.value)}
-                className="pl-8"
               />
               <SearchIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 pointer-events-none text-default-400 w-4 h-4" />
             </div>
@@ -214,13 +216,20 @@ export default function CustomersPage() {
           <p>{t("admin-customers-empty")}</p>
         ) : (
           <Table aria-label="Customers">
-            <Table.Content selectionMode="none" aria-label={t("admin-customers-title")}>
+            <Table.Content
+              aria-label={t("admin-customers-title")}
+              selectionMode="none"
+            >
               <Table.Header>
-                <Table.Column isRowHeader>{t("admin-customers-col-name")}</Table.Column>
+                <Table.Column isRowHeader>
+                  {t("admin-customers-col-name")}
+                </Table.Column>
                 <Table.Column>{t("admin-customers-col-email")}</Table.Column>
                 <Table.Column>{t("admin-customers-col-orders")}</Table.Column>
                 <Table.Column>{t("admin-customers-col-spent")}</Table.Column>
-                <Table.Column>{t("admin-customers-col-first-order")}</Table.Column>
+                <Table.Column>
+                  {t("admin-customers-col-first-order")}
+                </Table.Column>
               </Table.Header>
               <Table.Body renderEmptyState={() => ""}>
                 {customers.map((c) => (
@@ -229,27 +238,42 @@ export default function CustomersPage() {
                     className="cursor-pointer hover:bg-default-100 transition-colors"
                   >
                     <Table.Cell>
-                      <div onClick={() => openCustomer(c)} className="block w-full">
+                      <div
+                        className="block w-full"
+                        onClick={() => openCustomer(c)}
+                      >
                         {c.name || "-"}
                       </div>
                     </Table.Cell>
                     <Table.Cell>
-                      <div onClick={() => openCustomer(c)} className="block w-full">
+                      <div
+                        className="block w-full"
+                        onClick={() => openCustomer(c)}
+                      >
                         {c.email}
                       </div>
                     </Table.Cell>
                     <Table.Cell>
-                      <div onClick={() => openCustomer(c)} className="block w-full">
+                      <div
+                        className="block w-full"
+                        onClick={() => openCustomer(c)}
+                      >
                         {c.stats.order_count}
                       </div>
                     </Table.Cell>
                     <Table.Cell>
-                      <div onClick={() => openCustomer(c)} className="block w-full">
+                      <div
+                        className="block w-full"
+                        onClick={() => openCustomer(c)}
+                      >
                         {formatMoney(c.stats.total_spent_cents, "EUR")}
                       </div>
                     </Table.Cell>
                     <Table.Cell>
-                      <div onClick={() => openCustomer(c)} className="block w-full">
+                      <div
+                        className="block w-full"
+                        onClick={() => openCustomer(c)}
+                      >
                         {new Date(c.created_at).toLocaleDateString()}
                       </div>
                     </Table.Cell>
@@ -280,7 +304,9 @@ export default function CustomersPage() {
                 <>
                   <Modal.CloseTrigger onPress={close} />
                   <Modal.Header>
-                    {customerDetail?.name || selectedCustomer?.email || t("customer")}
+                    {customerDetail?.name ||
+                      selectedCustomer?.email ||
+                      t("customer")}
                   </Modal.Header>
                   <Modal.Body>
                     {customerDetail && selectedCustomer ? (
@@ -291,28 +317,34 @@ export default function CustomersPage() {
                             {/* Contact Info */}
                             <Card>
                               <Card.Content className="gap-4">
-                                <h4 className="text-sm font-semibold">Contact Info</h4>
+                                <h4 className="text-sm font-semibold">
+                                  Contact Info
+                                </h4>
                                 <TextField>
                                   <Label>Name</Label>
                                   <Input
                                     defaultValue={customerDetail.name || ""}
                                     placeholder="Customer name"
-                                    onBlur={(e) => updateField("name", e.target.value || "")}
+                                    onBlur={(e) =>
+                                      updateField("name", e.target.value || "")
+                                    }
                                   />
                                 </TextField>
                                 <div>
                                   <Label className="text-xs">Email</Label>
-                                  <div className="mt-1 px-3 py-2 rounded-lg bg-default-100 text-sm font-mono">
+                                  <div className="mt-1 px-3 py-2 rounded-lg bg-default-100 text-sm ">
                                     {customerDetail.email}
                                   </div>
                                 </div>
                                 <TextField>
                                   <Label>Phone</Label>
                                   <Input
-                                    type="tel"
                                     defaultValue={customerDetail.phone || ""}
                                     placeholder="Phone number"
-                                    onBlur={(e) => updateField("phone", e.target.value || "")}
+                                    type="tel"
+                                    onBlur={(e) =>
+                                      updateField("phone", e.target.value || "")
+                                    }
                                   />
                                 </TextField>
                               </Card.Content>
@@ -322,7 +354,9 @@ export default function CustomersPage() {
                             <div className="grid grid-cols-2 gap-3">
                               <Card>
                                 <Card.Content className="items-center justify-center py-4">
-                                  <p className="text-xs text-default-500 uppercase">Orders</p>
+                                  <p className="text-xs text-default-500 uppercase">
+                                    Orders
+                                  </p>
                                   <p className="text-2xl font-bold mt-2">
                                     {customerDetail.stats.order_count}
                                   </p>
@@ -330,75 +364,127 @@ export default function CustomersPage() {
                               </Card>
                               <Card>
                                 <Card.Content className="items-center justify-center py-4">
-                                  <p className="text-xs text-default-500 uppercase">Spent</p>
+                                  <p className="text-xs text-default-500 uppercase">
+                                    Spent
+                                  </p>
                                   <p className="text-xl font-bold mt-2">
-                                    {formatMoney(customerDetail.stats.total_spent_cents, "EUR")}
+                                    {formatMoney(
+                                      customerDetail.stats.total_spent_cents,
+                                      "EUR",
+                                    )}
                                   </p>
                                 </Card.Content>
                               </Card>
                             </div>
 
                             {/* Addresses */}
-                            {customerDetail.addresses && customerDetail.addresses.length > 0 && (
-                              <Card>
-                                <Card.Content className="gap-3">
-                                  <h4 className="text-sm font-semibold">Addresses</h4>
-                                  <div className="space-y-3">
-                                    {customerDetail.addresses.map((addr) => (
-                                      <div key={addr.id} className="space-y-2 pb-3 last:pb-0 border-b last:border-0">
-                                        <div className="flex items-center gap-2">
-                                          {addr.label && (
-                                            <Chip size="sm" color="accent" variant="primary">
-                                              {addr.label}
-                                            </Chip>
-                                          )}
-                                          {addr.is_default && (
-                                            <Chip size="sm" variant="secondary">
-                                              Default
-                                            </Chip>
-                                          )}
+                            {customerDetail.addresses &&
+                              customerDetail.addresses.length > 0 && (
+                                <Card>
+                                  <Card.Content className="gap-3">
+                                    <h4 className="text-sm font-semibold">
+                                      Addresses
+                                    </h4>
+                                    <div className="space-y-3">
+                                      {customerDetail.addresses.map((addr) => (
+                                        <div
+                                          key={addr.id}
+                                          className="space-y-2 pb-3 last:pb-0 border-b last:border-0"
+                                        >
+                                          <div className="flex items-center gap-2">
+                                            {addr.label && (
+                                              <Chip
+                                                color="accent"
+                                                size="sm"
+                                                variant="primary"
+                                              >
+                                                {addr.label}
+                                              </Chip>
+                                            )}
+                                            {addr.is_default && (
+                                              <Chip
+                                                size="sm"
+                                                variant="secondary"
+                                              >
+                                                Default
+                                              </Chip>
+                                            )}
+                                          </div>
+                                          <div className="text-sm space-y-1">
+                                            {addr.name && (
+                                              <p className="font-medium">
+                                                {addr.name}
+                                              </p>
+                                            )}
+                                            {addr.company && (
+                                              <p className="text-default-500">
+                                                {addr.company}
+                                              </p>
+                                            )}
+                                            <p>{addr.line1}</p>
+                                            {addr.line2 && <p>{addr.line2}</p>}
+                                            <p>
+                                              {[
+                                                addr.city,
+                                                addr.state,
+                                                addr.postal_code,
+                                              ]
+                                                .filter(Boolean)
+                                                .join(", ")}
+                                            </p>
+                                            <p>{addr.country}</p>
+                                          </div>
                                         </div>
-                                        <div className="text-sm space-y-1">
-                                          {addr.name && <p className="font-medium">{addr.name}</p>}
-                                          {addr.company && <p className="text-default-500">{addr.company}</p>}
-                                          <p>{addr.line1}</p>
-                                          {addr.line2 && <p>{addr.line2}</p>}
-                                          <p>
-                                            {[addr.city, addr.state, addr.postal_code]
-                                              .filter(Boolean)
-                                              .join(", ")}
-                                          </p>
-                                          <p>{addr.country}</p>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </Card.Content>
-                              </Card>
-                            )}
+                                      ))}
+                                    </div>
+                                  </Card.Content>
+                                </Card>
+                              )}
                           </div>
 
                           {/* Right column - Recent Orders */}
                           <Card>
                             <Card.Content className="gap-4">
-                              <h4 className="text-sm font-semibold">Recent Orders</h4>
+                              <h4 className="text-sm font-semibold">
+                                Recent Orders
+                              </h4>
                               {customerOrders && customerOrders.length > 0 ? (
                                 <div className="space-y-3">
                                   {customerOrders.map((order, idx) => (
-                                    <div key={order.id} className={idx !== customerOrders.length - 1 ? "pb-3 border-b" : ""}>
+                                    <div
+                                      key={order.id}
+                                      className={
+                                        idx !== customerOrders.length - 1
+                                          ? "pb-3 border-b"
+                                          : ""
+                                      }
+                                    >
                                       <div className="flex items-center justify-between">
                                         <div>
-                                          <p className="text-sm font-mono font-medium">{order.number}</p>
+                                          <p className="text-sm  font-medium">
+                                            {order.number}
+                                          </p>
                                           <p className="text-xs text-default-500">
-                                            {new Date(order.created_at).toLocaleDateString()}
+                                            {new Date(
+                                              order.created_at,
+                                            ).toLocaleDateString()}
                                           </p>
                                         </div>
                                         <div className="text-right">
-                                          <p className="text-sm font-mono font-medium">
-                                            {formatMoney(order.amounts.total_cents, "EUR")}
+                                          <p className="text-sm  font-medium">
+                                            {formatMoney(
+                                              order.amounts.total_cents,
+                                              "EUR",
+                                            )}
                                           </p>
-                                          <Chip size="sm" variant="secondary" className="mt-1">
-                                            <span className="text-xs capitalize">{order.status}</span>
+                                          <Chip
+                                            className="mt-1"
+                                            size="sm"
+                                            variant="secondary"
+                                          >
+                                            <span className="text-xs capitalize">
+                                              {order.status}
+                                            </span>
                                           </Chip>
                                         </div>
                                       </div>
@@ -406,7 +492,9 @@ export default function CustomersPage() {
                                   ))}
                                 </div>
                               ) : (
-                                <p className="text-sm text-default-500">No orders yet</p>
+                                <p className="text-sm text-default-500">
+                                  No orders yet
+                                </p>
                               )}
                             </Card.Content>
                           </Card>
@@ -417,11 +505,17 @@ export default function CustomersPage() {
                         {/* Timestamp */}
                         <div className="text-xs text-default-500 space-y-1">
                           <p>
-                            Customer since {new Date(selectedCustomer.created_at).toLocaleString()}
+                            Customer since{" "}
+                            {new Date(
+                              selectedCustomer.created_at,
+                            ).toLocaleString()}
                           </p>
                           {selectedCustomer.stats.last_order_at && (
                             <p>
-                              Last order {new Date(selectedCustomer.stats.last_order_at).toLocaleString()}
+                              Last order{" "}
+                              {new Date(
+                                selectedCustomer.stats.last_order_at,
+                              ).toLocaleString()}
                             </p>
                           )}
                         </div>
@@ -436,6 +530,6 @@ export default function CustomersPage() {
           </Modal.Container>
         </Modal.Backdrop>
       </Modal>
-  </DefaultLayout>
+    </DefaultLayout>
   );
 }
