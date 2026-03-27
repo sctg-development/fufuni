@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { Modal} from "@heroui/react";
+import { Modal, Card, Separator, Label, Button, Chip } from "@heroui/react";
 
 import { formatMoney } from "@/utils/currency";
 import { useSecuredApi } from "@/authentication";
@@ -413,375 +413,321 @@ export default function OrdersPage() {
             }
           }}
         >
-          <Modal.Container>
-            <Modal.Header>
-              {selectedOrder
-                ? `${t("admin-orders-order-prefix")} ${
-                    selectedOrder.number || selectedOrder.id.slice(0, 8)
-                  }`
-                : t("admin-orders-title")}
-            </Modal.Header>
-            <Modal.Body>
-              {selectedOrder && (
-                <div className="space-y-5">
-                  {/* Status Badge */}
-                  <span className="text-sm font-mono">
-                    {selectedOrder.status}
-                  </span>
+          <Modal.Backdrop>
+            <Modal.Container>
+              <Modal.Dialog>
+                {({ close }) => (
+                  <>
+                    <Modal.CloseTrigger onPress={close} />
+                    <Modal.Header>
+                      {selectedOrder
+                        ? `${t("admin-orders-order-prefix")} ${
+                            selectedOrder.number || selectedOrder.id.slice(0, 8)
+                          }`
+                        : t("admin-orders-title")}
+                    </Modal.Header>
+                    <Modal.Body>
+                      {selectedOrder && (
+                        <div className="space-y-5">
+                          {/* Status Badge */}
+                          <Chip size="sm" color="accent" variant="primary">
+                            <span className="text-sm capitalize">{selectedOrder.status}</span>
+                          </Chip>
 
-                  {/* Two column layout */}
-                  <div className="grid grid-cols-2 gap-5">
-                    {/* Left column */}
-                    <div className="space-y-4">
-                      {/* Customer */}
-                      <div
-                        className="p-3 rounded-lg"
-                        style={{ border: "1px solid var(--border)" }}
-                      >
-                        <h4
-                          className="text-xs font-medium uppercase tracking-wide mb-2"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          {t("admin-orders-customer")}
-                        </h4>
-                        {selectedOrder.shipping?.name && (
-                          <p className="font-mono text-sm font-medium">
-                            {selectedOrder.shipping.name}
-                          </p>
-                        )}
-                        <p
-                          className="font-mono text-sm"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          {selectedOrder.customer_email}
-                        </p>
-                        {selectedOrder.shipping?.phone && (
-                          <p
-                            className="font-mono text-sm mt-1"
-                            style={{ color: "var(--text-secondary)" }}
-                          >
-                            {selectedOrder.shipping.phone}
-                          </p>
-                        )}
-                      </div>
+                          {/* Two column layout */}
+                          <div className="grid grid-cols-2 gap-5">
+                            {/* Left column */}
+                            <div className="space-y-4">
+                              {/* Customer */}
+                              <Card>
+                                <Card.Content className="gap-3">
+                                  <h4 className="text-sm font-semibold">{t("admin-orders-customer")}</h4>
+                                  {selectedOrder.shipping?.name && (
+                                    <p className="font-mono text-sm font-medium">
+                                      {selectedOrder.shipping.name}
+                                    </p>
+                                  )}
+                                  <p className="font-mono text-sm text-default-500">
+                                    {selectedOrder.customer_email}
+                                  </p>
+                                  {selectedOrder.shipping?.phone && (
+                                    <p className="font-mono text-sm text-default-500">
+                                      {selectedOrder.shipping.phone}
+                                    </p>
+                                  )}
+                                </Card.Content>
+                              </Card>
 
-                      {/* Shipping Address */}
-                      {selectedOrder.shipping?.address && (
-                        <div
-                          className="p-3 rounded-lg"
-                          style={{ border: "1px solid var(--border)" }}
-                        >
-                          <h4
-                            className="text-xs font-medium uppercase tracking-wide mb-2"
-                            style={{ color: "var(--text-secondary)" }}
-                          >
-                            {t("admin-orders-ship-to")}
-                          </h4>
-                          <div className="font-mono text-sm">
-                            {selectedOrder.shipping.name && (
-                              <p className="font-medium">
-                                {selectedOrder.shipping.name}
-                              </p>
-                            )}
-                            {selectedOrder.shipping.address.line1 && (
-                              <p>{selectedOrder.shipping.address.line1}</p>
-                            )}
-                            {selectedOrder.shipping.address.line2 && (
-                              <p>{selectedOrder.shipping.address.line2}</p>
-                            )}
-                            <p>
-                              {[
-                                selectedOrder.shipping.address.city,
-                                selectedOrder.shipping.address.state,
-                                selectedOrder.shipping.address.postal_code,
-                              ]
-                                .filter(Boolean)
-                                .join(", ")}
-                            </p>
-                            {selectedOrder.shipping.address.country && (
-                              <p>{selectedOrder.shipping.address.country}</p>
-                            )}
-                          </div>
-                        </div>
-                      )}
+                              {/* Shipping Address */}
+                              {selectedOrder.shipping?.address && (
+                                <Card>
+                                  <Card.Content className="gap-3">
+                                    <h4 className="text-sm font-semibold">{t("admin-orders-ship-to")}</h4>
+                                    <div className="font-mono text-sm space-y-1">
+                                      {selectedOrder.shipping.name && (
+                                        <p className="font-medium">
+                                          {selectedOrder.shipping.name}
+                                        </p>
+                                      )}
+                                      {selectedOrder.shipping.address.line1 && (
+                                        <p>{selectedOrder.shipping.address.line1}</p>
+                                      )}
+                                      {selectedOrder.shipping.address.line2 && (
+                                        <p>{selectedOrder.shipping.address.line2}</p>
+                                      )}
+                                      <p>
+                                        {[
+                                          selectedOrder.shipping.address.city,
+                                          selectedOrder.shipping.address.state,
+                                          selectedOrder.shipping.address.postal_code,
+                                        ]
+                                          .filter(Boolean)
+                                          .join(", ")}
+                                      </p>
+                                      {selectedOrder.shipping.address.country && (
+                                        <p>{selectedOrder.shipping.address.country}</p>
+                                      )}
+                                    </div>
+                                  </Card.Content>
+                                </Card>
+                              )}
 
-                      {/* Stripe Info */}
-                      {selectedOrder.stripe?.payment_intent_id && (
-                        <div
-                          className="p-3 rounded-lg"
-                          style={{ border: "1px solid var(--border)" }}
-                        >
-                          <h4
-                            className="text-xs font-medium uppercase tracking-wide mb-2"
-                            style={{ color: "var(--text-secondary)" }}
-                          >
-                            {t("admin-orders-stripe")}
-                          </h4>
-                          <p
-                            className="text-xs font-mono break-all"
-                            style={{ color: "var(--text-muted)" }}
-                          >
-                            {t("admin-orders-stripe-prefix")}{" "}
-                            {selectedOrder.stripe.payment_intent_id}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Right column */}
-                    <div className="space-y-4">
-                      {/* Items */}
-                      <div
-                        className="p-3 rounded-lg"
-                        style={{ border: "1px solid var(--border)" }}
-                      >
-                        <h4
-                          className="text-xs font-medium uppercase tracking-wide mb-2"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          {t("admin-orders-items")}
-                        </h4>
-                        <div className="space-y-2">
-                          {selectedOrder.items.map((item, i) => (
-                            <div
-                              key={i}
-                              className="flex items-center justify-between text-sm"
-                            >
-                              <div>
-                                <p className="font-mono">{item.title}</p>
-                                <p
-                                  className="text-xs font-mono"
-                                  style={{ color: "var(--text-muted)" }}
-                                >
-                                  {item.sku} × {item.qty}
-                                </p>
-                              </div>
-                              <p className="font-mono">
-                                {formatCurrency(
-                                  item.unit_price_cents * item.qty,
-                                  selectedOrder.amounts.currency ||
-                                    selectedOrder.currency ||
-                                    "USD",
-                                )}
-                              </p>
+                              {/* Stripe Info */}
+                              {selectedOrder.stripe?.payment_intent_id && (
+                                <Card>
+                                  <Card.Content className="gap-2">
+                                    <h4 className="text-sm font-semibold">{t("admin-orders-stripe")}</h4>
+                                    <p className="text-xs font-mono break-all text-default-500">
+                                      {t("admin-orders-stripe-prefix")}{" "}
+                                      {selectedOrder.stripe.payment_intent_id}
+                                    </p>
+                                  </Card.Content>
+                                </Card>
+                              )}
                             </div>
-                          ))}
+
+                            {/* Right column */}
+                            <div className="space-y-4">
+                              {/* Items */}
+                              <Card>
+                                <Card.Content className="gap-3">
+                                  <h4 className="text-sm font-semibold">{t("admin-orders-items")}</h4>
+                                  <div className="space-y-2">
+                                    {selectedOrder.items.map((item, i) => (
+                                      <div
+                                        key={i}
+                                        className="flex items-center justify-between text-sm pb-2 border-b last:pb-0 last:border-0"
+                                      >
+                                        <div>
+                                          <p className="font-mono">{item.title}</p>
+                                          <p className="text-xs font-mono text-default-500">
+                                            {item.sku} × {item.qty}
+                                          </p>
+                                        </div>
+                                        <p className="font-mono">
+                                          {formatCurrency(
+                                            item.unit_price_cents * item.qty,
+                                            selectedOrder.amounts.currency ||
+                                              selectedOrder.currency ||
+                                              "USD",
+                                          )}
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </Card.Content>
+                              </Card>
+
+                              {/* Summary */}
+                              <Card>
+                                <Card.Content className="gap-1">
+                                  <div className="space-y-1 text-sm font-mono">
+                                    <div className="flex justify-between">
+                                      <span className="text-default-500">
+                                        {t("admin-orders-subtotal")}
+                                      </span>
+                                      <span>
+                                        {formatCurrency(
+                                          selectedOrder.amounts.subtotal_cents || 0,
+                                          selectedOrder.amounts.currency ||
+                                            selectedOrder.currency ||
+                                            "USD",
+                                        )}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-default-500">
+                                        {t("admin-orders-tax")}
+                                      </span>
+                                      <span>
+                                        {formatCurrency(
+                                          selectedOrder.amounts.tax_cents || 0,
+                                          selectedOrder.amounts.currency ||
+                                            selectedOrder.currency ||
+                                            "USD",
+                                        )}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-default-500">
+                                        {t("admin-orders-shipping")}
+                                      </span>
+                                      <span>
+                                        {formatCurrency(
+                                          selectedOrder.amounts.shipping_cents || 0,
+                                          selectedOrder.amounts.currency ||
+                                            selectedOrder.currency ||
+                                            "USD",
+                                        )}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between pt-2 mt-2 border-t font-semibold">
+                                      <span>{t("admin-orders-total")}</span>
+                                      <span>
+                                        {formatCurrency(
+                                          selectedOrder.amounts.total_cents,
+                                          selectedOrder.amounts.currency ||
+                                            selectedOrder.currency ||
+                                            "USD",
+                                        )}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </Card.Content>
+                              </Card>
+                            </div>
+                          </div>
+
+                          <Separator />
+
+                          {/* Status & Tracking */}
+                          <div className="grid grid-cols-2 gap-5">
+                            {/* Status Update */}
+                            <div>
+                              <Label>{t("admin-orders-status")}</Label>
+                              <select
+                                className="w-full px-3 py-2 mt-2 font-mono text-sm rounded-lg bg-default-100 border border-default-300 focus:outline-none focus:ring-2"
+                                disabled={updateMutation.isPending}
+                                value={selectedOrder.status}
+                                onChange={(e) => {
+                                  const newStatus = e.target.value;
+                                  console.log("select status", newStatus);
+                                  setSelectedOrder((o) =>
+                                    o ? { ...o, status: newStatus } : o,
+                                  );
+                                  updateMutation.mutate({
+                                    id: selectedOrder.id,
+                                    data: { status: newStatus },
+                                  });
+                                }}
+                              >
+                                {ORDER_STATUSES.map((s) => (
+                                  <option key={s} value={s}>
+                                    {s}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            {/* Tracking */}
+                            <div>
+                              <Label className="flex items-center gap-2">
+                                <Truck size={14} />
+                                {t("admin-orders-tracking")}
+                              </Label>
+                              <input
+                                className="w-full px-3 py-2 mt-2 font-mono text-sm rounded-lg bg-default-100 border border-default-300 focus:outline-none focus:ring-2"
+                                defaultValue={selectedOrder.tracking?.number || ""}
+                                placeholder={t("admin-orders-tracking-placeholder")}
+                                type="text"
+                                onBlur={(e) => {
+                                  if (
+                                    e.target.value !==
+                                    (selectedOrder.tracking?.number || "")
+                                  ) {
+                                    updateMutation.mutate({
+                                      id: selectedOrder.id,
+                                      data: { tracking_number: e.target.value },
+                                    });
+                                  }
+                                }}
+                              />
+                              {selectedOrder.tracking?.url && (
+                                <a
+                                  className="inline-flex items-center gap-1 text-sm mt-2 hover:underline text-accent"
+                                  href={selectedOrder.tracking.url}
+                                  rel="noopener noreferrer"
+                                  target="_blank"
+                                >
+                                  <ExternalLink size={14} />
+                                  {t("admin-orders-track-package")}
+                                </a>
+                              )}
+                            </div>
+                          </div>
+
+                          <Separator />
+
+                          {/* Footer: Timestamp + Refund */}
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs font-mono text-default-500">
+                              {t("admin-orders-created")}{" "}
+                              {new Date(selectedOrder.created_at).toLocaleString()}
+                            </p>
+                            <div className="flex items-center gap-3">
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                isDisabled={resendConfirmationMutation.isPending}
+                                onPress={() => {
+                                  resendConfirmationMutation.mutate(selectedOrder.id);
+                                }}
+                              >
+                                {resendConfirmationMutation.isPending
+                                  ? t("admin-orders-resend-sending")
+                                  : t("admin-orders-btn-resend-confirmation")}
+                              </Button>
+
+                              <Button
+                                size="sm"
+                                variant="tertiary"
+                                isDisabled={regenerateLinkMutation.isPending}
+                                onPress={() => {
+                                  regenerateLinkMutation.mutate(selectedOrder.id);
+                                }}
+                              >
+                                {regenerateLinkMutation.isPending
+                                  ? t("admin-orders-regenerating")
+                                  : t("admin-orders-btn-regenerate-link")}
+                              </Button>
+
+                              {selectedOrder.status === "paid" &&
+                                selectedOrder.stripe?.payment_intent_id && (
+                                  <Button
+                                    size="sm"
+                                    variant="danger"
+                                    isDisabled={refundMutation.isPending}
+                                    onPress={() => {
+                                      if (confirm(t("admin-orders-confirm-refund"))) {
+                                        refundMutation.mutate(selectedOrder.id);
+                                      }
+                                    }}
+                                  >
+                                    {refundMutation.isPending
+                                      ? t("admin-orders-refunding")
+                                      : t("admin-orders-btn-refund")}
+                                  </Button>
+                                )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-
-                      {/* Summary */}
-                      <div
-                        className="p-3 rounded-lg"
-                        style={{ border: "1px solid var(--border)" }}
-                      >
-                        <div className="space-y-1 text-sm font-mono">
-                          <div className="flex justify-between">
-                            <span style={{ color: "var(--text-secondary)" }}>
-                              {t("admin-orders-subtotal")}
-                            </span>
-                            <span>
-                              {formatCurrency(
-                                selectedOrder.amounts.subtotal_cents || 0,
-                                selectedOrder.amounts.currency ||
-                                  selectedOrder.currency ||
-                                  "USD",
-                              )}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span style={{ color: "var(--text-secondary)" }}>
-                              {t("admin-orders-tax")}
-                            </span>
-                            <span>
-                              {formatCurrency(
-                                selectedOrder.amounts.tax_cents || 0,
-                                selectedOrder.amounts.currency ||
-                                  selectedOrder.currency ||
-                                  "USD",
-                              )}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span style={{ color: "var(--text-secondary)" }}>
-                              {t("admin-orders-shipping")}
-                            </span>
-                            <span>
-                              {formatCurrency(
-                                selectedOrder.amounts.shipping_cents || 0,
-                                selectedOrder.amounts.currency ||
-                                  selectedOrder.currency ||
-                                  "USD",
-                              )}
-                            </span>
-                          </div>
-                          <div
-                            className="flex justify-between pt-2 mt-2 border-t font-semibold"
-                            style={{ borderColor: "var(--border)" }}
-                          >
-                            <span>{t("admin-orders-total")}</span>
-                            <span>
-                              {formatCurrency(
-                                selectedOrder.amounts.total_cents,
-                                selectedOrder.amounts.currency ||
-                                  selectedOrder.currency ||
-                                  "USD",
-                              )}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Status & Tracking */}
-                  <div
-                    className="grid grid-cols-2 gap-5 pt-4 border-t"
-                    style={{ borderColor: "var(--border)" }}
-                  >
-                    {/* Status Update */}
-                    <div>
-                      <h4
-                        className="text-xs font-medium uppercase tracking-wide mb-2"
-                        style={{ color: "var(--text-secondary)" }}
-                      >
-                        {t("admin-orders-status")}
-                      </h4>
-                      <select
-                        className="w-full px-3 py-2 font-mono text-sm rounded-lg focus:outline-none focus:ring-2"
-                        disabled={updateMutation.isPending}
-                        style={{
-                          background: "var(--bg-card)",
-                          border: "1px solid var(--border)",
-                          color: "var(--text)",
-                        }}
-                        value={selectedOrder.status}
-                        onChange={(e) => {
-                          const newStatus = e.target.value;
-
-                          console.log("select status", newStatus);
-                          // optimistically update
-                          setSelectedOrder((o) =>
-                            o ? { ...o, status: newStatus } : o,
-                          );
-                          updateMutation.mutate({
-                            id: selectedOrder.id,
-                            data: { status: newStatus },
-                          });
-                        }}
-                      >
-                        {ORDER_STATUSES.map((s) => (
-                          <option key={s} value={s}>
-                            {s}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Tracking */}
-                    <div>
-                      <h4
-                        className="text-xs font-medium uppercase tracking-wide mb-2 flex items-center gap-2"
-                        style={{ color: "var(--text-secondary)" }}
-                      >
-                        <Truck size={14} />
-                        {t("admin-orders-tracking")}
-                      </h4>
-                      <input
-                        className="w-full px-3 py-2 font-mono text-sm rounded-lg focus:outline-none focus:ring-2"
-                        defaultValue={selectedOrder.tracking?.number || ""}
-                        placeholder={t("admin-orders-tracking-placeholder")}
-                        style={{
-                          background: "var(--bg-card)",
-                          border: "1px solid var(--border)",
-                          color: "var(--text)",
-                        }}
-                        type="text"
-                        onBlur={(e) => {
-                          if (
-                            e.target.value !==
-                            (selectedOrder.tracking?.number || "")
-                          ) {
-                            updateMutation.mutate({
-                              id: selectedOrder.id,
-                              data: { tracking_number: e.target.value },
-                            });
-                          }
-                        }}
-                      />
-                      {selectedOrder.tracking?.url && (
-                        <a
-                          className="inline-flex items-center gap-1 text-sm mt-2 hover:underline"
-                          href={selectedOrder.tracking.url}
-                          rel="noopener noreferrer"
-                          style={{ color: "var(--accent)" }}
-                          target="_blank"
-                        >
-                          <ExternalLink size={14} />
-                          {t("admin-orders-track-package")}
-                        </a>
                       )}
-                    </div>
-                  </div>
-
-                  {/* Footer: Timestamp + Refund */}
-                  <div
-                    className="flex items-center justify-between pt-4 border-t"
-                    style={{ borderColor: "var(--border)" }}
-                  >
-                    <p
-                      className="text-xs font-mono"
-                      style={{ color: "var(--text-muted)" }}
-                    >
-                      {t("admin-orders-created")}{" "}
-                      {new Date(selectedOrder.created_at).toLocaleString()}
-                    </p>
-                    <div className="flex items-center gap-3">
-                      <button
-                        className="text-sm font-medium text-blue-500 hover:text-blue-600 disabled:opacity-50"
-                        disabled={resendConfirmationMutation.isPending}
-                        onClick={() => {
-                          resendConfirmationMutation.mutate(selectedOrder.id);
-                        }}
-                      >
-                        {resendConfirmationMutation.isPending
-                          ? t("admin-orders-resend-sending")
-                          : t("admin-orders-btn-resend-confirmation")}
-                      </button>
-
-                      <button
-                        className="text-sm font-medium text-indigo-500 hover:text-indigo-600 disabled:opacity-50"
-                        disabled={regenerateLinkMutation.isPending}
-                        onClick={() => {
-                          regenerateLinkMutation.mutate(selectedOrder.id);
-                        }}
-                      >
-                        {regenerateLinkMutation.isPending
-                          ? t("admin-orders-regenerating")
-                          : t("admin-orders-btn-regenerate-link")}
-                      </button>
-
-                      {selectedOrder.status === "paid" &&
-                        selectedOrder.stripe?.payment_intent_id && (
-                          <button
-                            className="text-sm font-medium text-red-500 hover:text-red-600 disabled:opacity-50"
-                            disabled={refundMutation.isPending}
-                            onClick={() => {
-                              if (confirm(t("admin-orders-confirm-refund"))) {
-                                refundMutation.mutate(selectedOrder.id);
-                              }
-                            }}
-                          >
-                            {refundMutation.isPending
-                              ? t("admin-orders-refunding")
-                              : t("admin-orders-btn-refund")}
-                          </button>
-                        )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </Modal.Body>
-          </Modal.Container>
+                    </Modal.Body>
+                  </>
+                )}
+              </Modal.Dialog>
+            </Modal.Container>
+          </Modal.Backdrop>
         </Modal>
       </div>
     </DefaultLayout>

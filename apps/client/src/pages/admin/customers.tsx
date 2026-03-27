@@ -21,7 +21,12 @@ import { useTranslation } from "react-i18next";
 import {
   Input,
   Table,
-  Modal
+  Modal,
+  Card,
+  Separator,
+  Label,
+  TextField,
+  Chip,
 } from "@heroui/react";
 
 import DefaultLayout from "@/layouts/default";
@@ -98,6 +103,7 @@ export default function CustomersPage() {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null,
   );
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [customerDetail, setCustomerDetail] = useState<
     (Customer & { addresses: Address[] }) | null
   >(null);
@@ -138,16 +144,15 @@ export default function CustomersPage() {
    */
   const openCustomer = async (c: Customer) => {
     setSelectedCustomer(c);
+    setIsModalOpen(true);
     setCustomerDetail(null);
     setCustomerOrders(null);
     try {
       const detail = await getJson(`${apiBase}/v1/customers/${c.id}`);
-
       setCustomerDetail(detail);
       const ordersResp = await getJson(
         `${apiBase}/v1/customers/${c.id}/orders?limit=10`,
       );
-
       setCustomerOrders(ordersResp.items || []);
     } catch (err) {
       console.error("Failed to load customer detail/orders", err);
@@ -209,33 +214,48 @@ export default function CustomersPage() {
           <p>{t("admin-customers-empty")}</p>
         ) : (
           <Table aria-label="Customers">
-            <Table.Content selectionMode="none">
+            <Table.Content selectionMode="none" aria-label={t("admin-customers-title")}>
               <Table.Header>
-                <Table.Column>{t("admin-customers-col-name")}</Table.Column>
+                <Table.Column isRowHeader>{t("admin-customers-col-name")}</Table.Column>
                 <Table.Column>{t("admin-customers-col-email")}</Table.Column>
                 <Table.Column>{t("admin-customers-col-orders")}</Table.Column>
                 <Table.Column>{t("admin-customers-col-spent")}</Table.Column>
                 <Table.Column>{t("admin-customers-col-first-order")}</Table.Column>
               </Table.Header>
               <Table.Body renderEmptyState={() => ""}>
-              {customers.map((c) => (
-                <Table.Row
-                  key={c.id}
-                  className="cursor-pointer"
-                  onClick={() => openCustomer(c)}
-                >
-                  <Table.Cell>{c.name || "-"}</Table.Cell>
-                  <Table.Cell>{c.email}</Table.Cell>
-                  <Table.Cell>{c.stats.order_count}</Table.Cell>
-                  <Table.Cell>
-                    {formatMoney(c.stats.total_spent_cents, "EUR")}
-                  </Table.Cell>
-                  <Table.Cell>
-                    {new Date(c.created_at).toLocaleDateString()}
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
+                {customers.map((c) => (
+                  <Table.Row
+                    key={c.id}
+                    className="cursor-pointer hover:bg-default-100 transition-colors"
+                  >
+                    <Table.Cell>
+                      <div onClick={() => openCustomer(c)} className="block w-full">
+                        {c.name || "-"}
+                      </div>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <div onClick={() => openCustomer(c)} className="block w-full">
+                        {c.email}
+                      </div>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <div onClick={() => openCustomer(c)} className="block w-full">
+                        {c.stats.order_count}
+                      </div>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <div onClick={() => openCustomer(c)} className="block w-full">
+                        {formatMoney(c.stats.total_spent_cents, "EUR")}
+                      </div>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <div onClick={() => openCustomer(c)} className="block w-full">
+                        {new Date(c.created_at).toLocaleDateString()}
+                      </div>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
             </Table.Content>
           </Table>
         )}
@@ -243,285 +263,179 @@ export default function CustomersPage() {
 
       {/* customer detail modal */}
       <Modal
-        isOpen={!!selectedCustomer}
+        isOpen={isModalOpen}
         onOpenChange={(open) => {
+          setIsModalOpen(open);
           if (!open) {
             setSelectedCustomer(null);
+            setCustomerDetail(null);
+            setCustomerOrders(null);
           }
         }}
       >
         <Modal.Backdrop>
           <Modal.Container>
-          <Modal.Header>
-            {customerDetail?.name || selectedCustomer?.email || t("customer")}
-          </Modal.Header>
-          <Modal.Body>
-            {customerDetail && selectedCustomer ? (
-              <div className="space-y-5">
-                {/* Contact / Stats / Addresses / Orders copied roughly from merchant */}
-                <div className="grid grid-cols-2 gap-5">
-                  <div className="space-y-4">
-                    {/* Contact Info */}
-                    <div
-                      className="p-3 rounded-lg space-y-3"
-                      style={{ border: "1px solid var(--border)" }}
-                    >
-                      <h4
-                        className="text-xs font-medium uppercase tracking-wide"
-                        style={{ color: "var(--text-secondary)" }}
-                      >
-                        Contact
-                      </h4>
-                      <div className="space-y-3">
-                        <div>
-                          <label
-                            className="block text-xs font-medium uppercase tracking-wide mb-1.5"
-                            style={{ color: "var(--text-secondary)" }}
-                          >
-                            Name
-                          </label>
-                          <input
-                            className="w-full px-3 py-2 font-mono text-sm rounded-lg focus:outline-none focus:ring-2"
-                            defaultValue={customerDetail.name || ""}
-                            placeholder="Customer name"
-                            style={{
-                              background: "var(--bg-card)",
-                              border: "1px solid var(--border)",
-                              color: "var(--text)",
-                            }}
-                            type="text"
-                            onBlur={(e) =>
-                              updateField("name", e.target.value || "")
-                            }
-                          />
-                        </div>
-                        <div>
-                          <label
-                            className="block text-xs font-medium uppercase tracking-wide mb-1.5"
-                            style={{ color: "var(--text-secondary)" }}
-                          >
-                            Email
-                          </label>
-                          <div
-                            className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg"
-                            style={{
-                              background: "var(--bg-subtle)",
-                              border: "1px solid var(--border-subtle)",
-                            }}
-                          >
-                            <span
-                              className="font-mono"
-                              style={{ color: "var(--accent)" }}
-                            >
-                              {customerDetail.email}
-                            </span>
-                          </div>
-                        </div>
-                        <div>
-                          <label
-                            className="block text-xs font-medium uppercase tracking-wide mb-1.5"
-                            style={{ color: "var(--text-secondary)" }}
-                          >
-                            Phone
-                          </label>
-                          <input
-                            className="w-full px-3 py-2 font-mono text-sm rounded-lg focus:outline-none focus:ring-2"
-                            defaultValue={customerDetail.phone || ""}
-                            placeholder="Phone number"
-                            style={{
-                              background: "var(--bg-card)",
-                              border: "1px solid var(--border)",
-                              color: "var(--text)",
-                            }}
-                            type="tel"
-                            onBlur={(e) =>
-                              updateField("phone", e.target.value || "")
-                            }
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Stats */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div
-                        className="p-3 rounded-lg"
-                        style={{ border: "1px solid var(--border)" }}
-                      >
-                        <p
-                          className="text-xs uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          Orders
-                        </p>
-                        <p className="text-xl font-semibold font-mono mt-1">
-                          {customerDetail.stats.order_count}
-                        </p>
-                      </div>
-                      <div
-                        className="p-3 rounded-lg"
-                        style={{ border: "1px solid var(--border)" }}
-                      >
-                        <p
-                          className="text-xs uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          Spent
-                        </p>
-                        <p className="text-xl font-semibold font-mono mt-1">
-                          {formatMoney(
-                            customerDetail.stats.total_spent_cents,
-                            "EUR",
-                          )}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Addresses */}
-                    {customerDetail.addresses &&
-                      customerDetail.addresses.length > 0 && (
-                        <div
-                          className="p-3 rounded-lg"
-                          style={{ border: "1px solid var(--border)" }}
-                        >
-                          <h4
-                            className="text-xs font-medium uppercase tracking-wide mb-2 flex items-center gap-2"
-                            style={{ color: "var(--text-secondary)" }}
-                          >
-                            Addresses
-                          </h4>
-                          <div className="space-y-3">
-                            {customerDetail.addresses.map((addr) => (
-                              <div key={addr.id} className="font-mono text-sm">
-                                <div className="flex items-center gap-2 mb-1">
-                                  {addr.label && (
-                                    <span
-                                      className="text-xs px-1.5 py-0.5 rounded font-sans"
-                                      style={{
-                                        background: "var(--accent)",
-                                        color: "white",
-                                      }}
-                                    >
-                                      {addr.label}
-                                    </span>
-                                  )}
-                                  {addr.is_default && (
-                                    <span
-                                      className="text-xs font-sans"
-                                      style={{ color: "var(--text-muted)" }}
-                                    >
-                                      Default
-                                    </span>
-                                  )}
+            <Modal.Dialog>
+              {({ close }) => (
+                <>
+                  <Modal.CloseTrigger onPress={close} />
+                  <Modal.Header>
+                    {customerDetail?.name || selectedCustomer?.email || t("customer")}
+                  </Modal.Header>
+                  <Modal.Body>
+                    {customerDetail && selectedCustomer ? (
+                      <div className="space-y-5">
+                        <div className="grid grid-cols-2 gap-5">
+                          {/* Left column */}
+                          <div className="space-y-4">
+                            {/* Contact Info */}
+                            <Card>
+                              <Card.Content className="gap-4">
+                                <h4 className="text-sm font-semibold">Contact Info</h4>
+                                <TextField>
+                                  <Label>Name</Label>
+                                  <Input
+                                    defaultValue={customerDetail.name || ""}
+                                    placeholder="Customer name"
+                                    onBlur={(e) => updateField("name", e.target.value || "")}
+                                  />
+                                </TextField>
+                                <div>
+                                  <Label className="text-xs">Email</Label>
+                                  <div className="mt-1 px-3 py-2 rounded-lg bg-default-100 text-sm font-mono">
+                                    {customerDetail.email}
+                                  </div>
                                 </div>
-                                {addr.name && (
-                                  <p className="font-medium">{addr.name}</p>
-                                )}
-                                {addr.company && (
-                                  <p style={{ color: "var(--text-secondary)" }}>
-                                    {addr.company}
-                                  </p>
-                                )}
-                                <p>{addr.line1}</p>
-                                {addr.line2 && <p>{addr.line2}</p>}
-                                <p>
-                                  {[addr.city, addr.state, addr.postal_code]
-                                    .filter(Boolean)
-                                    .join(", ")}
-                                </p>
-                                <p>{addr.country}</p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                  </div>
+                                <TextField>
+                                  <Label>Phone</Label>
+                                  <Input
+                                    type="tel"
+                                    defaultValue={customerDetail.phone || ""}
+                                    placeholder="Phone number"
+                                    onBlur={(e) => updateField("phone", e.target.value || "")}
+                                  />
+                                </TextField>
+                              </Card.Content>
+                            </Card>
 
-                  {/* Recent Orders */}
-                  <div
-                    className="p-3 rounded-lg"
-                    style={{ border: "1px solid var(--border)" }}
-                  >
-                    <h4
-                      className="text-xs font-medium uppercase tracking-wide mb-3 flex items-center gap-2"
-                      style={{ color: "var(--text-secondary)" }}
-                    >
-                      Recent Orders
-                    </h4>
-                    {customerOrders && customerOrders.length > 0 ? (
-                      <div className="space-y-2">
-                        {customerOrders.map((order) => (
-                          <div
-                            key={order.id}
-                            className="flex items-center justify-between py-2 border-b last:border-0"
-                            style={{ borderColor: "var(--border-subtle)" }}
-                          >
-                            <div>
-                              <p className="font-mono text-sm">
-                                {order.number}
-                              </p>
-                              <p
-                                className="text-xs font-mono"
-                                style={{ color: "var(--text-muted)" }}
-                              >
-                                {new Date(
-                                  order.created_at,
-                                ).toLocaleDateString()}
-                              </p>
+                            {/* Stats */}
+                            <div className="grid grid-cols-2 gap-3">
+                              <Card>
+                                <Card.Content className="items-center justify-center py-4">
+                                  <p className="text-xs text-default-500 uppercase">Orders</p>
+                                  <p className="text-2xl font-bold mt-2">
+                                    {customerDetail.stats.order_count}
+                                  </p>
+                                </Card.Content>
+                              </Card>
+                              <Card>
+                                <Card.Content className="items-center justify-center py-4">
+                                  <p className="text-xs text-default-500 uppercase">Spent</p>
+                                  <p className="text-xl font-bold mt-2">
+                                    {formatMoney(customerDetail.stats.total_spent_cents, "EUR")}
+                                  </p>
+                                </Card.Content>
+                              </Card>
                             </div>
-                            <div className="text-right">
-                              <p className="font-mono text-sm">
-                                {formatMoney(order.amounts.total_cents, "EUR")}
-                              </p>
-                              <p
-                                className="text-xs font-mono capitalize"
-                                style={{ color: "var(--text-muted)" }}
-                              >
-                                {order.status}
-                              </p>
-                            </div>
+
+                            {/* Addresses */}
+                            {customerDetail.addresses && customerDetail.addresses.length > 0 && (
+                              <Card>
+                                <Card.Content className="gap-3">
+                                  <h4 className="text-sm font-semibold">Addresses</h4>
+                                  <div className="space-y-3">
+                                    {customerDetail.addresses.map((addr) => (
+                                      <div key={addr.id} className="space-y-2 pb-3 last:pb-0 border-b last:border-0">
+                                        <div className="flex items-center gap-2">
+                                          {addr.label && (
+                                            <Chip size="sm" color="accent" variant="primary">
+                                              {addr.label}
+                                            </Chip>
+                                          )}
+                                          {addr.is_default && (
+                                            <Chip size="sm" variant="secondary">
+                                              Default
+                                            </Chip>
+                                          )}
+                                        </div>
+                                        <div className="text-sm space-y-1">
+                                          {addr.name && <p className="font-medium">{addr.name}</p>}
+                                          {addr.company && <p className="text-default-500">{addr.company}</p>}
+                                          <p>{addr.line1}</p>
+                                          {addr.line2 && <p>{addr.line2}</p>}
+                                          <p>
+                                            {[addr.city, addr.state, addr.postal_code]
+                                              .filter(Boolean)
+                                              .join(", ")}
+                                          </p>
+                                          <p>{addr.country}</p>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </Card.Content>
+                              </Card>
+                            )}
                           </div>
-                        ))}
+
+                          {/* Right column - Recent Orders */}
+                          <Card>
+                            <Card.Content className="gap-4">
+                              <h4 className="text-sm font-semibold">Recent Orders</h4>
+                              {customerOrders && customerOrders.length > 0 ? (
+                                <div className="space-y-3">
+                                  {customerOrders.map((order, idx) => (
+                                    <div key={order.id} className={idx !== customerOrders.length - 1 ? "pb-3 border-b" : ""}>
+                                      <div className="flex items-center justify-between">
+                                        <div>
+                                          <p className="text-sm font-mono font-medium">{order.number}</p>
+                                          <p className="text-xs text-default-500">
+                                            {new Date(order.created_at).toLocaleDateString()}
+                                          </p>
+                                        </div>
+                                        <div className="text-right">
+                                          <p className="text-sm font-mono font-medium">
+                                            {formatMoney(order.amounts.total_cents, "EUR")}
+                                          </p>
+                                          <Chip size="sm" variant="secondary" className="mt-1">
+                                            <span className="text-xs capitalize">{order.status}</span>
+                                          </Chip>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-sm text-default-500">No orders yet</p>
+                              )}
+                            </Card.Content>
+                          </Card>
+                        </div>
+
+                        <Separator />
+
+                        {/* Timestamp */}
+                        <div className="text-xs text-default-500 space-y-1">
+                          <p>
+                            Customer since {new Date(selectedCustomer.created_at).toLocaleString()}
+                          </p>
+                          {selectedCustomer.stats.last_order_at && (
+                            <p>
+                              Last order {new Date(selectedCustomer.stats.last_order_at).toLocaleString()}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     ) : (
-                      <p
-                        className="text-sm font-mono"
-                        style={{ color: "var(--text-secondary)" }}
-                      >
-                        No orders yet
-                      </p>
+                      <p>Loading…</p>
                     )}
-                  </div>
-                </div>
-
-                {/* Timestamp */}
-                <div
-                  className="text-xs font-mono pt-4 border-t"
-                  style={{
-                    borderColor: "var(--border)",
-                    color: "var(--text-muted)",
-                  }}
-                >
-                  Customer since{" "}
-                  {new Date(selectedCustomer.created_at).toLocaleString()}
-                  {selectedCustomer.stats.last_order_at && (
-                    <span>
-                      {" "}
-                      · Last order{" "}
-                      {new Date(
-                        selectedCustomer.stats.last_order_at,
-                      ).toLocaleString()}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <p>Loading…</p>
-            )}
-          </Modal.Body>
-        </Modal.Container>
-      </Modal.Backdrop>
-    </Modal>
+                  </Modal.Body>
+                </>
+              )}
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
   </DefaultLayout>
   );
 }
