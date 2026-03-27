@@ -635,5 +635,6 @@
   "account-orders-summary-info": "בקר בדף המלא של ההזמנות כדי לראות את כל ההזמנות שלך",
   "account-help-text": "צריך עזרה? בדוק את ה",
   "help-center": "מרכז העזרה",
-  "my-account": "החשבון שלי"
+  "my-account": "החשבון שלי",
+  "admin-warehouses-filter-placeholder": "חפש במחסנים..."
 }

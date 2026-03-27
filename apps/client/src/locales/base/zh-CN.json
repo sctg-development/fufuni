@@ -635,5 +635,6 @@
   "account-orders-summary-info": "访问完整订单页面查看所有订单",
   "account-help-text": "需要帮助？查看我们的",
   "help-center": "帮助中心",
-  "my-account": "我的账户"
+  "my-account": "我的账户",
+  "admin-warehouses-filter-placeholder": "搜索仓库..."
 }

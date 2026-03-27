@@ -635,5 +635,6 @@
   "account-orders-summary-info": "Visitez la page complète pour voir toutes vos commandes",
   "account-help-text": "Besoin d'aide ? Consultez notre",
   "help-center": "centre d'aide",
-  "my-account": "Mon compte"
+  "my-account": "Mon compte",
+  "admin-warehouses-filter-placeholder": "Rechercher des entrepôts..."
 }

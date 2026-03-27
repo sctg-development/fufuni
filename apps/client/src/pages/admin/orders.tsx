@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { Modal, Card, Separator, Label, Button, Chip } from "@heroui/react";
+import { Modal, Card, Separator, Label, Button, Chip, Table } from "@heroui/react";
 
 import { formatMoney } from "@/utils/currency";
 import { useSecuredApi } from "@/authentication";
@@ -272,135 +272,109 @@ export default function OrdersPage() {
         </div>
 
         {/* Table card */}
-        <div
-          className="rounded-lg overflow-hidden"
-          style={{
-            background: "var(--bg-card)",
-            border: "1px solid var(--border)",
-          }}
-        >
-          {/* Filters */}
-          <div
-            className="flex items-center border-b"
-            style={{ borderColor: "var(--border)" }}
-          >
-            {/* Search */}
-            <div
-              className="flex-1 flex items-center gap-2 px-4 py-3"
-              style={{ color: "var(--text-muted)" }}
-            >
-              <Search className="shrink-0" size={16} />
-              <input
-                className="bg-transparent border-0  text-sm w-full focus:outline-none"
-                placeholder={t("search") + "..."}
-                style={{ color: "var(--text)" }}
-                type="text"
-                value={globalFilter}
-                onChange={(e) => setGlobalFilter(e.target.value)}
-              />
+        <Card>
+          <Card.Content className="p-0">
+            {/* Filters */}
+            <div className="flex items-center gap-4 px-4 py-3 border-b border-default-200">
+              {/* Search */}
+              <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-default-100 rounded-lg">
+                <Search className="shrink-0 text-default-400" size={16} />
+                <input
+                  className="bg-transparent border-0 text-sm w-full focus:outline-none"
+                  placeholder={t("search") + "..."}
+                  type="text"
+                  value={globalFilter}
+                  onChange={(e) => setGlobalFilter(e.target.value)}
+                />
+              </div>
+
+              {/* Status filter */}
+              <select
+                className="px-3 py-2 text-sm rounded-lg bg-default-100 border border-default-300 focus:outline-none focus:ring-2"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="">{t("all")}</option>
+                {ORDER_STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {/* Status filter */}
-            <select
-              className="h-full px-4 py-3  text-sm bg-transparent border-0 border-l focus:outline-none cursor-pointer"
-              style={{
-                borderColor: "var(--border)",
-                color: statusFilter ? "var(--text)" : "var(--text-muted)",
-              }}
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="">{t("all")}</option>
-              {ORDER_STATUSES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Table */}
-          {isLoading ? (
-            <div className="py-12 flex items-center justify-center">
-              <Loader2
-                className="animate-spin"
-                size={20}
-                style={{ color: "var(--text-muted)" }}
-              />
-            </div>
-          ) : orders.length === 0 ? (
-            <div
-              className="py-12 text-center text-sm"
-              style={{ color: "var(--text-muted)" }}
-            >
-              {t("admin-orders-empty")}
-            </div>
-          ) : (
-            <table className="w-full">
-              <thead>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <tr
-                    key={headerGroup.id}
-                    style={{ borderBottom: "1px solid var(--border)" }}
-                  >
-                    {headerGroup.headers.map((header) => (
-                      <th
-                        key={header.id}
-                        className={clsx(
-                          "px-4 py-3 text-left text-xs font-medium uppercase tracking-wide",
-                          header.column.getCanSort() &&
-                            "cursor-pointer select-none hover:bg-(--bg-hover)",
-                        )}
-                        style={{ color: "var(--text-muted)" }}
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        <div className="flex items-center gap-1">
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
+            {/* Table */}
+            {isLoading ? (
+              <div className="py-12 flex items-center justify-center">
+                <Loader2
+                  className="animate-spin text-default-400"
+                  size={20}
+                />
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="py-12 text-center text-sm text-default-400">
+                {t("admin-orders-empty")}
+              </div>
+            ) : (
+              <Table className="w-full">
+                <Table.ScrollContainer>
+                  <Table.Content aria-label="Orders table" className="min-w-full">
+                    <Table.Header>
+                      {table.getHeaderGroups()[0]?.headers.map((header) => (
+                        <Table.Column
+                          key={header.id}
+                          className={clsx(
+                            header.column.getCanSort() &&
+                              "cursor-pointer select-none",
                           )}
-                          {header.column.getCanSort() && (
-                            <span className="ml-1">
-                              {header.column.getIsSorted() === "asc" ? (
-                                <ChevronUp size={14} />
-                              ) : header.column.getIsSorted() === "desc" ? (
-                                <ChevronDown size={14} />
-                              ) : (
-                                <ChevronsUpDown
-                                  className="opacity-30"
-                                  size={14}
-                                />
+                          onClick={header.column.getToggleSortingHandler()}
+                        >
+                          <div className="flex items-center gap-2">
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                            {header.column.getCanSort() && (
+                              <span>
+                                {header.column.getIsSorted() === "asc" ? (
+                                  <ChevronUp size={14} />
+                                ) : header.column.getIsSorted() === "desc" ? (
+                                  <ChevronDown size={14} />
+                                ) : (
+                                  <ChevronsUpDown
+                                    className="opacity-30"
+                                    size={14}
+                                  />
+                                )}
+                              </span>
+                            )}
+                          </div>
+                        </Table.Column>
+                      ))}
+                    </Table.Header>
+                    <Table.Body>
+                      {table.getRowModel().rows.map((row) => (
+                        <Table.Row
+                          key={row.id}
+                          className="cursor-pointer hover:bg-default-100"
+                        >
+                          {row.getVisibleCells().map((cell) => (
+                            <Table.Cell key={cell.id} onClick={() => setSelectedOrder(row.original)}>
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext(),
                               )}
-                            </span>
-                          )}
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                ))}
-              </thead>
-              <tbody>
-                {table.getRowModel().rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="cursor-pointer transition-colors hover:bg-(--bg-hover)"
-                    style={{ borderBottom: "1px solid var(--border-subtle)" }}
-                    onClick={() => setSelectedOrder(row.original)}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="px-4 py-3">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+                            </Table.Cell>
+                          ))}
+                        </Table.Row>
+                      ))}
+                    </Table.Body>
+                  </Table.Content>
+                </Table.ScrollContainer>
+              </Table>
+            )}
+          </Card.Content>
+        </Card>
 
         {/* Order Detail Modal */}
         <Modal

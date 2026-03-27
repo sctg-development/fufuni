@@ -635,5 +635,6 @@
   "account-orders-summary-info": "قم بزيارة صفحة الطلبات الكاملة لعرض جميع طلباتك",
   "account-help-text": "هل تحتاج مساعدة؟ تحقق من",
   "help-center": "مركز المساعدة",
-  "my-account": "حسابي"
+  "my-account": "حسابي",
+  "admin-warehouses-filter-placeholder": "بحث عن المستودعات..."
 }

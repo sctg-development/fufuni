@@ -630,5 +630,6 @@
   "account-orders-summary-info": "Visit full orders page to see all your orders",
   "account-help-text": "Need help? Check our",
   "help-center": "help center",
-  "my-account": "My account"
+  "my-account": "My account",
+  "admin-warehouses-filter-placeholder": "Search warehouses..."
 }
