@@ -23,7 +23,6 @@ import { Separator } from "@heroui/react";
 import { ScrollShadow } from "@heroui/react";
 import { Button } from "@heroui/react";
 import { Tooltip } from "@heroui/react";
-import { useOverlayState } from "@heroui/react";
 import { JWTPayload } from "jose";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -74,21 +73,25 @@ function formatDuration(seconds: number, t: any): string {
 }
 
 export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
-  ({ isOpen, user, accessToken, tokenPayload, onTokenRefreshed }) => {
+  ({ isOpen, onClose, user, accessToken, tokenPayload, onTokenRefreshed }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { refreshToken } = useTokenRefresh({ onTokenRefreshed });
     const [secondsLeft, setSecondsLeft] = useState<number>(0);
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-    const modalState = useOverlayState();
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
+    // Sync parent isOpen prop with local state
     useEffect(() => {
-      if (isOpen) {
-        modalState.open();
-      } else {
-        modalState.close();
+      setIsModalOpen(isOpen);
+    }, [isOpen]);
+
+    const handleOpenChange = (open: boolean) => {
+      setIsModalOpen(open);
+      if (!open && onClose) {
+        onClose();
       }
-    }, [isOpen, modalState]);
+    };
 
     useEffect(() => {
       if (!tokenPayload?.exp) return;
@@ -117,14 +120,15 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
 
     return (
       <Modal
-        state={modalState}
+        isOpen={isModalOpen}
+        onOpenChange={handleOpenChange}
       >
         <Modal.Backdrop>
           <Modal.Container placement="bottom">
             <Modal.Dialog>
               {({ close }) => (
                 <>
-                  <Modal.CloseTrigger />
+                  <Modal.CloseTrigger onPress={close} />
                   <Modal.Header className="flex items-center gap-2 border-b border-default-100 pb-3">
                     <div className="flex flex-col gap-0.5">
                       <span className="font-black text-foreground text-base leading-tight">
@@ -294,7 +298,7 @@ export const UserTechnicalInfoModal = memo<UserTechnicalInfoModalProps>(
                     </div>
                   </Modal.Body>
                 </>
-              )} 
+              )}
             </Modal.Dialog>
           </Modal.Container>
         </Modal.Backdrop>
