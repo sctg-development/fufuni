@@ -3,14 +3,12 @@
  * License: AGPL-3.0-or-later
  */
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Modal,
-
   Button,
   Separator,
   Card,
-  useOverlayState,
 } from "@heroui/react";
 import { useTranslation } from "react-i18next";
 import { Trash2 } from "lucide-react";
@@ -36,15 +34,18 @@ export function SavedCartModal({
 }: SavedCartModalProps) {
   const { t } = useTranslation();
   const { addItem, clear } = useCart();
-  const modalState = useOverlayState();
+  const [isModalOpen, setIsModalOpen] = useState(isOpen);
 
   useEffect(() => {
-    if (isOpen) {
-      modalState.open();
-    } else {
-      modalState.close();
+    setIsModalOpen(isOpen);
+  }, [isOpen]);
+
+  const handleOpenChange = (open: boolean) => {
+    setIsModalOpen(open);
+    if (!open) {
+      onOpenChange(false);
     }
-  }, [isOpen, modalState]);
+  };
 
   const handleLoadCart = () => {
     try {
@@ -66,7 +67,7 @@ export function SavedCartModal({
       onLoadCart?.();
       
       // Close modal
-      modalState.close();
+      setIsModalOpen(false);
       onOpenChange(false);
     } catch (error) {
       console.error('[SavedCartModal] Error loading cart:', error);
@@ -76,12 +77,13 @@ export function SavedCartModal({
   const itemCount = snapshot.items?.length || 0;
 
   return (
-    <Modal state={modalState}>
+    <Modal isOpen={isModalOpen} onOpenChange={handleOpenChange}>
       <Modal.Backdrop>
         <Modal.Container>
-        <Modal.Dialog>
-          {({ close }) => (
-            <>
+          <Modal.Dialog>
+            {({ close }) => (
+              <>
+                <Modal.CloseTrigger onPress={close} />
               <Modal.Header className="flex flex-col gap-1">
                 {t('load-saved-cart', 'Load Saved Cart')}
               </Modal.Header>
