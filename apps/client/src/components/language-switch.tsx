@@ -19,7 +19,6 @@ import { type FC, useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dropdown,
-  Button,
   Tooltip,
   Label,
 } from "@heroui/react";
@@ -153,10 +152,8 @@ export const LanguageSwitch: FC<LanguageSwitchProps> = ({
       <Tooltip.Trigger>
         <div className="flex gap-1">
           <Dropdown>
-            <Dropdown.Trigger>
-              <Button aria-label={t("language")} variant="secondary">
-                <Icon className="text-default-500" size={24} />
-              </Button>
+            <Dropdown.Trigger aria-label={t("language")}>
+              <Icon className="text-default-500" size={24} />
             </Dropdown.Trigger>
             <Dropdown.Popover>
               <Dropdown.Menu aria-label={t("language")}>

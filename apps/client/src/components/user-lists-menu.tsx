@@ -6,7 +6,6 @@
 import { useState } from "react";
 import {
   Dropdown,
-  Button,
   Label,
   Badge,
 } from "@heroui/react";
@@ -80,15 +79,13 @@ export function UserListsMenu() {
   return (
     <>
       <Dropdown>
-        <Dropdown.Trigger>
-          <Button isIconOnly variant="tertiary" aria-label="Account Menu" className="relative">
-            {totalItems > 0 && (
-              <Badge content={totalItems.toString()} color="danger">
-                <UserIcon size={20} className="text-default-500" />
-              </Badge>
-            )}
-            {totalItems === 0 && <UserIcon size={20} className="text-default-500" />}
-          </Button>
+        <Dropdown.Trigger className="relative" aria-label="Account Menu">
+          {totalItems > 0 && (
+            <Badge content={totalItems.toString()} color="danger">
+              <UserIcon size={20} className="text-default-500" />
+            </Badge>
+          )}
+          {totalItems === 0 && <UserIcon size={20} className="text-default-500" />}
         </Dropdown.Trigger>
         
         <Dropdown.Popover>

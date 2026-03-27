@@ -18,9 +18,7 @@
 
 import { Kbd } from "@heroui/react";
 import { Input } from "@heroui/react";
-import { Dropdown,
-  Label,
-} from "@heroui/react";
+import { Dropdown, Label } from "@heroui/react";
 import { Button } from "@heroui/react";
 
 import { clsx } from "clsx";
@@ -44,7 +42,6 @@ import { useCart } from "@/hooks/useCart";
 import { ShoppingCart, ChevronDown, ShieldCheck } from "lucide-react";
 import { availableLanguages } from "@/i18n";
 import { LoginModal } from '../modals/LoginModal';
-import { useOverlayState } from '@heroui/react';
 import { UserListsMenu } from "./user-lists-menu";
 
 export const Navbar = () => {
@@ -53,8 +50,8 @@ export const Navbar = () => {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { isAuthenticated } = useAuth();
-  const modalState = useOverlayState();
 
   const submitSearch = () => {
     const q = searchValue.trim();
@@ -116,23 +113,18 @@ export const Navbar = () => {
           ))}
           {!isAuthenticated && (
             <li>
-              <Button onPress={modalState.open}>
+              <Button onPress={() => setIsLoginModalOpen(true)}>
                 {t('log-in')}
               </Button>
             </li>
           )}
-          <LoginModal isOpen={modalState.isOpen} onClose={() => modalState.setOpen(false)} />
+          <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
           <AuthenticationGuardWithPermission permission="admin:store">
             <li>
               <Dropdown>
-                <Dropdown.Trigger>
-                  <Button
-                    className="p-0 bg-transparent data-[hover=true]:bg-transparent"
-                    variant="tertiary"
-                  >
-                    {t("nav-admin")}
-                    <ChevronDown className="w-4 h-4" />
-                  </Button>
+                <Dropdown.Trigger className="p-0 bg-transparent data-[hover=true]:bg-transparent">
+                  {t("nav-admin")}
+                  <ChevronDown className="w-4 h-4" />
                 </Dropdown.Trigger>
                 <Dropdown.Popover>
                   <Dropdown.Menu
