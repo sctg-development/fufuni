@@ -80,13 +80,17 @@ export function UserListsMenu() {
   return (
     <>
       <Dropdown>
-        <Dropdown.Trigger className="relative" aria-label="Account Menu">
-          {totalItems > 0 && (
+        <Dropdown.Trigger className="inline-flex items-center" aria-label="Account Menu">
+          {/* {totalItems > 0 && (
             <Badge content={totalItems.toString()} color="danger">
-              <UserIcon size={20} className="text-default-500" />
+              <UserIcon size={20} />
             </Badge>
           )}
-          {totalItems === 0 && <UserIcon size={20} className="text-default-500" />}
+          {totalItems === 0 && <UserIcon size={20}/>} */}
+          <Badge.Anchor>
+            <UserIcon size={20} />
+            <Badge size="sm" color="danger" variant="primary">{totalItems.toString()}</Badge>
+          </Badge.Anchor>
         </Dropdown.Trigger>
         
         <Dropdown.Popover>

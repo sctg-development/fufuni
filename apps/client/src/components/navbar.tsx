@@ -18,7 +18,7 @@
 
 import { Kbd } from "@heroui/react";
 import { Input } from "@heroui/react";
-import { Dropdown, Label } from "@heroui/react";
+import { Dropdown, Label, Badge } from "@heroui/react";
 import { Button } from "@heroui/react";
 
 import { clsx } from "clsx";
@@ -156,66 +156,62 @@ export const Navbar = () => {
         </ul>
 
         {/* Desktop Right Items */}
-        <ul className="hidden sm:flex gap-4 items-center ml-auto">
-          <li className="hidden sm:flex gap-4 items-center">
-            <UserListsMenu />
-            <RouterLink
-              to="/cart"
-              className="relative text-foreground hover:opacity-80 transition-opacity"
-            >
+        <div className="hidden sm:flex gap-4 items-center ml-auto">
+          <UserListsMenu />
+          <RouterLink
+            to="/cart"
+            className="inline-flex items-center text-foreground hover:opacity-80 transition-opacity"
+          >
+            <Badge.Anchor>
               <ShoppingCart size={20} />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-danger text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                  {cartCount}
-                </span>
+                <Badge size="sm" color="danger" variant="primary">{cartCount.toString()}</Badge>
               )}
-            </RouterLink>
-            <a
-              href={siteConfig().links.twitter}
-              target="_blank"
-              rel="noopener noreferrer"
-              title={t("twitter")}
-              className="text-foreground hover:opacity-80 transition-opacity"
-            >
-              <TwitterIcon className="text-default-500" />
-            </a>
-            <a
-              href={siteConfig().links.discord}
-              target="_blank"
-              rel="noopener noreferrer"
-              title={t("discord")}
-              className="text-foreground hover:opacity-80 transition-opacity"
-            >
-              <DiscordIcon className="text-default-500" />
-            </a>
-            <a
-              href={siteConfig().links.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              title={t("github")}
-              className="text-foreground hover:opacity-80 transition-opacity"
-            >
-              <GithubIcon className="text-default-500" />
-            </a>
-            <ThemeSwitch />
-            <LanguageSwitch
-              availableLanguages={availableLanguages}
-              icon={I18nIcon}
-            />
-          </li>
-          <li className="hidden lg:flex">{searchInput}</li>
-          <li className="hidden md:flex">
-            <a
-              href={siteConfig().links.sponsor}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-normal text-default-600 bg-default-100 px-2 py-1 rounded hover:opacity-80 transition-opacity inline-flex items-center gap-2"
-            >
-              <HeartFilledIcon className="text-danger" />
-              <Trans i18nKey="sponsor" />
-            </a>
-          </li>
-        </ul>
+            </Badge.Anchor>
+          </RouterLink>
+          <a
+            href={siteConfig().links.twitter}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={t("twitter")}
+            className="inline-flex items-center text-foreground hover:opacity-80 transition-opacity"
+          >
+            <TwitterIcon className="text-default-500" />
+          </a>
+          <a
+            href={siteConfig().links.discord}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={t("discord")}
+            className="inline-flex items-center text-foreground hover:opacity-80 transition-opacity"
+          >
+            <DiscordIcon className="text-default-500" />
+          </a>
+          <a
+            href={siteConfig().links.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={t("github")}
+            className="inline-flex items-center text-foreground hover:opacity-80 transition-opacity"
+          >
+            <GithubIcon className="text-default-500" />
+          </a>
+          <ThemeSwitch />
+          <LanguageSwitch
+            availableLanguages={availableLanguages}
+            icon={I18nIcon}
+          />
+          <div className="hidden lg:flex">{searchInput}</div>
+          <a
+            href={siteConfig().links.sponsor}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden md:inline-flex text-sm font-normal text-default-600 bg-default-100 px-2 py-1 rounded hover:opacity-80 transition-opacity items-center gap-2"
+          >
+            <HeartFilledIcon className="text-danger" />
+            <Trans i18nKey="sponsor" />
+          </a>
+        </div>
 
         {/* Mobile Menu Icon */}
         <div className="sm:hidden flex gap-4 items-center ml-auto">
