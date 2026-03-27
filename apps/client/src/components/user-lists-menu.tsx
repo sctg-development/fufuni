@@ -8,6 +8,7 @@ import {
   Dropdown,
   Label,
   Badge,
+  Header,
 } from "@heroui/react";
 import { useAuth } from "@/authentication/providers/use-auth";
 import { useTranslation } from "react-i18next";
@@ -94,7 +95,7 @@ export function UserListsMenu() {
             className="w-80"
           >
             <Dropdown.Section>
-              <div className="px-2 py-1 text-small font-left font-semibold text-default-900">{user?.name || user?.email || t("my-account", "My Account")}</div>
+              <Header>{user?.name || user?.email || t("my-account", "My Account")}</Header>
               <Dropdown.Item 
                 key="account" 
                 id="account"
@@ -106,7 +107,7 @@ export function UserListsMenu() {
             </Dropdown.Section>
 
             <Dropdown.Section>
-              <div className="px-2 py-1 text-small font-left font-semibold text-default-900">{t('my-wishlist', 'My Wishlist')}</div>
+              <Header>{t('my-wishlist', 'My Wishlist')}</Header>
               {wishlist && wishlist.length > 0 ? (
                 wishlist.map((productId) => {
                   const matchedProduct = wishlistProducts.find((p) => p.id === productId);
@@ -145,7 +146,7 @@ export function UserListsMenu() {
             </Dropdown.Section>
 
             <Dropdown.Section>
-              <div className="px-2 py-1 text-small font-left font-semibold text-default-900">{t('my-saved-carts', 'My Saved Carts')}</div>
+              <Header>{t('my-saved-carts', 'My Saved Carts')}</Header>
               {savedCarts && savedCarts.length > 0 ? (
                 savedCarts.map(snapshot => {
                   // Handle both new snapshot format and legacy string format
@@ -163,7 +164,7 @@ export function UserListsMenu() {
                           <Bookmark className="w-4 h-4 text-primary shrink-0" fill="currentColor" />
                           <div className="flex flex-col flex-1 gap-1">
                             <Label>{t('cart-number', { num: (snapshot as string).slice(0, 8) }) || `Cart #${(snapshot as string).slice(0, 8)}`}</Label>
-                            <p className="text-xs text-default-400">ID: {snapshot} (${t('legacy', 'legacy')})</p>
+                            <p className="text-xs text-default-400">ID: {snapshot} ({t('legacy', 'legacy')})</p>
                           </div>
                         </div>
                       </Dropdown.Item>
@@ -186,7 +187,7 @@ export function UserListsMenu() {
                         <Bookmark className="w-4 h-4 text-primary shrink-0" fill="currentColor" />
                         <div className="flex flex-col flex-1 gap-1">
                           <Label>{t('cart-number', { num: snapshot.id.slice(0, 8) }) || `Cart #${snapshot.id.slice(0, 8)}`}</Label>
-                          <p className="text-xs text-default-400">{itemCount} ${itemCount === 1 ? t('item') : t('items')} • ${formatMoney(totalCents, currency)}</p>
+                          <p className="text-xs text-default-400">{itemCount} {itemCount === 1 ? t('item') : t('items')} • {formatMoney(totalCents, currency)}</p>
                         </div>
                       </div>
                     </Dropdown.Item>

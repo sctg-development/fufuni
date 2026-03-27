@@ -634,5 +634,6 @@
   "account-recent-orders-tab": "Commandes ({{count}})",
   "account-orders-summary-info": "Visitez la page complète pour voir toutes vos commandes",
   "account-help-text": "Besoin d'aide ? Consultez notre",
-  "help-center": "centre d'aide"
+  "help-center": "centre d'aide",
+  "my-account": "Mon compte"
 }

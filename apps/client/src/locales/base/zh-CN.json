@@ -634,5 +634,6 @@
   "account-recent-orders-tab": "订单 ({{count}})",
   "account-orders-summary-info": "访问完整订单页面查看所有订单",
   "account-help-text": "需要帮助？查看我们的",
-  "help-center": "帮助中心"
+  "help-center": "帮助中心",
+  "my-account": "我的账户"
 }
